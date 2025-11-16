@@ -22,7 +22,7 @@ interface BotsTabProps {
   onPauseBot: (botId: string) => void;
   onResumeBot: (botId: string) => void;
   onDeleteBot: (botId: string) => void;
-  onSelectBot: (botId: string) => void;
+  onSelectBot: (bot: ArbitrageBot) => void;
   isLoading?: boolean;
   error?: string | null;
 }
@@ -158,7 +158,7 @@ export function BotsTab({ activeBots, pausedBots, stoppedBots, allBots, onCreate
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => onSelectBot(bot.id)}>
+        <DropdownMenuItem onClick={() => onSelectBot(bot)}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>

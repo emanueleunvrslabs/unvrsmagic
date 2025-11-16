@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Check, Cog, Lock, X } from "lucide-react";
 import type { Exchange } from "../types";
-import Image from "next/image";
 
 interface ExchangeCardProps {
   exchange: Exchange;
@@ -20,7 +19,7 @@ export function ExchangeCard({ exchange, onConnect, onDisconnect }: ExchangeCard
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="h-8 w-8 overflow-hidden rounded-full">
-              <Image src={exchange.logo || "/placeholder.svg"} alt={exchange.name} className="h-full w-full object-cover" width={32} height={32} />
+              <img src={exchange.logo || "/placeholder.svg"} alt={exchange.name} className="h-full w-full object-cover" />
             </div>
             <div>
               <CardTitle className="text-base">{exchange.name}</CardTitle>

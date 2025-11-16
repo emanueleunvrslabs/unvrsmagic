@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Save, RotateCcw, Info, AlertCircle, CheckCircle, Loader2 } from "lucide-react"
-import type { ArbitrageBot } from "../../../types"
+import type { ArbitrageBot } from "../../types"
 
 interface SettingsTabProps {
   bot: ArbitrageBot
