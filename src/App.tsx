@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Overview from "./pages/Overview";
@@ -44,6 +44,20 @@ const App = () => (
           <Route path="/bot-settings" element={<BotSettings />} />
           <Route path="/defi-protocols" element={<DeFiProtocols />} />
           <Route path="/execution-logs" element={<ExecutionLogs />} />
+          {/* Control Panel prefixed routes */}
+          <Route path="/control-panel/overview" element={<Overview />} />
+          <Route path="/control-panel/bot-settings" element={<BotSettings />} />
+          <Route path="/control-panel/execution-logs" element={<ExecutionLogs />} />
+          {/* Legacy/extra links redirects */}
+          <Route path="/my-analytics" element={<Navigate to="/portfolio-tracker" replace />} />
+          <Route path="/signal-bot" element={<Navigate to="/ai-bot" replace />} />
+          <Route path="/pump-screener" element={<Navigate to="/trading" replace />} />
+          <Route path="/defi-center/yield-farming" element={<Navigate to="/defi-protocols" replace />} />
+          <Route path="/defi-center/staking-pools" element={<Navigate to="/defi-protocols" replace />} />
+          <Route path="/defi-center/liquidity-tracker" element={<Navigate to="/defi-protocols" replace />} />
+          <Route path="/bot-templates" element={<Navigate to="/strategies-marketplace" replace />} />
+          <Route path="/invite-friends" element={<Navigate to="/settings" replace />} />
+          <Route path="/help-center" element={<Navigate to="/settings" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
