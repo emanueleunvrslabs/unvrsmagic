@@ -32,8 +32,6 @@ export function AiBotDashboard() {
   const [showTradeHistory, setShowTradeHistory] = useState(false);
   const [showRemoveAsset, setShowRemoveAsset] = useState(false);
 
-  const router = useRouter();
-
   // Handle fullscreen toggle
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
