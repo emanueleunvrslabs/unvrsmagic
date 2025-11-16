@@ -113,36 +113,38 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
   });
 
   const [showAddExchange, setShowAddExchange] = useState(false);
-
-  // React 19 useActionState for settings
-  const [settingsState, settingsAction, isSettingsPending] = useActionState(saveSettingsAction, {
-    success: false,
-    settings: generalSettings,
-  });
-  const [exchangeState, exchangeAction, isExchangePending] = useActionState(addExchangeAction, {
-    success: false,
-    settings: apiSettings,
-  });
-
-  // Optimistic updates for settings
-  const [optimisticSettings, setOptimisticSettings] = useOptimistic(generalSettings, (currentSettings, newSettings: typeof generalSettings) => ({ ...currentSettings, ...newSettings }));
+  const [isSettingsPending, setIsSettingsPending] = useState(false);
+  const [isExchangePending, setIsExchangePending] = useState(false);
 
   const handleGeneralSettingChange = (key: string, value: any) => {
     const newSettings = { ...generalSettings, [key]: value };
     setGeneralSettings(newSettings);
-    setOptimisticSettings(newSettings);
   };
 
   const handleNotificationSettingChange = (key: string, value: boolean) => {
     setNotificationSettings((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSettingsSubmit = async (formData: FormData) => {
-    const result = await settingsAction(formData);
+  const handleSettingsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSettingsPending(true);
+    try {
+      // Save settings logic here
+      console.log("Saving settings:", generalSettings);
+    } finally {
+      setIsSettingsPending(false);
+    }
   };
 
-  const handleExchangeSubmit = async (formData: FormData) => {
-    const result = await exchangeAction(formData);
+  const handleExchangeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsExchangePending(true);
+    try {
+      // Add exchange logic here
+      console.log("Adding exchange");
+    } finally {
+      setIsExchangePending(false);
+    }
   };
 
   const handleTestConnection = (exchangeId: string) => {
@@ -219,16 +221,16 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
               <CardDescription>Basic bot settings and preferences</CardDescription>
             </CardHeader>
             <CardContent>
-              <form action={handleSettingsSubmit} className="space-y-6">
+              <form onSubmit={handleSettingsSubmit} className="space-y-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="botName">Bot Name</Label>
-                    <Input id="botName" name="botName" value={optimisticSettings.botName} onChange={(e) => handleGeneralSettingChange("botName", e.target.value)} placeholder="Enter bot name" />
+                    <Input id="botName" name="botName" value={generalSettings.botName} onChange={(e) => handleGeneralSettingChange("botName", e.target.value)} placeholder="Enter bot name" />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="logLevel">Log Level</Label>
-                    <Select name="logLevel" value={optimisticSettings.logLevel} onValueChange={(value) => handleGeneralSettingChange("logLevel", value)}>
+                    <Select name="logLevel" value={generalSettings.logLevel} onValueChange={(value) => handleGeneralSettingChange("logLevel", value)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -352,9 +354,8 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                   <DialogTitle>Add Exchange</DialogTitle>
                   <DialogDescription>Connect a new exchange by providing your API credentials.</DialogDescription>
                 </DialogHeader>
-                <form action={handleExchangeSubmit}>
+                <form onSubmit={handleExchangeSubmit}>
                   <div className="grid gap-4 py-4">
-                    {exchangeState?.error && <div className="text-sm text-red-600">{exchangeState.error}</div>}
 
                     <div className="space-y-2">
                       <Label htmlFor="exchangeName">Exchange</Label>
@@ -559,9 +560,9 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
             <CardContent className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Memory Limit (MB): {optimisticSettings.maxConcurrentTrades * 100}</Label>
+                  <Label>Memory Limit (MB): {generalSettings.maxConcurrentTrades * 100}</Label>
                   <Slider
-                    value={[optimisticSettings.maxConcurrentTrades * 100]}
+                    value={[generalSettings.maxConcurrentTrades * 100]}
                     onValueChange={([value]) => handleGeneralSettingChange("memoryLimit", value)}
                     max={2048}
                     min={256}
@@ -682,9 +683,9 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
             <CardContent className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Max Drawdown Override (%): {optimisticSettings.maxConcurrentTrades * 2}</Label>
+                  <Label>Max Drawdown Override (%): {generalSettings.maxConcurrentTrades * 2}</Label>
                   <Slider
-                    value={[optimisticSettings.maxConcurrentTrades * 2]}
+                    value={[generalSettings.maxConcurrentTrades * 2]}
                     onValueChange={([value]) => handleGeneralSettingChange("maxDrawdown", value)}
                     max={50}
                     min={5}
@@ -695,9 +696,9 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Position Size Multiplier: {(optimisticSettings.maxConcurrentTrades / 10).toFixed(1)}x</Label>
+                  <Label>Position Size Multiplier: {(generalSettings.maxConcurrentTrades / 10).toFixed(1)}x</Label>
                   <Slider
-                    value={[optimisticSettings.maxConcurrentTrades / 10]}
+                    value={[generalSettings.maxConcurrentTrades / 10]}
                     onValueChange={([value]) => handleGeneralSettingChange("positionMultiplier", value)}
                     max={5}
                     min={0.1}

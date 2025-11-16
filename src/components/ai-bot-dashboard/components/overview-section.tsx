@@ -76,7 +76,7 @@ export function OverviewSection({ botData, onViewAllTrades, onViewAllInsights }:
                   </div>
                 </div>
               ))}
-              <Button variant="ghost" size="sm" className="w-full gap-1" href="/trading">
+              <Button variant="ghost" size="sm" className="w-full gap-1" onClick={() => {}}>
                 <History className="h-4 w-4" />
                 <span>View All Trades</span>
               </Button>
