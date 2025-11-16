@@ -1,4 +1,5 @@
 import { PortfolioTrackerInterface } from "@/components/portfolio-tracker-interface/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 
 export const metadata = {
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function PortfolioTrackerPage() {
-  return <PortfolioTrackerInterface />;
+  return (
+    <DashboardLayout>
+      <PortfolioTrackerInterface />
+    </DashboardLayout>
+  );
 }

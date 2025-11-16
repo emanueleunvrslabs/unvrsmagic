@@ -1,4 +1,5 @@
 import { SubscriptionInterface } from "@/components/subscription-interface/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata = {
   title: "Subscription | DefibotX",
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function SubscriptionPage() {
-  return <SubscriptionInterface />;
+  return (
+    <DashboardLayout>
+      <SubscriptionInterface />
+    </DashboardLayout>
+  );
 }

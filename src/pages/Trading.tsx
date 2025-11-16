@@ -1,4 +1,5 @@
 import { TradingInterface } from "@/components/trading-interface/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 
 export const metadata = {
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function TradingPage() {
-  return <TradingInterface />;
+  return (
+    <DashboardLayout>
+      <TradingInterface />
+    </DashboardLayout>
+  );
 }

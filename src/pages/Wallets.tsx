@@ -1,4 +1,5 @@
 import { WalletsInterface } from "@/components/wallets-interface/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata = {
   title: "Wallets | DefibotX",
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function WalletsPage() {
-  return <WalletsInterface />;
+  return (
+    <DashboardLayout>
+      <WalletsInterface />
+    </DashboardLayout>
+  );
 }
