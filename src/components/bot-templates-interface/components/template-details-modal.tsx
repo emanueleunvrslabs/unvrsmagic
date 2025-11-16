@@ -1,6 +1,6 @@
 "use client"
 
-import Image from "next/image";
+
 import { X, Heart, Share2, Download, Code, Check } from "lucide-react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -78,12 +78,10 @@ export function TemplateDetailsModal({ template, isOpen, onClose, onToggleFavori
         <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-3">
           <div className="md:col-span-2">
             <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted">
-              <Image
+              <img
                 src={template.image || "/placeholder.svg"}
                 alt={template.name}
                 className="h-full w-full object-cover"
-                width={800}
-                height={450}
               />
             </div>
 

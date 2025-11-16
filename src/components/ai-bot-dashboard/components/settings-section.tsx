@@ -573,10 +573,10 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                 </div>
 
                 <div className="space-y-2">
-                  <Label>CPU Threads: {Math.min(optimisticSettings.maxConcurrentTrades, 8)}</Label>
+                  <Label>CPU Threads: {Math.min(generalSettings.maxConcurrentTrades || 4, 8)}</Label>
                   <Slider
-                    value={[Math.min(optimisticSettings.maxConcurrentTrades, 8)]}
-                    onValueChange={([value]) => handleGeneralSettingChange("cpuThreads", value)}
+                    value={[Math.min(generalSettings.maxConcurrentTrades || 4, 8)]}
+                    onValueChange={([value]) => handleGeneralSettingChange("maxConcurrentTrades", value)}
                     max={16}
                     min={1}
                     step={1}
@@ -592,7 +592,7 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                     <Label>High Performance Mode</Label>
                     <p className="text-sm text-muted-foreground">Enable aggressive optimization for faster execution</p>
                   </div>
-                  <Switch checked={optimisticSettings.autoStart} onCheckedChange={(checked) => handleGeneralSettingChange("highPerformance", checked)} />
+                  <Switch checked={generalSettings.autoStart || false} onCheckedChange={(checked) => handleGeneralSettingChange("autoStart", checked)} />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -600,7 +600,7 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                     <Label>Parallel Order Processing</Label>
                     <p className="text-sm text-muted-foreground">Process multiple orders simultaneously</p>
                   </div>
-                  <Switch checked={optimisticSettings.notifications} onCheckedChange={(checked) => handleGeneralSettingChange("parallelProcessing", checked)} />
+                  <Switch checked={generalSettings.notifications || false} onCheckedChange={(checked) => handleGeneralSettingChange("notifications", checked)} />
                 </div>
               </div>
             </CardContent>

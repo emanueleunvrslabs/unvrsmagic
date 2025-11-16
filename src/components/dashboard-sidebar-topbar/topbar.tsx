@@ -10,7 +10,7 @@ import { WalletConnectModal } from "@/components/wallet-connect-modal";
 import { useWalletConnection } from "@/hooks/use-wallet-connection";
 import { cn } from "@/lib/utils";
 import { Bell, ChevronDown, Copy, ExternalLink, LogOut, Settings, User, Wallet } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 export function Topbar() {

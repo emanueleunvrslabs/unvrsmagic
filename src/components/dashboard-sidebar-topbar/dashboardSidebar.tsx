@@ -42,8 +42,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
 type MenuItem = {
@@ -100,7 +99,7 @@ function FloatingSubmenu({ item, isVisible, position, activeItem, setActiveItem 
               asChild={!!subItem.href}
             >
               {subItem.href ? (
-                <Link href={subItem.href} className="flex items-center w-full">
+                <Link to={subItem.href} className="flex items-center w-full">
                   <SubIcon className="mr-3 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">{subItem.label}</span>
                 </Link>
@@ -125,7 +124,8 @@ type Props = {
 };
 
 export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
   const [activeItem, setActiveItem] = useState("");
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
     "control-panel": false,
