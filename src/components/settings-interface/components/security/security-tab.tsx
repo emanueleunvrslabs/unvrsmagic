@@ -3,8 +3,6 @@
 import type React from "react"
 import { SettingsSection } from "../shared/settings-section"
 import { SettingsToggle } from "../shared/settings-toggle"
-import { PasswordSection } from "./password-section"
-import { TwoFactorSection } from "./two-factor-section"
 import { ApiKeysSection } from "./api-keys-section"
 import { ActiveSessionsSection } from "./active-sessions-section"
 import { LoginHistorySection } from "./login-history-section"
@@ -31,20 +29,6 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <SettingsSection title="Password" description="Change your account password">
-        <PasswordSection />
-      </SettingsSection>
-
-      <SettingsSection
-        title="Two-Factor Authentication"
-        description="Secure your account with an additional verification step"
-      >
-        <TwoFactorSection
-          isEnabled={security.twoFactorEnabled}
-          onToggle={(enabled) => onSecurityChange({ twoFactorEnabled: enabled })}
-        />
-      </SettingsSection>
-
       <SettingsSection title="Security Notifications" description="Get notified about important security events">
         <div className="space-y-4">
           <SettingsToggle
