@@ -212,20 +212,11 @@ export const mockConnections: Connection[] = [
 export const mockApiKeys: ApiKey[] = [
   {
     id: "1",
-    name: "Trading Bot API",
+    name: "Wasender API",
     key: "sk_live_***************",
-    permissions: ["read", "trade"],
+    permissions: ["read", "write"],
     lastUsed: "2024-01-15T08:30:00Z",
     created: "2024-01-01T00:00:00Z",
-    status: "active",
-  },
-  {
-    id: "2",
-    name: "Analytics API",
-    key: "sk_live_***************",
-    permissions: ["read"],
-    lastUsed: "2024-01-14T16:45:00Z",
-    created: "2024-01-05T00:00:00Z",
     status: "active",
   },
 ]
