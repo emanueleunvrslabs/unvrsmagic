@@ -29,34 +29,6 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <SettingsSection title="Security Notifications" description="Get notified about important security events">
-        <div className="space-y-4">
-          <SettingsToggle
-            id="emailNotifications"
-            label="Email Notifications"
-            description="Receive security alerts via email"
-            checked={security.emailNotifications}
-            onCheckedChange={(checked) => onSecurityChange({ emailNotifications: checked })}
-          />
-
-          <SettingsToggle
-            id="smsNotifications"
-            label="SMS Notifications"
-            description="Receive critical security alerts via SMS"
-            checked={security.smsNotifications}
-            onCheckedChange={(checked) => onSecurityChange({ smsNotifications: checked })}
-          />
-
-          <SettingsToggle
-            id="loginAlerts"
-            label="Login Alerts"
-            description="Get notified of new device logins"
-            checked={security.loginAlerts}
-            onCheckedChange={(checked) => onSecurityChange({ loginAlerts: checked })}
-          />
-        </div>
-      </SettingsSection>
-
       <SettingsSection title="API Access" description="Manage API keys for programmatic access">
         <ApiKeysSection apiKeys={apiKeys} onApiKeysChange={onApiKeysChange} />
       </SettingsSection>
