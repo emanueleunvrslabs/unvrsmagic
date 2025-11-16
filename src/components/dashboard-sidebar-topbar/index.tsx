@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { DashboardSidebar } from "./dashboardSidebar";
 import { Topbar } from "./topbar";
@@ -8,7 +8,8 @@ import { Topbar } from "./topbar";
 const DashboardSidebarTopbar = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
 
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   useEffect(() => {
     setCollapsed(true);

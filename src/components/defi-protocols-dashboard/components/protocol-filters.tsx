@@ -42,7 +42,7 @@ export function ProtocolFiltersComponent({ filters, onFiltersChange, onRiskFilte
             {CHAINS.map((chain) => (
               <SelectItem key={chain.id} value={chain.id}>
                 <div className="flex items-center gap-2">
-                  <Image src={chain.icon || "/placeholder.svg"} alt={chain.name} className="h-4 w-4" width={16} height={16} />
+                  <img src={chain.icon || "/placeholder.svg"} alt={chain.name} className="h-4 w-4" />
                   <span>{chain.name}</span>
                 </div>
               </SelectItem>
