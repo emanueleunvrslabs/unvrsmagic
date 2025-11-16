@@ -29,7 +29,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <SettingsSection title="Wasender Integration" description="Manage API keys for Wasender WhatsApp services">
+      <SettingsSection title="API Access" description="Manage API keys for programmatic access">
         <ApiKeysSection apiKeys={apiKeys} onApiKeysChange={onApiKeysChange} />
       </SettingsSection>
 
