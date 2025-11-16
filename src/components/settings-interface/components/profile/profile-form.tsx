@@ -22,33 +22,23 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ profile, onProfileChan
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label htmlFor="firstName">First Name</Label>
+        <Label htmlFor="firstName">Username</Label>
         <Input
           id="firstName"
           value={profile.firstName}
           onChange={handleInputChange("firstName")}
-          placeholder="Enter your first name"
+          placeholder="Enter your username"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="lastName">Last Name</Label>
-        <Input
-          id="lastName"
-          value={profile.lastName}
-          onChange={handleInputChange("lastName")}
-          placeholder="Enter your last name"
-        />
-      </div>
-
-      <div className="space-y-2 md:col-span-2">
-        <Label htmlFor="phone">Phone Number</Label>
+        <Label htmlFor="phone">WhatsApp</Label>
         <Input
           id="phone"
           type="tel"
           value={profile.phone}
           onChange={handleInputChange("phone")}
-          placeholder="Enter your phone number"
+          placeholder="Enter your WhatsApp number"
           className={!isPhoneValid && profile.phone ? "border-destructive" : ""}
         />
         {!isPhoneValid && profile.phone && (
