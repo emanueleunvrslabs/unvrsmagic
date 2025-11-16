@@ -20,6 +20,7 @@ import Subscription from "./pages/Subscription";
 import BotSettings from "./pages/BotSettings";
 import DeFiProtocols from "./pages/DeFiProtocols";
 import ExecutionLogs from "./pages/ExecutionLogs";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/overview" element={<Overview />} />
           <Route path="/trading" element={<Trading />} />
           <Route path="/wallets" element={<Wallets />} />
