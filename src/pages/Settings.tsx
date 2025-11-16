@@ -1,4 +1,5 @@
 import { SettingsInterface } from "@/components/settings-interface/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata = {
   title: "Setting | DefibotX",
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function SettingsPage() {
-  return <SettingsInterface />;
+  return (
+    <DashboardLayout>
+      <SettingsInterface />
+    </DashboardLayout>
+  );
 }

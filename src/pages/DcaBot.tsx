@@ -1,4 +1,5 @@
 import { DcaBotDashboard } from "@/components/dca-bot-dashboard/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata = {
   title: "Dca Bot | DefibotX",
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function DcaBotPage() {
-  return <DcaBotDashboard />;
+  return (
+    <DashboardLayout>
+      <DcaBotDashboard />
+    </DashboardLayout>
+  );
 }

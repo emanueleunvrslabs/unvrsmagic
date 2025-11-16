@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata = {
   title: "Execution Logs | DefibotX",
@@ -7,16 +8,18 @@ export const metadata = {
 
 export default function ExecutionLogsPage() {
   return (
-    <div className="container mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Execution Logs</CardTitle>
-          <CardDescription>View your bot execution history</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Execution logs dashboard coming soon...</p>
-        </CardContent>
-      </Card>
-    </div>
+    <DashboardLayout>
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Execution Logs</CardTitle>
+            <CardDescription>View your bot execution history</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">Execution logs dashboard coming soon...</p>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   )
 }

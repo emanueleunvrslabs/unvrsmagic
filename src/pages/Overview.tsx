@@ -1,4 +1,5 @@
 import { OverviewDashboard } from "@/components/overview-dashboard/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 
 export const metadata = {
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function OverviewPage() {
-  return <OverviewDashboard />;
+  return (
+    <DashboardLayout>
+      <OverviewDashboard />
+    </DashboardLayout>
+  );
 }

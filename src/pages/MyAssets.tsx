@@ -1,4 +1,5 @@
 import { MyAssets } from "@/components/my-assets/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata = {
   title: "My Assets | DefibotX",
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function MyAssetsPage() {
-  return <MyAssets />;
+  return (
+    <DashboardLayout>
+      <MyAssets />
+    </DashboardLayout>
+  );
 }

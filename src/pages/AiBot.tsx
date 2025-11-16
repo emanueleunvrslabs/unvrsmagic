@@ -1,4 +1,5 @@
 import { AiBotDashboard } from "@/components/ai-bot-dashboard/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata = {
   title: "AI Bot | DefibotX",
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function AiBotPage() {
-  return <AiBotDashboard />;
+  return (
+    <DashboardLayout>
+      <AiBotDashboard />
+    </DashboardLayout>
+  );
 }

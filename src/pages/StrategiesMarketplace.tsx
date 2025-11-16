@@ -1,4 +1,5 @@
 import { StrategiesMarketplaceInterface } from "@/components/strategies-marketplace-interface/index";
+import { DashboardLayout } from "@/components/dashboard-layout";
 
 export const metadata = {
   title: "Strategies Marketplace | DefibotX",
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function StrategiesMarketplacePage() {
-  return <StrategiesMarketplaceInterface />;
+  return (
+    <DashboardLayout>
+      <StrategiesMarketplaceInterface />
+    </DashboardLayout>
+  );
 }
