@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import Image from "next/image";
+
 import { ChevronRight, Heart } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -31,12 +31,10 @@ export const TemplateCard = React.memo(function TemplateCard({
     <Card className="flex h-full flex-col overflow-hidden transition-all hover:shadow-md">
       <div className="relative">
         <div className="aspect-video w-full overflow-hidden bg-muted">
-          <Image
+          <img
             src={template.image || "/placeholder.svg"}
             alt={template.name}
             className="h-full w-full object-cover transition-transform hover:scale-105"
-            width={400}
-            height={225}
           />
         </div>
         <div className="absolute right-2 top-2 flex gap-1">
