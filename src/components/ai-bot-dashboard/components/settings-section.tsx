@@ -250,7 +250,7 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                       <Label>Auto Start Bot</Label>
                       <p className="text-sm text-muted-foreground">Automatically start the bot when the application launches</p>
                     </div>
-                    <Switch name="autoStart" checked={optimisticSettings.autoStart} onCheckedChange={(checked) => handleGeneralSettingChange("autoStart", checked)} />
+                    <Switch name="autoStart" checked={generalSettings.autoStart} onCheckedChange={(checked) => handleGeneralSettingChange("autoStart", checked)} />
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -258,7 +258,7 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                       <Label>Enable Notifications</Label>
                       <p className="text-sm text-muted-foreground">Receive notifications for trades and alerts</p>
                     </div>
-                    <Switch name="notifications" checked={optimisticSettings.notifications} onCheckedChange={(checked) => handleGeneralSettingChange("notifications", checked)} />
+                    <Switch name="notifications" checked={generalSettings.notifications} onCheckedChange={(checked) => handleGeneralSettingChange("notifications", checked)} />
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -268,27 +268,27 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                     </div>
                     <Switch
                       name="tradingHoursEnabled"
-                      checked={optimisticSettings.tradingHours.enabled}
+                      checked={generalSettings.tradingHours.enabled}
                       onCheckedChange={(checked) =>
                         handleGeneralSettingChange("tradingHours", {
-                          ...optimisticSettings.tradingHours,
+                          ...generalSettings.tradingHours,
                           enabled: checked,
                         })
                       }
                     />
                   </div>
 
-                  {optimisticSettings.tradingHours.enabled && (
+                  {generalSettings.tradingHours.enabled && (
                     <div className="grid gap-4 md:grid-cols-2 ml-6">
                       <div className="space-y-2">
                         <Label>Start Time</Label>
                         <Input
                           name="tradingHoursStart"
                           type="time"
-                          value={optimisticSettings.tradingHours.start}
+                          value={generalSettings.tradingHours.start}
                           onChange={(e) =>
                             handleGeneralSettingChange("tradingHours", {
-                              ...optimisticSettings.tradingHours,
+                              ...generalSettings.tradingHours,
                               start: e.target.value,
                             })
                           }
@@ -299,10 +299,10 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                         <Input
                           name="tradingHoursEnd"
                           type="time"
-                          value={optimisticSettings.tradingHours.end}
+                          value={generalSettings.tradingHours.end}
                           onChange={(e) =>
                             handleGeneralSettingChange("tradingHours", {
-                              ...optimisticSettings.tradingHours,
+                              ...generalSettings.tradingHours,
                               end: e.target.value,
                             })
                           }
@@ -313,16 +313,16 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Max Concurrent Trades: {optimisticSettings.maxConcurrentTrades}</Label>
+                  <Label>Max Concurrent Trades: {generalSettings.maxConcurrentTrades}</Label>
                   <Slider
-                    value={[optimisticSettings.maxConcurrentTrades]}
+                    value={[generalSettings.maxConcurrentTrades]}
                     onValueChange={([value]) => handleGeneralSettingChange("maxConcurrentTrades", value)}
                     max={20}
                     min={1}
                     step={1}
                     className="w-full"
                   />
-                  <input type="hidden" name="maxConcurrentTrades" value={optimisticSettings.maxConcurrentTrades} />
+                  <input type="hidden" name="maxConcurrentTrades" value={generalSettings.maxConcurrentTrades} />
                   <p className="text-xs text-muted-foreground">Maximum number of trades that can run simultaneously</p>
                 </div>
 

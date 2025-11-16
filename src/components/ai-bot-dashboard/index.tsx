@@ -62,12 +62,12 @@ export function AiBotDashboard() {
 
   // Handle navigation to trades page
   const handleViewAllTrades = () => {
-    router.push("/trading");
+    // Navigation would be handled here
   };
 
   // Handle navigation to AI insights page
   const handleViewAllInsights = () => {
-    router.push("/ai-bot?tab=insights");
+    // Navigation would be handled here
   };
 
   // Handle asset actions
