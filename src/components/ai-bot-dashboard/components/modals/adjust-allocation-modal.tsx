@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { AlertTriangle } from "lucide-react";
-import { useActionState, useOptimistic, useState } from "react";
+import { useState } from "react";
 import type { Asset } from "../../types";
 import { formatCurrency } from "../../utils";
 
@@ -36,10 +36,7 @@ async function adjustAllocationAction(prevState: any, formData: FormData) {
 
 export function AdjustAllocationModal({ asset, isOpen, onClose, onSave, totalBalance }: AdjustAllocationModalProps) {
   const [allocation, setAllocation] = useState<number>(asset?.allocation || 0);
-  const [state, formAction, isPending] = useActionState(adjustAllocationAction, { success: false, allocation: 0 });
-
-  // Optimistic updates for allocation changes
-  const [optimisticAllocation, setOptimisticAllocation] = useOptimistic(allocation, (currentAllocation, newAllocation: number) => newAllocation);
+  const [isPending, setIsPending] = useState(false);
 
   // Reset allocation when asset changes
   if (asset && allocation !== asset.allocation) {
@@ -49,14 +46,12 @@ export function AdjustAllocationModal({ asset, isOpen, onClose, onSave, totalBal
   const handleAllocationChange = (value: number[]) => {
     const newAllocation = value[0];
     setAllocation(newAllocation);
-    setOptimisticAllocation(newAllocation);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number.parseFloat(e.target.value);
     if (!isNaN(value) && value >= 0 && value <= 100) {
       setAllocation(value);
-      setOptimisticAllocation(value);
     }
   };
 
@@ -66,8 +61,8 @@ export function AdjustAllocationModal({ asset, isOpen, onClose, onSave, totalBal
 
   if (!asset) return null;
 
-  const allocationValue = (optimisticAllocation / 100) * totalBalance;
-  const allocationDifference = optimisticAllocation - asset.allocation;
+  const allocationValue = (allocation / 100) * totalBalance;
+  const allocationDifference = allocation - asset.allocation;
   const showWarning = allocationDifference > 10 || allocationDifference < -10;
 
   return (
@@ -80,7 +75,7 @@ export function AdjustAllocationModal({ asset, isOpen, onClose, onSave, totalBal
           </DialogDescription>
         </DialogHeader>
 
-        <form action={handleFormAction}>
+        <form onSubmit={(e) => { e.preventDefault(); handleFormAction(new FormData(e.currentTarget)); }}>
           <div className="space-y-6 py-4">
             {showWarning && (
               <Alert className="bg-yellow-50 text-yellow-800 border-yellow-200">
@@ -92,21 +87,14 @@ export function AdjustAllocationModal({ asset, isOpen, onClose, onSave, totalBal
               </Alert>
             )}
 
-            {state?.error && (
-              <Alert className="bg-red-50 text-red-800 border-red-200">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{state.error}</AlertDescription>
-              </Alert>
-            )}
-
             <div className="space-y-2">
               <div className="flex justify-between">
                 <Label htmlFor="allocation">Allocation Percentage</Label>
-                <span className="text-sm text-muted-foreground">{optimisticAllocation}%</span>
+                <span className="text-sm text-muted-foreground">{allocation}%</span>
               </div>
-              <Slider id="allocation-slider" min={0} max={100} step={0.5} value={[optimisticAllocation]} onValueChange={handleAllocationChange} className="py-4" />
+              <Slider id="allocation-slider" min={0} max={100} step={0.5} value={[allocation]} onValueChange={handleAllocationChange} className="py-4" />
               <div className="flex items-center gap-2">
-                <Input name="allocation" id="allocation" type="number" min={0} max={100} step={0.5} value={optimisticAllocation} onChange={handleInputChange} className="w-24" />
+                <Input name="allocation" id="allocation" type="number" min={0} max={100} step={0.5} value={allocation} onChange={handleInputChange} className="w-24" />
                 <span className="text-muted-foreground">%</span>
               </div>
             </div>
