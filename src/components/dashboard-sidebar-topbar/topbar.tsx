@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { WalletConnectModal } from "@/components/wallet-connect-modal";
 import { useWalletConnection } from "@/hooks/use-wallet-connection";
 import { cn } from "@/lib/utils";
 import { Bell, ChevronDown, Copy, ExternalLink, LogOut, Settings, User, Wallet } from "lucide-react";
@@ -151,8 +150,6 @@ export function Topbar() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      <WalletConnectModal open={showWalletModal} onOpenChange={setShowWalletModal} />
     </header>
   );
 }

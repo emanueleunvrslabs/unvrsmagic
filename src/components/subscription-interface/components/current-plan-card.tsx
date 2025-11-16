@@ -1,61 +1,48 @@
 "use client"
 
-import { Calendar } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Plan, UsageItem, BillingCycle } from "../types"
-import { UsageProgressItem } from "./usage-progress-item"
+import { Progress } from "@/components/ui/progress"
+import type { Plan, UsageItem } from "../types"
 
 interface CurrentPlanCardProps {
   currentPlan: Plan
-  billingCycle: BillingCycle
+  billingCycle: "monthly" | "annual"
   usageData: UsageItem[]
   onCancelSubscription: () => void
 }
 
 export function CurrentPlanCard({ currentPlan, billingCycle, usageData, onCancelSubscription }: CurrentPlanCardProps) {
+  const price = billingCycle === "monthly" ? currentPlan.price.monthly : currentPlan.price.annual
+
   return (
     <Card className="lg:col-span-1">
       <CardHeader>
         <CardTitle>Current Plan</CardTitle>
-        <CardDescription>Your subscription details and usage</CardDescription>
+        <CardDescription>Your active subscription details</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">{currentPlan.name} Plan</p>
-            <p className="text-sm text-muted-foreground">{billingCycle === "monthly" ? "Monthly" : "Annual"} billing</p>
-          </div>
-          <Badge variant="secondary" className="px-3 py-1">
-            Active
-          </Badge>
+        <div>
+          <h3 className="text-2xl font-bold">{currentPlan.name}</h3>
+          <p className="text-muted-foreground">
+            ${price}/{billingCycle === "monthly" ? "mo" : "yr"}
+          </p>
         </div>
 
-        <div className="rounded-lg bg-muted p-3">
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <p className="font-medium">Next billing date</p>
-              <p className="text-muted-foreground">June 1, 2025</p>
+        {usageData.map((usage) => (
+          <div key={usage.name} className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{usage.name}</span>
+              <span>{usage.used} / {usage.total}{usage.unit || ''}</span>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Calendar className="h-5 w-5 text-primary" />
-            </div>
+            <Progress value={usage.percentage} />
           </div>
-        </div>
+        ))}
 
-        <div className="space-y-4">
-          <p className="text-sm font-medium">Plan Usage</p>
-          {usageData.map((item) => (
-            <UsageProgressItem key={item.name} item={item} />
-          ))}
-        </div>
-      </CardContent>
-      <CardFooter className="flex flex-col gap-2">
         <Button variant="outline" className="w-full" onClick={onCancelSubscription}>
           Cancel Subscription
         </Button>
-      </CardFooter>
+      </CardContent>
     </Card>
   )
 }
