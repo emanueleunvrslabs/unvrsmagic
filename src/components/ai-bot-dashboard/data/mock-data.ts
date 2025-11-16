@@ -1,4 +1,4 @@
-import type { BotData } from "../types"
+import type { BotData, PerformanceData } from "../types"
 
 export const mockBotData: BotData = {
   name: "DefiMax AI",

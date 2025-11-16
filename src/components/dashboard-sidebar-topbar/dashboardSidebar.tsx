@@ -385,7 +385,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                                     asChild={!!subItem.href}
                                   >
                                     {subItem.href ? (
-                                      <Link href={subItem.href}>
+                                      <Link to={subItem.href}>
                                         <SubIcon className="mr-2 h-4 w-4" />
                                         <span>{subItem.label}</span>
                                       </Link>
@@ -436,7 +436,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                         <TooltipTrigger asChild>
                           {item.href ? (
                             <Button variant={isActive ? "secondary" : "ghost"} className={cn("w-full justify-start", collapsed ? "px-2 justify-center" : "px-4")} asChild>
-                              <Link href={item.href}>
+                              <Link to={item.href}>
                                 <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
                                 {!collapsed && <span>{item.label}</span>}
                               </Link>
@@ -471,7 +471,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                     <TooltipTrigger asChild>
                       {item.href ? (
                         <Button variant="ghost" className={cn("w-full justify-start", collapsed ? "px-2" : "px-2")} asChild>
-                          <Link href={item.href}>
+                          <Link to={item.href}>
                             <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
                             {!collapsed && <span>{item.label}</span>}
                           </Link>

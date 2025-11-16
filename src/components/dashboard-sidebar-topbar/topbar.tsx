@@ -119,15 +119,15 @@ export function Topbar() {
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              <Link href="/settings">Settings</Link>
+              <Link to="/settings">Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              <Link href="/signin">Signin</Link>
+              <Link to="/signin">Signin</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              <Link href="/signup">Sign Up</Link>
+              <Link to="/signup">Sign Up</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <LogOut className="mr-2 h-4 w-4" />
