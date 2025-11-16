@@ -36,9 +36,9 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = ({ apiKeys, onApiKe
   const [isCreating, setIsCreating] = useState(false)
 
   const availablePermissions = [
-    { id: "read", label: "Read", description: "View account information and trading data" },
-    { id: "trade", label: "Trade", description: "Execute trades and manage orders" },
-    { id: "withdraw", label: "Withdraw", description: "Withdraw funds from account" },
+    { id: "send", label: "Send Messages", description: "Send WhatsApp messages and media" },
+    { id: "read", label: "Read Messages", description: "Read incoming messages and status" },
+    { id: "manage", label: "Manage Contacts", description: "Manage contacts and campaigns" },
   ]
 
   const handleCreateApiKey = async () => {
@@ -127,8 +127,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = ({ apiKeys, onApiKe
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-medium">API Keys</h3>
-          <p className="text-sm text-muted-foreground">Manage API keys for programmatic access to your account</p>
+          <h3 className="font-medium">Wasender API Keys</h3>
+          <p className="text-sm text-muted-foreground">Manage API keys for Wasender WhatsApp integration</p>
         </div>
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -140,9 +140,9 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = ({ apiKeys, onApiKe
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New API Key</DialogTitle>
+              <DialogTitle>Create New Wasender API Key</DialogTitle>
               <DialogDescription>
-                Create a new API key with specific permissions for your application.
+                Create a new API key to integrate Wasender WhatsApp services with your application.
               </DialogDescription>
             </DialogHeader>
 
