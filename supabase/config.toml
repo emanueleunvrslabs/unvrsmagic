@@ -2,3 +2,6 @@ project_id = "uzsxrvwdfdmucgoshpni"
 
 [functions.verify-api-key]
 verify_jwt = true
+
+[functions.verify-exchange-key]
+verify_jwt = true
