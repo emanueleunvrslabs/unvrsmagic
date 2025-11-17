@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { exchange, apiKey, apiSecret } = await req.json()
+    const { exchange, apiKey, apiSecret, passphrase } = await req.json()
 
     if (!exchange || !apiKey) {
       return new Response(
@@ -64,8 +64,14 @@ serve(async (req) => {
 
       case "bitget":
         try {
+          if (!passphrase) {
+            errorMessage = "Passphrase is required for Bitget"
+            console.error(`Bitget verification failed: ${errorMessage}`)
+            break
+          }
+
           const timestamp = Date.now().toString()
-          const requestPath = '/api/v2/user/verify-info'
+          const requestPath = '/api/v2/spot/account/assets'
           const method = 'GET'
           const preHash = timestamp + method + requestPath
           const signature = createHmac("sha256", apiSecret)
@@ -79,7 +85,7 @@ serve(async (req) => {
                 'ACCESS-KEY': apiKey,
                 'ACCESS-SIGN': signature,
                 'ACCESS-TIMESTAMP': timestamp,
-                'ACCESS-PASSPHRASE': apiSecret,
+                'ACCESS-PASSPHRASE': passphrase,
                 'Content-Type': 'application/json',
               },
             }
@@ -88,11 +94,13 @@ serve(async (req) => {
           console.log(`Bitget response status: ${response.status}`)
           
           const data = await response.json()
+          console.log(`Bitget response data:`, JSON.stringify(data))
+          
           if (response.ok && data.code === '00000') {
             isValid = true
             console.log("Bitget API key is valid")
           } else {
-            errorMessage = data.msg || "Invalid Bitget credentials"
+            errorMessage = data.msg || data.message || "Invalid Bitget credentials"
             console.error(`Bitget verification failed: ${errorMessage}`)
           }
         } catch (error) {

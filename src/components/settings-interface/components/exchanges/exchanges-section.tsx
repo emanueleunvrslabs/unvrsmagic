@@ -16,9 +16,9 @@ interface ExchangesSectionProps {
 }
 
 const EXCHANGES = [
-  { id: "binance", name: "Binance", placeholder: "Enter API Key", description: "Spot & Futures trading", requiresSecret: true },
-  { id: "bitget", name: "Bitget", placeholder: "Enter API Key", description: "Crypto derivatives exchange", requiresSecret: true },
-  { id: "hyperliquid", name: "Hyperliquid", placeholder: "Enter API Key", description: "Decentralized perpetuals", requiresSecret: true },
+  { id: "binance", name: "Binance", placeholder: "Enter API Key", description: "Spot & Futures trading", requiresSecret: true, requiresPassphrase: false },
+  { id: "bitget", name: "Bitget", placeholder: "Enter API Key", description: "Crypto derivatives exchange", requiresSecret: true, requiresPassphrase: true },
+  { id: "hyperliquid", name: "Hyperliquid", placeholder: "Enter API Key", description: "Decentralized perpetuals", requiresSecret: true, requiresPassphrase: false },
 ]
 
 // Validation schemas for each exchange
@@ -45,8 +45,14 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
     bitget: "",
     hyperliquid: "",
   })
+  const [passphrases, setPassphrases] = useState<Record<string, string>>({
+    binance: "",
+    bitget: "",
+    hyperliquid: "",
+  })
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [visibleSecrets, setVisibleSecrets] = useState<Set<string>>(new Set())
+  const [visiblePassphrases, setVisiblePassphrases] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [connectedExchanges, setConnectedExchanges] = useState<Set<string>>(new Set())
   const [connectingExchange, setConnectingExchange] = useState<string | null>(null)
@@ -61,7 +67,7 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
 
         const { data, error } = await supabase
           .from('exchange_keys')
-          .select('exchange, api_key, api_secret')
+          .select('exchange, api_key, api_secret, passphrase')
           .eq('user_id', user.id)
 
         if (error) {
@@ -72,6 +78,7 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
         if (data && data.length > 0) {
           const loadedKeys: Record<string, string> = {}
           const loadedSecrets: Record<string, string> = {}
+          const loadedPassphrases: Record<string, string> = {}
           const connected = new Set<string>()
 
           data.forEach((item) => {
@@ -79,11 +86,15 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
             if (item.api_secret) {
               loadedSecrets[item.exchange] = item.api_secret
             }
+            if (item.passphrase) {
+              loadedPassphrases[item.exchange] = item.passphrase
+            }
             connected.add(item.exchange)
           })
 
           setApiKeys(prev => ({ ...prev, ...loadedKeys }))
           setApiSecrets(prev => ({ ...prev, ...loadedSecrets }))
+          setPassphrases(prev => ({ ...prev, ...loadedPassphrases }))
           setConnectedExchanges(connected)
         }
       } catch (error) {
@@ -116,6 +127,16 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
     setVisibleSecrets(newVisibleSecrets)
   }
 
+  const togglePassphraseVisibility = (exchangeId: string) => {
+    const newVisiblePassphrases = new Set(visiblePassphrases)
+    if (newVisiblePassphrases.has(exchangeId)) {
+      newVisiblePassphrases.delete(exchangeId)
+    } else {
+      newVisiblePassphrases.add(exchangeId)
+    }
+    setVisiblePassphrases(newVisiblePassphrases)
+  }
+
   const handleKeyChange = (exchangeId: string, value: string) => {
     setApiKeys(prev => ({ ...prev, [exchangeId]: value }))
     
@@ -131,6 +152,10 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
 
   const handleSecretChange = (exchangeId: string, value: string) => {
     setApiSecrets(prev => ({ ...prev, [exchangeId]: value }))
+  }
+
+  const handlePassphraseChange = (exchangeId: string, value: string) => {
+    setPassphrases(prev => ({ ...prev, [exchangeId]: value }))
   }
 
   const validateApiKey = (exchangeId: string): boolean => {
@@ -179,6 +204,12 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
       return
     }
 
+    // Check if passphrase is required and provided
+    if (exchange?.requiresPassphrase && !passphrases[exchangeId]?.trim()) {
+      toast.error("Passphrase is required for this exchange")
+      return
+    }
+
     setConnectingExchange(exchangeId)
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -195,7 +226,8 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
         body: {
           exchange: exchangeId,
           apiKey: apiKeys[exchangeId],
-          apiSecret: apiSecrets[exchangeId]
+          apiSecret: apiSecrets[exchangeId],
+          passphrase: passphrases[exchangeId] || undefined
         }
       })
 
@@ -220,7 +252,8 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
           user_id: user.id,
           exchange: exchangeId,
           api_key: apiKeys[exchangeId],
-          api_secret: apiSecrets[exchangeId] || null
+          api_secret: apiSecrets[exchangeId] || null,
+          passphrase: passphrases[exchangeId] || null
         }, {
           onConflict: 'user_id,exchange'
         })
@@ -275,6 +308,7 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
       
       setApiKeys(prev => ({ ...prev, [exchangeId]: "" }))
       setApiSecrets(prev => ({ ...prev, [exchangeId]: "" }))
+      setPassphrases(prev => ({ ...prev, [exchangeId]: "" }))
       
       const exchangeName = EXCHANGES.find(e => e.id === exchangeId)?.name
       toast.success(`${exchangeName} disconnected`)
@@ -344,6 +378,29 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
                           onClick={() => toggleSecretVisibility(exchange.id)}
                         >
                           {visibleSecrets.has(exchange.id) ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                    {exchange.requiresPassphrase && (
+                      <div className="flex items-center space-x-2 max-w-md">
+                        <Input
+                          type={visiblePassphrases.has(exchange.id) ? "text" : "password"}
+                          placeholder="Enter Passphrase"
+                          value={passphrases[exchange.id] || ""}
+                          onChange={(e) => handlePassphraseChange(exchange.id, e.target.value)}
+                          className="flex-1"
+                          disabled={connectedExchanges.has(exchange.id)}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => togglePassphraseVisibility(exchange.id)}
+                        >
+                          {visiblePassphrases.has(exchange.id) ? (
                             <EyeOff className="h-4 w-4" />
                           ) : (
                             <Eye className="h-4 w-4" />
