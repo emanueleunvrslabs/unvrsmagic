@@ -58,15 +58,16 @@ Deno.serve(async (req) => {
     )
 
     // Get the user from the JWT token
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
     const {
       data: { user },
       error: userError,
-    } = await supabaseClient.auth.getUser()
+    } = await supabaseClient.auth.getUser(bearerToken || '')
 
     if (userError || !user) {
       console.error('User authentication error:', userError)
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
+        JSON.stringify({ error: 'Unauthorized', details: userError?.message || 'Auth session missing!' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       )
     }
