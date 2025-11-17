@@ -89,41 +89,40 @@ serve(async (req) => {
 
       case "qwen":
         try {
-          // Qwen Model Studio (Singapore) API verification
-          if (!ownerId) {
-            errorMessage = "Owner ID is required for Qwen3 Model Studio";
-            console.error("Qwen verification failed: missing owner_id");
-            break;
-          }
-
-          // Model Studio International endpoint (Singapore)
-          const response = await fetch("https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/text-generation/generation", {
+          // Qwen Model Studio (International/Singapore) - use OpenAI-compatible endpoint
+          const response = await fetch("https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions", {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${apiKey}`,
               "Content-Type": "application/json",
-              "X-DashScope-WorkSpace": ownerId
             },
             body: JSON.stringify({
               model: "qwen-turbo",
-              input: {
-                messages: [{ role: "user", content: "test" }]
-              },
-              parameters: {
-                max_tokens: 1
-              }
+              messages: [
+                { role: "system", content: "Ping for key validation" },
+                { role: "user", content: "test" }
+              ],
+              max_tokens: 1
             }),
           });
 
           console.log("Qwen response status:", response.status);
-          
-          if (response.ok || response.status === 400) {
+
+          if (response.status === 200 || response.status === 400) {
             isValid = true;
-            console.log("Qwen API key is valid");
+            console.log("Qwen API key is valid or accepted by gateway");
+          } else if (response.status === 401) {
+            let errText = await response.text().catch(() => "");
+            try {
+              const j = JSON.parse(errText || "{}");
+              errText = j.error?.message || j.message || errText;
+            } catch {}
+            errorMessage = errText || "Invalid Qwen API key";
+            console.error("Qwen verification failed (401):", errorMessage);
           } else {
-            const error = await response.json();
-            errorMessage = error.message || `Invalid Qwen API key (status: ${response.status})`;
-            console.error("Qwen verification failed:", errorMessage, error);
+            const errBody = await response.text().catch(() => "");
+            errorMessage = errBody || `Failed to verify Qwen API key (status: ${response.status})`;
+            console.error("Qwen verification unexpected:", errorMessage);
           }
         } catch (error) {
           errorMessage = "Failed to verify Qwen API key";
