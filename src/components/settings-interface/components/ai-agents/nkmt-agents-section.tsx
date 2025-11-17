@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/integrations/supabase/client"
 import type { ApiKey } from "../../types"
-import { Settings } from "lucide-react"
+import { Settings, FileText } from "lucide-react"
 import { NKMTAgentApiModal } from "./nkmt-agent-api-modal"
+import { NKMTAgentPromptModal } from "./nkmt-agent-prompt-modal"
 
 const NKMT_AGENTS = [
   { id: "nkmt", name: "NKMT", model: "GPT-5.1 Thinking", description: "Main orchestrator", requiresApi: "openai", externalApis: [] },
@@ -31,6 +32,8 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
   const [isLoading, setIsLoading] = useState(true)
   const [selectedAgent, setSelectedAgent] = useState<typeof NKMT_AGENTS[0] | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedPromptAgent, setSelectedPromptAgent] = useState<typeof NKMT_AGENTS[0] | null>(null)
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
 
   useEffect(() => {
     const normalizeProvider = (p: string) => {
@@ -153,6 +156,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
             <TableHead>Model</TableHead>
             <TableHead>Description</TableHead>
             <TableHead className="text-center">API Config</TableHead>
+            <TableHead className="text-center">Prompt</TableHead>
             <TableHead className="text-right">Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -180,6 +184,16 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
                   <span className="text-muted-foreground text-xs">-</span>
                 )}
               </TableCell>
+              <TableCell className="text-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleOpenPromptModal(agent)}
+                  className="h-8 w-8 p-0"
+                >
+                  <FileText className="h-4 w-4" />
+                </Button>
+              </TableCell>
               <TableCell className="text-right">
                 {isAgentConnected(agent) ? (
                   <span className="text-green-600 text-sm font-medium">Connected</span>
@@ -200,6 +214,15 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
           agentId={selectedAgent.id}
           externalApis={selectedAgent.externalApis || []}
           onSuccess={handleApiSuccess}
+        />
+      )}
+
+      {selectedPromptAgent && (
+        <NKMTAgentPromptModal
+          isOpen={isPromptModalOpen}
+          onClose={handleClosePromptModal}
+          agentName={selectedPromptAgent.name}
+          agentId={selectedPromptAgent.id}
         />
       )}
     </div>
