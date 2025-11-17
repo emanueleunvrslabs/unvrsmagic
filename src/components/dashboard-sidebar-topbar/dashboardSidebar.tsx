@@ -315,9 +315,21 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     }
 
     const rect = element.getBoundingClientRect();
+    
+    // Calculate estimated submenu height (approximately 50px per item + header)
+    const estimatedMenuHeight = (item.submenuItems?.length || 0) * 50 + 60;
+    const viewportHeight = window.innerHeight;
+    
+    // Adjust y position to keep menu on screen
+    let yPos = rect.top;
+    if (yPos + estimatedMenuHeight > viewportHeight) {
+      // Position menu to align with bottom of viewport with some padding
+      yPos = Math.max(10, viewportHeight - estimatedMenuHeight - 10);
+    }
+    
     const position = {
       x: rect.right + 8, // 8px gap from the sidebar
-      y: rect.top,
+      y: yPos,
     };
 
     setHoveredSubmenu({ item, position });
