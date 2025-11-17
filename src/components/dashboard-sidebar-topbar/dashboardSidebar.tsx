@@ -3,10 +3,8 @@
 import type React from "react";
 import { createPortal } from "react-dom";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
@@ -29,7 +27,6 @@ import {
   Layers,
   LayoutDashboard,
   LineChart,
-  LogOut,
   Menu,
   Package,
   PieChart,
@@ -455,7 +452,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         { id: "settings-exchanges", label: "Exchange Connection", icon: Store, href: "/settings?tab=exchanges" },
       ],
     },
-    { id: "logout", label: "Logout", icon: LogOut },
   ];
 
   return (
@@ -736,37 +732,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                   </Tooltip>
                 );
               })}
-            </div>
-
-            <Separator className="my-2" />
-
-            <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
-              {!collapsed && (
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/abstract-geometric-shapes.png" />
-                    <AvatarFallback>AZ</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">Ayaan Zafar</span>
-                    <span className="text-xs text-muted-foreground">Pro Plan</span>
-                  </div>
-                </div>
-              )}
-
-              {collapsed && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Avatar className="h-8 w-8 cursor-pointer">
-                      <AvatarImage src="/abstract-geometric-shapes.png" />
-                      <AvatarFallback>AZ</AvatarFallback>
-                    </Avatar>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="font-normal">
-                    Ayaan Zafar (Pro Plan)
-                  </TooltipContent>
-                </Tooltip>
-              )}
             </div>
           </div>
         </TooltipProvider>
