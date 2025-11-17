@@ -67,6 +67,19 @@ export const SettingsInterface: React.FC = () => {
           />
         );
 
+      case "ai-agents":
+        return (
+          <SecurityTab
+            security={settings.security}
+            apiKeys={settings.apiKeys}
+            sessions={settings.sessions}
+            loginHistory={settings.loginHistory}
+            onSecurityChange={updateSecurity}
+            onApiKeysChange={(apiKeys) => updateSecurity({ apiKeysEnabled: apiKeys.length > 0 })}
+            onSessionsChange={() => {}} // Sessions are managed separately
+          />
+        );
+
       case "exchanges":
         return (
           <ExchangesTab

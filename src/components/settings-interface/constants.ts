@@ -14,6 +14,12 @@ export const SETTINGS_TABS: SettingsTab[] = [
     description: "Connect and manage AI models like OpenAI, Claude, and more",
   },
   {
+    id: "ai-agents",
+    label: "AI Agents API",
+    icon: "Zap",
+    description: "Connect and manage AI models like OpenAI, Claude, and more",
+  },
+  {
     id: "exchanges",
     label: "Exchange Connection",
     icon: "ArrowLeftRight",
