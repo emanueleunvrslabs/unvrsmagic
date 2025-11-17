@@ -55,12 +55,6 @@ export const SETTINGS_TABS: SettingsTab[] = [
     icon: "Database",
     description: "Data export, retention, and account management",
   },
-  {
-    id: "connections",
-    label: "Connections",
-    icon: "Link",
-    description: "Connected exchanges, wallets, and third-party services",
-  },
 ]
 
 export const LANGUAGES = [
