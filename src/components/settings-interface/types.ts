@@ -183,6 +183,16 @@ export interface ApiKey {
   status: "active" | "inactive"
 }
 
+export interface ExchangeKey {
+  id: string
+  name: string
+  key: string
+  permissions: string[]
+  lastUsed: string
+  created: string
+  status: "active" | "inactive"
+}
+
 export interface Session {
   id: string
   device: string
