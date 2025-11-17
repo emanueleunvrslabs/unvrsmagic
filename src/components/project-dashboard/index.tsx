@@ -56,20 +56,11 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/projects")}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{project.name}</h1>
-            {project.description && (
-              <p className="text-muted-foreground mt-1">{project.description}</p>
-            )}
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold">{project.name}</h1>
+          {project.description && (
+            <p className="text-muted-foreground mt-1">{project.description}</p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <div className={`px-3 py-1 rounded-full text-sm font-medium ${
