@@ -22,11 +22,7 @@ const mockExchanges = [
   { id: "bybit", name: "Bybit" },
 ]
 
-const mockAccounts = [
-  { id: "main", name: "Main Account" },
-  { id: "trading", name: "Trading Account" },
-  { id: "bot", name: "Bot Account" },
-]
+// Account types will be fetched dynamically based on available accounts
 
 const mockMarkets = [
   { id: "spot", name: "Spot Trading" },
@@ -74,6 +70,7 @@ export function TradingHeader({
   onSettingChange,
 }: TradingHeaderProps) {
   const [connectedExchanges, setConnectedExchanges] = useState<Array<{ id: string; name: string }>>([])
+  const [availableAccounts, setAvailableAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(2024, 4, 15), // May 15, 2024
     to: new Date(2024, 4, 22), // May 22, 2024
@@ -102,6 +99,20 @@ export function TradingHeader({
     }
 
     fetchConnectedExchanges()
+  }, [])
+
+  // Fetch available accounts from Bitget
+  useEffect(() => {
+    const fetchAvailableAccounts = async () => {
+      // For Bitget, we have these account types
+      const bitgetAccounts = [
+        { id: "spot", name: "Spot Account" },
+        { id: "futures", name: "Futures Account" },
+      ]
+      setAvailableAccounts(bitgetAccounts)
+    }
+
+    fetchAvailableAccounts()
   }, [])
 
   const formatDateRange = (range: DateRange | undefined): string => {
@@ -162,11 +173,15 @@ export function TradingHeader({
                 <SelectValue placeholder="Select account" />
               </SelectTrigger>
               <SelectContent>
-                {mockAccounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.name}
-                  </SelectItem>
-                ))}
+                {availableAccounts.length === 0 ? (
+                  <SelectItem value="none" disabled>No accounts available</SelectItem>
+                ) : (
+                  availableAccounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </CardContent>

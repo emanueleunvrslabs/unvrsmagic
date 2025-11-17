@@ -26,7 +26,7 @@ export function useTrading() {
   })
 
   const [selectedExchange, setSelectedExchange] = useState("")
-  const [selectedAccount, setSelectedAccount] = useState("main")
+  const [selectedAccount, setSelectedAccount] = useState("spot")
   const [selectedMarket, setSelectedMarket] = useState("spot")
   const [selectedPair, setSelectedPair] = useState("btcusdt")
 
