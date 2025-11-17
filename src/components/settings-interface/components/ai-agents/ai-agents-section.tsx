@@ -17,11 +17,11 @@ interface AIAgentsSectionProps {
 }
 
 const AI_AGENT_PROVIDERS = [
-  { id: "nano", name: "Nano 🍌", placeholder: "Enter API key", description: "Nano AI model", requiresOwnerId: false },
-  { id: "veo3", name: "Veo3", placeholder: "Enter API key", description: "Veo3 AI model", requiresOwnerId: false },
-  { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI model", requiresOwnerId: false },
-  { id: "claude", name: "Claude 4.5", placeholder: "sk-ant-...", description: "Anthropic Claude", requiresOwnerId: false },
-  { id: "chatgpt", name: "ChatGPT", placeholder: "sk-...", description: "OpenAI ChatGPT", requiresOwnerId: false },
+  { id: "nano", name: "Nano 🍌", placeholder: "Enter API key", description: "Nano AI model", requiresOwnerId: false, usesProvider: "Fal" },
+  { id: "veo3", name: "Veo3", placeholder: "Enter API key", description: "Veo3 AI model", requiresOwnerId: false, usesProvider: "Fal" },
+  { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI model", requiresOwnerId: false, usesProvider: "Gamma" },
+  { id: "claude", name: "Claude 4.5", placeholder: "sk-ant-...", description: "Anthropic Claude", requiresOwnerId: false, usesProvider: "Anthropic" },
+  { id: "chatgpt", name: "ChatGPT", placeholder: "sk-...", description: "OpenAI ChatGPT", requiresOwnerId: false, usesProvider: "OpenAI" },
 ]
 
 // Validation schemas for each provider
@@ -289,6 +289,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
             <TableRow>
               <TableHead>Provider</TableHead>
               <TableHead>Description</TableHead>
+              <TableHead>Model Provider</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
@@ -297,6 +298,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
               <TableRow key={provider.id}>
                 <TableCell className="font-medium">{provider.name}</TableCell>
                 <TableCell className="text-muted-foreground">{provider.description}</TableCell>
+                <TableCell className="text-sm">{provider.usesProvider}</TableCell>
                 <TableCell>
                   {connectedProviders.has(provider.id) ? (
                     <span className="text-green-600 text-sm font-medium">Connected</span>
