@@ -194,6 +194,31 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
         return
       }
 
+      // Verify the exchange credentials using edge function
+      toast.loading("Verifying exchange credentials...")
+      
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-exchange-key', {
+        body: {
+          exchange: exchangeId,
+          apiKey: apiKeys[exchangeId],
+          apiSecret: apiSecrets[exchangeId]
+        }
+      })
+
+      if (verifyError) {
+        console.error("Verification error:", verifyError)
+        toast.error("Failed to verify exchange credentials")
+        return
+      }
+
+      if (!verifyData?.isValid) {
+        toast.error(verifyData?.error || "Invalid exchange credentials")
+        return
+      }
+
+      toast.dismiss()
+      toast.loading("Saving exchange credentials...")
+
       // Save the exchange credentials to database
       const { error: saveError } = await supabase
         .from('exchange_keys')
@@ -215,6 +240,7 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
       // Mark as connected
       setConnectedExchanges(prev => new Set(prev).add(exchangeId))
       
+      toast.dismiss()
       const exchangeName = EXCHANGES.find(e => e.id === exchangeId)?.name
       toast.success(`${exchangeName} connected successfully`)
     } catch (error) {
