@@ -196,8 +196,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
 
-      if (!data.isValid) {
-        toast.error(data.error || "Invalid API key")
+      if (!data?.valid) {
+        toast.error(data?.error || "Invalid API key")
         return
       }
 
