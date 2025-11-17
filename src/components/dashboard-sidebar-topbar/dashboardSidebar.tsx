@@ -146,6 +146,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     "control-panel": false,
     "defi-center": false,
     "settings": false,
+    "nkmt": false,
   });
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -207,6 +208,30 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         setActiveItem("settings");
       }
       setOpenSubmenus((prev) => ({ ...prev, "settings": true }));
+    } else if (pathname.startsWith("/nkmt")) {
+      // Handle NKMT agents
+      if (pathname === "/nkmt") {
+        setActiveItem("nkmt-main");
+      } else if (pathname === "/nkmt/mkt-data") {
+        setActiveItem("nkmt-mkt-data");
+      } else if (pathname === "/nkmt/deriv-data") {
+        setActiveItem("nkmt-deriv-data");
+      } else if (pathname === "/nkmt/sentiment-scout") {
+        setActiveItem("nkmt-sentiment");
+      } else if (pathname === "/nkmt/chain-analyst") {
+        setActiveItem("nkmt-chain");
+      } else if (pathname === "/nkmt/market-modeler") {
+        setActiveItem("nkmt-modeler");
+      } else if (pathname === "/nkmt/signal-maker") {
+        setActiveItem("nkmt-signal");
+      } else if (pathname === "/nkmt/risk-mgr") {
+        setActiveItem("nkmt-risk");
+      } else if (pathname === "/nkmt/trade-executor") {
+        setActiveItem("nkmt-executor");
+      } else if (pathname === "/nkmt/reviewer") {
+        setActiveItem("nkmt-reviewer");
+      }
+      setOpenSubmenus((prev) => ({ ...prev, "nkmt": true }));
     } else {
       // Extract the main path without subpaths
       const mainPath = pathname.split("/")[1];
@@ -309,7 +334,16 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           icon: Layers,
           hasSubmenu: true,
           submenuItems: [
-            // Placeholder submenu items - can be populated later
+            { id: "nkmt-main", label: "NKMT", icon: Cpu, href: "/nkmt" },
+            { id: "nkmt-mkt-data", label: "Mkt.data", icon: Database, href: "/nkmt/mkt-data" },
+            { id: "nkmt-deriv-data", label: "Deriv.data", icon: Database, href: "/nkmt/deriv-data" },
+            { id: "nkmt-sentiment", label: "Sentiment.scout", icon: Activity, href: "/nkmt/sentiment-scout" },
+            { id: "nkmt-chain", label: "Chain.analyst", icon: Layers, href: "/nkmt/chain-analyst" },
+            { id: "nkmt-modeler", label: "Market.modeler", icon: PieChart, href: "/nkmt/market-modeler" },
+            { id: "nkmt-signal", label: "Signal.maker", icon: Zap, href: "/nkmt/signal-maker" },
+            { id: "nkmt-risk", label: "Risk.mgr", icon: CreditCard, href: "/nkmt/risk-mgr" },
+            { id: "nkmt-executor", label: "Trade.executor", icon: Bot, href: "/nkmt/trade-executor" },
+            { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
           ],
         },
         { id: "my-assets", label: "My Assets", icon: Coins, href: "/my-assets" },
