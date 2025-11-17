@@ -145,7 +145,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
     "control-panel": false,
     "defi-center": false,
-    "settings": false,
+    "settings": location.pathname === "/settings",  // Apri se siamo già in settings
     "nkmt": false,
   });
   const { theme, setTheme } = useTheme();
