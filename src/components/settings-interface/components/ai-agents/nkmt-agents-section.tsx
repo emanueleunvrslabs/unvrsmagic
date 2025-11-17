@@ -41,7 +41,9 @@ export const NKMTAgentsSection: React.FC = () => {
         }
 
         if (data) {
-          setConnectedApis(new Set(data.map(item => item.provider)))
+          const apis = new Set(data.map(item => item.provider))
+          console.log("NKMT: Loaded APIs:", Array.from(apis))
+          setConnectedApis(apis)
         }
       } catch (error) {
         console.error("Error loading connected APIs:", error)
@@ -57,7 +59,9 @@ export const NKMTAgentsSection: React.FC = () => {
     // Code-based agents are always connected
     if (!agent.requiresApi) return true
     // Check if the required API is connected
-    return connectedApis.has(agent.requiresApi)
+    const isConnected = connectedApis.has(agent.requiresApi)
+    console.log(`NKMT: Agent ${agent.name} (requires ${agent.requiresApi}):`, isConnected, "Available APIs:", Array.from(connectedApis))
+    return isConnected
   }
 
   if (isLoading) {
