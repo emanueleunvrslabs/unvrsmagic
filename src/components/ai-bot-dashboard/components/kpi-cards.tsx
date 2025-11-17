@@ -18,7 +18,13 @@ export function KpiCards({ botData }: KpiCardsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(botData.balance)}</div>
           <div className="flex items-center text-xs text-muted-foreground mt-1">
-            <Badge variant={botData.profit.daily >= 0 ? "default" : "destructive"} className="mr-1">
+            <Badge 
+              variant="outline" 
+              className={botData.profit.daily >= 0 
+                ? "mr-1 border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400" 
+                : "mr-1 border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400"
+              }
+            >
               <span className="flex items-center">
                 {botData.profit.daily >= 0 ? (
                   <ArrowUp className="mr-1 h-3 w-3" />
