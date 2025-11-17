@@ -100,9 +100,37 @@ Deno.serve(async (req) => {
       .eq('provider', 'webshare')
       .single()
 
-    const webshareApiKey = webshareKey?.api_key
-    if (webshareApiKey) {
-      console.log('Using Webshare proxy for Bitget API calls')
+    let proxyCredentials: { username: string; password: string; address: string; port: number } | null = null
+
+    if (webshareKey?.api_key) {
+      console.log('Fetching Webshare proxy credentials...')
+      try {
+        // Get proxy list from Webshare API
+        const proxyListResponse = await fetch('https://proxy.webshare.io/api/v2/proxy/list/', {
+          headers: {
+            'Authorization': `Token ${webshareKey.api_key}`
+          }
+        })
+
+        if (proxyListResponse.ok) {
+          const proxyData = await proxyListResponse.json()
+          if (proxyData.results && proxyData.results.length > 0) {
+            // Use the first available proxy
+            const proxy = proxyData.results[0]
+            proxyCredentials = {
+              username: proxy.username,
+              password: proxy.password,
+              address: proxy.proxy_address,
+              port: proxy.port
+            }
+            console.log('Webshare proxy configured:', { address: proxyCredentials.address, port: proxyCredentials.port })
+          }
+        } else {
+          console.error('Failed to fetch Webshare proxy list:', proxyListResponse.status)
+        }
+      } catch (error) {
+        console.error('Error fetching Webshare proxy credentials:', error)
+      }
     }
 
     // Helper function to sign Bitget requests
@@ -142,28 +170,41 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       }
 
-      // Add proxy authentication if Webshare is configured
-      if (webshareApiKey) {
-        headers['Proxy-Authorization'] = `Basic ${btoa(`${webshareApiKey}:`)}`
-      }
-
-      const fetchOptions: RequestInit = {
+      let fetchOptions: RequestInit = {
         method: 'GET',
         headers: headers,
       }
 
-      // Use Webshare proxy if configured
-      const apiUrl = webshareApiKey 
-        ? `http://proxy.webshare.io:80/https://api.bitget.com${endpoint}`
-        : `https://api.bitget.com${endpoint}`
+      let apiUrl = `https://api.bitget.com${endpoint}`
 
-      console.log(`Calling Bitget API: ${endpoint}${webshareApiKey ? ' (via Webshare proxy)' : ''}`)
+      // Configure proxy if available
+      if (proxyCredentials) {
+        const proxyAuth = btoa(`${proxyCredentials.username}:${proxyCredentials.password}`)
+        const proxyUrl = `http://${proxyCredentials.address}:${proxyCredentials.port}`
+        
+        // Use Deno's native proxy support
+        fetchOptions = {
+          ...fetchOptions,
+          // @ts-ignore - Deno supports proxy in fetch
+          proxy: {
+            url: proxyUrl,
+            basicAuth: {
+              username: proxyCredentials.username,
+              password: proxyCredentials.password
+            }
+          }
+        }
+        
+        console.log(`Calling Bitget API: ${endpoint} (via Webshare proxy)`)
+      } else {
+        console.log(`Calling Bitget API: ${endpoint} (direct connection)`)
+      }
 
       const response = await fetch(apiUrl, fetchOptions)
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error(`Bitget API error for ${endpoint}:`, errorText)
+        console.error(`Bitget API error for ${endpoint}:`, response.status, errorText)
         throw new Error(`Bitget API error: ${response.status}`)
       }
 
