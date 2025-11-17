@@ -17,9 +17,9 @@ interface ApiKeysSectionProps {
 }
 
 const AI_PROVIDERS = [
-  { id: "openai", name: "OpenAI", placeholder: "sk-...", description: "GPT models" },
-  { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models" },
-  { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models" },
+  { id: "openai", name: "OpenAI", placeholder: "sk-...", description: "GPT models", requiresKeyId: false },
+  { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models", requiresKeyId: false },
+  { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresKeyId: true },
 ]
 
 // Validation schemas for each provider
@@ -41,6 +41,9 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     anthropic: "",
     qwen: "",
   })
+  const [keyIds, setKeyIds] = useState<Record<string, string>>({
+    qwen: "",
+  })
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [connectedProviders, setConnectedProviders] = useState<Set<string>>(new Set())
@@ -56,7 +59,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
 
         const { data, error } = await supabase
           .from('api_keys')
-          .select('provider, api_key')
+          .select('provider, api_key, key_id')
           .eq('user_id', user.id)
 
         if (error) {
@@ -66,14 +69,19 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
 
         if (data && data.length > 0) {
           const loadedKeys: Record<string, string> = {}
+          const loadedKeyIds: Record<string, string> = {}
           const connected = new Set<string>()
 
           data.forEach((item) => {
             loadedKeys[item.provider] = item.api_key
+            if (item.key_id) {
+              loadedKeyIds[item.provider] = item.key_id
+            }
             connected.add(item.provider)
           })
 
           setApiKeys(prev => ({ ...prev, ...loadedKeys }))
+          setKeyIds(prev => ({ ...prev, ...loadedKeyIds }))
           setConnectedProviders(connected)
         }
       } catch (error) {
@@ -148,6 +156,12 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
       return
     }
 
+    // For Qwen3, validate key_id as well
+    if (providerId === "qwen" && !keyIds.qwen?.trim()) {
+      toast.error("Key ID is required for Qwen3")
+      return
+    }
+
     setConnectingProvider(providerId)
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -161,7 +175,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
       const { data, error } = await supabase.functions.invoke('verify-api-key', {
         body: {
           provider: providerId,
-          apiKey: apiKeys[providerId]
+          apiKey: apiKeys[providerId],
+          keyId: providerId === "qwen" ? keyIds.qwen : undefined
         }
       })
 
@@ -182,7 +197,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         .upsert({
           user_id: user.id,
           provider: providerId,
-          api_key: apiKeys[providerId]
+          api_key: apiKeys[providerId],
+          key_id: providerId === "qwen" ? keyIds.qwen : null
         }, {
           onConflict: 'user_id,provider'
         })
@@ -235,6 +251,9 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
       })
       
       setApiKeys(prev => ({ ...prev, [providerId]: "" }))
+      if (providerId === "qwen") {
+        setKeyIds(prev => ({ ...prev, qwen: "" }))
+      }
       
       const providerName = AI_PROVIDERS.find(p => p.id === providerId)?.name
       toast.success(`${providerName} disconnected`)
@@ -288,6 +307,15 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                         )}
                       </Button>
                     </div>
+                    {provider.requiresKeyId && (
+                      <Input
+                        type="text"
+                        placeholder="Enter Key ID"
+                        value={keyIds[provider.id] || ""}
+                        onChange={(e) => setKeyIds(prev => ({ ...prev, [provider.id]: e.target.value }))}
+                        className="max-w-md"
+                      />
+                    )}
                     {validationErrors[provider.id] && (
                       <p className="text-sm text-destructive">
                         {validationErrors[provider.id]}
