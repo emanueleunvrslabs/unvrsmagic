@@ -26,12 +26,6 @@ export const SETTINGS_TABS: SettingsTab[] = [
     description: "Configure email, push, and SMS notifications",
   },
   {
-    id: "appearance",
-    label: "Appearance",
-    icon: "Palette",
-    description: "Theme, layout, language, and accessibility settings",
-  },
-  {
     id: "trading",
     label: "Trading",
     icon: "TrendingUp",
@@ -42,12 +36,6 @@ export const SETTINGS_TABS: SettingsTab[] = [
     label: "Bots",
     icon: "Bot",
     description: "Bot parameters, behavior, and monitoring settings",
-  },
-  {
-    id: "data",
-    label: "Data",
-    icon: "Database",
-    description: "Data export, retention, and account management",
   },
 ]
 
