@@ -34,7 +34,7 @@ export function PortfolioSection({ botData, realPortfolioData, isLoading, onAsse
         symbol: coin.coin,
         amount: total,
         type: 'Spot',
-        value: total // This will be converted to USDT by the backend
+        value: parseFloat(coin.usdtValue || '0')
       }
     }).filter((asset: any) => asset.amount > 0),
     // Futures account balance
