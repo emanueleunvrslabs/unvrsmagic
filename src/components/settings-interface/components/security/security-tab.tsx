@@ -34,7 +34,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
         <ApiKeysSection apiKeys={apiKeys} onApiKeysChange={onApiKeysChange} />
       </SettingsSection>
 
-      <SettingsSection title="AI Agents API" description="Connect and manage your AI agent providers">
+      <SettingsSection title="AI Agents" description="Connect and manage your AI agent providers">
         <AIAgentsSection apiKeys={apiKeys} onApiKeysChange={onApiKeysChange} />
       </SettingsSection>
     </div>
