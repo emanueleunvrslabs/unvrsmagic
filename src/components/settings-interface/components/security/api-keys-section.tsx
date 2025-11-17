@@ -4,7 +4,8 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, EyeOff, Save } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
@@ -15,14 +16,34 @@ interface ApiKeysSectionProps {
   onApiKeysChange: (apiKeys: ApiKey[]) => void
 }
 
+const AI_PROVIDERS = [
+  { id: "openai", name: "OpenAI", placeholder: "sk-...", description: "GPT models" },
+  { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models" },
+  { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models" },
+]
+
 export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
-  const [openaiKey, setOpenaiKey] = useState("")
-  const [anthropicKey, setAnthropicKey] = useState("")
-  const [qwenKey, setQwenKey] = useState("")
-  const [showOpenai, setShowOpenai] = useState(false)
-  const [showAnthropic, setShowAnthropic] = useState(false)
-  const [showQwen, setShowQwen] = useState(false)
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({
+    openai: "",
+    anthropic: "",
+    qwen: "",
+  })
+  const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [isSaving, setIsSaving] = useState(false)
+
+  const toggleKeyVisibility = (providerId: string) => {
+    const newVisibleKeys = new Set(visibleKeys)
+    if (newVisibleKeys.has(providerId)) {
+      newVisibleKeys.delete(providerId)
+    } else {
+      newVisibleKeys.add(providerId)
+    }
+    setVisibleKeys(newVisibleKeys)
+  }
+
+  const handleKeyChange = (providerId: string, value: string) => {
+    setApiKeys(prev => ({ ...prev, [providerId]: value }))
+  }
 
   const handleSaveKeys = async () => {
     setIsSaving(true)
@@ -44,90 +65,56 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-1">OpenAI</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Connect your OpenAI API key for GPT models
-            </p>
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  type={showOpenai ? "text" : "password"}
-                  placeholder="sk-..."
-                  value={openaiKey}
-                  onChange={(e) => setOpenaiKey(e.target.value)}
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowOpenai(!showOpenai)}
-              >
-                {showOpenai ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-1">Anthropic</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Connect your Anthropic API key for Claude models
-            </p>
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  type={showAnthropic ? "text" : "password"}
-                  placeholder="sk-ant-..."
-                  value={anthropicKey}
-                  onChange={(e) => setAnthropicKey(e.target.value)}
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowAnthropic(!showAnthropic)}
-              >
-                {showAnthropic ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-1">Qwen3</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Connect your Qwen3 API key for Alibaba's AI models
-            </p>
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  type={showQwen ? "text" : "password"}
-                  placeholder="Enter your Qwen3 API key"
-                  value={qwenKey}
-                  onChange={(e) => setQwenKey(e.target.value)}
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowQwen(!showQwen)}
-              >
-                {showQwen ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
+    <div className="space-y-4">
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Provider</TableHead>
+              <TableHead>API Key</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {AI_PROVIDERS.map((provider) => (
+              <TableRow key={provider.id}>
+                <TableCell className="font-medium">{provider.name}</TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-2 max-w-md">
+                    <Input
+                      type={visibleKeys.has(provider.id) ? "text" : "password"}
+                      placeholder={provider.placeholder}
+                      value={apiKeys[provider.id]}
+                      onChange={(e) => handleKeyChange(provider.id, e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleKeyVisibility(provider.id)}
+                    >
+                      {visibleKeys.has(provider.id) ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {provider.description}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={apiKeys[provider.id] ? "default" : "secondary"}>
+                    {apiKeys[provider.id] ? "Connected" : "Not connected"}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <div className="flex justify-end">
         <Button onClick={handleSaveKeys} disabled={isSaving}>
