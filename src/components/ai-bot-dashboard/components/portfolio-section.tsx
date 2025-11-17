@@ -37,11 +37,18 @@ export function PortfolioSection({ botData, realPortfolioData, isLoading, onAsse
         value: total // This will be converted to USDT by the backend
       }
     }).filter((asset: any) => asset.amount > 0),
+    // Futures account balance
+    ...(realPortfolioData.futuresAccounts || []).map((account: any) => ({
+      symbol: account.marginCoin,
+      amount: parseFloat(account.available || '0'),
+      type: 'Futures',
+      value: parseFloat(account.available || '0')
+    })).filter((asset: any) => asset.amount > 0),
     // Futures positions
     ...(realPortfolioData.positions || []).map((position: any) => ({
       symbol: position.symbol,
       amount: parseFloat(position.total || '0'),
-      type: 'Futures',
+      type: 'Futures Position',
       value: parseFloat(position.unrealizedPL || '0'),
       side: position.holdSide
     })).filter((asset: any) => asset.amount > 0)
@@ -81,11 +88,9 @@ export function PortfolioSection({ botData, realPortfolioData, isLoading, onAsse
                       </div>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <div className="text-muted-foreground">Amount:</div>
                       <div>{asset.amount.toFixed(8)}</div>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <div className="text-muted-foreground">Value:</div>
                       <div className="font-medium">${asset.value.toFixed(2)}</div>
                     </div>
                   </div>
