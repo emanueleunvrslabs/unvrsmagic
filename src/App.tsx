@@ -24,6 +24,7 @@ import DeFiProtocols from "./pages/DeFiProtocols";
 import ExecutionLogs from "./pages/ExecutionLogs";
 import Auth from "./pages/Auth";
 import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
           <Route path="/projects/active" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
           <Route path="/projects/archived" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+          <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
           <Route path="/wallets" element={<ProtectedRoute><Wallets /></ProtectedRoute>} />
           <Route path="/my-assets" element={<ProtectedRoute><MyAssets /></ProtectedRoute>} />
           <Route path="/portfolio-tracker" element={<ProtectedRoute><PortfolioTracker /></ProtectedRoute>} />
