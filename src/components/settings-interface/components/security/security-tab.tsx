@@ -32,10 +32,6 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
       <SettingsSection title="API Access" description="Manage API keys for programmatic access">
         <ApiKeysSection apiKeys={apiKeys} onApiKeysChange={onApiKeysChange} />
       </SettingsSection>
-
-      <SettingsSection title="Login History" description="Review recent login attempts and security events">
-        <LoginHistorySection loginHistory={loginHistory} />
-      </SettingsSection>
     </div>
   )
 }
