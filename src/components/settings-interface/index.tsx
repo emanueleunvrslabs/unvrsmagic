@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { ExchangesSection } from "./components/exchanges/exchanges-section";
+import { ExchangesTab } from "./components/exchanges/exchanges-tab";
 import { toast } from "sonner";
 import { AppearanceTab } from "./components/appearance/appearance-tab";
 import { BotsTab } from "./components/bots/bots-tab";
@@ -69,7 +69,7 @@ export const SettingsInterface: React.FC = () => {
 
       case "exchanges":
         return (
-          <ExchangesSection
+          <ExchangesTab
             exchanges={[]}
             onExchangesChange={handleConnectionsChange}
           />
