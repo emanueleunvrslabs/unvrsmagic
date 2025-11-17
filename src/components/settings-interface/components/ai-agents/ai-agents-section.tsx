@@ -17,11 +17,11 @@ interface AIAgentsSectionProps {
 }
 
 const AI_AGENT_PROVIDERS = [
-  { id: "nano", name: "Nano 🍌", placeholder: "Enter API key", description: "Nano AI model", requiresOwnerId: false, usesProvider: "Fal" },
-  { id: "veo3", name: "Veo3", placeholder: "Enter API key", description: "Veo3 AI model", requiresOwnerId: false, usesProvider: "Fal" },
-  { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI model", requiresOwnerId: false, usesProvider: "Gamma" },
-  { id: "claude", name: "Claude 4.5", placeholder: "sk-ant-...", description: "Anthropic Claude", requiresOwnerId: false, usesProvider: "Anthropic" },
-  { id: "chatgpt", name: "ChatGPT", placeholder: "sk-...", description: "OpenAI ChatGPT", requiresOwnerId: false, usesProvider: "OpenAI" },
+  { id: "nano", name: "Nano 🍌", placeholder: "Enter API key", description: "Image generator", requiresOwnerId: false, usesProvider: "Fal" },
+  { id: "veo3", name: "Veo3", placeholder: "Enter API key", description: "Video generator", requiresOwnerId: false, usesProvider: "Fal" },
+  { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Presentation generator", requiresOwnerId: false, usesProvider: "Gamma" },
+  { id: "claude", name: "Claude 4.5", placeholder: "sk-ant-...", description: "Website generator", requiresOwnerId: false, usesProvider: "Anthropic" },
+  { id: "chatgpt", name: "ChatGPT", placeholder: "sk-...", description: "Normal chat", requiresOwnerId: false, usesProvider: "OpenAI" },
 ]
 
 // Validation schemas for each provider
