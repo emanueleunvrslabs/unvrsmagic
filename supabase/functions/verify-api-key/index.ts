@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { provider, apiKey } = await req.json();
+    const { provider, apiKey, keyId } = await req.json();
 
     if (!provider || !apiKey) {
       return new Response(
@@ -89,11 +89,21 @@ serve(async (req) => {
 
       case "qwen":
         try {
-          // Qwen/Alibaba Cloud API verification
+          // Qwen/Alibaba Cloud API verification requires both API key and Key ID
+          const { keyId } = await req.json();
+          
+          if (!keyId) {
+            errorMessage = "Key ID is required for Qwen3";
+            console.error("Qwen verification failed: missing key_id");
+            break;
+          }
+
           const response = await fetch("https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation", {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${apiKey}`,
+              "X-DashScope-SSE": "disable",
+              "X-DashScope-DataInspection": "enable",
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -102,7 +112,8 @@ serve(async (req) => {
                 messages: [{ role: "user", content: "test" }]
               },
               parameters: {
-                max_tokens: 1
+                max_tokens: 1,
+                api_key: keyId
               }
             }),
           });
