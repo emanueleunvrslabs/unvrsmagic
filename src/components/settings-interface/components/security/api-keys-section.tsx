@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Eye, EyeOff, Save } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
 import type { ApiKey } from "../../types"
@@ -43,8 +43,9 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     qwen: "",
   })
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
-  const [isSaving, setIsSaving] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+  const [connectedProviders, setConnectedProviders] = useState<Set<string>>(new Set())
+  const [connectingProvider, setConnectingProvider] = useState<string | null>(null)
 
   const toggleKeyVisibility = (providerId: string) => {
     const newVisibleKeys = new Set(visibleKeys)
@@ -69,62 +70,82 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     }
   }
 
-  const validateApiKeys = (): boolean => {
-    const errors: Record<string, string> = {}
-    let hasError = false
+  const validateApiKey = (providerId: string): boolean => {
+    const key = apiKeys[providerId]
+    
+    if (!key || key.trim() === "") {
+      setValidationErrors(prev => ({
+        ...prev,
+        [providerId]: "API key is required"
+      }))
+      return false
+    }
 
-    AI_PROVIDERS.forEach(provider => {
-      const key = apiKeys[provider.id]
-      
-      // Only validate if key is not empty
-      if (key && key.trim() !== "") {
-        const schema = apiKeySchemas[provider.id as keyof typeof apiKeySchemas]
-        const result = schema.safeParse(key)
-        
-        if (!result.success) {
-          errors[provider.id] = result.error.errors[0].message
-          hasError = true
-        }
-      }
+    const schema = apiKeySchemas[providerId as keyof typeof apiKeySchemas]
+    const result = schema.safeParse(key)
+    
+    if (!result.success) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [providerId]: result.error.errors[0].message
+      }))
+      return false
+    }
+
+    // Clear error if validation passes
+    setValidationErrors(prev => {
+      const newErrors = { ...prev }
+      delete newErrors[providerId]
+      return newErrors
     })
-
-    setValidationErrors(errors)
-    return !hasError
+    
+    return true
   }
 
-  const handleSaveKeys = async () => {
-    // Validate all API keys before saving
-    if (!validateApiKeys()) {
-      toast.error("Please fix validation errors before saving")
+  const handleConnect = async (providerId: string) => {
+    // Validate the API key first
+    if (!validateApiKey(providerId)) {
+      toast.error("Please fix validation errors")
       return
     }
 
-    setIsSaving(true)
+    setConnectingProvider(providerId)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
         toast.error("User not authenticated")
-        setIsSaving(false)
         return
       }
 
-      // Only save non-empty keys
-      const keysToSave = Object.entries(apiKeys).filter(([_, value]) => value.trim() !== "")
+      // TODO: In a real implementation, verify the API key with the provider's API
+      // For now, simulate verification
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Mark as connected
+      setConnectedProviders(prev => new Set(prev).add(providerId))
       
-      if (keysToSave.length === 0) {
-        toast.error("Please enter at least one API key")
-        setIsSaving(false)
-        return
-      }
-
-      toast.success("API keys saved successfully")
+      const providerName = AI_PROVIDERS.find(p => p.id === providerId)?.name
+      toast.success(`${providerName} connected successfully`)
     } catch (error) {
-      console.error("Error saving API keys:", error)
-      toast.error("Failed to save API keys")
+      console.error("Error connecting provider:", error)
+      toast.error("Failed to connect provider")
     } finally {
-      setIsSaving(false)
+      setConnectingProvider(null)
     }
+  }
+
+  const handleDisconnect = (providerId: string) => {
+    setConnectedProviders(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(providerId)
+      return newSet
+    })
+    
+    setApiKeys(prev => ({ ...prev, [providerId]: "" }))
+    
+    const providerName = AI_PROVIDERS.find(p => p.id === providerId)?.name
+    toast.success(`${providerName} disconnected`)
   }
 
   return (
@@ -137,6 +158,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
               <TableHead>API Key</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="w-[120px]">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -176,21 +198,33 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                   {provider.description}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={apiKeys[provider.id] ? "default" : "secondary"}>
-                    {apiKeys[provider.id] ? "Connected" : "Not connected"}
+                  <Badge variant={connectedProviders.has(provider.id) ? "default" : "secondary"}>
+                    {connectedProviders.has(provider.id) ? "Connected" : "Not connected"}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  {connectedProviders.has(provider.id) ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDisconnect(provider.id)}
+                    >
+                      Disconnect
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => handleConnect(provider.id)}
+                      disabled={connectingProvider === provider.id || !apiKeys[provider.id]}
+                    >
+                      {connectingProvider === provider.id ? "Connecting..." : "Connect"}
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </div>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSaveKeys} disabled={isSaving}>
-          <Save className="mr-2 h-4 w-4" />
-          {isSaving ? "Saving..." : "Save API Keys"}
-        </Button>
       </div>
     </div>
   )
