@@ -58,6 +58,7 @@ type MenuItem = {
     label: string;
     icon: React.ElementType;
     href?: string;
+    status?: 'active' | 'archived';
   }>;
 };
 
@@ -102,11 +103,23 @@ function FloatingSubmenu({ item, isVisible, position, activeItem, setActiveItem 
             >
               {subItem.href ? (
                 <Link to={subItem.href} className="flex items-center w-full">
+                  {subItem.status && (
+                    <div className={cn(
+                      "w-2 h-2 rounded-full mr-2 flex-shrink-0",
+                      subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
+                    )} />
+                  )}
                   <SubIcon className="mr-3 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">{subItem.label}</span>
                 </Link>
               ) : (
                 <div className="flex items-center w-full">
+                  {subItem.status && (
+                    <div className={cn(
+                      "w-2 h-2 rounded-full mr-2 flex-shrink-0",
+                      subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
+                    )} />
+                  )}
                   <SubIcon className="mr-3 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">{subItem.label}</span>
                 </div>
@@ -135,7 +148,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   });
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string; status: string }>>([]);
   const [hoveredSubmenu, setHoveredSubmenu] = useState<{
     item: MenuItem;
     position: { x: number; y: number };
@@ -213,8 +226,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     const fetchProjects = async () => {
       const { data } = await supabase
         .from("projects")
-        .select("id, name")
-        .eq("status", "active")
+        .select("id, name, status")
         .order("created_at", { ascending: false });
       
       if (data) {
@@ -273,9 +285,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
               label: project.name,
               icon: Folder,
               href: `/projects/${project.id}`,
+              status: project.status as 'active' | 'archived',
             })),
-            { id: "active-projects", label: "Active Projects", icon: Activity, href: "/projects/active" },
-            { id: "archived-projects", label: "Archived Projects", icon: Database, href: "/projects/archived" },
           ],
         },
         { id: "my-assets", label: "My Assets", icon: Coins, href: "/my-assets" },
@@ -431,15 +442,27 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                                     asChild={!!subItem.href}
                                   >
                                     {subItem.href ? (
-                                      <Link to={subItem.href}>
+                                      <Link to={subItem.href} className="flex items-center w-full">
+                                        {subItem.status && (
+                                          <div className={cn(
+                                            "w-2 h-2 rounded-full mr-2 flex-shrink-0",
+                                            subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
+                                          )} />
+                                        )}
                                         <SubIcon className="mr-2 h-4 w-4" />
                                         <span>{subItem.label}</span>
                                       </Link>
                                     ) : (
-                                      <>
+                                      <div className="flex items-center w-full">
+                                        {subItem.status && (
+                                          <div className={cn(
+                                            "w-2 h-2 rounded-full mr-2 flex-shrink-0",
+                                            subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
+                                          )} />
+                                        )}
                                         <SubIcon className="mr-2 h-4 w-4" />
                                         <span>{subItem.label}</span>
-                                      </>
+                                      </div>
                                     )}
                                   </Button>
                                 );
