@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,6 +36,47 @@ export function NKMTAgentApiModal({
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [verifyingProviders, setVerifyingProviders] = useState<Set<string>>(new Set())
   const [verifiedProviders, setVerifiedProviders] = useState<Set<string>>(new Set())
+
+  // Load existing API keys when modal opens
+  useEffect(() => {
+    const loadApiKeys = async () => {
+      if (!isOpen) return
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const providers = externalApis.map(api => api.provider)
+        const { data, error } = await supabase
+          .from('api_keys')
+          .select('provider, api_key')
+          .eq('user_id', user.id)
+          .in('provider', providers)
+
+        if (error) {
+          console.error("Error loading API keys:", error)
+          return
+        }
+
+        if (data && data.length > 0) {
+          const loadedKeys: Record<string, string> = {}
+          const verified = new Set<string>()
+
+          data.forEach((item) => {
+            loadedKeys[item.provider] = item.api_key
+            verified.add(item.provider)
+          })
+
+          setApiKeys(loadedKeys)
+          setVerifiedProviders(verified)
+        }
+      } catch (error) {
+        console.error("Error loading API keys:", error)
+      }
+    }
+
+    loadApiKeys()
+  }, [isOpen, externalApis])
 
   const toggleKeyVisibility = (provider: string) => {
     setVisibleKeys(prev => {
