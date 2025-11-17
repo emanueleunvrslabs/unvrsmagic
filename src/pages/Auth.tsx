@@ -32,7 +32,7 @@ export default function Auth() {
     e.preventDefault();
     
     if (!phoneNumber) {
-      toast.error("Inserisci il numero di telefono");
+      toast.error("Please enter phone number");
       return;
     }
 
@@ -47,14 +47,14 @@ export default function Auth() {
       if (error) throw error;
 
       if (data.success) {
-        toast.success("Codice OTP inviato su WhatsApp!");
+        toast.success("OTP code sent on WhatsApp!");
         setStep("otp");
       } else {
-        throw new Error(data.error || "Errore durante l'invio dell'OTP");
+        throw new Error(data.error || "Error sending OTP");
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      toast.error("Errore durante l'invio dell'OTP. Riprova.");
+      toast.error("Error sending OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export default function Auth() {
     e.preventDefault();
 
     if (!otp || otp.length !== 6) {
-      toast.error("Inserisci un codice OTP valido (6 cifre)");
+      toast.error("Please enter a valid OTP code (6 digits)");
       return;
     }
 
@@ -100,19 +100,19 @@ export default function Auth() {
         }
 
         if (data.isNewUser) {
-          toast.success("Account creato con successo!");
+          toast.success("Account created successfully!");
         } else {
-          toast.success("Accesso effettuato!");
+          toast.success("Login successful!");
         }
 
         // Navigate to dashboard
         navigate("/overview");
       } else {
-        throw new Error(data.error || "Codice OTP non valido");
+        throw new Error(data.error || "Invalid OTP code");
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      toast.error("Codice OTP non valido o scaduto. Riprova.");
+      toast.error("Invalid or expired OTP code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -128,12 +128,12 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Accedi con WhatsApp
+            Login with WhatsApp
           </CardTitle>
           <CardDescription className="text-center">
             {step === "phone" 
-              ? "Inserisci il tuo numero di telefono per ricevere il codice OTP"
-              : "Inserisci il codice che hai ricevuto su WhatsApp"
+              ? "Enter your phone number to receive the OTP code"
+              : "Enter the code you received on WhatsApp"
             }
           </CardDescription>
         </CardHeader>
@@ -141,7 +141,7 @@ export default function Auth() {
           {step === "phone" ? (
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div className="space-y-2">
-                <Label>Numero di telefono</Label>
+                <Label>Phone number</Label>
                 <div className="flex gap-2">
                   <Select value={countryCode} onValueChange={setCountryCode}>
                     <SelectTrigger className="w-[120px]">
@@ -174,17 +174,17 @@ export default function Auth() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Invio in corso...
+                    Sending...
                   </>
                 ) : (
-                  "Invia codice OTP"
+                  "Send OTP code"
                 )}
               </Button>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="otp">Codice OTP</Label>
+                <Label htmlFor="otp">OTP Code</Label>
                 <Input
                   id="otp"
                   type="text"
@@ -197,7 +197,7 @@ export default function Auth() {
                   className="text-center text-2xl tracking-widest"
                 />
                 <p className="text-xs text-muted-foreground text-center">
-                  Codice inviato a {countryCode}{phoneNumber}
+                  Code sent to {countryCode}{phoneNumber}
                 </p>
               </div>
               <div className="space-y-2">
@@ -209,10 +209,10 @@ export default function Auth() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifica in corso...
+                      Verifying...
                     </>
                   ) : (
-                    "Verifica codice"
+                    "Verify code"
                   )}
                 </Button>
                 <Button 
@@ -222,7 +222,7 @@ export default function Auth() {
                   onClick={handleBack}
                   disabled={loading}
                 >
-                  Torna indietro
+                  Go back
                 </Button>
               </div>
               <div className="text-center">
@@ -233,7 +233,7 @@ export default function Auth() {
                   disabled={loading}
                   className="text-sm"
                 >
-                  Invia di nuovo il codice
+                  Resend code
                 </Button>
               </div>
             </form>
