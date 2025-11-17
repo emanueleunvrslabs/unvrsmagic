@@ -214,24 +214,38 @@ Deno.serve(async (req) => {
 
     console.log('Fetching Bitget portfolio data...')
 
-    // Fetch all account balances in parallel
-    const [spotData, futuresData, positionsData] = await Promise.all([
+    // Fetch all account balances and market tickers in parallel
+    const [spotData, futuresData, positionsData, tickerData] = await Promise.all([
       callBitgetAPI('/api/v2/spot/account/assets'),
       callBitgetAPI('/api/v2/mix/account/accounts?productType=USDT-FUTURES'),
-      callBitgetAPI('/api/v2/mix/position/all-position?productType=USDT-FUTURES')
+      callBitgetAPI('/api/v2/mix/position/all-position?productType=USDT-FUTURES'),
+      callBitgetAPI('/api/v2/spot/market/tickers')
     ])
 
     console.log('Spot data:', JSON.stringify(spotData))
     console.log('Futures data:', JSON.stringify(futuresData))
     console.log('Positions data:', JSON.stringify(positionsData))
 
+    // Create a price map from ticker data
+    const priceMap: Record<string, number> = {}
+    if (tickerData.data && Array.isArray(tickerData.data)) {
+      tickerData.data.forEach((ticker: any) => {
+        // Extract base currency from symbol (e.g., BTCUSDT -> BTC)
+        const symbol = ticker.symbol
+        if (symbol.endsWith('USDT')) {
+          const baseCoin = symbol.replace('USDT', '')
+          priceMap[baseCoin] = parseFloat(ticker.lastPr || '0')
+        }
+      })
+    }
+    console.log('Price map:', JSON.stringify(priceMap))
+
     // Calculate total portfolio value in USDT
     let totalSpotUSDT = 0
     let totalFuturesUSDT = 0
     let totalUnrealizedPnL = 0
 
-    // Calculate spot balance (convert all to USDT equivalent)
-    // Note: For simplicity, we're assuming 1:1 for stablecoins and using USDT value for others
+    // Calculate spot balance (convert all to USDT equivalent using market prices)
     if (spotData.data && Array.isArray(spotData.data)) {
       spotData.data.forEach((coin: BitgetSpotAccount) => {
         const available = parseFloat(coin.available || '0')
@@ -239,13 +253,27 @@ Deno.serve(async (req) => {
         const locked = parseFloat(coin.locked || '0')
         const total = available + frozen + locked
         
-        // For USDT and stablecoins, use direct value
-        if (['USDT', 'USDC', 'BUSD', 'DAI'].includes(coin.coin)) {
+        if (total === 0) return
+        
+        // For USDT, use direct value
+        if (coin.coin === 'USDT') {
           totalSpotUSDT += total
-        } else {
-          // For other coins, we'd need price conversion
-          // For now, skip or implement price lookup
-          totalSpotUSDT += total // This is a simplification
+          console.log(`${coin.coin}: ${total} USDT (direct)`)
+        } 
+        // For other coins, convert using market price
+        else if (priceMap[coin.coin]) {
+          const usdtValue = total * priceMap[coin.coin]
+          totalSpotUSDT += usdtValue
+          console.log(`${coin.coin}: ${total} * ${priceMap[coin.coin]} = ${usdtValue} USDT`)
+        }
+        // For stablecoins without ticker, assume 1:1
+        else if (['USDC', 'BUSD', 'DAI', 'FDUSD'].includes(coin.coin)) {
+          totalSpotUSDT += total
+          console.log(`${coin.coin}: ${total} USDT (stablecoin 1:1)`)
+        }
+        // For EUR and other fiat, try to use their USDT pair price
+        else {
+          console.log(`${coin.coin}: ${total} - no price found, skipping`)
         }
       })
     }
