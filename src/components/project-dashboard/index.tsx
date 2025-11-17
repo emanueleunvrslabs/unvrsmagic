@@ -84,12 +84,14 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
 
       {/* Navigation Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto">
+        <TabsList className="grid w-full grid-cols-7 lg:w-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-          <TabsTrigger value="strategy">Strategy</TabsTrigger>
-          <TabsTrigger value="trades">Trades</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="workflow">Workflow</TabsTrigger>
+          <TabsTrigger value="transaction">Transaction</TabsTrigger>
+          <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="todo">Todo</TabsTrigger>
+          <TabsTrigger value="note">Note</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
@@ -123,38 +125,56 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="portfolio" className="mt-6">
+        <TabsContent value="workflow" className="mt-6">
           <div className="rounded-lg border bg-card p-6">
-            <h3 className="text-lg font-semibold mb-4">Portfolio</h3>
+            <h3 className="text-lg font-semibold mb-4">Workflow</h3>
             <p className="text-muted-foreground">
-              Manage your project portfolio and asset allocation here.
+              Manage your project workflow and processes here.
             </p>
           </div>
         </TabsContent>
 
-        <TabsContent value="strategy" className="mt-6">
+        <TabsContent value="transaction" className="mt-6">
           <div className="rounded-lg border bg-card p-6">
-            <h3 className="text-lg font-semibold mb-4">Strategy</h3>
+            <h3 className="text-lg font-semibold mb-4">Transaction</h3>
             <p className="text-muted-foreground">
-              Configure your trading strategy and parameters here.
+              View and manage project transactions here.
             </p>
           </div>
         </TabsContent>
 
-        <TabsContent value="trades" className="mt-6">
+        <TabsContent value="payments" className="mt-6">
           <div className="rounded-lg border bg-card p-6">
-            <h3 className="text-lg font-semibold mb-4">Trades History</h3>
+            <h3 className="text-lg font-semibold mb-4">Payments</h3>
             <p className="text-muted-foreground">
-              View and analyze your trade history here.
+              Track and manage project payments here.
             </p>
           </div>
         </TabsContent>
 
-        <TabsContent value="settings" className="mt-6">
+        <TabsContent value="documents" className="mt-6">
           <div className="rounded-lg border bg-card p-6">
-            <h3 className="text-lg font-semibold mb-4">Project Settings</h3>
+            <h3 className="text-lg font-semibold mb-4">Documents</h3>
             <p className="text-muted-foreground">
-              Configure project settings, notifications, and preferences here.
+              Store and organize project documents here.
+            </p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="todo" className="mt-6">
+          <div className="rounded-lg border bg-card p-6">
+            <h3 className="text-lg font-semibold mb-4">Todo</h3>
+            <p className="text-muted-foreground">
+              Manage your project tasks and to-do list here.
+            </p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="note" className="mt-6">
+          <div className="rounded-lg border bg-card p-6">
+            <h3 className="text-lg font-semibold mb-4">Note</h3>
+            <p className="text-muted-foreground">
+              Keep notes and important information about your project here.
             </p>
           </div>
         </TabsContent>
