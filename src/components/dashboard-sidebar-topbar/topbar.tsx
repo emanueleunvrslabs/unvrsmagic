@@ -161,14 +161,6 @@ export function Topbar() {
               <Settings className="mr-2 h-4 w-4" />
               <Link to="/settings">Settings</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <Link to="/signin">Signin</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <Link to="/signup">Sign Up</Link>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
