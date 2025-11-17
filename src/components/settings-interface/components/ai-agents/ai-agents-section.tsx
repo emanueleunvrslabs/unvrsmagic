@@ -289,9 +289,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
             <TableRow>
               <TableHead>Provider</TableHead>
               <TableHead>Description</TableHead>
-              <TableHead>API Key</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -300,64 +298,10 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
                 <TableCell className="font-medium">{provider.name}</TableCell>
                 <TableCell className="text-muted-foreground">{provider.description}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2 max-w-xs">
-                    <div className="flex-1">
-                      <Input
-                        type={visibleKeys.has(provider.id) ? "text" : "password"}
-                        value={apiKeys[provider.id]}
-                        onChange={(e) => handleKeyChange(provider.id, e.target.value)}
-                        placeholder={
-                          (provider.id === 'nano' || provider.id === 'veo3') && connectedProviders.has(provider.id)
-                            ? "Powered by Fal"
-                            : provider.id === 'gamma' && connectedProviders.has(provider.id)
-                            ? "Powered by Gamma"
-                            : provider.id === 'claude' && connectedProviders.has(provider.id)
-                            ? "Powered by Anthropic"
-                            : provider.id === 'chatgpt' && connectedProviders.has(provider.id)
-                            ? "Powered by OpenAI"
-                            : provider.placeholder
-                        }
-                        disabled={connectedProviders.has(provider.id)}
-                        className={validationErrors[provider.id] ? "border-red-500" : ""}
-                      />
-                      {validationErrors[provider.id] && (
-                        <p className="text-xs text-red-500 mt-1">{validationErrors[provider.id]}</p>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => toggleKeyVisibility(provider.id)}
-                      disabled={!apiKeys[provider.id]}
-                    >
-                      {visibleKeys.has(provider.id) ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </TableCell>
-                <TableCell>
                   {connectedProviders.has(provider.id) ? (
                     <span className="text-green-600 text-sm font-medium">Connected</span>
                   ) : (
                     <span className="text-muted-foreground text-sm">Not connected</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {connectedProviders.has(provider.id) ? (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDisconnect(provider.id)}
-                    >
-                      Disconnect
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      onClick={() => handleConnect(provider.id)}
-                      disabled={!apiKeys[provider.id] || connectingProvider === provider.id}
-                    >
-                      {connectingProvider === provider.id ? "Connecting..." : "Connect"}
-                    </Button>
                   )}
                 </TableCell>
               </TableRow>
