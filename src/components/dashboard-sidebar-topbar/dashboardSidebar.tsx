@@ -23,6 +23,7 @@ import {
   CreditCard,
   Database,
   FileText,
+  Folder,
   Gauge,
   HelpCircle,
   Layers,
@@ -44,6 +45,7 @@ import {
 import { useTheme } from "next-themes";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 type MenuItem = {
   id: string;
@@ -133,6 +135,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   });
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
   const [hoveredSubmenu, setHoveredSubmenu] = useState<{
     item: MenuItem;
     position: { x: number; y: number };
@@ -205,6 +208,23 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Load projects from database
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const { data } = await supabase
+        .from("projects")
+        .select("id, name")
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+      
+      if (data) {
+        setProjects(data);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -248,6 +268,12 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           hasSubmenu: true,
           submenuItems: [
             { id: "new-project", label: "New Project", icon: Package, href: "/projects" },
+            ...projects.map((project) => ({
+              id: `project-${project.id}`,
+              label: project.name,
+              icon: Folder,
+              href: `/projects/${project.id}`,
+            })),
             { id: "active-projects", label: "Active Projects", icon: Activity, href: "/projects/active" },
             { id: "archived-projects", label: "Archived Projects", icon: Database, href: "/projects/archived" },
           ],
