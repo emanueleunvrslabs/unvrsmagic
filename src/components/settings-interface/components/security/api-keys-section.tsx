@@ -17,9 +17,9 @@ interface ApiKeysSectionProps {
 }
 
 const AI_PROVIDERS = [
-  { id: "openai", name: "OpenAI", placeholder: "sk-...", description: "GPT models", requiresKeyId: false },
-  { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models", requiresKeyId: false },
-  { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresKeyId: true },
+  { id: "openai", name: "OpenAI", placeholder: "sk-...", description: "GPT models", requiresOwnerId: false },
+  { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models", requiresOwnerId: false },
+  { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresOwnerId: true },
 ]
 
 // Validation schemas for each provider
@@ -41,7 +41,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     anthropic: "",
     qwen: "",
   })
-  const [keyIds, setKeyIds] = useState<Record<string, string>>({
+  const [ownerIds, setOwnerIds] = useState<Record<string, string>>({
     qwen: "",
   })
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
@@ -59,7 +59,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
 
         const { data, error } = await supabase
           .from('api_keys')
-          .select('provider, api_key, key_id')
+          .select('provider, api_key, owner_id')
           .eq('user_id', user.id)
 
         if (error) {
@@ -69,19 +69,19 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
 
         if (data && data.length > 0) {
           const loadedKeys: Record<string, string> = {}
-          const loadedKeyIds: Record<string, string> = {}
+          const loadedOwnerIds: Record<string, string> = {}
           const connected = new Set<string>()
 
           data.forEach((item) => {
             loadedKeys[item.provider] = item.api_key
-            if (item.key_id) {
-              loadedKeyIds[item.provider] = item.key_id
+            if (item.owner_id) {
+              loadedOwnerIds[item.provider] = item.owner_id
             }
             connected.add(item.provider)
           })
 
           setApiKeys(prev => ({ ...prev, ...loadedKeys }))
-          setKeyIds(prev => ({ ...prev, ...loadedKeyIds }))
+          setOwnerIds(prev => ({ ...prev, ...loadedOwnerIds }))
           setConnectedProviders(connected)
         }
       } catch (error) {
@@ -156,9 +156,9 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
       return
     }
 
-    // For Qwen3, validate key_id as well
-    if (providerId === "qwen" && !keyIds.qwen?.trim()) {
-      toast.error("Key ID is required for Qwen3")
+    // For Qwen3, validate owner_id as well
+    if (providerId === "qwen" && !ownerIds.qwen?.trim()) {
+      toast.error("Owner ID is required for Qwen3")
       return
     }
 
@@ -176,7 +176,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         body: {
           provider: providerId,
           apiKey: apiKeys[providerId],
-          keyId: providerId === "qwen" ? keyIds.qwen : undefined
+          ownerId: providerId === "qwen" ? ownerIds.qwen : undefined
         }
       })
 
@@ -198,7 +198,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
           user_id: user.id,
           provider: providerId,
           api_key: apiKeys[providerId],
-          key_id: providerId === "qwen" ? keyIds.qwen : null
+          owner_id: providerId === "qwen" ? ownerIds.qwen : null
         }, {
           onConflict: 'user_id,provider'
         })
@@ -252,7 +252,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
       
       setApiKeys(prev => ({ ...prev, [providerId]: "" }))
       if (providerId === "qwen") {
-        setKeyIds(prev => ({ ...prev, qwen: "" }))
+        setOwnerIds(prev => ({ ...prev, qwen: "" }))
       }
       
       const providerName = AI_PROVIDERS.find(p => p.id === providerId)?.name
@@ -307,12 +307,12 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                         )}
                       </Button>
                     </div>
-                    {provider.requiresKeyId && (
+                    {provider.requiresOwnerId && (
                       <Input
                         type="text"
-                        placeholder="Enter Key ID"
-                        value={keyIds[provider.id] || ""}
-                        onChange={(e) => setKeyIds(prev => ({ ...prev, [provider.id]: e.target.value }))}
+                        placeholder="Enter Owner ID"
+                        value={ownerIds[provider.id] || ""}
+                        onChange={(e) => setOwnerIds(prev => ({ ...prev, [provider.id]: e.target.value }))}
                         className="max-w-md"
                       />
                     )}
