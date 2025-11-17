@@ -2,21 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Clock, Cpu, Power, RefreshCw } from "lucide-react";
+import { Clock, Cpu, Power } from "lucide-react";
 
 interface HeaderProps {
   exchangeName: string;
   botRunning: boolean;
-  isRefreshing: boolean;
   isFullscreen: boolean;
   onToggleBotStatus: () => void;
-  onRefresh: () => void;
   onToggleFullscreen: () => void;
 }
 
-export function Header({ exchangeName, botRunning, isRefreshing, isFullscreen, onToggleBotStatus, onRefresh, onToggleFullscreen }: HeaderProps) {
+export function Header({ exchangeName, botRunning, isFullscreen, onToggleBotStatus, onToggleFullscreen }: HeaderProps) {
   return (
     <>
       {/* Header section */}
@@ -29,19 +26,6 @@ export function Header({ exchangeName, botRunning, isRefreshing, isFullscreen, o
           <p className="text-muted-foreground">Connect your {exchangeName} account and manage your trading portfolio with AI-powered automation</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={onRefresh} disabled={isRefreshing}>
-                  <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Refresh data</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
           <Button variant={botRunning ? "destructive" : "default"} className="gap-2" onClick={onToggleBotStatus}>
             <Power className="h-4 w-4" />
             <span>{botRunning ? "Stop Bot" : "Start Bot"}</span>
