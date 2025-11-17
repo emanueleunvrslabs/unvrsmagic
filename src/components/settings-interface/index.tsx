@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { ExchangesSection } from "./components/exchanges/exchanges-section";
 import { toast } from "sonner";
 import { AppearanceTab } from "./components/appearance/appearance-tab";
 import { BotsTab } from "./components/bots/bots-tab";
@@ -63,6 +64,14 @@ export const SettingsInterface: React.FC = () => {
             onSecurityChange={updateSecurity}
             onApiKeysChange={(apiKeys) => updateSecurity({ apiKeysEnabled: apiKeys.length > 0 })}
             onSessionsChange={() => {}} // Sessions are managed separately
+          />
+        );
+
+      case "exchanges":
+        return (
+          <ExchangesSection
+            exchanges={[]}
+            onExchangesChange={handleConnectionsChange}
           />
         );
 
