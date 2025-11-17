@@ -192,7 +192,6 @@ export default function Auth() {
           ) : (
             <div className="space-y-6">
               <div className="text-center space-y-4">
-                <h2 className="text-3xl font-bold tracking-tight">VERIFY CODE</h2>
                 <p className="text-sm text-muted-foreground">
                   Code sent to {countryCode}{phoneNumber}
                 </p>
