@@ -132,26 +132,39 @@ serve(async (req) => {
 
       case "fal":
         try {
-          // Fal AI - verify by checking status endpoint
-          const response = await fetch("https://queue.fal.run/fal-ai/fast-sdxl/requests", {
-            method: "GET",
+          // Fal AI - test with a simple submit request to flux model
+          const response = await fetch("https://queue.fal.run/fal-ai/flux/schnell", {
+            method: "POST",
             headers: {
               "Authorization": `Key ${apiKey}`,
               "Content-Type": "application/json",
             },
+            body: JSON.stringify({
+              prompt: "test"
+            }),
           });
 
           console.log("Fal response status:", response.status);
 
-          if (response.status === 200) {
+          // Valid key returns 200 or 202 (accepted for queue)
+          if (response.status === 200 || response.status === 202) {
             isValid = true;
             console.log("Fal API key is valid");
           } else if (response.status === 401 || response.status === 403) {
             errorMessage = "Invalid Fal API key";
             console.error("Fal verification failed:", response.status);
           } else {
-            errorMessage = `Failed to verify Fal API key (status: ${response.status})`;
-            console.error("Fal verification unexpected:", errorMessage);
+            // Even other errors mean the key was accepted for auth
+            const errBody = await response.text().catch(() => "");
+            console.log("Fal response body:", errBody);
+            // 400 might mean key is valid but request is bad
+            if (response.status === 400) {
+              isValid = true;
+              console.log("Fal API key is valid (400 = bad request but authenticated)");
+            } else {
+              errorMessage = `Failed to verify Fal API key (status: ${response.status})`;
+              console.error("Fal verification unexpected:", errorMessage);
+            }
           }
         } catch (error) {
           errorMessage = "Failed to verify Fal API key";
@@ -161,26 +174,28 @@ serve(async (req) => {
 
       case "gamma":
         try {
-          // Gamma - verify by making a simple API call
-          const response = await fetch("https://api.gamma.app/v1/models", {
-            method: "GET",
+          // Gamma - test with generations endpoint (will fail but auth will be checked)
+          const response = await fetch("https://public-api.gamma.app/v0.2/generations", {
+            method: "POST",
             headers: {
-              "Authorization": `Bearer ${apiKey}`,
+              "X-API-KEY": apiKey,
               "Content-Type": "application/json",
             },
+            body: JSON.stringify({
+              inputText: "test"
+            }),
           });
 
           console.log("Gamma response status:", response.status);
 
-          if (response.status === 200) {
+          // 401 = invalid key, 400 or other = key is valid but request might be incomplete
+          if (response.status === 401) {
+            errorMessage = "Invalid Gamma API key";
+            console.error("Gamma verification failed: 401");
+          } else {
+            // Any other status means the key was accepted
             isValid = true;
             console.log("Gamma API key is valid");
-          } else if (response.status === 401 || response.status === 403) {
-            errorMessage = "Invalid Gamma API key";
-            console.error("Gamma verification failed:", response.status);
-          } else {
-            errorMessage = `Failed to verify Gamma API key (status: ${response.status})`;
-            console.error("Gamma verification unexpected:", errorMessage);
           }
         } catch (error) {
           errorMessage = "Failed to verify Gamma API key";
