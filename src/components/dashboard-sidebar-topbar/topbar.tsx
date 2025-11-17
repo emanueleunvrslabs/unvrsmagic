@@ -150,10 +150,6 @@ export function Topbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src="/abstract-geometric-shapes.png" />
-                <AvatarFallback>{getUserInitials(username)}</AvatarFallback>
-              </Avatar>
               <span className="hidden md:inline-flex">{username || "User"}</span>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
