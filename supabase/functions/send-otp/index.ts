@@ -21,17 +21,63 @@ serve(async (req) => {
       );
     }
 
+    // Validate phone number format (E.164 format)
+    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid phone number format. Use E.164 format (e.g., +1234567890)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate phone number length
+    if (phoneNumber.length < 8 || phoneNumber.length > 16) {
+      return new Response(
+        JSON.stringify({ error: 'Phone number length must be between 8 and 16 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Initialize Supabase admin client
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Rate limiting: Check recent OTP requests for this phone number (max 3 per hour)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { data: recentOtps, error: rateLimitError } = await supabaseAdmin
+      .from('otp_codes')
+      .select('created_at')
+      .eq('phone_number', phoneNumber)
+      .gte('created_at', oneHourAgo);
+
+    if (rateLimitError) {
+      console.error('Rate limit check error:', rateLimitError);
+    }
+
+    if (recentOtps && recentOtps.length >= 3) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many OTP requests. Please wait before requesting another code.',
+          retryAfter: 3600 
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Clean up old unverified OTP codes for this phone number
+    await supabaseAdmin
+      .from('otp_codes')
+      .delete()
+      .eq('phone_number', phoneNumber)
+      .eq('verified', false);
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
     // Set expiration to 10 minutes from now
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    // Save OTP to database using service role key
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
 
     const { error: dbError } = await supabaseAdmin
       .from('otp_codes')
