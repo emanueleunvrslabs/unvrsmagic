@@ -17,7 +17,20 @@ export function useBotState() {
   // Fetch real Bitget portfolio data
   const fetchBitgetPortfolio = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('get-bitget-portfolio')
+      // Check if user is authenticated first
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        console.log('No active session, skipping portfolio fetch')
+        setIsLoadingPortfolio(false)
+        return
+      }
+
+      const { data, error } = await supabase.functions.invoke('get-bitget-portfolio', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      })
       
       if (error) {
         console.error('Error fetching Bitget portfolio:', error)
