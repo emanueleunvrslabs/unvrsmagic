@@ -9,7 +9,7 @@ export const SETTINGS_TABS: SettingsTab[] = [
   },
   {
     id: "security",
-    label: "API AI Agents",
+    label: "AI Model API",
     icon: "Zap",
     description: "Connect and manage AI models like OpenAI, Claude, and more",
   },
