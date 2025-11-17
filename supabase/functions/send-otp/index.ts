@@ -44,31 +44,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Rate limiting: Check recent OTP requests for this phone number (max 3 per hour)
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { data: recentOtps, error: rateLimitError } = await supabaseAdmin
-      .from('otp_codes')
-      .select('created_at')
-      .eq('phone_number', phoneNumber)
-      .gte('created_at', oneHourAgo);
-
-    if (rateLimitError) {
-      return new Response(
-        JSON.stringify({ error: 'Service temporarily unavailable' }),
-        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (recentOtps && recentOtps.length >= 3) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Too many OTP requests. Please wait before requesting another code.',
-          retryAfter: 3600 
-        }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Clean up old unverified OTP codes for this phone number
     await supabaseAdmin
       .from('otp_codes')
