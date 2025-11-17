@@ -140,6 +140,40 @@ export function NKMTAgentApiModal({
     }
   }
 
+  const disconnectApiKey = async (provider: string, apiName: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error("User not authenticated")
+        return
+      }
+
+      const { error } = await supabase
+        .from('api_keys')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('provider', provider)
+
+      if (error) {
+        console.error(`Error disconnecting ${apiName}:`, error)
+        toast.error(`Failed to disconnect ${apiName}`)
+        return
+      }
+
+      setVerifiedProviders(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(provider)
+        return newSet
+      })
+      setApiKeys(prev => ({ ...prev, [provider]: "" }))
+      toast.success(`${apiName} disconnected`)
+      onSuccess()
+    } catch (error) {
+      console.error(`Error disconnecting ${apiName}:`, error)
+      toast.error(`Failed to disconnect ${apiName}`)
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -178,9 +212,16 @@ export function NKMTAgentApiModal({
                   </button>
                 </div>
                 <Button 
-                  onClick={() => verifyAndSaveApiKey(api.provider, api.name)}
-                  disabled={verifyingProviders.has(api.provider) || verifiedProviders.has(api.provider)}
+                  onClick={() => {
+                    if (verifiedProviders.has(api.provider)) {
+                      disconnectApiKey(api.provider, api.name)
+                    } else {
+                      verifyAndSaveApiKey(api.provider, api.name)
+                    }
+                  }}
+                  disabled={verifyingProviders.has(api.provider)}
                   size="sm"
+                  variant={verifiedProviders.has(api.provider) ? "destructive" : "default"}
                   className="min-w-[90px]"
                 >
                   {verifyingProviders.has(api.provider) ? (
@@ -189,10 +230,7 @@ export function NKMTAgentApiModal({
                       Connecting
                     </>
                   ) : verifiedProviders.has(api.provider) ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Connected
-                    </>
+                    "Disconnect"
                   ) : (
                     "Connect"
                   )}
