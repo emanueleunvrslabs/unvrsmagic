@@ -21,7 +21,7 @@ import { useBotState } from "./hooks/use-bot-state";
 import type { Asset } from "./types";
 
 export function AiBotDashboard() {
-  const { botData, setBotData, botRunning, selectedStrategy, riskSettings, setRiskSettings, isRefreshing, toggleBotStatus, handleStrategyChange, handleRefresh } = useBotState();
+  const { botData, setBotData, botRunning, selectedStrategy, riskSettings, setRiskSettings, isRefreshing, isLoadingPortfolio, toggleBotStatus, handleStrategyChange, handleRefresh } = useBotState();
 
   const [activeTab, setActiveTab] = useState("overview");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -128,7 +128,7 @@ export function AiBotDashboard() {
     <div className={cn("space-y-6", isFullscreen && "fixed inset-0 z-50 bg-background p-6 overflow-auto")}>
       <Header exchangeName="Bitget" botRunning={botRunning} isRefreshing={isRefreshing} isFullscreen={isFullscreen} onToggleBotStatus={toggleBotStatus} onRefresh={handleRefresh} onToggleFullscreen={toggleFullscreen} />
 
-      <KpiCards botData={botData} />
+      <KpiCards botData={botData} isLoading={isLoadingPortfolio} />
 
       {/* Main content tabs */}
       <Tabs defaultValue="overview" onValueChange={setActiveTab} className="space-y-4">

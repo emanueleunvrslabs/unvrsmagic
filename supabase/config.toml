@@ -5,3 +5,7 @@ verify_jwt = true
 
 [functions.verify-exchange-key]
 verify_jwt = true
+
+[functions.get-bitget-portfolio]
+verify_jwt = true
+
