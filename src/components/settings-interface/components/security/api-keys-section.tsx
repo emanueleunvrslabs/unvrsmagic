@@ -118,9 +118,24 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
 
-      // TODO: In a real implementation, verify the API key with the provider's API
-      // For now, simulate verification
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Verify the API key with the provider's API via edge function
+      const { data, error } = await supabase.functions.invoke('verify-api-key', {
+        body: {
+          provider: providerId,
+          apiKey: apiKeys[providerId]
+        }
+      })
+
+      if (error) {
+        console.error("Error verifying API key:", error)
+        toast.error("Failed to verify API key")
+        return
+      }
+
+      if (!data.isValid) {
+        toast.error(data.error || "Invalid API key")
+        return
+      }
 
       // Mark as connected
       setConnectedProviders(prev => new Set(prev).add(providerId))
