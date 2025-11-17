@@ -160,7 +160,7 @@ export default function Auth() {
             .from('profiles')
             .select('username')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
           if (profile?.username) {
             // User already has username, go to dashboard
@@ -204,6 +204,11 @@ export default function Auth() {
 
     if (!username || username.length < 3) {
       toast.error("Username must be at least 3 characters");
+      return;
+    }
+
+    if (usernameAvailable === false) {
+      toast.error("Username already taken");
       return;
     }
 
