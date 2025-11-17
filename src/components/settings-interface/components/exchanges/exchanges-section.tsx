@@ -17,10 +17,8 @@ interface ExchangesSectionProps {
 
 const EXCHANGES = [
   { id: "binance", name: "Binance", placeholder: "Enter API Key", description: "Spot & Futures trading", requiresSecret: true },
-  { id: "coinbase", name: "Coinbase", placeholder: "Enter API Key", description: "Crypto exchange", requiresSecret: true },
-  { id: "kraken", name: "Kraken", placeholder: "Enter API Key", description: "Crypto trading platform", requiresSecret: true },
-  { id: "bybit", name: "Bybit", placeholder: "Enter API Key", description: "Derivatives trading", requiresSecret: true },
   { id: "bitget", name: "Bitget", placeholder: "Enter API Key", description: "Crypto derivatives exchange", requiresSecret: true },
+  { id: "hyperliquid", name: "Hyperliquid", placeholder: "Enter API Key", description: "Decentralized perpetuals", requiresSecret: true },
 ]
 
 // Validation schemas for each exchange
@@ -28,34 +26,24 @@ const exchangeKeySchemas = {
   binance: z.string().trim().min(20, {
     message: "Binance API key must be at least 20 characters"
   }),
-  coinbase: z.string().trim().min(20, {
-    message: "Coinbase API key must be at least 20 characters"
-  }),
-  kraken: z.string().trim().min(20, {
-    message: "Kraken API key must be at least 20 characters"
-  }),
-  bybit: z.string().trim().min(20, {
-    message: "Bybit API key must be at least 20 characters"
-  }),
   bitget: z.string().trim().min(20, {
     message: "Bitget API key must be at least 20 characters"
+  }),
+  hyperliquid: z.string().trim().min(20, {
+    message: "Hyperliquid API key must be at least 20 characters"
   })
 }
 
 export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({
     binance: "",
-    coinbase: "",
-    kraken: "",
-    bybit: "",
     bitget: "",
+    hyperliquid: "",
   })
   const [apiSecrets, setApiSecrets] = useState<Record<string, string>>({
     binance: "",
-    coinbase: "",
-    kraken: "",
-    bybit: "",
     bitget: "",
+    hyperliquid: "",
   })
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [visibleSecrets, setVisibleSecrets] = useState<Set<string>>(new Set())
