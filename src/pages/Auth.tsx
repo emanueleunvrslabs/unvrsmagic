@@ -14,7 +14,6 @@ export default function Auth() {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [countryCode, setCountryCode] = useState("+34");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [fullName, setFullName] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -77,7 +76,6 @@ export default function Auth() {
         body: { 
           phoneNumber: fullPhoneNumber, 
           code: otp,
-          fullName: fullName || undefined,
         },
       });
 
@@ -167,17 +165,6 @@ export default function Auth() {
                     className="flex-1"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Nome completo (opzionale)</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="Mario Rossi"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  disabled={loading}
-                />
               </div>
               <Button 
                 type="submit" 
