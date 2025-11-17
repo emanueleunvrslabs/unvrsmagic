@@ -234,6 +234,25 @@ export function TradingHeader({
             <CardTitle className="text-sm font-medium">Trading Pair</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
+            <Select value={selectedPair} onValueChange={onPairChange} disabled={isLoadingPairs}>
+              <SelectTrigger>
+                <SelectValue placeholder={isLoadingPairs ? "Loading pairs..." : "Select pair"} />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredTradingPairs.length === 0 ? (
+                  <SelectItem value="none" disabled>
+                    {isLoadingPairs ? "Loading..." : "No trading pairs available"}
+                  </SelectItem>
+                ) : (
+                  filteredTradingPairs.map((pair) => (
+                    <SelectItem key={pair.symbol.toLowerCase()} value={pair.symbol.toLowerCase()}>
+                      {pair.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -245,7 +264,7 @@ export function TradingHeader({
               />
             </div>
 
-            {pairSearchQuery.trim() ? (
+            {pairSearchQuery.trim() && (
               <div className="rounded-md border border-border bg-background">
                 <ul className="max-h-64 overflow-auto">
                   {filteredTradingPairs.length === 0 ? (
@@ -268,25 +287,6 @@ export function TradingHeader({
                   )}
                 </ul>
               </div>
-            ) : (
-              <Select value={selectedPair} onValueChange={onPairChange} disabled={isLoadingPairs}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isLoadingPairs ? "Loading pairs..." : "Select pair"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredTradingPairs.length === 0 ? (
-                    <SelectItem value="none" disabled>
-                      {isLoadingPairs ? "Loading..." : "No trading pairs available"}
-                    </SelectItem>
-                  ) : (
-                    filteredTradingPairs.map((pair) => (
-                      <SelectItem key={pair.symbol.toLowerCase()} value={pair.symbol.toLowerCase()}>
-                        {pair.name}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
             )}
           </CardContent>
         </Card>
