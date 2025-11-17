@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ThemeProvider from "./components/theme-provider";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Overview from "./pages/Overview";
@@ -34,24 +35,24 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/overview" element={<Overview />} />
-          <Route path="/trading" element={<Trading />} />
-          <Route path="/wallets" element={<Wallets />} />
-          <Route path="/my-assets" element={<MyAssets />} />
-          <Route path="/portfolio-tracker" element={<PortfolioTracker />} />
-          <Route path="/ai-bot" element={<AiBot />} />
-          <Route path="/arbitrage-bot" element={<ArbitrageBot />} />
-          <Route path="/dca-bot" element={<DcaBot />} />
-          <Route path="/strategies-marketplace" element={<StrategiesMarketplace />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/subscription" element={<Subscription />} />
-          <Route path="/bot-settings" element={<BotSettings />} />
-          <Route path="/defi-protocols" element={<DeFiProtocols />} />
-          <Route path="/execution-logs" element={<ExecutionLogs />} />
+          <Route path="/overview" element={<ProtectedRoute><Overview /></ProtectedRoute>} />
+          <Route path="/trading" element={<ProtectedRoute><Trading /></ProtectedRoute>} />
+          <Route path="/wallets" element={<ProtectedRoute><Wallets /></ProtectedRoute>} />
+          <Route path="/my-assets" element={<ProtectedRoute><MyAssets /></ProtectedRoute>} />
+          <Route path="/portfolio-tracker" element={<ProtectedRoute><PortfolioTracker /></ProtectedRoute>} />
+          <Route path="/ai-bot" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
+          <Route path="/arbitrage-bot" element={<ProtectedRoute><ArbitrageBot /></ProtectedRoute>} />
+          <Route path="/dca-bot" element={<ProtectedRoute><DcaBot /></ProtectedRoute>} />
+          <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+          <Route path="/bot-settings" element={<ProtectedRoute><BotSettings /></ProtectedRoute>} />
+          <Route path="/defi-protocols" element={<ProtectedRoute><DeFiProtocols /></ProtectedRoute>} />
+          <Route path="/execution-logs" element={<ProtectedRoute><ExecutionLogs /></ProtectedRoute>} />
           {/* Control Panel prefixed routes */}
-          <Route path="/control-panel/overview" element={<Overview />} />
-          <Route path="/control-panel/bot-settings" element={<BotSettings />} />
-          <Route path="/control-panel/execution-logs" element={<ExecutionLogs />} />
+          <Route path="/control-panel/overview" element={<ProtectedRoute><Overview /></ProtectedRoute>} />
+          <Route path="/control-panel/bot-settings" element={<ProtectedRoute><BotSettings /></ProtectedRoute>} />
+          <Route path="/control-panel/execution-logs" element={<ProtectedRoute><ExecutionLogs /></ProtectedRoute>} />
           {/* Legacy/extra links redirects */}
           <Route path="/my-analytics" element={<Navigate to="/portfolio-tracker" replace />} />
           <Route path="/signal-bot" element={<Navigate to="/ai-bot" replace />} />
