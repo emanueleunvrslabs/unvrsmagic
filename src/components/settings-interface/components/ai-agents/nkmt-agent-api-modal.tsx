@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Loader2, Check } from "lucide-react"
 
 interface ExternalApi {
   name: string
@@ -34,7 +34,8 @@ export function NKMTAgentApiModal({
 }: NKMTAgentApiModalProps) {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
-  const [isVerifying, setIsVerifying] = useState(false)
+  const [verifyingProviders, setVerifyingProviders] = useState<Set<string>>(new Set())
+  const [verifiedProviders, setVerifiedProviders] = useState<Set<string>>(new Set())
 
   const toggleKeyVisibility = (provider: string) => {
     setVisibleKeys(prev => {
@@ -50,86 +51,92 @@ export function NKMTAgentApiModal({
 
   const handleKeyChange = (provider: string, value: string) => {
     setApiKeys(prev => ({ ...prev, [provider]: value }))
+    // Reset verified status when user changes the key
+    setVerifiedProviders(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(provider)
+      return newSet
+    })
   }
 
-  const verifyAndSaveApiKeys = async () => {
-    // Check if at least one API key is filled
-    const filledKeys = externalApis.filter(api => apiKeys[api.provider]?.trim())
-    if (filledKeys.length === 0) {
-      toast.error(`Please fill in at least one API key`)
+  const verifyAndSaveApiKey = async (provider: string, apiName: string) => {
+    const apiKey = apiKeys[provider]?.trim()
+    
+    if (!apiKey) {
+      toast.error(`Please enter ${apiName} API key`)
       return
     }
 
-    setIsVerifying(true)
+    setVerifyingProviders(prev => new Set([...prev, provider]))
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error("User not authenticated")
-        setIsVerifying(false)
+        setVerifyingProviders(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(provider)
+          return newSet
+        })
         return
       }
 
-      let successCount = 0
-      let failCount = 0
-
-      // Verify and save each API key independently
-      for (const api of filledKeys) {
-        const apiKey = apiKeys[api.provider]
-        
-        try {
-          // Verify the API key
-          const { data, error } = await supabase.functions.invoke('verify-api-key', {
-            body: { 
-              provider: api.provider,
-              apiKey: apiKey
-            }
-          })
-
-          if (error || !data?.valid) {
-            toast.error(`${api.name} API key verification failed`)
-            failCount++
-            continue
-          }
-
-          // If verification passed, save to database
-          const { error: saveError } = await supabase
-            .from('api_keys')
-            .upsert({
-              user_id: user.id,
-              provider: api.provider,
-              api_key: apiKey,
-            }, {
-              onConflict: 'user_id,provider'
-            })
-
-          if (saveError) {
-            console.error(`Error saving ${api.name} API key:`, saveError)
-            toast.error(`Failed to save ${api.name} API key`)
-            failCount++
-          } else {
-            toast.success(`${api.name} API key saved successfully`)
-            successCount++
-          }
-        } catch (error) {
-          console.error(`Error processing ${api.name} API key:`, error)
-          toast.error(`Failed to process ${api.name} API key`)
-          failCount++
+      // Verify the API key
+      const { data, error } = await supabase.functions.invoke('verify-api-key', {
+        body: { 
+          provider: provider,
+          apiKey: apiKey
         }
+      })
+
+      if (error || !data?.valid) {
+        toast.error(`${apiName} API key verification failed`)
+        setVerifyingProviders(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(provider)
+          return newSet
+        })
+        return
       }
 
-      if (successCount > 0) {
-        setApiKeys({})
-        onSuccess()
-        if (failCount === 0) {
-          onClose()
-        }
+      // If verification passed, save to database
+      const { error: saveError } = await supabase
+        .from('api_keys')
+        .upsert({
+          user_id: user.id,
+          provider: provider,
+          api_key: apiKey,
+        }, {
+          onConflict: 'user_id,provider'
+        })
+
+      if (saveError) {
+        console.error(`Error saving ${apiName} API key:`, saveError)
+        toast.error(`Failed to save ${apiName} API key`)
+        setVerifyingProviders(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(provider)
+          return newSet
+        })
+        return
       }
+
+      toast.success(`${apiName} API key verified and saved`)
+      setVerifiedProviders(prev => new Set([...prev, provider]))
+      setVerifyingProviders(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(provider)
+        return newSet
+      })
+      onSuccess()
     } catch (error) {
-      console.error("Error verifying/saving API keys:", error)
-      toast.error("Failed to configure API keys")
-    } finally {
-      setIsVerifying(false)
+      console.error(`Error processing ${apiName} API key:`, error)
+      toast.error(`Failed to process ${apiName} API key`)
+      setVerifyingProviders(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(provider)
+        return newSet
+      })
     }
   }
 
@@ -139,7 +146,7 @@ export function NKMTAgentApiModal({
         <DialogHeader>
           <DialogTitle>Configure API Keys - {agentName}</DialogTitle>
           <DialogDescription>
-            Enter the API keys required for this agent to function properly.
+            Enter and verify the API keys required for this agent to function properly.
           </DialogDescription>
         </DialogHeader>
 
@@ -147,39 +154,52 @@ export function NKMTAgentApiModal({
           {externalApis.map((api) => (
             <div key={api.provider} className="space-y-2">
               <Label htmlFor={api.provider}>{api.name}</Label>
-              <div className="relative">
-                <Input
-                  id={api.provider}
-                  type={visibleKeys.has(api.provider) ? "text" : "password"}
-                  placeholder={api.placeholder}
-                  value={apiKeys[api.provider] || ""}
-                  onChange={(e) => handleKeyChange(api.provider, e.target.value)}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleKeyVisibility(api.provider)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    id={api.provider}
+                    type={visibleKeys.has(api.provider) ? "text" : "password"}
+                    placeholder={api.placeholder}
+                    value={apiKeys[api.provider] || ""}
+                    onChange={(e) => handleKeyChange(api.provider, e.target.value)}
+                    className="pr-10"
+                    disabled={verifiedProviders.has(api.provider)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => toggleKeyVisibility(api.provider)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {visibleKeys.has(api.provider) ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                <Button 
+                  onClick={() => verifyAndSaveApiKey(api.provider, api.name)}
+                  disabled={verifyingProviders.has(api.provider) || verifiedProviders.has(api.provider)}
+                  size="default"
+                  className="min-w-[100px]"
                 >
-                  {visibleKeys.has(api.provider) ? (
-                    <EyeOff className="h-4 w-4" />
+                  {verifyingProviders.has(api.provider) ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Verifying
+                    </>
+                  ) : verifiedProviders.has(api.provider) ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Verified
+                    </>
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    "Verify"
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} disabled={isVerifying}>
-            Cancel
-          </Button>
-          <Button onClick={verifyAndSaveApiKeys} disabled={isVerifying}>
-            {isVerifying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Verify & Save
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
