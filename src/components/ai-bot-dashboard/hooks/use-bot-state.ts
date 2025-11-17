@@ -12,6 +12,7 @@ export function useBotState() {
   const [selectedStrategy, setSelectedStrategy] = useState(botData.strategies.find((s) => s.active)?.id || "1")
   const [riskSettings, setRiskSettings] = useState<RiskSettings>(botData.riskSettings)
   const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(true)
+  const [realPortfolioData, setRealPortfolioData] = useState<any>(null)
 
   // Fetch real Bitget portfolio data
   const fetchBitgetPortfolio = async () => {
@@ -38,16 +39,18 @@ export function useBotState() {
       }
 
       if (data?.success && data?.data) {
-        const { totalValue, spot, futures, unrealizedPnL } = data.data
+        const { totalValue, spot, futures, unrealizedPnL, breakdown } = data.data
+        
+        // Store complete breakdown data
+        setRealPortfolioData(breakdown)
         
         // Update bot data with real portfolio value
         setBotData(prev => ({
           ...prev,
           balance: totalValue,
-          // You can also update other fields based on real data
         }))
         
-        console.log('Bitget portfolio loaded:', { totalValue, spot, futures, unrealizedPnL })
+        console.log('Bitget portfolio loaded:', { totalValue, spot, futures, unrealizedPnL, breakdown })
       }
     } catch (error) {
       console.error('Exception fetching Bitget portfolio:', error)
@@ -119,6 +122,7 @@ export function useBotState() {
     riskSettings,
     setRiskSettings: updateRiskSettings,
     isLoadingPortfolio,
+    realPortfolioData,
     toggleBotStatus,
     handleStrategyChange,
     updateStrategies,

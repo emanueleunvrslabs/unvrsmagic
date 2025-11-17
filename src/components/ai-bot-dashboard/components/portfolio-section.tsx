@@ -19,10 +19,34 @@ import type { BotData, Asset } from "../types"
 
 interface PortfolioSectionProps {
   botData: BotData
+  realPortfolioData: any
+  isLoading: boolean
   onAssetAction: (asset: Asset, action: string) => void
 }
 
-export function PortfolioSection({ botData, onAssetAction }: PortfolioSectionProps) {
+export function PortfolioSection({ botData, realPortfolioData, isLoading, onAssetAction }: PortfolioSectionProps) {
+  // Transform real portfolio data into displayable format
+  const displayAssets = realPortfolioData ? [
+    // Spot assets
+    ...(realPortfolioData.spotAccounts || []).map((coin: any) => {
+      const total = parseFloat(coin.available || '0') + parseFloat(coin.frozen || '0') + parseFloat(coin.locked || '0')
+      return {
+        symbol: coin.coin,
+        amount: total,
+        type: 'Spot',
+        value: total // This will be converted to USDT by the backend
+      }
+    }).filter((asset: any) => asset.amount > 0),
+    // Futures positions
+    ...(realPortfolioData.positions || []).map((position: any) => ({
+      symbol: position.symbol,
+      amount: parseFloat(position.total || '0'),
+      type: 'Futures',
+      value: parseFloat(position.unrealizedPL || '0'),
+      side: position.holdSide
+    })).filter((asset: any) => asset.amount > 0)
+  ] : botData.assets
+
   return (
     <>
       {/* Portfolio allocation */}
@@ -42,25 +66,27 @@ export function PortfolioSection({ botData, onAssetAction }: PortfolioSectionPro
           </div>
           <div className="flex-1">
             <div className="space-y-4">
-              {botData.assets.map((asset) => (
-                <div key={asset.symbol} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="font-medium">{asset.symbol}</div>
-                    <div className="text-sm">{asset.allocation}%</div>
-                  </div>
-                  <Progress value={asset.allocation} className="h-2" />
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div>{formatCurrency(asset.price)}</div>
-                    <div
-                      className={cn(
-                        asset.change24h >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400",
-                      )}
-                    >
-                      {formatPercentage(asset.change24h)}
+              {isLoading ? (
+                <div className="text-center text-muted-foreground py-8">Loading portfolio...</div>
+              ) : displayAssets.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">No assets found</div>
+              ) : (
+                displayAssets.map((asset: any) => (
+                  <div key={`${asset.symbol}-${asset.type}`} className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium flex items-center gap-2">
+                        {asset.symbol}
+                        <Badge variant="outline" className="text-xs">{asset.type}</Badge>
+                      </div>
+                      <div className="text-sm">{asset.amount.toFixed(8)}</div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div>Value: ${asset.value.toFixed(2)}</div>
+                      {asset.side && <Badge variant="secondary">{asset.side}</Badge>}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </CardContent>
@@ -209,60 +235,69 @@ export function PortfolioSection({ botData, onAssetAction }: PortfolioSectionPro
             <TableHeader>
               <TableRow>
                 <TableHead>Asset</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>24h Change</TableHead>
-                <TableHead>Allocation</TableHead>
-                <TableHead>Value</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Value (USDT)</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {botData.assets.map((asset) => (
-                <TableRow key={asset.symbol}>
-                  <TableCell className="font-medium">{asset.symbol}</TableCell>
-                  <TableCell>{formatCurrency(asset.price)}</TableCell>
-                  <TableCell
-                    className={cn(
-                      asset.change24h >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400",
-                    )}
-                  >
-                    {formatPercentage(asset.change24h)}
-                  </TableCell>
-                  <TableCell>{asset.allocation}%</TableCell>
-                  <TableCell>{formatCurrency((asset.allocation / 100) * botData.balance)}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onAssetAction(asset, "details")}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onAssetAction(asset, "adjust")}>
-                          <Settings className="mr-2 h-4 w-4" />
-                          Adjust Allocation
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onAssetAction(asset, "history")}>
-                          <History className="mr-2 h-4 w-4" />
-                          Trade History
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-600 dark:text-red-400"
-                          onClick={() => onAssetAction(asset, "remove")}
-                        >
-                          <Trash className="mr-2 h-4 w-4" />
-                          Remove from Portfolio
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    Loading assets...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : displayAssets.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    No assets found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                displayAssets.map((asset: any) => (
+                  <TableRow key={`${asset.symbol}-${asset.type}`}>
+                    <TableCell className="font-medium">{asset.symbol}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{asset.type}</Badge>
+                      {asset.side && <Badge variant="secondary" className="ml-2">{asset.side}</Badge>}
+                    </TableCell>
+                    <TableCell>{asset.amount.toFixed(8)}</TableCell>
+                    <TableCell>{formatCurrency(asset.value)}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onAssetAction(asset, "details")}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onAssetAction(asset, "adjust")}>
+                            <Settings className="mr-2 h-4 w-4" />
+                            Adjust Allocation
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onAssetAction(asset, "history")}>
+                            <History className="mr-2 h-4 w-4" />
+                            Trade History
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600 dark:text-red-400"
+                            onClick={() => onAssetAction(asset, "remove")}
+                          >
+                            <Trash className="mr-2 h-4 w-4" />
+                            Remove from Portfolio
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

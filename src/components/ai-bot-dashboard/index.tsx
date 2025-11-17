@@ -21,7 +21,7 @@ import { useBotState } from "./hooks/use-bot-state";
 import type { Asset } from "./types";
 
 export function AiBotDashboard() {
-  const { botData, setBotData, botRunning, selectedStrategy, riskSettings, setRiskSettings, isLoadingPortfolio, toggleBotStatus, handleStrategyChange } = useBotState();
+  const { botData, setBotData, botRunning, selectedStrategy, riskSettings, setRiskSettings, isLoadingPortfolio, realPortfolioData, toggleBotStatus, handleStrategyChange } = useBotState();
 
   const [activeTab, setActiveTab] = useState("overview");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -153,7 +153,7 @@ export function AiBotDashboard() {
 
         {/* Portfolio Tab */}
         <TabsContent value="portfolio" className="space-y-4">
-          <PortfolioSection botData={botData} onAssetAction={handleAssetAction} />
+          <PortfolioSection botData={botData} realPortfolioData={realPortfolioData} isLoading={isLoadingPortfolio} onAssetAction={handleAssetAction} />
         </TabsContent>
 
         {/* Trades Tab */}
