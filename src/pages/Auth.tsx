@@ -102,21 +102,15 @@ export default function Auth() {
       if (error) throw error;
 
       if (data.success) {
-        // Get the user's email format
-        const email = `${fullPhoneNumber.replace(/\+/g, '')}@phone.auth`;
-        
-        // Create a temporary password for sign in
-        const tempPassword = crypto.randomUUID();
-        
-        // Sign in with the credentials
+        // Sign in with the temporary password
         const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password: tempPassword,
+          email: data.email,
+          password: data.tempPassword,
         });
 
         if (signInError) {
-          // If password sign in fails, try to update the password and sign in again
-          console.log("Attempting alternative auth method");
+          console.error("Sign in error:", signInError);
+          throw new Error("Failed to sign in");
         }
 
         // Get the authenticated user
@@ -134,16 +128,16 @@ export default function Auth() {
 
           if (profile?.username) {
             // User already has username, go to dashboard
-            if (data.isNewUser) {
-              toast.success("Account created successfully!");
-            } else {
-              toast.success("Login successful!");
-            }
+            toast.success("Login successful!");
             navigate("/overview");
           } else {
             // New user or user without username, go to username step
             setStep("username");
-            toast.success("OTP verified! Please choose your username.");
+            if (data.isNewUser) {
+              toast.success("Account created! Please choose your username.");
+            } else {
+              toast.success("Please set your username.");
+            }
           }
         }
       } else {

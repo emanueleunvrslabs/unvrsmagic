@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { phoneNumber, code, fullName } = await req.json();
+    const { phoneNumber, code } = await req.json();
 
     if (!phoneNumber || !code) {
       return new Response(
@@ -61,25 +61,34 @@ serve(async (req) => {
 
     let userId: string;
     let isNewUser = false;
+    let email: string;
+    let tempPassword: string;
 
     if (existingProfile) {
-      // Existing user - get user data
+      // Existing user
       userId = existingProfile.user_id;
+      email = `${phoneNumber.replace(/\+/g, '')}@phone.auth`;
+      
+      // Generate temporary password for login
+      tempPassword = crypto.randomUUID();
+      
+      // Update user password
+      await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: tempPassword,
+      });
     } else {
       // New user - create auth user and profile
       isNewUser = true;
       
-      // Create a user with phone number as email (format: +1234567890@phone.auth)
-      const email = `${phoneNumber.replace(/\+/g, '')}@phone.auth`;
-      const password = crypto.randomUUID(); // Generate random password
+      email = `${phoneNumber.replace(/\+/g, '')}@phone.auth`;
+      tempPassword = crypto.randomUUID();
       
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
-        password,
+        password: tempPassword,
         email_confirm: true,
         user_metadata: {
           phone_number: phoneNumber,
-          full_name: fullName || '',
         }
       });
 
@@ -90,13 +99,12 @@ serve(async (req) => {
 
       userId = authData.user.id;
 
-      // Create profile
+      // Create profile without username
       const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .insert({
           user_id: userId,
           phone_number: phoneNumber,
-          full_name: fullName || null,
         });
 
       if (profileError) {
@@ -109,8 +117,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true,
         isNewUser,
-        userId,
-        phoneNumber,
+        email,
+        tempPassword,
       }),
       { 
         status: 200, 
