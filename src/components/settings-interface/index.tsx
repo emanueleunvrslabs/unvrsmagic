@@ -11,7 +11,6 @@ import { NotificationsTab } from "./components/notifications/notifications-tab";
 import { PrivacyTab } from "./components/privacy/privacy-tab";
 import { ProfileTab } from "./components/profile/profile-tab";
 import { SecurityTab } from "./components/security/security-tab";
-import { AIAgentsTab } from "./components/ai-agents/ai-agents-tab";
 import { SettingsSidebar } from "./components/settings-sidebar";
 import { SaveButton } from "./components/shared/save-button";
 import { TradingTab } from "./components/trading/trading-tab";
@@ -65,14 +64,6 @@ export const SettingsInterface: React.FC = () => {
             onSecurityChange={updateSecurity}
             onApiKeysChange={(apiKeys) => updateSecurity({ apiKeysEnabled: apiKeys.length > 0 })}
             onSessionsChange={() => {}} // Sessions are managed separately
-          />
-        );
-
-      case "ai-agents":
-        return (
-          <AIAgentsTab
-            apiKeys={settings.apiKeys}
-            onApiKeysChange={(apiKeys) => updateSecurity({ apiKeysEnabled: apiKeys.length > 0 })}
           />
         );
 
