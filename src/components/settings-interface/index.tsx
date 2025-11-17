@@ -130,8 +130,7 @@ export const SettingsInterface: React.FC = () => {
 
         {settings.hasUnsavedChanges && (
           <div className="border-t bg-background p-4">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <p className="text-sm text-muted-foreground">You have unsaved changes</p>
+            <div className="flex items-center justify-end gap-3 flex-wrap">
               <div className="flex space-x-2">
                 <SaveButton onSave={handleSave} isSaving={isSaving} hasUnsavedChanges={settings.hasUnsavedChanges} />
                 <button onClick={resetSettings} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">

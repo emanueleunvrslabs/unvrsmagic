@@ -17,7 +17,6 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, onT
     <div className="md:w-64 md:border-r bg-muted/10">
       <div className="p-4">
         <h2 className="text-lg font-semibold">Settings</h2>
-        {hasUnsavedChanges && <p className="text-sm text-orange-600 mt-1">You have unsaved changes</p>}
       </div>
       <div className="md:h-[calc(100vh-8rem)]">
         <div className="p-2 space-y-1">
