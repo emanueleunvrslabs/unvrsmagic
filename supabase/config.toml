@@ -12,3 +12,6 @@ verify_jwt = true
 [functions.mkt-data-agent]
 verify_jwt = true
 
+[functions.mkt-data-scheduler]
+verify_jwt = false
+

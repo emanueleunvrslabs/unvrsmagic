@@ -1,150 +1,132 @@
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { supabase } from "@/integrations/supabase/client"
-import { toast } from "sonner"
-import { Loader2, Play } from "lucide-react"
+import { useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Activity, TrendingUp, Database } from "lucide-react"
 import { MktDataResults } from "./mkt-data-results"
+import { useMktData } from "@/hooks/use-mkt-data"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export const MktDataInterface = () => {
-  const [symbols, setSymbols] = useState("BTCUSDT,ETHUSDT")
-  const [timeframes, setTimeframes] = useState("1h,4h")
-  const [lookbackBars, setLookbackBars] = useState("100")
-  const [marketTypes, setMarketTypes] = useState<string[]>(["spot"])
-  const [isLoading, setIsLoading] = useState(false)
-  const [results, setResults] = useState<any>(null)
+  const { data, isLoading, error, initializeConfig } = useMktData()
 
-  const handleExecute = async () => {
-    if (!symbols.trim()) {
-      toast.error("Please enter at least one symbol")
-      return
-    }
+  useEffect(() => {
+    initializeConfig()
+  }, [])
 
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('mkt-data-agent', {
-        body: {
-          symbols: symbols.split(',').map(s => s.trim()),
-          timeframes: timeframes.split(',').map(t => t.trim()),
-          lookback_bars: parseInt(lookbackBars),
-          data_sources: "coingecko,coinmarketcap,bitget",
-          market_types: marketTypes
-        }
-      })
-
-      if (error) {
-        console.error('Error calling mkt-data-agent:', error)
-        toast.error("Failed to fetch market data")
-        return
-      }
-
-      setResults(data)
-      toast.success("Market data retrieved successfully")
-    } catch (error) {
-      console.error('Error:', error)
-      toast.error("An error occurred while fetching data")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Transform data for MktDataResults component
+  const transformedResults = data.length > 0 ? {
+    data_sources_used: Array.from(new Set(data.flatMap(d => d.data_sources || []))).map(source => ({
+      name: source,
+      notes: `Data from ${source}`
+    })),
+    symbols: groupDataBySymbol(data),
+    errors: []
+  } : null
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Mkt.data Agent</h1>
         <p className="text-muted-foreground mt-2">
-          Market data ingestion and normalization for cryptocurrency markets
+          Market data collection running automatically in background for top 100 cryptocurrencies
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Configure Data Request</CardTitle>
-          <CardDescription>
-            Specify symbols, timeframes, and market types to fetch OHLCV data
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="symbols">Trading Symbols</Label>
-              <Input
-                id="symbols"
-                placeholder="BTCUSDT,ETHUSDT,BNBUSDT"
-                value={symbols}
-                onChange={(e) => setSymbols(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Comma-separated list of trading pairs
-              </p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Data Points</CardTitle>
+            <Database className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Total market data records
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Symbols</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {new Set(data.map(d => d.symbol)).size}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Unique trading pairs tracked
+            </p>
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="timeframes">Timeframes</Label>
-              <Input
-                id="timeframes"
-                placeholder="1m,5m,15m,1h,4h,1d"
-                value={timeframes}
-                onChange={(e) => setTimeframes(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Comma-separated list (e.g., 1m, 1h, 1d)
-              </p>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Status</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">Active</div>
+            <p className="text-xs text-muted-foreground">
+              Auto-updating every 5 minutes
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {isLoading && data.length === 0 ? (
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center text-muted-foreground">
+              <Activity className="h-8 w-8 animate-pulse mx-auto mb-2" />
+              <p>Loading market data...</p>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lookback">Lookback Bars</Label>
-              <Input
-                id="lookback"
-                type="number"
-                placeholder="100"
-                value={lookbackBars}
-                onChange={(e) => setLookbackBars(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Number of historical bars to fetch
-              </p>
+          </CardContent>
+        </Card>
+      ) : transformedResults ? (
+        <MktDataResults results={transformedResults} />
+      ) : (
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center text-muted-foreground">
+              <p>No market data available yet. The agent will start collecting data automatically.</p>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="market-type">Market Type</Label>
-              <Select
-                value={marketTypes[0]}
-                onValueChange={(value) => setMarketTypes([value])}
-              >
-                <SelectTrigger id="market-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="spot">Spot</SelectItem>
-                  <SelectItem value="perpetual_futures">Perpetual Futures</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <Button onClick={handleExecute} disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Fetching Data...
-                </>
-              ) : (
-                <>
-                  <Play className="mr-2 h-4 w-4" />
-                  Execute Agent
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {results && <MktDataResults results={results} />}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
+}
+
+function groupDataBySymbol(data: any[]) {
+  const symbolMap = new Map()
+  
+  for (const item of data) {
+    if (!symbolMap.has(item.symbol)) {
+      symbolMap.set(item.symbol, { symbol: item.symbol, markets: [] })
+    }
+    
+    const symbolData = symbolMap.get(item.symbol)
+    let marketData = symbolData.markets.find((m: any) => m.market_type === item.market_type)
+    
+    if (!marketData) {
+      marketData = { market_type: item.market_type, timeframes: [] }
+      symbolData.markets.push(marketData)
+    }
+    
+    marketData.timeframes.push({
+      timeframe: item.timeframe,
+      ohlcv: item.ohlcv,
+      confidence_score: item.confidence_score,
+      notes: item.notes
+    })
+  }
+  
+  return Array.from(symbolMap.values())
 }

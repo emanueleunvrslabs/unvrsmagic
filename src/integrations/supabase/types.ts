@@ -104,6 +104,84 @@ export type Database = {
         }
         Relationships: []
       }
+      mkt_data_config: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          lookback_bars: number
+          market_types: string[]
+          symbols: string[]
+          timeframes: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          lookback_bars?: number
+          market_types?: string[]
+          symbols?: string[]
+          timeframes?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          lookback_bars?: number
+          market_types?: string[]
+          symbols?: string[]
+          timeframes?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mkt_data_results: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          data_sources: Json | null
+          id: string
+          market_type: string
+          notes: string | null
+          ohlcv: Json
+          symbol: string
+          timeframe: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          data_sources?: Json | null
+          id?: string
+          market_type: string
+          notes?: string | null
+          ohlcv: Json
+          symbol: string
+          timeframe: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          data_sources?: Json | null
+          id?: string
+          market_type?: string
+          notes?: string | null
+          ohlcv?: Json
+          symbol?: string
+          timeframe?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       otp_codes: {
         Row: {
           code: string
