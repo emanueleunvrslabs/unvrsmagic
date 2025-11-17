@@ -12,10 +12,12 @@ import { Loader2 } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [step, setStep] = useState<"phone" | "otp" | "username">("phone");
   const [countryCode, setCountryCode] = useState("+34");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
+  const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Check if user is already logged in
@@ -117,14 +119,33 @@ export default function Auth() {
           console.log("Attempting alternative auth method");
         }
 
-        if (data.isNewUser) {
-          toast.success("Account created successfully!");
-        } else {
-          toast.success("Login successful!");
-        }
+        // Get the authenticated user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          setUserId(user.id);
+          
+          // Check if user has username
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('user_id', user.id)
+            .single();
 
-        // Navigate to dashboard
-        navigate("/overview");
+          if (profile?.username) {
+            // User already has username, go to dashboard
+            if (data.isNewUser) {
+              toast.success("Account created successfully!");
+            } else {
+              toast.success("Login successful!");
+            }
+            navigate("/overview");
+          } else {
+            // New user or user without username, go to username step
+            setStep("username");
+            toast.success("OTP verified! Please choose your username.");
+          }
+        }
       } else {
         throw new Error(data.error || "Invalid OTP code");
       }
@@ -137,8 +158,56 @@ export default function Auth() {
   };
 
   const handleBack = () => {
-    setStep("phone");
-    setOtp("");
+    if (step === "username") {
+      setStep("phone");
+      setPhoneNumber("");
+      setOtp("");
+      setUsername("");
+    } else {
+      setStep("phone");
+      setOtp("");
+    }
+  };
+
+  const handleSubmitUsername = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!username || username.length < 3) {
+      toast.error("Username must be at least 3 characters");
+      return;
+    }
+
+    if (!userId) {
+      toast.error("User not authenticated");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Update profile with username
+      const { error } = await supabase
+        .from('profiles')
+        .update({ username: username.toLowerCase() })
+        .eq('user_id', userId);
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error("Username already taken. Please choose another.");
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      toast.success("Username set successfully!");
+      navigate("/overview");
+    } catch (error) {
+      console.error("Error setting username:", error);
+      toast.error("Error setting username. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -146,12 +215,14 @@ export default function Auth() {
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Login with WhatsApp
+            {step === "username" ? "Choose Username" : "Login with WhatsApp"}
           </CardTitle>
           <CardDescription className="text-center">
             {step === "phone" 
               ? "Enter your phone number to receive the OTP code"
-              : "Enter the code you received on WhatsApp"
+              : step === "otp"
+              ? "Enter the code you received on WhatsApp"
+              : "Choose a unique username for your account"
             }
           </CardDescription>
         </CardHeader>
@@ -193,7 +264,7 @@ export default function Auth() {
                 )}
               </div>
             </div>
-          ) : (
+          ) : step === "otp" ? (
             <div className="space-y-6">
               <div className="text-center space-y-4">
                 <p className="text-sm text-muted-foreground">
@@ -250,7 +321,42 @@ export default function Auth() {
                 </Button>
               </div>
             </div>
-          )}
+          ) : step === "username" ? (
+            <form onSubmit={handleSubmitUsername} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="johndoe"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))}
+                  required
+                  disabled={loading}
+                  minLength={3}
+                  maxLength={20}
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground">
+                  3-20 characters, lowercase, no spaces
+                </p>
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Setting username...
+                  </>
+                ) : (
+                  "Continue"
+                )}
+              </Button>
+            </form>
+          ) : null}
         </CardContent>
       </Card>
     </div>
