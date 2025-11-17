@@ -132,12 +132,10 @@ export function AiBotDashboard() {
       {/* Main content tabs */}
       <Tabs defaultValue="overview" onValueChange={setActiveTab} className="space-y-4">
         <div className="overflow-x-auto">
-          <TabsList className="grid  grid-cols-5 min-w-[450px] lg:w-[600px]">
+          <TabsList className="grid grid-cols-3 min-w-[450px] lg:w-[600px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="strategy">Strategy</TabsTrigger>
             <TabsTrigger value="trades">Trades</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
         </div>
 
@@ -151,19 +149,9 @@ export function AiBotDashboard() {
           <PortfolioSection botData={botData} onAssetAction={handleAssetAction} />
         </TabsContent>
 
-        {/* Strategy Tab */}
-        <TabsContent value="strategy" className="space-y-4">
-          <StrategySection botData={botData} onStrategyChange={handleStrategyChange} onRiskSettingsChange={setRiskSettings} />
-        </TabsContent>
-
         {/* Trades Tab */}
         <TabsContent value="trades" className="space-y-4">
           <TradesSection botData={botData} />
-        </TabsContent>
-
-        {/* Settings Tab */}
-        <TabsContent value="settings" className="space-y-4">
-          <SettingsSection botData={botData} onSettingsChange={(settings) => console.log("Settings updated:", settings)} />
         </TabsContent>
       </Tabs>
 

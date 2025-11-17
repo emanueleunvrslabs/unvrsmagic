@@ -26,7 +26,7 @@ export function Header({ exchangeName, botRunning, isRefreshing, isFullscreen, o
             <Cpu className="h-6 w-6" />
             <span>{exchangeName}</span>
           </h1>
-          <p className="text-muted-foreground">Advanced AI-powered trading with smart portfolio management</p>
+          <p className="text-muted-foreground">Connect your {exchangeName} account and manage your trading portfolio with AI-powered automation</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <TooltipProvider>
