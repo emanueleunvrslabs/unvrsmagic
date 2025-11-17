@@ -95,33 +95,11 @@ export function ProjectDashboard({ projectId }: ProjectDashboardProps) {
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
-          <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {/* Placeholder cards for overview */}
-              <div className="rounded-lg border bg-card p-6">
-                <h3 className="text-sm font-medium text-muted-foreground">Total Value</h3>
-                <p className="text-2xl font-bold mt-2">$0.00</p>
-              </div>
-              <div className="rounded-lg border bg-card p-6">
-                <h3 className="text-sm font-medium text-muted-foreground">P&L</h3>
-                <p className="text-2xl font-bold mt-2 text-green-500">+$0.00</p>
-              </div>
-              <div className="rounded-lg border bg-card p-6">
-                <h3 className="text-sm font-medium text-muted-foreground">Total Trades</h3>
-                <p className="text-2xl font-bold mt-2">0</p>
-              </div>
-              <div className="rounded-lg border bg-card p-6">
-                <h3 className="text-sm font-medium text-muted-foreground">Win Rate</h3>
-                <p className="text-2xl font-bold mt-2">0%</p>
-              </div>
-            </div>
-
-            <div className="rounded-lg border bg-card p-6">
-              <h3 className="text-lg font-semibold mb-4">Project Overview</h3>
-              <p className="text-muted-foreground">
-                This is the overview section for your project. Here you can see general statistics and information.
-              </p>
-            </div>
+          <div className="rounded-lg border bg-card p-6">
+            <h3 className="text-lg font-semibold mb-4">Project Overview</h3>
+            <p className="text-muted-foreground">
+              This is the overview section for your project. Here you can see general statistics and information.
+            </p>
           </div>
         </TabsContent>
 
