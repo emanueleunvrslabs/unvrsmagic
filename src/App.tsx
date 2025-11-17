@@ -24,6 +24,7 @@ import DeFiProtocols from "./pages/DeFiProtocols";
 import ExecutionLogs from "./pages/ExecutionLogs";
 import Auth from "./pages/Auth";
 import ProjectDetail from "./pages/ProjectDetail";
+import MktData from "./pages/MktData";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/my-assets" element={<ProtectedRoute><MyAssets /></ProtectedRoute>} />
           <Route path="/portfolio-tracker" element={<ProtectedRoute><PortfolioTracker /></ProtectedRoute>} />
           <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
+          <Route path="/nkmt/mkt-data" element={<ProtectedRoute><MktData /></ProtectedRoute>} />
           <Route path="/nkmt" element={<Navigate to="/nkmt/bitget" replace />} />
           <Route path="/ai-bot" element={<Navigate to="/nkmt/bitget" replace />} />
           <Route path="/arbitrage-bot" element={<ProtectedRoute><ArbitrageBot /></ProtectedRoute>} />
