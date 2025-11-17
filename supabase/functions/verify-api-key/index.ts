@@ -196,6 +196,64 @@ serve(async (req) => {
         }
         break;
 
+      case "coingecko":
+        try {
+          // CoinGecko API - verify with a simple ping endpoint
+          const response = await fetch(`https://api.coingecko.com/api/v3/ping?x_cg_demo_api_key=${apiKey}`, {
+            method: "GET",
+            headers: {
+              "accept": "application/json",
+            },
+          });
+
+          console.log("CoinGecko response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("CoinGecko API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid CoinGecko API key";
+            console.error("CoinGecko verification failed:", response.status);
+          } else {
+            errorMessage = "Failed to verify CoinGecko API key";
+            console.error("CoinGecko unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify CoinGecko API key";
+          console.error("CoinGecko verification error:", error);
+        }
+        break;
+
+      case "coinmarketcap":
+        try {
+          // CoinMarketCap API - verify with cryptocurrency listings endpoint
+          const response = await fetch("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=1", {
+            method: "GET",
+            headers: {
+              "X-CMC_PRO_API_KEY": apiKey,
+              "Accept": "application/json",
+            },
+          });
+
+          console.log("CoinMarketCap response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("CoinMarketCap API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            const error = await response.json();
+            errorMessage = error.status?.error_message || "Invalid CoinMarketCap API key";
+            console.error("CoinMarketCap verification failed:", errorMessage);
+          } else {
+            errorMessage = "Failed to verify CoinMarketCap API key";
+            console.error("CoinMarketCap unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify CoinMarketCap API key";
+          console.error("CoinMarketCap verification error:", error);
+        }
+        break;
+
       default:
         return new Response(
           JSON.stringify({ error: "Unsupported provider" }),
@@ -205,7 +263,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        isValid, 
+        valid: isValid, 
         provider,
         error: isValid ? null : errorMessage 
       }),

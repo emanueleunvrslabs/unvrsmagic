@@ -4,25 +4,33 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { supabase } from "@/integrations/supabase/client"
 import type { ApiKey } from "../../types"
+import { Settings } from "lucide-react"
+import { NKMTAgentApiModal } from "./nkmt-agent-api-modal"
 
 const NKMT_AGENTS = [
-  { id: "nkmt", name: "NKMT", model: "GPT-5.1 Thinking", description: "Main orchestrator", requiresApi: "openai" },
-  { id: "mkt-data", name: "Mkt.data", model: "Code", description: "Market data processor", requiresApi: null },
-  { id: "deriv-data", name: "Deriv.data", model: "Code", description: "Derivatives data processor", requiresApi: null },
-  { id: "sentiment-scout", name: "Sentiment.scout", model: "GPT-5.1", description: "Sentiment analysis", requiresApi: "openai" },
-  { id: "chain-analyst", name: "Chain.analyst", model: "Qwen 3", description: "Blockchain analysis", requiresApi: "qwen" },
-  { id: "market-modeler", name: "Market.modeler", model: "Claude Sonnet 4.5", description: "Market modeling", requiresApi: "anthropic" },
-  { id: "signal-maker", name: "Signal.maker", model: "GPT-5.1 Thinking", description: "Signal generation", requiresApi: "openai" },
-  { id: "risk-mgr", name: "Risk.mgr", model: "GPT-5.1 Thinking", description: "Risk management", requiresApi: "openai" },
-  { id: "trade-executor", name: "Trade.executor", model: "Code", description: "Trade execution", requiresApi: null },
-  { id: "reviewer", name: "Reviewer", model: "Claude Sonnet 4.5", description: "Trade review", requiresApi: "anthropic" },
+  { id: "nkmt", name: "NKMT", model: "GPT-5.1 Thinking", description: "Main orchestrator", requiresApi: "openai", externalApis: [] },
+  { id: "mkt-data", name: "Mkt.data", model: "Code", description: "Market data processor", requiresApi: null, externalApis: [
+    { name: "CoinGecko", provider: "coingecko", placeholder: "Enter CoinGecko API key" },
+    { name: "CoinMarketCap", provider: "coinmarketcap", placeholder: "Enter CoinMarketCap API key" }
+  ]},
+  { id: "deriv-data", name: "Deriv.data", model: "Code", description: "Derivatives data processor", requiresApi: null, externalApis: [] },
+  { id: "sentiment-scout", name: "Sentiment.scout", model: "GPT-5.1", description: "Sentiment analysis", requiresApi: "openai", externalApis: [] },
+  { id: "chain-analyst", name: "Chain.analyst", model: "Qwen 3", description: "Blockchain analysis", requiresApi: "qwen", externalApis: [] },
+  { id: "market-modeler", name: "Market.modeler", model: "Claude Sonnet 4.5", description: "Market modeling", requiresApi: "anthropic", externalApis: [] },
+  { id: "signal-maker", name: "Signal.maker", model: "GPT-5.1 Thinking", description: "Signal generation", requiresApi: "openai", externalApis: [] },
+  { id: "risk-mgr", name: "Risk.mgr", model: "GPT-5.1 Thinking", description: "Risk management", requiresApi: "openai", externalApis: [] },
+  { id: "trade-executor", name: "Trade.executor", model: "Code", description: "Trade execution", requiresApi: null, externalApis: [] },
+  { id: "reviewer", name: "Reviewer", model: "Claude Sonnet 4.5", description: "Trade review", requiresApi: "anthropic", externalApis: [] },
 ]
 
 export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys }) => {
   const [connectedApis, setConnectedApis] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedAgent, setSelectedAgent] = useState<typeof NKMT_AGENTS[0] | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const normalizeProvider = (p: string) => {
@@ -83,6 +91,56 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
     return isConnected
   }
 
+  const handleOpenApiModal = (agent: typeof NKMT_AGENTS[0]) => {
+    setSelectedAgent(agent)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedAgent(null)
+  }
+
+  const handleApiSuccess = () => {
+    // Reload connected APIs
+    const normalizeProvider = (p: string) => {
+      if (!p) return p
+      const map: Record<string, string> = {
+        chatgpt: 'openai',
+        claude: 'anthropic',
+      }
+      return map[p] ?? p
+    }
+
+    const loadConnectedApis = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data, error } = await supabase
+          .from('api_keys')
+          .select('provider')
+          .eq('user_id', user.id)
+          .in('provider', ['openai', 'anthropic', 'qwen', 'chatgpt', 'claude', 'coingecko', 'coinmarketcap'])
+
+        if (error) {
+          console.error("Error loading API keys:", error)
+          return
+        }
+
+        if (data) {
+          const normalized = data.map((item) => normalizeProvider(item.provider))
+          const apis = new Set(normalized)
+          setConnectedApis(apis)
+        }
+      } catch (error) {
+        console.error("Error loading connected APIs:", error)
+      }
+    }
+
+    loadConnectedApis()
+  }
+
   if (isLoading) {
     return <div className="text-center py-4">Loading...</div>
   }
@@ -94,6 +152,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
             <TableHead>Agent</TableHead>
             <TableHead>Model</TableHead>
             <TableHead>Description</TableHead>
+            <TableHead className="text-center">API Config</TableHead>
             <TableHead className="text-right">Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -107,6 +166,20 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
                 </Badge>
               </TableCell>
               <TableCell className="text-muted-foreground">{agent.description}</TableCell>
+              <TableCell className="text-center">
+                {agent.externalApis && agent.externalApis.length > 0 ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOpenApiModal(agent)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <span className="text-muted-foreground text-xs">-</span>
+                )}
+              </TableCell>
               <TableCell className="text-right">
                 {isAgentConnected(agent) ? (
                   <span className="text-green-600 text-sm font-medium">Connected</span>
@@ -118,6 +191,17 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
           ))}
         </TableBody>
       </Table>
+
+      {selectedAgent && (
+        <NKMTAgentApiModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          agentName={selectedAgent.name}
+          agentId={selectedAgent.id}
+          externalApis={selectedAgent.externalApis || []}
+          onSuccess={handleApiSuccess}
+        />
+      )}
     </div>
   )
 }
