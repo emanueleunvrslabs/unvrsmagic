@@ -154,9 +154,6 @@ export default function Auth() {
                       <SelectItem value="+39">🇮🇹 +39</SelectItem>
                       <SelectItem value="+44">🇬🇧 +44</SelectItem>
                       <SelectItem value="+1">🇺🇸 +1</SelectItem>
-                      <SelectItem value="+33">🇫🇷 +33</SelectItem>
-                      <SelectItem value="+49">🇩🇪 +49</SelectItem>
-                      <SelectItem value="+41">🇨🇭 +41</SelectItem>
                     </SelectContent>
                   </Select>
                   <Input
