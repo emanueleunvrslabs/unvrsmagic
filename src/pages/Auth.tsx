@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -189,42 +190,52 @@ export default function Auth() {
               </Button>
             </form>
           ) : (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="otp">OTP Code</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="123456"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  maxLength={6}
-                  required
-                  disabled={loading}
-                  className="text-center text-2xl tracking-widest"
-                  autoFocus
-                />
-                <p className="text-xs text-muted-foreground text-center">
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Verifying...
-                    </span>
-                  ) : (
-                    `Code sent to ${countryCode}${phoneNumber}`
-                  )}
+            <div className="space-y-6">
+              <div className="text-center space-y-4">
+                <h2 className="text-3xl font-bold tracking-tight">VERIFY CODE</h2>
+                <p className="text-sm text-muted-foreground">
+                  Code sent to {countryCode}{phoneNumber}
                 </p>
-              </div>
-              <div className="text-center space-y-2">
                 <Button
                   type="button"
                   variant="link"
                   onClick={handleBack}
                   disabled={loading}
-                  className="text-sm"
+                  className="text-sm underline"
                 >
-                  Go back
+                  Change number
                 </Button>
+              </div>
+              
+              <div className="flex justify-center">
+                <InputOTP
+                  maxLength={6}
+                  value={otp}
+                  onChange={setOtp}
+                  disabled={loading}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+
+              {loading && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Verifying...
+                </div>
+              )}
+
+              <div className="text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Didn&apos;t receive the code?
+                </p>
                 <Button
                   type="button"
                   variant="link"
@@ -232,7 +243,7 @@ export default function Auth() {
                   disabled={loading}
                   className="text-sm"
                 >
-                  Resend code
+                  Resend Code
                 </Button>
               </div>
             </div>
