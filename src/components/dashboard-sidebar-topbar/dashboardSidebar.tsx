@@ -452,14 +452,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     },
   ];
 
-  const footerItems = [
-    { 
-      id: "settings", 
-      label: "Settings", 
-      icon: Settings,
-      href: "/settings",
-    },
-  ];
+  const footerItems: MenuItem[] = [];
 
   return (
     <>
