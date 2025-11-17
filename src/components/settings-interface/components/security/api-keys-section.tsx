@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -45,6 +45,46 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [connectedProviders, setConnectedProviders] = useState<Set<string>>(new Set())
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load saved API keys on mount
+  useEffect(() => {
+    const loadApiKeys = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data, error } = await supabase
+          .from('api_keys')
+          .select('provider, api_key')
+          .eq('user_id', user.id)
+
+        if (error) {
+          console.error("Error loading API keys:", error)
+          return
+        }
+
+        if (data && data.length > 0) {
+          const loadedKeys: Record<string, string> = {}
+          const connected = new Set<string>()
+
+          data.forEach((item) => {
+            loadedKeys[item.provider] = item.api_key
+            connected.add(item.provider)
+          })
+
+          setApiKeys(prev => ({ ...prev, ...loadedKeys }))
+          setConnectedProviders(connected)
+        }
+      } catch (error) {
+        console.error("Error loading API keys:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadApiKeys()
+  }, [])
 
   const toggleKeyVisibility = (providerId: string) => {
     const newVisibleKeys = new Set(visibleKeys)
@@ -136,6 +176,23 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
 
+      // Save the verified API key to database
+      const { error: saveError } = await supabase
+        .from('api_keys')
+        .upsert({
+          user_id: user.id,
+          provider: providerId,
+          api_key: apiKeys[providerId]
+        }, {
+          onConflict: 'user_id,provider'
+        })
+
+      if (saveError) {
+        console.error("Error saving API key:", saveError)
+        toast.error("Failed to save API key")
+        return
+      }
+
       // Mark as connected
       setConnectedProviders(prev => new Set(prev).add(providerId))
       
@@ -149,22 +206,52 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     }
   }
 
-  const handleDisconnect = (providerId: string) => {
-    setConnectedProviders(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(providerId)
-      return newSet
-    })
-    
-    setApiKeys(prev => ({ ...prev, [providerId]: "" }))
-    
-    const providerName = AI_PROVIDERS.find(p => p.id === providerId)?.name
-    toast.success(`${providerName} disconnected`)
+  const handleDisconnect = async (providerId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        toast.error("User not authenticated")
+        return
+      }
+
+      // Delete the API key from database
+      const { error } = await supabase
+        .from('api_keys')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('provider', providerId)
+
+      if (error) {
+        console.error("Error deleting API key:", error)
+        toast.error("Failed to disconnect provider")
+        return
+      }
+
+      setConnectedProviders(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(providerId)
+        return newSet
+      })
+      
+      setApiKeys(prev => ({ ...prev, [providerId]: "" }))
+      
+      const providerName = AI_PROVIDERS.find(p => p.id === providerId)?.name
+      toast.success(`${providerName} disconnected`)
+    } catch (error) {
+      console.error("Error disconnecting provider:", error)
+      toast.error("Failed to disconnect provider")
+    }
   }
 
   return (
     <div className="space-y-4">
-      <div className="border rounded-lg">
+      {isLoading ? (
+        <div className="text-center py-8 text-muted-foreground">
+          Loading API keys...
+        </div>
+      ) : (
+        <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
@@ -244,6 +331,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
           </TableBody>
         </Table>
       </div>
+      )}
     </div>
   )
 }
