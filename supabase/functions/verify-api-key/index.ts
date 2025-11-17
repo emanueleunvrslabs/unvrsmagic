@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { provider, apiKey, keyId } = await req.json();
+    const { provider, apiKey, ownerId } = await req.json();
 
     if (!provider || !apiKey) {
       return new Response(
@@ -89,10 +89,10 @@ serve(async (req) => {
 
       case "qwen":
         try {
-          // Qwen/Alibaba Cloud API verification requires both API key and Key ID
-          if (!keyId) {
-            errorMessage = "Key ID is required for Qwen3";
-            console.error("Qwen verification failed: missing key_id");
+          // Qwen/Alibaba Cloud API verification requires both API key and Owner ID
+          if (!ownerId) {
+            errorMessage = "Owner ID is required for Qwen3";
+            console.error("Qwen verification failed: missing owner_id");
             break;
           }
 
@@ -110,8 +110,7 @@ serve(async (req) => {
                 messages: [{ role: "user", content: "test" }]
               },
               parameters: {
-                max_tokens: 1,
-                api_key: keyId
+                max_tokens: 1
               }
             }),
           });
