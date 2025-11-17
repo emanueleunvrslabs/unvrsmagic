@@ -313,6 +313,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDisconnect(provider.id)}
+                      className="h-8 px-3 text-xs"
                     >
                       Disconnect
                     </Button>
@@ -321,6 +322,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                       size="sm"
                       onClick={() => handleConnect(provider.id)}
                       disabled={connectingProvider === provider.id || !apiKeys[provider.id]}
+                      className="h-8 px-3 text-xs"
                     >
                       {connectingProvider === provider.id ? "Connecting..." : "Connect"}
                     </Button>
