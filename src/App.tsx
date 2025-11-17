@@ -43,8 +43,9 @@ const App = () => (
           <Route path="/wallets" element={<ProtectedRoute><Wallets /></ProtectedRoute>} />
           <Route path="/my-assets" element={<ProtectedRoute><MyAssets /></ProtectedRoute>} />
           <Route path="/portfolio-tracker" element={<ProtectedRoute><PortfolioTracker /></ProtectedRoute>} />
-          <Route path="/nkmt" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
-          <Route path="/ai-bot" element={<Navigate to="/nkmt" replace />} />
+          <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
+          <Route path="/nkmt" element={<Navigate to="/nkmt/bitget" replace />} />
+          <Route path="/ai-bot" element={<Navigate to="/nkmt/bitget" replace />} />
           <Route path="/arbitrage-bot" element={<ProtectedRoute><ArbitrageBot /></ProtectedRoute>} />
           <Route path="/dca-bot" element={<ProtectedRoute><DcaBot /></ProtectedRoute>} />
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />

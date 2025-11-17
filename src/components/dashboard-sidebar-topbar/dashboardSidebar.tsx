@@ -151,6 +151,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [projects, setProjects] = useState<Array<{ id: string; name: string; status: string }>>([]);
+  const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
   const [hoveredSubmenu, setHoveredSubmenu] = useState<{
     item: MenuItem;
     position: { x: number; y: number };
@@ -209,9 +210,10 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       }
       setOpenSubmenus((prev) => ({ ...prev, "settings": true }));
     } else if (pathname.startsWith("/nkmt")) {
-      // Handle NKMT agents
-      if (pathname === "/nkmt") {
-        setActiveItem("ai-bot");
+      // Handle NKMT agents and exchanges
+      if (pathname === "/nkmt/bitget" || pathname === "/nkmt/binance" || pathname === "/nkmt/okx") {
+        const exchange = pathname.split("/")[2];
+        setActiveItem(`nkmt-${exchange}`);
       } else if (pathname === "/nkmt/mkt-data") {
         setActiveItem("nkmt-mkt-data");
       } else if (pathname === "/nkmt/deriv-data") {
@@ -277,6 +279,28 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     fetchProjects();
   }, []);
 
+  // Load connected exchanges from database
+  useEffect(() => {
+    const fetchExchanges = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("exchange_keys")
+        .select("exchange")
+        .eq("user_id", user.id);
+      
+      if (data) {
+        // Remove duplicates
+        const uniqueExchanges = Array.from(new Set(data.map(item => item.exchange)))
+          .map(exchange => ({ exchange }));
+        setExchanges(uniqueExchanges);
+      }
+    };
+
+    fetchExchanges();
+  }, []);
+
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -334,7 +358,14 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           icon: Layers,
           hasSubmenu: true,
           submenuItems: [
-            { id: "ai-bot", label: "AI Bot", icon: Cpu, href: "/nkmt" },
+            // Dynamically add connected exchanges
+            ...exchanges.map((ex) => ({
+              id: `nkmt-${ex.exchange}`,
+              label: ex.exchange.charAt(0).toUpperCase() + ex.exchange.slice(1), // Capitalize first letter
+              icon: Store,
+              href: `/nkmt/${ex.exchange}`,
+            })),
+            // Static NKMT agents
             { id: "nkmt-mkt-data", label: "Mkt.data", icon: Database, href: "/nkmt/mkt-data" },
             { id: "nkmt-deriv-data", label: "Deriv.data", icon: Database, href: "/nkmt/deriv-data" },
             { id: "nkmt-sentiment", label: "Sentiment.scout", icon: Activity, href: "/nkmt/sentiment-scout" },
