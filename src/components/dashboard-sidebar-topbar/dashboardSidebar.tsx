@@ -288,6 +288,15 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             })),
           ],
         },
+        {
+          id: "nkmt",
+          label: "NKMT",
+          icon: Layers,
+          hasSubmenu: true,
+          submenuItems: [
+            // Placeholder submenu items - can be populated later
+          ],
+        },
         { id: "my-assets", label: "My Assets", icon: Coins, href: "/my-assets" },
         { id: "my-analytics", label: "My Analytics", icon: LineChart, href: "/my-analytics" },
       ],
