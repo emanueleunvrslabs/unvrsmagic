@@ -135,8 +135,8 @@ export function AiBotDashboard() {
         <div className="overflow-x-auto">
           <TabsList className="grid grid-cols-4 min-w-[450px] lg:w-[700px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="place-order">Place Order</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="place-order">Place Order</TabsTrigger>
             <TabsTrigger value="trades">Trades</TabsTrigger>
           </TabsList>
         </div>
@@ -146,14 +146,14 @@ export function AiBotDashboard() {
           <OverviewSection botData={botData} onViewAllTrades={handleViewAllTrades} onViewAllInsights={handleViewAllInsights} />
         </TabsContent>
 
-        {/* Place Order Tab */}
-        <TabsContent value="place-order" className="space-y-4">
-          <TradingInterface />
-        </TabsContent>
-
         {/* Portfolio Tab */}
         <TabsContent value="portfolio" className="space-y-4">
           <PortfolioSection botData={botData} realPortfolioData={realPortfolioData} isLoading={isLoadingPortfolio} onAssetAction={handleAssetAction} />
+        </TabsContent>
+
+        {/* Place Order Tab */}
+        <TabsContent value="place-order" className="space-y-4">
+          <TradingInterface />
         </TabsContent>
 
         {/* Trades Tab */}
