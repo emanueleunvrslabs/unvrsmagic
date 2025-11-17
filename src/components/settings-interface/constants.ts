@@ -44,12 +44,6 @@ export const SETTINGS_TABS: SettingsTab[] = [
     description: "Bot parameters, behavior, and monitoring settings",
   },
   {
-    id: "privacy",
-    label: "Privacy",
-    icon: "Lock",
-    description: "Data sharing, profile privacy, and tracking settings",
-  },
-  {
     id: "data",
     label: "Data",
     icon: "Database",
