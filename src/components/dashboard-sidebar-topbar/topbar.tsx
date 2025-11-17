@@ -8,7 +8,43 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useWalletConnection } from "@/hooks/use-wallet-connection";
 import { cn } from "@/lib/utils";
-import { Bell, ChevronDown, Copy, ExternalLink, LogOut, Settings, User, Wallet } from "lucide-react";
+import {
+  Activity,
+  BarChart,
+  Bell,
+  Bot,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  CircleDollarSign,
+  Cog,
+  Coins,
+  Copy,
+  Cpu,
+  CreditCard,
+  Database,
+  ExternalLink,
+  FileText,
+  Folder,
+  Gauge,
+  HelpCircle,
+  Layers,
+  LayoutDashboard,
+  LineChart,
+  LogOut,
+  Menu,
+  Package,
+  PieChart,
+  Repeat,
+  Settings,
+  Store,
+  TrendingUp,
+  User,
+  UserPlus,
+  Wallet,
+  XIcon,
+  Zap,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,6 +197,15 @@ export function Topbar() {
               <User className="mr-2 h-4 w-4" />
               <Link to="/settings?tab=profile">Profile</Link>
             </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Zap className="mr-2 h-4 w-4" />
+              <Link to="/settings?tab=security">AI Model API</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Store className="mr-2 h-4 w-4" />
+              <Link to="/settings?tab=exchanges">Exchange Connection</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
               <Link to="/settings">Settings</Link>
