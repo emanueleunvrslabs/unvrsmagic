@@ -89,19 +89,20 @@ serve(async (req) => {
 
       case "qwen":
         try {
-          // Qwen/Alibaba Cloud API verification requires both API key and Owner ID
+          // Qwen Model Studio (Singapore) API verification
           if (!ownerId) {
-            errorMessage = "Owner ID is required for Qwen3";
+            errorMessage = "Owner ID is required for Qwen3 Model Studio";
             console.error("Qwen verification failed: missing owner_id");
             break;
           }
 
-          const response = await fetch("https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation", {
+          // Model Studio International endpoint (Singapore)
+          const response = await fetch("https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/text-generation/generation", {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${apiKey}`,
-              "X-DashScope-SSE": "disable",
               "Content-Type": "application/json",
+              "X-DashScope-WorkSpace": ownerId
             },
             body: JSON.stringify({
               model: "qwen-turbo",
@@ -109,19 +110,20 @@ serve(async (req) => {
                 messages: [{ role: "user", content: "test" }]
               },
               parameters: {
-                max_tokens: 1,
-                api_key: ownerId
+                max_tokens: 1
               }
             }),
           });
 
+          console.log("Qwen response status:", response.status);
+          
           if (response.ok || response.status === 400) {
             isValid = true;
             console.log("Qwen API key is valid");
           } else {
             const error = await response.json();
-            errorMessage = error.message || "Invalid Qwen API key";
-            console.error("Qwen verification failed:", errorMessage);
+            errorMessage = error.message || `Invalid Qwen API key (status: ${response.status})`;
+            console.error("Qwen verification failed:", errorMessage, error);
           }
         } catch (error) {
           errorMessage = "Failed to verify Qwen API key";
