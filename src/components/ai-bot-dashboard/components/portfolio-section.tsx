@@ -82,6 +82,14 @@ export function PortfolioSection({ botData, realPortfolioData, isLoading, onAsse
                   <div key={`${asset.symbol}-${asset.type}`} className="space-y-1">
                     <div className="flex items-center justify-between">
                       <div className="font-medium flex items-center gap-2">
+                        <img 
+                          src={`https://assets.coincap.io/assets/icons/${asset.symbol.toLowerCase()}@2x.png`}
+                          alt={asset.symbol}
+                          className="w-6 h-6 rounded-full"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
                         {asset.symbol}
                         <Badge variant="outline" className="text-xs">{asset.type}</Badge>
                         {asset.side && <Badge variant="secondary" className="text-xs">{asset.side}</Badge>}
@@ -264,7 +272,19 @@ export function PortfolioSection({ botData, realPortfolioData, isLoading, onAsse
               ) : (
                 displayAssets.map((asset: any) => (
                   <TableRow key={`${asset.symbol}-${asset.type}`}>
-                    <TableCell className="font-medium">{asset.symbol}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={`https://assets.coincap.io/assets/icons/${asset.symbol.toLowerCase()}@2x.png`}
+                          alt={asset.symbol}
+                          className="w-6 h-6 rounded-full"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                        {asset.symbol}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline">{asset.type}</Badge>
                       {asset.side && <Badge variant="secondary" className="ml-2">{asset.side}</Badge>}
