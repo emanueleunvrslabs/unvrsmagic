@@ -132,8 +132,9 @@ export function AiBotDashboard() {
       {/* Main content tabs */}
       <Tabs defaultValue="overview" onValueChange={setActiveTab} className="space-y-4">
         <div className="overflow-x-auto">
-          <TabsList className="grid grid-cols-3 min-w-[450px] lg:w-[600px]">
+          <TabsList className="grid grid-cols-4 min-w-[450px] lg:w-[700px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="place-order">Place Order</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="trades">Trades</TabsTrigger>
           </TabsList>
@@ -142,6 +143,17 @@ export function AiBotDashboard() {
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <OverviewSection botData={botData} onViewAllTrades={handleViewAllTrades} onViewAllInsights={handleViewAllInsights} />
+        </TabsContent>
+
+        {/* Place Order Tab */}
+        <TabsContent value="place-order" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Order form content will be added here */}
+            <div className="rounded-lg border bg-card p-6">
+              <h3 className="text-lg font-semibold mb-4">Place Order</h3>
+              <p className="text-sm text-muted-foreground">Order placement interface coming soon...</p>
+            </div>
+          </div>
         </TabsContent>
 
         {/* Portfolio Tab */}
