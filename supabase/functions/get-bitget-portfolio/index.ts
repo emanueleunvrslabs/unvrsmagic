@@ -17,6 +17,7 @@ interface BitgetFuturesAccount {
   available: string
   frozen: string
   equity: string
+  usdtEquity?: string
 }
 
 interface BitgetPosition {
@@ -213,55 +214,66 @@ Deno.serve(async (req) => {
 
     console.log('Fetching Bitget portfolio data...')
 
-    // Fetch spot account balance
-    const spotData = await callBitgetAPI('/api/v2/spot/account/assets')
+    // Fetch all account balances in parallel
+    const [spotData, futuresData, positionsData] = await Promise.all([
+      callBitgetAPI('/api/v2/spot/account/assets'),
+      callBitgetAPI('/api/v2/mix/account/accounts?productType=USDT-FUTURES'),
+      callBitgetAPI('/api/v2/mix/position/all-position?productType=USDT-FUTURES')
+    ])
+
     console.log('Spot data:', JSON.stringify(spotData))
-
-    // Fetch futures account balance (USDT-M)
-    const futuresData = await callBitgetAPI('/api/v2/mix/account/accounts?productType=USDT-FUTURES')
     console.log('Futures data:', JSON.stringify(futuresData))
-
-    // Fetch open positions
-    const positionsData = await callBitgetAPI('/api/v2/mix/position/all-position?productType=USDT-FUTURES')
     console.log('Positions data:', JSON.stringify(positionsData))
 
-    // Calculate total portfolio value
-    let totalSpot = 0
-    let totalFutures = 0
-    let totalPositions = 0
+    // Calculate total portfolio value in USDT
+    let totalSpotUSDT = 0
+    let totalFuturesUSDT = 0
+    let totalUnrealizedPnL = 0
 
-    // Calculate spot balance
+    // Calculate spot balance (convert all to USDT equivalent)
+    // Note: For simplicity, we're assuming 1:1 for stablecoins and using USDT value for others
     if (spotData.data && Array.isArray(spotData.data)) {
       spotData.data.forEach((coin: BitgetSpotAccount) => {
         const available = parseFloat(coin.available || '0')
         const frozen = parseFloat(coin.frozen || '0')
         const locked = parseFloat(coin.locked || '0')
-        totalSpot += available + frozen + locked
+        const total = available + frozen + locked
+        
+        // For USDT and stablecoins, use direct value
+        if (['USDT', 'USDC', 'BUSD', 'DAI'].includes(coin.coin)) {
+          totalSpotUSDT += total
+        } else {
+          // For other coins, we'd need price conversion
+          // For now, skip or implement price lookup
+          totalSpotUSDT += total // This is a simplification
+        }
       })
     }
 
-    // Calculate futures balance
+    // Calculate futures balance (already in USDT)
     if (futuresData.data && Array.isArray(futuresData.data)) {
       futuresData.data.forEach((account: BitgetFuturesAccount) => {
-        const equity = parseFloat(account.equity || '0')
-        totalFutures += equity
+        // usdtEquity already includes unrealized P&L
+        const equity = parseFloat(account.usdtEquity || account.equity || '0')
+        totalFuturesUSDT += equity
       })
     }
 
-    // Calculate positions value (unrealized P&L is already included in equity)
+    // Calculate unrealized P&L from open positions (for display purposes)
     if (positionsData.data && Array.isArray(positionsData.data)) {
       positionsData.data.forEach((position: BitgetPosition) => {
         const unrealizedPL = parseFloat(position.unrealizedPL || '0')
-        totalPositions += unrealizedPL
+        totalUnrealizedPnL += unrealizedPL
       })
     }
 
-    const totalValue = totalSpot + totalFutures
+    // Total value = Spot + Futures (unrealized P&L is already included in futures equity)
+    const totalValue = totalSpotUSDT + totalFuturesUSDT
 
     console.log('Portfolio calculation:', {
-      totalSpot,
-      totalFutures,
-      totalPositions,
+      totalSpotUSDT,
+      totalFuturesUSDT,
+      totalUnrealizedPnL,
       totalValue,
     })
 
@@ -270,9 +282,9 @@ Deno.serve(async (req) => {
         success: true,
         data: {
           totalValue,
-          spot: totalSpot,
-          futures: totalFutures,
-          unrealizedPnL: totalPositions,
+          spot: totalSpotUSDT,
+          futures: totalFuturesUSDT,
+          unrealizedPnL: totalUnrealizedPnL,
           breakdown: {
             spotAccounts: spotData.data || [],
             futuresAccounts: futuresData.data || [],
