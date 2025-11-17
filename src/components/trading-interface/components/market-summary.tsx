@@ -91,26 +91,26 @@ export function MarketSummary({ pair }: MarketSummaryProps) {
       <CardContent className="flex justify-between flex-wrap grid-cols-2 gap-4 md:grid-cols-4">
         <div>
           <div className="text-sm text-muted-foreground">Last Price</div>
-          <div className="text-lg font-medium">${marketData.lastPrice.toLocaleString()}</div>
+          <div className="text-lg font-medium">${(marketData.lastPrice ?? 0).toLocaleString()}</div>
         </div>
         <div>
           <div className="text-sm text-muted-foreground">24h Change</div>
-          <div className={`text-lg font-medium ${marketData.priceChangePercent24h >= 0 ? "text-green-500" : "text-red-500"}`}>
-            {marketData.priceChangePercent24h >= 0 ? "+" : ""}
-            {marketData.priceChangePercent24h.toFixed(2)}%
+          <div className={`text-lg font-medium ${(marketData.priceChangePercent24h ?? 0) >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {(marketData.priceChangePercent24h ?? 0) >= 0 ? "+" : ""}
+            {(marketData.priceChangePercent24h ?? 0).toFixed(2)}%
           </div>
         </div>
         <div>
           <div className="text-sm text-muted-foreground">24h High</div>
-          <div className="text-lg font-medium">${marketData.high24h.toLocaleString()}</div>
+          <div className="text-lg font-medium">${(marketData.high24h ?? 0).toLocaleString()}</div>
         </div>
         <div>
           <div className="text-sm text-muted-foreground">24h Low</div>
-          <div className="text-lg font-medium">${marketData.low24h.toLocaleString()}</div>
+          <div className="text-lg font-medium">${(marketData.low24h ?? 0).toLocaleString()}</div>
         </div>
         <div>
           <div className="text-sm text-muted-foreground">24h Volume</div>
-          <div className="text-lg font-medium">{marketData.volume24h.toLocaleString()}</div>
+          <div className="text-lg font-medium">{(marketData.volume24h ?? 0).toLocaleString()}</div>
         </div>
       </CardContent>
     </Card>
