@@ -9,9 +9,9 @@ export const SETTINGS_TABS: SettingsTab[] = [
   },
   {
     id: "security",
-    label: "Security",
-    icon: "Shield",
-    description: "Password, 2FA, API keys, and security settings",
+    label: "API AI Agents",
+    icon: "Zap",
+    description: "Connect and manage AI models like OpenAI, Claude, and more",
   },
   {
     id: "notifications",
