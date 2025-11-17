@@ -230,15 +230,19 @@ Deno.serve(async (req) => {
     const priceMap: Record<string, number> = {}
     if (tickerData.data && Array.isArray(tickerData.data)) {
       tickerData.data.forEach((ticker: any) => {
-        // Extract base currency from symbol (e.g., BTCUSDT -> BTC)
         const symbol = ticker.symbol
+        // Handle different symbol patterns
         if (symbol.endsWith('USDT')) {
           const baseCoin = symbol.replace('USDT', '')
+          priceMap[baseCoin] = parseFloat(ticker.lastPr || '0')
+        } else if (symbol.endsWith('_USDT')) {
+          // Handle symbols like EUR_USDT
+          const baseCoin = symbol.replace('_USDT', '')
           priceMap[baseCoin] = parseFloat(ticker.lastPr || '0')
         }
       })
     }
-    console.log('Price map:', JSON.stringify(priceMap))
+    console.log('Price map sample:', Object.keys(priceMap).slice(0, 20))
 
     // Calculate total portfolio value in USDT
     let totalSpotUSDT = 0
@@ -260,18 +264,25 @@ Deno.serve(async (req) => {
           totalSpotUSDT += total
           console.log(`${coin.coin}: ${total} USDT (direct)`)
         } 
-        // For other coins, convert using market price
-        else if (priceMap[coin.coin]) {
-          const usdtValue = total * priceMap[coin.coin]
-          totalSpotUSDT += usdtValue
-          console.log(`${coin.coin}: ${total} * ${priceMap[coin.coin]} = ${usdtValue} USDT`)
-        }
-        // For stablecoins without ticker, assume 1:1
+        // For stablecoins, assume 1:1
         else if (['USDC', 'BUSD', 'DAI', 'FDUSD'].includes(coin.coin)) {
           totalSpotUSDT += total
           console.log(`${coin.coin}: ${total} USDT (stablecoin 1:1)`)
         }
-        // For EUR and other fiat, try to use their USDT pair price
+        // For other coins, convert using market price (check both patterns)
+        else if (priceMap[coin.coin] || priceMap[coin.coin.toUpperCase()]) {
+          const price = priceMap[coin.coin] || priceMap[coin.coin.toUpperCase()]
+          const usdtValue = total * price
+          totalSpotUSDT += usdtValue
+          console.log(`${coin.coin}: ${total} * ${price} = ${usdtValue} USDT`)
+        }
+        // For fiat currencies, try approximate conversion (EUR ~= 1.05 USD for now)
+        else if (coin.coin === 'EUR') {
+          const eurToUsd = 1.05 // Approximate rate
+          const usdtValue = total * eurToUsd
+          totalSpotUSDT += usdtValue
+          console.log(`${coin.coin}: ${total} * ${eurToUsd} (approx) = ${usdtValue} USDT`)
+        }
         else {
           console.log(`${coin.coin}: ${total} - no price found, skipping`)
         }
