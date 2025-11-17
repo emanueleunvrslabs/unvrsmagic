@@ -1,23 +1,68 @@
 "use client"
 
 import type React from "react"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { supabase } from "@/integrations/supabase/client"
 
 const NKMT_AGENTS = [
-  { id: "nkmt", name: "nkmt", model: "GPT-5.1 Thinking", description: "Main orchestrator" },
-  { id: "mkt-data", name: "mkt.data", model: "Code", description: "Market data processor" },
-  { id: "deriv-data", name: "deriv.data", model: "Code", description: "Derivatives data processor" },
-  { id: "sentiment-scout", name: "sentiment.scout", model: "GPT-5.1", description: "Sentiment analysis" },
-  { id: "chain-analyst", name: "chain.analyst", model: "Qwen 3", description: "Blockchain analysis" },
-  { id: "market-modeler", name: "market.modeler", model: "Claude Sonnet 4.5", description: "Market modeling" },
-  { id: "signal-maker", name: "signal.maker", model: "GPT-5.1 Thinking", description: "Signal generation" },
-  { id: "risk-mgr", name: "risk.mgr", model: "GPT-5.1 Thinking", description: "Risk management" },
-  { id: "trade-executor", name: "trade.executor", model: "Code", description: "Trade execution" },
-  { id: "reviewer", name: "reviewer", model: "Claude Sonnet 4.5", description: "Trade review" },
+  { id: "nkmt", name: "nkmt", model: "GPT-5.1 Thinking", description: "Main orchestrator", requiresApi: "openai" },
+  { id: "mkt-data", name: "mkt.data", model: "Code", description: "Market data processor", requiresApi: null },
+  { id: "deriv-data", name: "deriv.data", model: "Code", description: "Derivatives data processor", requiresApi: null },
+  { id: "sentiment-scout", name: "sentiment.scout", model: "GPT-5.1", description: "Sentiment analysis", requiresApi: "openai" },
+  { id: "chain-analyst", name: "chain.analyst", model: "Qwen 3", description: "Blockchain analysis", requiresApi: null },
+  { id: "market-modeler", name: "market.modeler", model: "Claude Sonnet 4.5", description: "Market modeling", requiresApi: "anthropic" },
+  { id: "signal-maker", name: "signal.maker", model: "GPT-5.1 Thinking", description: "Signal generation", requiresApi: "openai" },
+  { id: "risk-mgr", name: "risk.mgr", model: "GPT-5.1 Thinking", description: "Risk management", requiresApi: "openai" },
+  { id: "trade-executor", name: "trade.executor", model: "Code", description: "Trade execution", requiresApi: null },
+  { id: "reviewer", name: "reviewer", model: "Claude Sonnet 4.5", description: "Trade review", requiresApi: "anthropic" },
 ]
 
 export const NKMTAgentsSection: React.FC = () => {
+  const [connectedApis, setConnectedApis] = useState<Set<string>>(new Set())
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadConnectedApis = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data, error } = await supabase
+          .from('api_keys')
+          .select('provider')
+          .eq('user_id', user.id)
+          .in('provider', ['openai', 'anthropic'])
+
+        if (error) {
+          console.error("Error loading API keys:", error)
+          return
+        }
+
+        if (data) {
+          setConnectedApis(new Set(data.map(item => item.provider)))
+        }
+      } catch (error) {
+        console.error("Error loading connected APIs:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadConnectedApis()
+  }, [])
+
+  const isAgentConnected = (agent: typeof NKMT_AGENTS[0]) => {
+    // Code-based agents are always connected
+    if (!agent.requiresApi) return true
+    // Check if the required API is connected
+    return connectedApis.has(agent.requiresApi)
+  }
+
+  if (isLoading) {
+    return <div className="text-center py-4">Loading...</div>
+  }
   return (
     <div className="space-y-4">
       <Table>
@@ -40,9 +85,11 @@ export const NKMTAgentsSection: React.FC = () => {
               </TableCell>
               <TableCell className="text-muted-foreground">{agent.description}</TableCell>
               <TableCell className="text-right">
-                <Badge variant="default" className="bg-green-500/10 text-green-500 hover:bg-green-500/20">
-                  Active
-                </Badge>
+                {isAgentConnected(agent) ? (
+                  <span className="text-green-600 text-sm font-medium">Connected</span>
+                ) : (
+                  <span className="text-muted-foreground text-sm">Not connected</span>
+                )}
               </TableCell>
             </TableRow>
           ))}
