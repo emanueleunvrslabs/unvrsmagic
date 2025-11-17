@@ -254,6 +254,36 @@ serve(async (req) => {
         }
         break;
 
+      case "webshare":
+        try {
+          // Webshare API - verify with proxy list endpoint
+          const response = await fetch("https://proxy.webshare.io/api/v2/proxy/list/?mode=direct&page=1&page_size=1", {
+            method: "GET",
+            headers: {
+              "Authorization": `Token ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Webshare response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("Webshare API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            const error = await response.json();
+            errorMessage = error.detail || "Invalid Webshare API key";
+            console.error("Webshare verification failed:", errorMessage);
+          } else {
+            errorMessage = "Failed to verify Webshare API key";
+            console.error("Webshare unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Webshare API key";
+          console.error("Webshare verification error:", error);
+        }
+        break;
+
       default:
         return new Response(
           JSON.stringify({ error: "Unsupported provider" }),

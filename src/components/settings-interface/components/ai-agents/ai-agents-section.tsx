@@ -20,6 +20,7 @@ const AI_AGENT_PROVIDERS = [
   { id: "nano", name: "Nano 🍌", placeholder: "Enter API key", description: "Image generator", requiresOwnerId: false, usesProvider: "Fal" },
   { id: "veo3", name: "Veo3", placeholder: "Enter API key", description: "Video generator", requiresOwnerId: false, usesProvider: "Fal" },
   { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Presentation generator", requiresOwnerId: false, usesProvider: "Gamma" },
+  { id: "webshare", name: "Webshare", placeholder: "Enter API key", description: "Proxy service", requiresOwnerId: false, usesProvider: "Webshare" },
   { id: "claude", name: "Claude 4.5", placeholder: "sk-ant-...", description: "Website generator", requiresOwnerId: false, usesProvider: "Anthropic" },
   { id: "chatgpt", name: "ChatGPT", placeholder: "sk-...", description: "Normal chat", requiresOwnerId: false, usesProvider: "OpenAI" },
 ]
@@ -35,6 +36,9 @@ const apiKeySchemas = {
   gamma: z.string().trim().min(20, {
     message: "Gamma API key must be at least 20 characters"
   }),
+  webshare: z.string().trim().min(10, {
+    message: "Webshare API key must be at least 10 characters"
+  }),
   claude: z.string().trim().regex(/^sk-ant-[A-Za-z0-9-_]{20,}$/, {
     message: "Claude API key must start with 'sk-ant-' followed by at least 20 characters"
   }),
@@ -48,6 +52,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
     nano: "",
     veo3: "",
     gamma: "",
+    webshare: "",
     claude: "",
     chatgpt: "",
   })
@@ -69,7 +74,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
           .from('api_keys')
           .select('provider, api_key')
           .eq('user_id', user.id)
-          .in('provider', ['nano', 'veo3', 'gamma', 'claude', 'chatgpt', 'fal', 'openai', 'anthropic'])
+          .in('provider', ['nano', 'veo3', 'gamma', 'webshare', 'claude', 'chatgpt', 'fal', 'openai', 'anthropic'])
 
         if (error) {
           console.error("Error loading API keys:", error)
@@ -83,6 +88,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
           // Check which underlying providers are connected
           const hasFal = data.some(item => item.provider === 'fal')
           const hasGamma = data.some(item => item.provider === 'gamma')
+          const hasWebshare = data.some(item => item.provider === 'webshare')
           const hasAnthropic = data.some(item => item.provider === 'anthropic')
           const hasOpenAI = data.some(item => item.provider === 'openai')
 
@@ -98,6 +104,9 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
           }
           if (hasGamma) {
             connected.add('gamma')
+          }
+          if (hasWebshare) {
+            connected.add('webshare')
           }
           if (hasAnthropic) {
             connected.add('claude')
@@ -191,6 +200,30 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
     }
 
     setConnectingProvider(providerId)
+    
+    // For webshare, verify API key before saving
+    if (providerId === 'webshare') {
+      try {
+        const { data, error } = await supabase.functions.invoke('verify-api-key', {
+          body: { 
+            provider: 'webshare',
+            apiKey: apiKeys[providerId]
+          }
+        })
+
+        if (error || !data?.valid) {
+          toast.error(data?.error || "Invalid Webshare API key")
+          setConnectingProvider(null)
+          return
+        }
+      } catch (error) {
+        console.error("Error verifying Webshare API key:", error)
+        toast.error("Failed to verify API key")
+        setConnectingProvider(null)
+        return
+      }
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
