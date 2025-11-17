@@ -447,7 +447,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       icon: Settings,
       hasSubmenu: true,
       submenuItems: [
-        { id: "settings-profile", label: "Profile", icon: Settings, href: "/settings?tab=profile" },
         { id: "settings-security", label: "AI Model API", icon: Zap, href: "/settings?tab=security" },
         { id: "settings-exchanges", label: "Exchange Connection", icon: Store, href: "/settings?tab=exchanges" },
       ],

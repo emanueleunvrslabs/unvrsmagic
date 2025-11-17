@@ -158,6 +158,10 @@ export function Topbar() {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <Link to="/settings?tab=profile">Profile</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
               <Link to="/settings">Settings</Link>
             </DropdownMenuItem>
