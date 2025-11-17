@@ -244,24 +244,50 @@ export function TradingHeader({
                 disabled={isLoadingPairs}
               />
             </div>
-            <Select value={selectedPair} onValueChange={onPairChange} disabled={isLoadingPairs}>
-              <SelectTrigger>
-                <SelectValue placeholder={isLoadingPairs ? "Loading pairs..." : "Select pair"} />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredTradingPairs.length === 0 ? (
-                  <SelectItem value="none" disabled>
-                    {isLoadingPairs ? "Loading..." : pairSearchQuery ? "No pairs found" : "No trading pairs available"}
-                  </SelectItem>
-                ) : (
-                  filteredTradingPairs.map((pair) => (
-                    <SelectItem key={pair.symbol.toLowerCase()} value={pair.symbol.toLowerCase()}>
-                      {pair.name}
+
+            {pairSearchQuery.trim() ? (
+              <div className="rounded-md border border-border bg-background">
+                <ul className="max-h-64 overflow-auto">
+                  {filteredTradingPairs.length === 0 ? (
+                    <li className="px-3 py-2 text-sm text-muted-foreground">No pairs found</li>
+                  ) : (
+                    filteredTradingPairs.slice(0, 100).map((pair) => (
+                      <li key={pair.symbol}>
+                        <button
+                          type="button"
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                          onClick={() => {
+                            onPairChange(pair.symbol.toLowerCase())
+                            setPairSearchQuery("")
+                          }}
+                        >
+                          {pair.name}
+                        </button>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            ) : (
+              <Select value={selectedPair} onValueChange={onPairChange} disabled={isLoadingPairs}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingPairs ? "Loading pairs..." : "Select pair"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredTradingPairs.length === 0 ? (
+                    <SelectItem value="none" disabled>
+                      {isLoadingPairs ? "Loading..." : "No trading pairs available"}
                     </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+                  ) : (
+                    filteredTradingPairs.map((pair) => (
+                      <SelectItem key={pair.symbol.toLowerCase()} value={pair.symbol.toLowerCase()}>
+                        {pair.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            )}
           </CardContent>
         </Card>
       </div>
