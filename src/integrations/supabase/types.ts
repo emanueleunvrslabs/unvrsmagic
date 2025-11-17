@@ -44,6 +44,36 @@ export type Database = {
         }
         Relationships: []
       }
+      exchange_keys: {
+        Row: {
+          api_key: string
+          api_secret: string | null
+          created_at: string
+          exchange: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          api_secret?: string | null
+          created_at?: string
+          exchange: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          api_secret?: string | null
+          created_at?: string
+          exchange?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       otp_codes: {
         Row: {
           code: string
