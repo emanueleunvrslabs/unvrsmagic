@@ -215,18 +215,16 @@ export default function Auth() {
                   )}
                 </p>
               </div>
-              <div className="space-y-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="w-full"
+              <div className="text-center space-y-2">
+                <Button
+                  type="button"
+                  variant="link"
                   onClick={handleBack}
                   disabled={loading}
+                  className="text-sm"
                 >
                   Go back
                 </Button>
-              </div>
-              <div className="text-center">
                 <Button
                   type="button"
                   variant="link"
