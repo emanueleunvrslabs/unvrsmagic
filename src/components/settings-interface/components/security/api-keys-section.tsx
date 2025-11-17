@@ -20,6 +20,8 @@ const AI_PROVIDERS = [
   { id: "openai", name: "OpenAI", placeholder: "sk-...", description: "GPT models", requiresOwnerId: false },
   { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models", requiresOwnerId: false },
   { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresOwnerId: true },
+  { id: "fal", name: "Fal", placeholder: "Enter API key", description: "Fal AI models", requiresOwnerId: false },
+  { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false },
 ]
 
 // Validation schemas for each provider
@@ -32,6 +34,12 @@ const apiKeySchemas = {
   }),
   qwen: z.string().trim().min(20, {
     message: "Qwen3 API key must be at least 20 characters"
+  }),
+  fal: z.string().trim().min(20, {
+    message: "Fal API key must be at least 20 characters"
+  }),
+  gamma: z.string().trim().min(20, {
+    message: "Gamma API key must be at least 20 characters"
   })
 }
 
@@ -40,6 +48,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     openai: "",
     anthropic: "",
     qwen: "",
+    fal: "",
+    gamma: "",
   })
   const [ownerIds, setOwnerIds] = useState<Record<string, string>>({
     qwen: "",

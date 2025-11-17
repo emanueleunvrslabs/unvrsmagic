@@ -64,11 +64,12 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
+        // Load both AI agent keys and the underlying provider keys
         const { data, error } = await supabase
           .from('api_keys')
           .select('provider, api_key')
           .eq('user_id', user.id)
-          .in('provider', ['nano', 'veo3', 'gamma', 'claude', 'chatgpt'])
+          .in('provider', ['nano', 'veo3', 'gamma', 'claude', 'chatgpt', 'fal', 'openai', 'anthropic'])
 
         if (error) {
           console.error("Error loading API keys:", error)
@@ -79,10 +80,31 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
           const loadedKeys: Record<string, string> = {}
           const connected = new Set<string>()
 
+          // Check which underlying providers are connected
+          const hasFal = data.some(item => item.provider === 'fal')
+          const hasGamma = data.some(item => item.provider === 'gamma')
+          const hasAnthropic = data.some(item => item.provider === 'anthropic')
+          const hasOpenAI = data.some(item => item.provider === 'openai')
+
           data.forEach((item) => {
             loadedKeys[item.provider] = item.api_key
             connected.add(item.provider)
           })
+
+          // Auto-connect agents based on underlying providers
+          if (hasFal) {
+            connected.add('nano')
+            connected.add('veo3')
+          }
+          if (hasGamma) {
+            connected.add('gamma')
+          }
+          if (hasAnthropic) {
+            connected.add('claude')
+          }
+          if (hasOpenAI) {
+            connected.add('chatgpt')
+          }
 
           setApiKeys(prev => ({ ...prev, ...loadedKeys }))
           setConnectedProviders(connected)
@@ -144,6 +166,24 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
   }
 
   const handleConnect = async (providerId: string) => {
+    // Prevent direct connection for agents that depend on other providers
+    if (providerId === 'nano' || providerId === 'veo3') {
+      toast.error("Please connect Fal API in AI Model API section to use this agent")
+      return
+    }
+    if (providerId === 'gamma') {
+      toast.error("Please connect Gamma API in AI Model API section to use this agent")
+      return
+    }
+    if (providerId === 'claude') {
+      toast.error("Please connect Anthropic API in AI Model API section to use this agent")
+      return
+    }
+    if (providerId === 'chatgpt') {
+      toast.error("Please connect OpenAI API in AI Model API section to use this agent")
+      return
+    }
+
     // Validate the API key first
     if (!validateApiKey(providerId)) {
       toast.error("Please fix validation errors")
@@ -187,6 +227,24 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
   }
 
   const handleDisconnect = async (providerId: string) => {
+    // Prevent direct disconnection for agents that depend on other providers
+    if (providerId === 'nano' || providerId === 'veo3') {
+      toast.error("Please disconnect Fal API in AI Model API section to disconnect this agent")
+      return
+    }
+    if (providerId === 'gamma') {
+      toast.error("Please disconnect Gamma API in AI Model API section to disconnect this agent")
+      return
+    }
+    if (providerId === 'claude') {
+      toast.error("Please disconnect Anthropic API in AI Model API section to disconnect this agent")
+      return
+    }
+    if (providerId === 'chatgpt') {
+      toast.error("Please disconnect OpenAI API in AI Model API section to disconnect this agent")
+      return
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -255,7 +313,17 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
                         type={visibleKeys.has(provider.id) ? "text" : "password"}
                         value={apiKeys[provider.id]}
                         onChange={(e) => handleKeyChange(provider.id, e.target.value)}
-                        placeholder={provider.placeholder}
+                        placeholder={
+                          (provider.id === 'nano' || provider.id === 'veo3') && connectedProviders.has(provider.id)
+                            ? "Powered by Fal"
+                            : provider.id === 'gamma' && connectedProviders.has(provider.id)
+                            ? "Powered by Gamma"
+                            : provider.id === 'claude' && connectedProviders.has(provider.id)
+                            ? "Powered by Anthropic"
+                            : provider.id === 'chatgpt' && connectedProviders.has(provider.id)
+                            ? "Powered by OpenAI"
+                            : provider.placeholder
+                        }
                         disabled={connectedProviders.has(provider.id)}
                         className={validationErrors[provider.id] ? "border-red-500" : ""}
                       />
