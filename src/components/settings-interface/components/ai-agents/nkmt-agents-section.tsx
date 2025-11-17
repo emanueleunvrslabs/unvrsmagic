@@ -7,16 +7,16 @@ import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/integrations/supabase/client"
 
 const NKMT_AGENTS = [
-  { id: "nkmt", name: "nkmt", model: "GPT-5.1 Thinking", description: "Main orchestrator", requiresApi: "openai" },
-  { id: "mkt-data", name: "mkt.data", model: "Code", description: "Market data processor", requiresApi: null },
-  { id: "deriv-data", name: "deriv.data", model: "Code", description: "Derivatives data processor", requiresApi: null },
-  { id: "sentiment-scout", name: "sentiment.scout", model: "GPT-5.1", description: "Sentiment analysis", requiresApi: "openai" },
-  { id: "chain-analyst", name: "chain.analyst", model: "Qwen 3", description: "Blockchain analysis", requiresApi: null },
-  { id: "market-modeler", name: "market.modeler", model: "Claude Sonnet 4.5", description: "Market modeling", requiresApi: "anthropic" },
-  { id: "signal-maker", name: "signal.maker", model: "GPT-5.1 Thinking", description: "Signal generation", requiresApi: "openai" },
-  { id: "risk-mgr", name: "risk.mgr", model: "GPT-5.1 Thinking", description: "Risk management", requiresApi: "openai" },
-  { id: "trade-executor", name: "trade.executor", model: "Code", description: "Trade execution", requiresApi: null },
-  { id: "reviewer", name: "reviewer", model: "Claude Sonnet 4.5", description: "Trade review", requiresApi: "anthropic" },
+  { id: "nkmt", name: "NKMT", model: "GPT-5.1 Thinking", description: "Main orchestrator", requiresApi: "openai" },
+  { id: "mkt-data", name: "Mkt.data", model: "Code", description: "Market data processor", requiresApi: null },
+  { id: "deriv-data", name: "Deriv.data", model: "Code", description: "Derivatives data processor", requiresApi: null },
+  { id: "sentiment-scout", name: "Sentiment.scout", model: "GPT-5.1", description: "Sentiment analysis", requiresApi: "openai" },
+  { id: "chain-analyst", name: "Chain.analyst", model: "Qwen 3", description: "Blockchain analysis", requiresApi: null },
+  { id: "market-modeler", name: "Market.modeler", model: "Claude Sonnet 4.5", description: "Market modeling", requiresApi: "anthropic" },
+  { id: "signal-maker", name: "Signal.maker", model: "GPT-5.1 Thinking", description: "Signal generation", requiresApi: "openai" },
+  { id: "risk-mgr", name: "Risk.mgr", model: "GPT-5.1 Thinking", description: "Risk management", requiresApi: "openai" },
+  { id: "trade-executor", name: "Trade.executor", model: "Code", description: "Trade execution", requiresApi: null },
+  { id: "reviewer", name: "Reviewer", model: "Claude Sonnet 4.5", description: "Trade review", requiresApi: "anthropic" },
 ]
 
 export const NKMTAgentsSection: React.FC = () => {
