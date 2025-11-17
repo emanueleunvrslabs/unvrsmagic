@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -11,6 +11,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { Calendar, ChevronDown } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/integrations/supabase/client"
 import type { DateRange } from "react-day-picker"
 
 // Mock data for the selectors
@@ -72,12 +73,36 @@ export function TradingHeader({
   onPairChange,
   onSettingChange,
 }: TradingHeaderProps) {
+  const [connectedExchanges, setConnectedExchanges] = useState<Array<{ id: string; name: string }>>([])
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(2024, 4, 15), // May 15, 2024
     to: new Date(2024, 4, 22), // May 22, 2024
   })
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+
+  // Fetch connected exchanges
+  useEffect(() => {
+    const fetchConnectedExchanges = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('exchange_keys')
+        .select('exchange')
+        .eq('user_id', user.id)
+
+      if (!error && data) {
+        const exchanges = data.map((item) => ({
+          id: item.exchange.toLowerCase(),
+          name: item.exchange.charAt(0).toUpperCase() + item.exchange.slice(1)
+        }))
+        setConnectedExchanges(exchanges)
+      }
+    }
+
+    fetchConnectedExchanges()
+  }, [])
 
   const formatDateRange = (range: DateRange | undefined): string => {
     if (!range?.from) {
@@ -113,11 +138,15 @@ export function TradingHeader({
                 <SelectValue placeholder="Select exchange" />
               </SelectTrigger>
               <SelectContent>
-                {mockExchanges.map((exchange) => (
-                  <SelectItem key={exchange.id} value={exchange.id}>
-                    {exchange.name}
-                  </SelectItem>
-                ))}
+                {connectedExchanges.length === 0 ? (
+                  <SelectItem value="none" disabled>No exchanges connected</SelectItem>
+                ) : (
+                  connectedExchanges.map((exchange) => (
+                    <SelectItem key={exchange.id} value={exchange.id}>
+                      {exchange.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </CardContent>

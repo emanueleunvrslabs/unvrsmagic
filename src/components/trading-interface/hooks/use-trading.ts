@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
+import { supabase } from "@/integrations/supabase/client"
 import type { OrderFormData, TradeHistoryItem, TradingSettings } from "../types"
 
 export function useTrading() {
@@ -24,10 +25,31 @@ export function useTrading() {
     type: "limit",
   })
 
-  const [selectedExchange, setSelectedExchange] = useState("binance")
+  const [selectedExchange, setSelectedExchange] = useState("")
   const [selectedAccount, setSelectedAccount] = useState("main")
   const [selectedMarket, setSelectedMarket] = useState("spot")
   const [selectedPair, setSelectedPair] = useState("btcusdt")
+
+  // Fetch the first connected exchange and set it as default
+  useEffect(() => {
+    const fetchFirstExchange = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('exchange_keys')
+        .select('exchange')
+        .eq('user_id', user.id)
+        .limit(1)
+        .single()
+
+      if (!error && data) {
+        setSelectedExchange(data.exchange.toLowerCase())
+      }
+    }
+
+    fetchFirstExchange()
+  }, [])
   const [tradeHistory, setTradeHistory] = useState<TradeHistoryItem[]>([
     {
       id: "1",
