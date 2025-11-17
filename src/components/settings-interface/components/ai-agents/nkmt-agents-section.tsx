@@ -184,7 +184,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
                 {isAgentConnected(agent) ? (
                   <span className="text-green-600 text-sm font-medium">Connected</span>
                 ) : (
-                  <span className="text-muted-foreground text-sm">Not connected</span>
+                  <span className="text-red-600 text-sm">Not connected</span>
                 )}
               </TableCell>
             </TableRow>
