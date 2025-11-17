@@ -53,7 +53,10 @@ serve(async (req) => {
       .gte('created_at', oneHourAgo);
 
     if (rateLimitError) {
-      console.error('Rate limit check error:', rateLimitError);
+      return new Response(
+        JSON.stringify({ error: 'Service temporarily unavailable' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     if (recentOtps && recentOtps.length >= 3) {
@@ -89,7 +92,6 @@ serve(async (req) => {
       });
 
     if (dbError) {
-      console.error('Database error:', dbError);
       throw new Error('Failed to save OTP');
     }
 
@@ -111,8 +113,6 @@ serve(async (req) => {
     });
 
     if (!wasenderResponse.ok) {
-      const errorText = await wasenderResponse.text();
-      console.error('Wasender API error:', errorText);
       throw new Error('Failed to send WhatsApp message');
     }
 
