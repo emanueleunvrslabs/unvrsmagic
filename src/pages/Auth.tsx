@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,17 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/overview");
+      }
+    };
+    checkSession();
+  }, [navigate]);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
