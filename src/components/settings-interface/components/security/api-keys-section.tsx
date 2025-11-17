@@ -4,7 +4,6 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
@@ -212,15 +211,13 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                 <TableCell className="text-sm text-muted-foreground">
                   {provider.description}
                 </TableCell>
-                <TableCell>
-                  <Badge variant={connectedProviders.has(provider.id) ? "default" : "secondary"}>
-                    {connectedProviders.has(provider.id) ? "Connected" : "Not connected"}
-                  </Badge>
+                <TableCell className="text-sm text-muted-foreground">
+                  {connectedProviders.has(provider.id) ? "Connected" : "Not connected"}
                 </TableCell>
                 <TableCell>
                   {connectedProviders.has(provider.id) ? (
                     <Button
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
                       onClick={() => handleDisconnect(provider.id)}
                     >
