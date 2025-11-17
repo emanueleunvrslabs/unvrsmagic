@@ -6,7 +6,7 @@ export const metadata = {
   description: "Advanced AI-powered trading bot for cryptocurrency markets",
 };
 
-export default function SettingsPage() {
+export default function Settings() {
   return (
     <DashboardLayout>
       <SettingsInterface />
