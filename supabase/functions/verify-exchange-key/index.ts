@@ -161,6 +161,45 @@ serve(async (req) => {
         }
         break
 
+      case "bitget":
+        try {
+          const timestamp = Date.now().toString()
+          const requestPath = '/api/v2/user/verify-info'
+          const method = 'GET'
+          const preHash = timestamp + method + requestPath
+          const signature = createHmac("sha256", apiSecret)
+            .update(preHash)
+            .digest("base64")
+
+          const response = await fetch(
+            `https://api.bitget.com${requestPath}`,
+            {
+              headers: {
+                'ACCESS-KEY': apiKey,
+                'ACCESS-SIGN': signature,
+                'ACCESS-TIMESTAMP': timestamp,
+                'ACCESS-PASSPHRASE': apiSecret,
+                'Content-Type': 'application/json',
+              },
+            }
+          )
+
+          console.log(`Bitget response status: ${response.status}`)
+          
+          const data = await response.json()
+          if (response.ok && data.code === '00000') {
+            isValid = true
+            console.log("Bitget API key is valid")
+          } else {
+            errorMessage = data.msg || "Invalid Bitget credentials"
+            console.error(`Bitget verification failed: ${errorMessage}`)
+          }
+        } catch (error) {
+          errorMessage = error instanceof Error ? error.message : "Network error"
+          console.error(`Bitget verification error: ${errorMessage}`)
+        }
+        break
+
       default:
         return new Response(
           JSON.stringify({ isValid: false, error: "Unsupported exchange" }),
