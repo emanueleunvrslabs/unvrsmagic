@@ -211,7 +211,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     } else if (pathname.startsWith("/nkmt")) {
       // Handle NKMT agents
       if (pathname === "/nkmt") {
-        setActiveItem("nkmt-main");
+        setActiveItem("ai-bot");
       } else if (pathname === "/nkmt/mkt-data") {
         setActiveItem("nkmt-mkt-data");
       } else if (pathname === "/nkmt/deriv-data") {
@@ -334,7 +334,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           icon: Layers,
           hasSubmenu: true,
           submenuItems: [
-            { id: "nkmt-main", label: "NKMT", icon: Cpu, href: "/nkmt" },
+            { id: "ai-bot", label: "AI Bot", icon: Cpu, href: "/nkmt" },
             { id: "nkmt-mkt-data", label: "Mkt.data", icon: Database, href: "/nkmt/mkt-data" },
             { id: "nkmt-deriv-data", label: "Deriv.data", icon: Database, href: "/nkmt/deriv-data" },
             { id: "nkmt-sentiment", label: "Sentiment.scout", icon: Activity, href: "/nkmt/sentiment-scout" },
@@ -365,7 +365,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "execution-logs", label: "Execution Logs", icon: FileText, href: "/control-panel/execution-logs" },
           ],
         },
-        { id: "ai-bot", label: "AI Bot", icon: Cpu, href: "/ai-bot" },
         { id: "signal-bot", label: "Signal Bot", icon: Zap, href: "/signal-bot" },
         { id: "dca-bot", label: "DCA Bot", icon: Repeat, href: "/dca-bot" },
         { id: "arbitrage-bot", label: "Arbitrage Bot", icon: Layers, href: "/arbitrage-bot" },
