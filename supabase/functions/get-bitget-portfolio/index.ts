@@ -37,17 +37,27 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Get and validate authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      console.error('Missing authorization header')
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      )
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: authHeader },
         },
       }
     )
 
-    // Get the user's session
+    // Get the user from the JWT token
     const {
       data: { user },
       error: userError,
@@ -56,10 +66,12 @@ Deno.serve(async (req) => {
     if (userError || !user) {
       console.error('User authentication error:', userError)
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       )
     }
+
+    console.log('Authenticated user:', user.id)
 
     // Get Bitget API credentials from database
     const { data: exchangeKeys, error: keysError } = await supabaseClient
