@@ -249,6 +249,9 @@ Deno.serve(async (req) => {
     let totalFuturesUSDT = 0
     let totalUnrealizedPnL = 0
 
+    // Enrich spot accounts with USDT values
+    const enrichedSpotAccounts: any[] = []
+    
     // Calculate spot balance (convert all to USDT equivalent using market prices)
     if (spotData.data && Array.isArray(spotData.data)) {
       spotData.data.forEach((coin: BitgetSpotAccount) => {
@@ -259,33 +262,43 @@ Deno.serve(async (req) => {
         
         if (total === 0) return
         
+        let usdtValue = 0
+        
         // For USDT, use direct value
         if (coin.coin === 'USDT') {
+          usdtValue = total
           totalSpotUSDT += total
           console.log(`${coin.coin}: ${total} USDT (direct)`)
         } 
         // For stablecoins, assume 1:1
         else if (['USDC', 'BUSD', 'DAI', 'FDUSD'].includes(coin.coin)) {
+          usdtValue = total
           totalSpotUSDT += total
           console.log(`${coin.coin}: ${total} USDT (stablecoin 1:1)`)
         }
         // For other coins, convert using market price (check both patterns)
         else if (priceMap[coin.coin] || priceMap[coin.coin.toUpperCase()]) {
           const price = priceMap[coin.coin] || priceMap[coin.coin.toUpperCase()]
-          const usdtValue = total * price
+          usdtValue = total * price
           totalSpotUSDT += usdtValue
           console.log(`${coin.coin}: ${total} * ${price} = ${usdtValue} USDT`)
         }
         // For fiat currencies, try approximate conversion (EUR ~= 1.05 USD for now)
         else if (coin.coin === 'EUR') {
           const eurToUsd = 1.05 // Approximate rate
-          const usdtValue = total * eurToUsd
+          usdtValue = total * eurToUsd
           totalSpotUSDT += usdtValue
           console.log(`${coin.coin}: ${total} * ${eurToUsd} (approx) = ${usdtValue} USDT`)
         }
         else {
           console.log(`${coin.coin}: ${total} - no price found, skipping`)
         }
+        
+        // Add enriched data with USDT value
+        enrichedSpotAccounts.push({
+          ...coin,
+          usdtValue
+        })
       })
     }
 
@@ -325,7 +338,7 @@ Deno.serve(async (req) => {
           futures: totalFuturesUSDT,
           unrealizedPnL: totalUnrealizedPnL,
           breakdown: {
-            spotAccounts: spotData.data || [],
+            spotAccounts: enrichedSpotAccounts,
             futuresAccounts: futuresData.data || [],
             positions: positionsData.data || [],
           },
