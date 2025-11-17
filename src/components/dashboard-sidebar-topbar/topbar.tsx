@@ -206,10 +206,6 @@ export function Topbar() {
               <Link to="/settings?tab=exchanges">Exchange Connection</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <Link to="/settings">Settings</Link>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
