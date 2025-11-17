@@ -11,7 +11,7 @@ const NKMT_AGENTS = [
   { id: "mkt-data", name: "Mkt.data", model: "Code", description: "Market data processor", requiresApi: null },
   { id: "deriv-data", name: "Deriv.data", model: "Code", description: "Derivatives data processor", requiresApi: null },
   { id: "sentiment-scout", name: "Sentiment.scout", model: "GPT-5.1", description: "Sentiment analysis", requiresApi: "openai" },
-  { id: "chain-analyst", name: "Chain.analyst", model: "Qwen 3", description: "Blockchain analysis", requiresApi: null },
+  { id: "chain-analyst", name: "Chain.analyst", model: "Qwen 3", description: "Blockchain analysis", requiresApi: "qwen" },
   { id: "market-modeler", name: "Market.modeler", model: "Claude Sonnet 4.5", description: "Market modeling", requiresApi: "anthropic" },
   { id: "signal-maker", name: "Signal.maker", model: "GPT-5.1 Thinking", description: "Signal generation", requiresApi: "openai" },
   { id: "risk-mgr", name: "Risk.mgr", model: "GPT-5.1 Thinking", description: "Risk management", requiresApi: "openai" },
@@ -33,7 +33,7 @@ export const NKMTAgentsSection: React.FC = () => {
           .from('api_keys')
           .select('provider')
           .eq('user_id', user.id)
-          .in('provider', ['openai', 'anthropic'])
+          .in('provider', ['openai', 'anthropic', 'qwen'])
 
         if (error) {
           console.error("Error loading API keys:", error)
