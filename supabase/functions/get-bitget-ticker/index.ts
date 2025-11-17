@@ -22,13 +22,20 @@ Deno.serve(async (req) => {
     
     console.log(`Fetching ticker data for: ${symbol} (cleaned: ${cleanSymbol})`)
 
+    const authHeader = req.headers.get('Authorization') || ''
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
     )
 
     // Get user and check for Webshare proxy
-    const { data: { user } } = await supabaseClient.auth.getUser()
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    const { data: { user } } = await supabaseClient.auth.getUser(bearerToken || '')
     let proxyCredentials: { username: string; password: string; address: string; port: number } | null = null
 
     if (user) {
@@ -66,8 +73,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fetch ticker data from Bitget
-    const bitgetUrl = `https://api.bitget.com/api/v2/spot/market/ticker?symbol=${cleanSymbol}`
+    // Fetch ticker data from Bitget (use tickers list and filter locally for robustness)
+    const bitgetUrl = `https://api.bitget.com/api/v2/spot/market/tickers`
     
     const fetchOptions: RequestInit = {
       method: 'GET',
@@ -94,7 +101,19 @@ Deno.serve(async (req) => {
       throw new Error(`Bitget API error: ${data.msg}`)
     }
 
-    const ticker = data.data[0]
+    // Try to find the ticker by symbol (handle both BTCUSDT and EUR_USDT patterns)
+    let ticker = null
+    if (Array.isArray(data.data)) {
+      const underscoreSymbol = cleanSymbol.endsWith('USDT') ? cleanSymbol.replace('USDT', '_USDT') : cleanSymbol
+      ticker = data.data.find((t: any) => t.symbol === cleanSymbol || t.symbol === underscoreSymbol)
+    }
+
+    if (!ticker) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Ticker not found' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      )
+    }
     
     // Format the ticker data
     const formattedData = {
