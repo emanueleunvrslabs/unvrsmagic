@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_prompts: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          prompt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          prompt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          prompt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           api_key: string
