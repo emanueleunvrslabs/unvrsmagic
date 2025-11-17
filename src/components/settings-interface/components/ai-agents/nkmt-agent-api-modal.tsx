@@ -53,10 +53,10 @@ export function NKMTAgentApiModal({
   }
 
   const verifyAndSaveApiKeys = async () => {
-    // Check if all required API keys are filled
-    const missingKeys = externalApis.filter(api => !apiKeys[api.provider]?.trim())
-    if (missingKeys.length > 0) {
-      toast.error(`Please fill in all API keys`)
+    // Check if at least one API key is filled
+    const filledKeys = externalApis.filter(api => apiKeys[api.provider]?.trim())
+    if (filledKeys.length === 0) {
+      toast.error(`Please fill in at least one API key`)
       return
     }
 
@@ -70,48 +70,61 @@ export function NKMTAgentApiModal({
         return
       }
 
-      // Verify each API key
-      for (const api of externalApis) {
+      let successCount = 0
+      let failCount = 0
+
+      // Verify and save each API key independently
+      for (const api of filledKeys) {
         const apiKey = apiKeys[api.provider]
         
-        const { data, error } = await supabase.functions.invoke('verify-api-key', {
-          body: { 
-            provider: api.provider,
-            apiKey: apiKey
-          }
-        })
-
-        if (error || !data?.valid) {
-          toast.error(`${api.name} API key verification failed`)
-          setIsVerifying(false)
-          return
-        }
-      }
-
-      // If all verifications passed, save to database
-      for (const api of externalApis) {
-        const { error: saveError } = await supabase
-          .from('api_keys')
-          .upsert({
-            user_id: user.id,
-            provider: api.provider,
-            api_key: apiKeys[api.provider],
-          }, {
-            onConflict: 'user_id,provider'
+        try {
+          // Verify the API key
+          const { data, error } = await supabase.functions.invoke('verify-api-key', {
+            body: { 
+              provider: api.provider,
+              apiKey: apiKey
+            }
           })
 
-        if (saveError) {
-          console.error(`Error saving ${api.name} API key:`, saveError)
-          toast.error(`Failed to save ${api.name} API key`)
-          setIsVerifying(false)
-          return
+          if (error || !data?.valid) {
+            toast.error(`${api.name} API key verification failed`)
+            failCount++
+            continue
+          }
+
+          // If verification passed, save to database
+          const { error: saveError } = await supabase
+            .from('api_keys')
+            .upsert({
+              user_id: user.id,
+              provider: api.provider,
+              api_key: apiKey,
+            }, {
+              onConflict: 'user_id,provider'
+            })
+
+          if (saveError) {
+            console.error(`Error saving ${api.name} API key:`, saveError)
+            toast.error(`Failed to save ${api.name} API key`)
+            failCount++
+          } else {
+            toast.success(`${api.name} API key saved successfully`)
+            successCount++
+          }
+        } catch (error) {
+          console.error(`Error processing ${api.name} API key:`, error)
+          toast.error(`Failed to process ${api.name} API key`)
+          failCount++
         }
       }
 
-      toast.success(`All API keys configured successfully for ${agentName}`)
-      setApiKeys({})
-      onSuccess()
-      onClose()
+      if (successCount > 0) {
+        setApiKeys({})
+        onSuccess()
+        if (failCount === 0) {
+          onClose()
+        }
+      }
     } catch (error) {
       console.error("Error verifying/saving API keys:", error)
       toast.error("Failed to configure API keys")
