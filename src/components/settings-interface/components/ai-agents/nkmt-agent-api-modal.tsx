@@ -180,21 +180,21 @@ export function NKMTAgentApiModal({
                 <Button 
                   onClick={() => verifyAndSaveApiKey(api.provider, api.name)}
                   disabled={verifyingProviders.has(api.provider) || verifiedProviders.has(api.provider)}
-                  size="default"
-                  className="min-w-[100px]"
+                  size="sm"
+                  className="min-w-[90px]"
                 >
                   {verifyingProviders.has(api.provider) ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying
+                      Connecting
                     </>
                   ) : verifiedProviders.has(api.provider) ? (
                     <>
                       <Check className="mr-2 h-4 w-4" />
-                      Verified
+                      Connected
                     </>
                   ) : (
-                    "Verify"
+                    "Connect"
                   )}
                 </Button>
               </div>
