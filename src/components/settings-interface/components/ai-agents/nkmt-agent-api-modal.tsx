@@ -130,8 +130,23 @@ export function NKMTAgentApiModal({
         }
       })
 
-      if (error || !data?.valid) {
-        toast.error(`${apiName} API key verification failed`)
+      console.log('Verify response:', { data, error, provider, apiName })
+
+      if (error) {
+        console.error('Supabase function error:', error)
+        toast.error(`${apiName} API key verification failed: ${error.message}`)
+        setVerifyingProviders(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(provider)
+          return newSet
+        })
+        return
+      }
+
+      if (!data?.valid) {
+        const errorMsg = data?.error || 'Unknown error'
+        console.error('Validation failed:', errorMsg)
+        toast.error(`${apiName} verification failed: ${errorMsg}`)
         setVerifyingProviders(prev => {
           const newSet = new Set(prev)
           newSet.delete(provider)
