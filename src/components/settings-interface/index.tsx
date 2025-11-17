@@ -127,19 +127,6 @@ export const SettingsInterface: React.FC = () => {
         <div className="flex-1 overflow-auto">
           <div className="md:p-6">{renderActiveTab()}</div>
         </div>
-
-        {settings.hasUnsavedChanges && (
-          <div className="border-t bg-background p-4">
-            <div className="flex items-center justify-end gap-3 flex-wrap">
-              <div className="flex space-x-2">
-                <SaveButton onSave={handleSave} isSaving={isSaving} hasUnsavedChanges={settings.hasUnsavedChanges} />
-                <button onClick={resetSettings} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
-                  Discard Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
