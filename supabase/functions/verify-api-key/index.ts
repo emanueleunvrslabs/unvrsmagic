@@ -110,7 +110,7 @@ serve(async (req) => {
 
           if (response.status === 200 || response.status === 400) {
             isValid = true;
-            console.log("Qwen API key is valid or accepted by gateway");
+            console.log("Qwen API key is valid");
           } else if (response.status === 401) {
             let errText = await response.text().catch(() => "");
             try {
@@ -127,6 +127,64 @@ serve(async (req) => {
         } catch (error) {
           errorMessage = "Failed to verify Qwen API key";
           console.error("Qwen verification error:", error);
+        }
+        break;
+
+      case "fal":
+        try {
+          // Fal AI - verify by checking status endpoint
+          const response = await fetch("https://queue.fal.run/fal-ai/fast-sdxl/requests", {
+            method: "GET",
+            headers: {
+              "Authorization": `Key ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Fal response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("Fal API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid Fal API key";
+            console.error("Fal verification failed:", response.status);
+          } else {
+            errorMessage = `Failed to verify Fal API key (status: ${response.status})`;
+            console.error("Fal verification unexpected:", errorMessage);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Fal API key";
+          console.error("Fal verification error:", error);
+        }
+        break;
+
+      case "gamma":
+        try {
+          // Gamma - verify by making a simple API call
+          const response = await fetch("https://api.gamma.app/v1/models", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Gamma response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("Gamma API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid Gamma API key";
+            console.error("Gamma verification failed:", response.status);
+          } else {
+            errorMessage = `Failed to verify Gamma API key (status: ${response.status})`;
+            console.error("Gamma verification unexpected:", errorMessage);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Gamma API key";
+          console.error("Gamma verification error:", error);
         }
         break;
 
