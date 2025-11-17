@@ -308,15 +308,13 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                       </Button>
                     </div>
                     {provider.requiresOwnerId && (
-                      <div className="flex items-center space-x-2 max-w-md">
-                        <Input
-                          type="text"
-                          placeholder="Enter Owner ID"
-                          value={ownerIds[provider.id] || ""}
-                          onChange={(e) => setOwnerIds(prev => ({ ...prev, [provider.id]: e.target.value }))}
-                          className="flex-1"
-                        />
-                      </div>
+                      <Input
+                        type="text"
+                        placeholder="Enter Owner ID"
+                        value={ownerIds[provider.id] || ""}
+                        onChange={(e) => setOwnerIds(prev => ({ ...prev, [provider.id]: e.target.value }))}
+                        className="max-w-md"
+                      />
                     )}
                     {validationErrors[provider.id] && (
                       <p className="text-sm text-destructive">
