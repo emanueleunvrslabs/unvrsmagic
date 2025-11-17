@@ -104,6 +104,16 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
     setSelectedAgent(null)
   }
 
+  const handleOpenPromptModal = (agent: typeof NKMT_AGENTS[0]) => {
+    setSelectedPromptAgent(agent)
+    setIsPromptModalOpen(true)
+  }
+
+  const handleClosePromptModal = () => {
+    setIsPromptModalOpen(false)
+    setSelectedPromptAgent(null)
+  }
+
   const handleApiSuccess = () => {
     // Reload connected APIs
     const normalizeProvider = (p: string) => {
