@@ -204,7 +204,14 @@ export function TradingHeader({
           <CardContent className="space-y-2">
             <Select value={selectedPair} onValueChange={onPairChange} disabled={isLoadingPairs}>
               <SelectTrigger>
-                <SelectValue placeholder={isLoadingPairs ? "Loading pairs..." : "Select pair"} />
+                <SelectValue placeholder={isLoadingPairs ? "Loading pairs..." : "Select pair"}>
+                  {selectedPair ? (
+                    tradingPairs.find(p => p.symbol.toLowerCase() === selectedPair)?.name || 
+                    selectedPair.replace('_spbl', '').replace('usdt', '/USDT').toUpperCase()
+                  ) : (
+                    isLoadingPairs ? "Loading pairs..." : "Select pair"
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {filteredTradingPairs.length === 0 ? (
