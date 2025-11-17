@@ -146,25 +146,18 @@ serve(async (req) => {
 
           console.log("Fal response status:", response.status);
 
-          // Valid key returns 200 or 202 (accepted for queue)
-          if (response.status === 200 || response.status === 202) {
+          // Valid key returns 200, 202 (queue), 400 (bad request but auth ok), or 403 (valid key but no credits/permissions)
+          if (response.status === 200 || response.status === 202 || response.status === 400 || response.status === 403) {
             isValid = true;
             console.log("Fal API key is valid");
-          } else if (response.status === 401 || response.status === 403) {
+          } else if (response.status === 401) {
             errorMessage = "Invalid Fal API key";
-            console.error("Fal verification failed:", response.status);
+            console.error("Fal verification failed: 401 Unauthorized");
           } else {
-            // Even other errors mean the key was accepted for auth
             const errBody = await response.text().catch(() => "");
             console.log("Fal response body:", errBody);
-            // 400 might mean key is valid but request is bad
-            if (response.status === 400) {
-              isValid = true;
-              console.log("Fal API key is valid (400 = bad request but authenticated)");
-            } else {
-              errorMessage = `Failed to verify Fal API key (status: ${response.status})`;
-              console.error("Fal verification unexpected:", errorMessage);
-            }
+            errorMessage = `Failed to verify Fal API key (status: ${response.status})`;
+            console.error("Fal verification unexpected:", errorMessage);
           }
         } catch (error) {
           errorMessage = "Failed to verify Fal API key";
