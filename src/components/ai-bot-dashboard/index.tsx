@@ -125,7 +125,7 @@ export function AiBotDashboard() {
 
   return (
     <div className={cn("space-y-6", isFullscreen && "fixed inset-0 z-50 bg-background p-6 overflow-auto")}>
-      <Header botRunning={botRunning} isRefreshing={isRefreshing} isFullscreen={isFullscreen} onToggleBotStatus={toggleBotStatus} onRefresh={handleRefresh} onToggleFullscreen={toggleFullscreen} />
+      <Header exchangeName="Bitget" botRunning={botRunning} isRefreshing={isRefreshing} isFullscreen={isFullscreen} onToggleBotStatus={toggleBotStatus} onRefresh={handleRefresh} onToggleFullscreen={toggleFullscreen} />
 
       <KpiCards botData={botData} />
 

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Clock, Cpu, Power, RefreshCw } from "lucide-react";
 
 interface HeaderProps {
+  exchangeName: string;
   botRunning: boolean;
   isRefreshing: boolean;
   isFullscreen: boolean;
@@ -15,7 +16,7 @@ interface HeaderProps {
   onToggleFullscreen: () => void;
 }
 
-export function Header({ botRunning, isRefreshing, isFullscreen, onToggleBotStatus, onRefresh, onToggleFullscreen }: HeaderProps) {
+export function Header({ exchangeName, botRunning, isRefreshing, isFullscreen, onToggleBotStatus, onRefresh, onToggleFullscreen }: HeaderProps) {
   return (
     <>
       {/* Header section */}
@@ -23,7 +24,7 @@ export function Header({ botRunning, isRefreshing, isFullscreen, onToggleBotStat
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Cpu className="h-6 w-6" />
-            <span>AI Trading Bot</span>
+            <span>{exchangeName}</span>
           </h1>
           <p className="text-muted-foreground">Advanced AI-powered trading with smart portfolio management</p>
         </div>
