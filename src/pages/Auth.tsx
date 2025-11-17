@@ -28,6 +28,13 @@ export default function Auth() {
     checkSession();
   }, [navigate]);
 
+  // Auto-verify OTP when 6 digits are entered
+  useEffect(() => {
+    if (otp.length === 6 && step === "otp" && !loading) {
+      handleVerifyOtp(new Event("submit") as any);
+    }
+  }, [otp]);
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -60,8 +67,8 @@ export default function Auth() {
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleVerifyOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
 
     if (!otp || otp.length !== 6) {
       toast.error("Please enter a valid OTP code (6 digits)");
@@ -182,7 +189,7 @@ export default function Auth() {
               </Button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="otp">OTP Code</Label>
                 <Input
@@ -195,26 +202,20 @@ export default function Auth() {
                   required
                   disabled={loading}
                   className="text-center text-2xl tracking-widest"
+                  autoFocus
                 />
                 <p className="text-xs text-muted-foreground text-center">
-                  Code sent to {countryCode}{phoneNumber}
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Verifying...
+                    </span>
+                  ) : (
+                    `Code sent to ${countryCode}${phoneNumber}`
+                  )}
                 </p>
               </div>
               <div className="space-y-2">
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    "Verify code"
-                  )}
-                </Button>
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -236,7 +237,7 @@ export default function Auth() {
                   Resend code
                 </Button>
               </div>
-            </form>
+            </div>
           )}
         </CardContent>
       </Card>
