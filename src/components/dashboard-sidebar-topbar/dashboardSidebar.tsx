@@ -279,7 +279,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           icon: Package,
           hasSubmenu: true,
           submenuItems: [
-            { id: "new-project", label: "New Project", icon: Package, href: "/projects" },
             ...projects.map((project) => ({
               id: `project-${project.id}`,
               label: project.name,
