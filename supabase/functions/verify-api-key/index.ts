@@ -90,8 +90,6 @@ serve(async (req) => {
       case "qwen":
         try {
           // Qwen/Alibaba Cloud API verification requires both API key and Key ID
-          const { keyId } = await req.json();
-          
           if (!keyId) {
             errorMessage = "Key ID is required for Qwen3";
             console.error("Qwen verification failed: missing key_id");
