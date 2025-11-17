@@ -149,6 +149,15 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       setActiveItem("my-analytics");
     } else if (pathname === "/trading") {
       setActiveItem("trading");
+    } else if (pathname === "/projects/all") {
+      setActiveItem("all-projects");
+      setOpenSubmenus((prev) => ({ ...prev, projects: true }));
+    } else if (pathname === "/projects/active") {
+      setActiveItem("active-projects");
+      setOpenSubmenus((prev) => ({ ...prev, projects: true }));
+    } else if (pathname === "/projects/archived") {
+      setActiveItem("archived-projects");
+      setOpenSubmenus((prev) => ({ ...prev, projects: true }));
     } else if (pathname === "/control-panel/overview") {
       setActiveItem("overview");
       setOpenSubmenus((prev) => ({ ...prev, "control-panel": true }));
@@ -232,6 +241,17 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       section: "Main",
       items: [
         { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/" },
+        {
+          id: "projects",
+          label: "Projects",
+          icon: Package,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "all-projects", label: "All Projects", icon: Layers, href: "/projects/all" },
+            { id: "active-projects", label: "Active Projects", icon: Activity, href: "/projects/active" },
+            { id: "archived-projects", label: "Archived Projects", icon: Database, href: "/projects/archived" },
+          ],
+        },
         { id: "my-assets", label: "My Assets", icon: Coins, href: "/my-assets" },
         { id: "my-analytics", label: "My Analytics", icon: LineChart, href: "/my-analytics" },
       ],
