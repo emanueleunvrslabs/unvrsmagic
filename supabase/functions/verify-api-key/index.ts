@@ -101,7 +101,6 @@ serve(async (req) => {
             headers: {
               "Authorization": `Bearer ${apiKey}`,
               "X-DashScope-SSE": "disable",
-              "X-DashScope-DataInspection": "enable",
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -110,7 +109,8 @@ serve(async (req) => {
                 messages: [{ role: "user", content: "test" }]
               },
               parameters: {
-                max_tokens: 1
+                max_tokens: 1,
+                api_key: ownerId
               }
             }),
           });
