@@ -10,18 +10,44 @@ import { useWalletConnection } from "@/hooks/use-wallet-connection";
 import { cn } from "@/lib/utils";
 import { Bell, ChevronDown, Copy, ExternalLink, LogOut, Settings, User, Wallet } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function Topbar() {
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
   const { isConnected, address, balance, disconnect, copyAddress } = useWalletConnection();
   const navigate = useNavigate();
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
+
+  // Load username from database
+  useEffect(() => {
+    const loadUsername = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (profile?.username) {
+            setUsername(profile.username);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading username:', error);
+      }
+    };
+
+    loadUsername();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -32,6 +58,11 @@ export function Topbar() {
       console.error("Logout error:", error);
       toast.error("Error logging out");
     }
+  };
+
+  const getUserInitials = (name: string | null) => {
+    if (!name) return "U";
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -121,9 +152,9 @@ export function Topbar() {
             <Button variant="ghost" size="sm" className="gap-2">
               <Avatar className="h-6 w-6">
                 <AvatarImage src="/abstract-geometric-shapes.png" />
-                <AvatarFallback>AZ</AvatarFallback>
+                <AvatarFallback>{getUserInitials(username)}</AvatarFallback>
               </Avatar>
-              <span className="hidden md:inline-flex">Ayaan Zafar</span>
+              <span className="hidden md:inline-flex">{username || "User"}</span>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
