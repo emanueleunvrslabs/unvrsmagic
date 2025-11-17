@@ -1,6 +1,8 @@
 "use client";
 
 import type React from "react";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { ExchangesTab } from "./components/exchanges/exchanges-tab";
 import { toast } from "sonner";
 import { AppearanceTab } from "./components/appearance/appearance-tab";
@@ -11,12 +13,12 @@ import { NotificationsTab } from "./components/notifications/notifications-tab";
 import { PrivacyTab } from "./components/privacy/privacy-tab";
 import { ProfileTab } from "./components/profile/profile-tab";
 import { SecurityTab } from "./components/security/security-tab";
-import { SettingsSidebar } from "./components/settings-sidebar";
 import { SaveButton } from "./components/shared/save-button";
 import { TradingTab } from "./components/trading/trading-tab";
 import { useSettings } from "./hooks/use-settings";
 
 export const SettingsInterface: React.FC = () => {
+  const location = useLocation();
   const {
     settings,
     isLoading,
@@ -33,6 +35,15 @@ export const SettingsInterface: React.FC = () => {
     saveSettings,
     resetSettings,
   } = useSettings();
+
+  // Set active tab from URL parameter
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+    if (tab && ['profile', 'security', 'exchanges'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [location.search, setActiveTab]);
 
   const handleSave = async () => {
     const result = await saveSettings();
@@ -120,14 +131,8 @@ export const SettingsInterface: React.FC = () => {
   }
 
   return (
-    <div className="flex max-md:flex-col md:h-screen bg-background w-full">
-      <SettingsSidebar activeTab={settings.activeTab} onTabChange={setActiveTab} hasUnsavedChanges={settings.hasUnsavedChanges} />
-
-      <div className="flex-1 flex flex-col">
-        <div className="flex-1 overflow-auto">
-          <div className="md:p-6">{renderActiveTab()}</div>
-        </div>
-      </div>
+    <div className="flex-1 overflow-auto p-6">
+      {renderActiveTab()}
     </div>
   );
 };
