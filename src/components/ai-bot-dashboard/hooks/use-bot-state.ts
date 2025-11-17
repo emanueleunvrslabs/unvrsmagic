@@ -11,7 +11,6 @@ export function useBotState() {
   const [botRunning, setBotRunning] = useState(botData.status === "active")
   const [selectedStrategy, setSelectedStrategy] = useState(botData.strategies.find((s) => s.active)?.id || "1")
   const [riskSettings, setRiskSettings] = useState<RiskSettings>(botData.riskSettings)
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(true)
 
   // Fetch real Bitget portfolio data
@@ -58,9 +57,16 @@ export function useBotState() {
     }
   }
 
-  // Load portfolio data on mount
+  // Load portfolio data on mount and set up auto-refresh
   useEffect(() => {
     fetchBitgetPortfolio()
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchBitgetPortfolio()
+    }, 30000)
+    
+    return () => clearInterval(interval)
   }, [])
 
   // Handle bot start/stop
@@ -105,13 +111,6 @@ export function useBotState() {
     })
   }
 
-  // Handle refresh data
-  const handleRefresh = async () => {
-    setIsRefreshing(true)
-    await fetchBitgetPortfolio()
-    setIsRefreshing(false)
-  }
-
   return {
     botData,
     setBotData,
@@ -119,11 +118,9 @@ export function useBotState() {
     selectedStrategy,
     riskSettings,
     setRiskSettings: updateRiskSettings,
-    isRefreshing,
     isLoadingPortfolio,
     toggleBotStatus,
     handleStrategyChange,
-    handleRefresh,
     updateStrategies,
   }
 }
