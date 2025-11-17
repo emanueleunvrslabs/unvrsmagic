@@ -16,6 +16,7 @@ import AiBot from "./pages/AiBot";
 import ArbitrageBot from "./pages/ArbitrageBot";
 import DcaBot from "./pages/DcaBot";
 import StrategiesMarketplace from "./pages/StrategiesMarketplace";
+import BotTemplates from "./pages/BotTemplates";
 import Settings from "./pages/Settings";
 import Subscription from "./pages/Subscription";
 import BotSettings from "./pages/BotSettings";
@@ -64,7 +65,7 @@ const App = () => (
           <Route path="/defi-center/yield-farming" element={<Navigate to="/defi-protocols" replace />} />
           <Route path="/defi-center/staking-pools" element={<Navigate to="/defi-protocols" replace />} />
           <Route path="/defi-center/liquidity-tracker" element={<Navigate to="/defi-protocols" replace />} />
-          <Route path="/bot-templates" element={<Navigate to="/strategies-marketplace" replace />} />
+          <Route path="/bot-templates" element={<ProtectedRoute><BotTemplates /></ProtectedRoute>} />
           <Route path="/invite-friends" element={<Navigate to="/settings" replace />} />
           <Route path="/help-center" element={<Navigate to="/settings" replace />} />
           <Route path="*" element={<NotFound />} />
