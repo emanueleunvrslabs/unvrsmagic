@@ -149,8 +149,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       setActiveItem("my-analytics");
     } else if (pathname === "/trading") {
       setActiveItem("trading");
-    } else if (pathname === "/projects/all") {
-      setActiveItem("all-projects");
+    } else if (pathname === "/projects") {
+      setActiveItem("new-project");
       setOpenSubmenus((prev) => ({ ...prev, projects: true }));
     } else if (pathname === "/projects/active") {
       setActiveItem("active-projects");
@@ -247,7 +247,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           icon: Package,
           hasSubmenu: true,
           submenuItems: [
-            { id: "all-projects", label: "All Projects", icon: Layers, href: "/projects/all" },
+            { id: "new-project", label: "New Project", icon: Package, href: "/projects" },
             { id: "active-projects", label: "Active Projects", icon: Activity, href: "/projects/active" },
             { id: "archived-projects", label: "Archived Projects", icon: Database, href: "/projects/archived" },
           ],
