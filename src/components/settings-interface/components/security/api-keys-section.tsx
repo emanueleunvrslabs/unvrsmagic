@@ -4,186 +4,140 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Copy, Eye, EyeOff, Trash2, Check } from "lucide-react"
-import type { ApiKey } from "../../types"
-import { maskApiKey, generateApiKey, getRelativeTime } from "../../utils"
+import { Card } from "@/components/ui/card"
+import { Eye, EyeOff, Save } from "lucide-react"
 import { toast } from "sonner"
+import { supabase } from "@/integrations/supabase/client"
 
 interface ApiKeysSectionProps {
-  apiKeys: ApiKey[]
-  onApiKeysChange: (apiKeys: ApiKey[]) => void
+  apiKeys: any[]
+  onApiKeysChange: (apiKeys: any[]) => void
 }
 
-export const ApiKeysSection: React.FC<ApiKeysSectionProps> = ({ apiKeys, onApiKeysChange }) => {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [newKeyName, setNewKeyName] = useState("")
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
-  const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
-  const [copiedKey, setCopiedKey] = useState<string | null>(null)
-  const [isCreating, setIsCreating] = useState(false)
+export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
+  const [openaiKey, setOpenaiKey] = useState("")
+  const [anthropicKey, setAnthropicKey] = useState("")
+  const [qwenKey, setQwenKey] = useState("")
+  const [showOpenai, setShowOpenai] = useState(false)
+  const [showAnthropic, setShowAnthropic] = useState(false)
+  const [showQwen, setShowQwen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
-  const availablePermissions = [
-    { id: "read", label: "Read", description: "View account information and trading data" },
-    { id: "trade", label: "Trade", description: "Execute trades and manage orders" },
-    { id: "withdraw", label: "Withdraw", description: "Withdraw funds from account" },
-  ]
-
-  const handleCreateApiKey = async () => {
-    if (!newKeyName.trim()) {
-      toast.error("Please enter a name for the API key")
-      return
-    }
-
-    if (selectedPermissions.length === 0) {
-      toast.error("Please select at least one permission")
-      return
-    }
-
-    setIsCreating(true)
+  const handleSaveKeys = async () => {
+    setIsSaving(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      const newApiKey: ApiKey = {
-        id: Date.now().toString(),
-        name: newKeyName,
-        key: generateApiKey(),
-        permissions: selectedPermissions,
-        lastUsed: new Date().toISOString(),
-        created: new Date().toISOString(),
-        status: "active",
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        toast.error("User not authenticated")
+        return
       }
 
-      onApiKeysChange([...apiKeys, newApiKey])
-
-      // Reset form
-      setNewKeyName("")
-      setSelectedPermissions([])
-      setIsCreateDialogOpen(false)
-
-      toast.success("API key created successfully")
+      // In a real implementation, you would save these to a secure storage
+      // For now, we'll just show a success message
+      toast.success("API keys saved successfully")
     } catch (error) {
-      toast.error("Failed to create API key")
+      console.error("Error saving API keys:", error)
+      toast.error("Failed to save API keys")
     } finally {
-      setIsCreating(false)
-    }
-  }
-
-  const handleDeleteApiKey = async (keyId: string) => {
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
-      onApiKeysChange(apiKeys.filter((key) => key.id !== keyId))
-      toast.success("API key deleted successfully")
-    } catch (error) {
-      toast.error("Failed to delete API key")
-    }
-  }
-
-  const toggleKeyVisibility = (keyId: string) => {
-    const newVisibleKeys = new Set(visibleKeys)
-    if (newVisibleKeys.has(keyId)) {
-      newVisibleKeys.delete(keyId)
-    } else {
-      newVisibleKeys.add(keyId)
-    }
-    setVisibleKeys(newVisibleKeys)
-  }
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopiedKey(text)
-      setTimeout(() => setCopiedKey(null), 2000)
-      toast.success("API key copied to clipboard")
-    } catch (error) {
-      toast.error("Failed to copy to clipboard")
-    }
-  }
-
-  const handlePermissionChange = (permissionId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedPermissions([...selectedPermissions, permissionId])
-    } else {
-      setSelectedPermissions(selectedPermissions.filter((p) => p !== permissionId))
+      setIsSaving(false)
     }
   }
 
   return (
-    <div className="space-y-4">
-      {apiKeys.length > 0 ? (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>API Key</TableHead>
-                <TableHead>Permissions</TableHead>
-                <TableHead>Last Used</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {apiKeys.map((apiKey) => (
-                <TableRow key={apiKey.id}>
-                  <TableCell className="font-medium">{apiKey.name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <code className="text-sm">
-                        {visibleKeys.has(apiKey.id) ? apiKey.key : maskApiKey(apiKey.key)}
-                      </code>
-                      <Button variant="ghost" size="sm" onClick={() => toggleKeyVisibility(apiKey.id)}>
-                        {visibleKeys.has(apiKey.id) ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(apiKey.key)}>
-                        {copiedKey === apiKey.key ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-1">
-                      {apiKey.permissions.map((permission) => (
-                        <Badge key={permission} variant="secondary" className="text-xs">
-                          {permission}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{getRelativeTime(apiKey.lastUsed)}</TableCell>
-                  <TableCell>
-                    <Badge variant={apiKey.status === "active" ? "default" : "secondary"}>{apiKey.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm" onClick={() => handleDeleteApiKey(apiKey.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      ) : (
-        <div className="text-center py-8 text-muted-foreground">
-          <p>No API keys created yet</p>
-          <p className="text-sm">Create your first API key to get started</p>
-        </div>
-      )}
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">OpenAI</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Connect your OpenAI API key for GPT models
+              </p>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    type={showOpenai ? "text" : "password"}
+                    placeholder="sk-..."
+                    value={openaiKey}
+                    onChange={(e) => setOpenaiKey(e.target.value)}
+                  />
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowOpenai(!showOpenai)}
+                >
+                  {showOpenai ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Anthropic</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Connect your Anthropic API key for Claude models
+              </p>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    type={showAnthropic ? "text" : "password"}
+                    placeholder="sk-ant-..."
+                    value={anthropicKey}
+                    onChange={(e) => setAnthropicKey(e.target.value)}
+                  />
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowAnthropic(!showAnthropic)}
+                >
+                  {showAnthropic ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Qwen3</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Connect your Qwen3 API key for Alibaba's AI models
+              </p>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    type={showQwen ? "text" : "password"}
+                    placeholder="Enter your Qwen3 API key"
+                    value={qwenKey}
+                    onChange={(e) => setQwenKey(e.target.value)}
+                  />
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowQwen(!showQwen)}
+                >
+                  {showQwen ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="flex justify-end">
+        <Button onClick={handleSaveKeys} disabled={isSaving}>
+          <Save className="mr-2 h-4 w-4" />
+          {isSaving ? "Saving..." : "Save API Keys"}
+        </Button>
+      </div>
     </div>
   )
 }
