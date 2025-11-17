@@ -16,7 +16,6 @@ export function TradingInterface() {
     sellOrder,
     selectedExchange,
     selectedAccount,
-    selectedMarket,
     selectedPair,
     tradeHistory,
     updateSetting,
@@ -27,7 +26,6 @@ export function TradingInterface() {
     executeSellOrder,
     setSelectedExchange,
     setSelectedAccount,
-    setSelectedMarket,
     setSelectedPair,
   } = useTrading()
 
@@ -40,12 +38,10 @@ export function TradingInterface() {
       <TradingHeader
         selectedExchange={selectedExchange}
         selectedAccount={selectedAccount}
-        selectedMarket={selectedMarket}
         selectedPair={selectedPair}
         settings={settings}
         onExchangeChange={setSelectedExchange}
         onAccountChange={setSelectedAccount}
-        onMarketChange={setSelectedMarket}
         onPairChange={setSelectedPair}
         onSettingChange={updateSetting}
       />

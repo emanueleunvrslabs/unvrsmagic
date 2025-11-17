@@ -27,7 +27,6 @@ export function useTrading() {
 
   const [selectedExchange, setSelectedExchange] = useState("")
   const [selectedAccount, setSelectedAccount] = useState("spot")
-  const [selectedMarket, setSelectedMarket] = useState("spot")
   const [selectedPair, setSelectedPair] = useState("btcusdt")
 
   // Fetch the first connected exchange and set it as default
@@ -214,7 +213,6 @@ export function useTrading() {
     sellOrder,
     selectedExchange,
     selectedAccount,
-    selectedMarket,
     selectedPair,
     tradeHistory,
     updateSetting,
@@ -225,7 +223,6 @@ export function useTrading() {
     executeSellOrder,
     setSelectedExchange,
     setSelectedAccount,
-    setSelectedMarket,
     setSelectedPair,
   }
 }
