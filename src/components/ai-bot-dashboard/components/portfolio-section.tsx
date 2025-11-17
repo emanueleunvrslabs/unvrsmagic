@@ -77,12 +77,16 @@ export function PortfolioSection({ botData, realPortfolioData, isLoading, onAsse
                       <div className="font-medium flex items-center gap-2">
                         {asset.symbol}
                         <Badge variant="outline" className="text-xs">{asset.type}</Badge>
+                        {asset.side && <Badge variant="secondary" className="text-xs">{asset.side}</Badge>}
                       </div>
-                      <div className="text-sm">{asset.amount.toFixed(8)}</div>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div>Value: ${asset.value.toFixed(2)}</div>
-                      {asset.side && <Badge variant="secondary">{asset.side}</Badge>}
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="text-muted-foreground">Amount:</div>
+                      <div>{asset.amount.toFixed(8)}</div>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="text-muted-foreground">Value:</div>
+                      <div className="font-medium">${asset.value.toFixed(2)}</div>
                     </div>
                   </div>
                 ))
