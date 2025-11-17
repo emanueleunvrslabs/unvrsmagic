@@ -17,7 +17,10 @@ Deno.serve(async (req) => {
       throw new Error('Symbol is required')
     }
 
-    console.log(`Fetching ticker data for: ${symbol}`)
+    // Remove Bitget internal suffixes (_spbl, _sumcbl, etc.)
+    const cleanSymbol = symbol.replace(/_[a-z]+$/i, '').toUpperCase()
+    
+    console.log(`Fetching ticker data for: ${symbol} (cleaned: ${cleanSymbol})`)
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -64,7 +67,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch ticker data from Bitget
-    const bitgetUrl = `https://api.bitget.com/api/v2/spot/market/ticker?symbol=${symbol.toUpperCase()}`
+    const bitgetUrl = `https://api.bitget.com/api/v2/spot/market/ticker?symbol=${cleanSymbol}`
     
     const fetchOptions: RequestInit = {
       method: 'GET',
