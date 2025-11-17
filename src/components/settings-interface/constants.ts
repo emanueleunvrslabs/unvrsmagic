@@ -19,24 +19,6 @@ export const SETTINGS_TABS: SettingsTab[] = [
     icon: "ArrowLeftRight",
     description: "Connect your crypto exchange accounts",
   },
-  {
-    id: "notifications",
-    label: "Notifications",
-    icon: "Bell",
-    description: "Configure email, push, and SMS notifications",
-  },
-  {
-    id: "trading",
-    label: "Trading",
-    icon: "TrendingUp",
-    description: "Default trading settings and risk management",
-  },
-  {
-    id: "bots",
-    label: "Bots",
-    icon: "Bot",
-    description: "Bot parameters, behavior, and monitoring settings",
-  },
 ]
 
 export const LANGUAGES = [
