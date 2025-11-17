@@ -24,12 +24,6 @@ const mockExchanges = [
 
 // Account types will be fetched dynamically based on available accounts
 
-const mockMarkets = [
-  { id: "spot", name: "Spot Trading" },
-  { id: "futures", name: "Futures" },
-  { id: "margin", name: "Margin Trading" },
-]
-
 const mockTradingPairs = [
   { symbol: "BTC/USDT", name: "Bitcoin / Tether" },
   { symbol: "ETH/USDT", name: "Ethereum / Tether" },
@@ -47,12 +41,10 @@ interface TradingSettings {
 interface TradingHeaderProps {
   selectedExchange: string
   selectedAccount: string
-  selectedMarket: string
   selectedPair: string
   settings: TradingSettings
   onExchangeChange: (value: string) => void
   onAccountChange: (value: string) => void
-  onMarketChange: (value: string) => void
   onPairChange: (value: string) => void
   onSettingChange: (key: keyof TradingSettings, value: boolean) => void
 }
@@ -60,12 +52,10 @@ interface TradingHeaderProps {
 export function TradingHeader({
   selectedExchange,
   selectedAccount,
-  selectedMarket,
   selectedPair,
   settings,
   onExchangeChange,
   onAccountChange,
-  onMarketChange,
   onPairChange,
   onSettingChange,
 }: TradingHeaderProps) {
@@ -138,7 +128,7 @@ export function TradingHeader({
   return (
     <>
       {/* Exchange Selection */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Exchange</CardTitle>
@@ -182,26 +172,6 @@ export function TradingHeader({
                     </SelectItem>
                   ))
                 )}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Market</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select value={selectedMarket} onValueChange={onMarketChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select market" />
-              </SelectTrigger>
-              <SelectContent>
-                {mockMarkets.map((market) => (
-                  <SelectItem key={market.id} value={market.id}>
-                    {market.name}
-                  </SelectItem>
-                ))}
               </SelectContent>
             </Select>
           </CardContent>
