@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -11,6 +12,7 @@ import { Loader2 } from "lucide-react";
 export default function Auth() {
   const navigate = useNavigate();
   const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [countryCode, setCountryCode] = useState("+39");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState("");
   const [otp, setOtp] = useState("");
@@ -35,17 +37,12 @@ export default function Auth() {
       return;
     }
 
-    // Validate phone number format (should start with +)
-    if (!phoneNumber.startsWith("+")) {
-      toast.error("Il numero deve iniziare con + seguito dal prefisso internazionale");
-      return;
-    }
-
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
     setLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke("send-otp", {
-        body: { phoneNumber },
+        body: { phoneNumber: fullPhoneNumber },
       });
 
       if (error) throw error;
@@ -72,12 +69,13 @@ export default function Auth() {
       return;
     }
 
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
     setLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke("verify-otp", {
         body: { 
-          phoneNumber, 
+          phoneNumber: fullPhoneNumber, 
           code: otp,
           fullName: fullName || undefined,
         },
@@ -87,7 +85,7 @@ export default function Auth() {
 
       if (data.success) {
         // Get the user's email format
-        const email = `${phoneNumber.replace(/\+/g, '')}@phone.auth`;
+        const email = `${fullPhoneNumber.replace(/\+/g, '')}@phone.auth`;
         
         // Create a temporary password for sign in
         const tempPassword = crypto.randomUUID();
@@ -145,19 +143,33 @@ export default function Auth() {
           {step === "phone" ? (
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Numero di telefono</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+39 xxx xxx xxxx"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Formato: +39 seguito dal numero (es. +393331234567)
-                </p>
+                <Label>Numero di telefono</Label>
+                <div className="flex gap-2">
+                  <Select value={countryCode} onValueChange={setCountryCode}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="+39">🇮🇹 +39</SelectItem>
+                      <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                      <SelectItem value="+44">🇬🇧 +44</SelectItem>
+                      <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                      <SelectItem value="+49">🇩🇪 +49</SelectItem>
+                      <SelectItem value="+34">🇪🇸 +34</SelectItem>
+                      <SelectItem value="+41">🇨🇭 +41</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="3331234567"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                    required
+                    disabled={loading}
+                    className="flex-1"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="fullName">Nome completo (opzionale)</Label>
@@ -201,7 +213,7 @@ export default function Auth() {
                   className="text-center text-2xl tracking-widest"
                 />
                 <p className="text-xs text-muted-foreground text-center">
-                  Codice inviato a {phoneNumber}
+                  Codice inviato a {countryCode}{phoneNumber}
                 </p>
               </div>
               <div className="space-y-2">
