@@ -27,7 +27,7 @@ export function useTrading() {
 
   const [selectedExchange, setSelectedExchange] = useState("")
   const [selectedAccount, setSelectedAccount] = useState("spot")
-  const [selectedPair, setSelectedPair] = useState("btcusdt")
+  const [selectedPair, setSelectedPair] = useState("btcusdt_spbl")
 
   // Fetch the first connected exchange and set it as default
   useEffect(() => {
