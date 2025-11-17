@@ -38,7 +38,6 @@ serve(async (req) => {
       .maybeSingle();
 
     if (otpError || !otpData) {
-      console.error('OTP verification failed:', otpError);
       return new Response(
         JSON.stringify({ error: 'Invalid or expired OTP code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -116,7 +115,6 @@ serve(async (req) => {
       });
 
       if (authError || !authData.user) {
-        console.error('Auth user creation error:', authError);
         throw new Error('Failed to create user account');
       }
 
@@ -131,7 +129,6 @@ serve(async (req) => {
         });
 
       if (profileError) {
-        console.error('Profile creation error:', profileError);
         throw new Error('Failed to create user profile');
       }
     }

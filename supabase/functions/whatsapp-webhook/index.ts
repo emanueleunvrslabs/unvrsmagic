@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { timingSafeEqual } from "https://deno.land/std@0.168.0/crypto/timing_safe_equal.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,12 +13,23 @@ serve(async (req) => {
   }
 
   try {
-    // Verify webhook signature
+    // Verify webhook signature using timing-safe comparison
     const signature = req.headers.get('x-webhook-signature');
     const webhookSecret = Deno.env.get('WASENDER_WEBHOOK_SECRET');
     
-    if (signature !== webhookSecret) {
-      console.error('Invalid webhook signature');
+    if (!signature || !webhookSecret) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid signature' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Convert to Uint8Array for timing-safe comparison
+    const sigBuffer = new TextEncoder().encode(signature);
+    const secretBuffer = new TextEncoder().encode(webhookSecret);
+    
+    // Length check and timing-safe comparison
+    if (sigBuffer.length !== secretBuffer.length || !timingSafeEqual(sigBuffer, secretBuffer)) {
       return new Response(
         JSON.stringify({ error: 'Invalid signature' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -25,14 +37,12 @@ serve(async (req) => {
     }
 
     const payload = await req.json();
-    console.log('Received WhatsApp webhook:', JSON.stringify(payload, null, 2));
 
     // Process the webhook payload
     // This can be used to handle incoming messages, delivery reports, etc.
     
     if (payload.event === 'message.received') {
       const { from, message } = payload.data || {};
-      console.log(`Message from ${from}: ${message?.text || 'No text'}`);
       
       // You can add custom logic here to handle incoming messages
       // For example, auto-replies, commands, etc.
@@ -47,10 +57,8 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in whatsapp-webhook function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Internal server error' }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

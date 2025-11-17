@@ -41,7 +41,6 @@ Deno.serve(async (req) => {
     // Get and validate authorization header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      console.error('Missing authorization header')
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
@@ -66,14 +65,11 @@ Deno.serve(async (req) => {
     } = await supabaseClient.auth.getUser(bearerToken || '')
 
     if (userError || !user) {
-      console.error('User authentication error:', userError)
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', details: userError?.message || 'Auth session missing!' }),
+        JSON.stringify({ error: 'Unauthorized' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       )
     }
-
-    console.log('Authenticated user:', user.id)
 
     // Get Bitget API credentials from database
     const { data: exchangeKeys, error: keysError } = await supabaseClient
@@ -84,7 +80,6 @@ Deno.serve(async (req) => {
       .single()
 
     if (keysError || !exchangeKeys) {
-      console.error('Exchange keys error:', keysError)
       return new Response(
         JSON.stringify({ error: 'Bitget credentials not found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
@@ -104,7 +99,6 @@ Deno.serve(async (req) => {
     let proxyCredentials: { username: string; password: string; address: string; port: number } | null = null
 
     if (webshareKey?.api_key) {
-      console.log('Fetching Webshare proxy credentials...')
       try {
         // Get proxy list from Webshare API
         const proxyListResponse = await fetch('https://proxy.webshare.io/api/v2/proxy/list/', {
@@ -124,13 +118,10 @@ Deno.serve(async (req) => {
               address: proxy.proxy_address,
               port: proxy.port
             }
-            console.log('Webshare proxy configured:', { address: proxyCredentials.address, port: proxyCredentials.port })
           }
-        } else {
-          console.error('Failed to fetch Webshare proxy list:', proxyListResponse.status)
         }
       } catch (error) {
-        console.error('Error fetching Webshare proxy credentials:', error)
+        // Proxy fetch failed, continue without proxy
       }
     }
 
@@ -204,8 +195,6 @@ Deno.serve(async (req) => {
       const response = await fetch(apiUrl, fetchOptions)
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error(`Bitget API error for ${endpoint}:`, response.status, errorText)
         throw new Error(`Bitget API error: ${response.status}`)
       }
 

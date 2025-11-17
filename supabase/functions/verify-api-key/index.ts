@@ -39,15 +39,12 @@ serve(async (req) => {
 
           if (response.ok) {
             isValid = true;
-            console.log("OpenAI API key is valid");
           } else {
             const error = await response.json();
             errorMessage = error.error?.message || "Invalid OpenAI API key";
-            console.error("OpenAI verification failed:", errorMessage);
           }
         } catch (error) {
           errorMessage = "Failed to verify OpenAI API key";
-          console.error("OpenAI verification error:", error);
         }
         break;
 
