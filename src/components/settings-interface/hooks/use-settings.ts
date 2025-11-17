@@ -14,6 +14,8 @@ import type {
 } from "../types"
 import { defaultSettingsState } from "../data"
 import { hasUnsavedChanges, deepClone } from "../utils"
+import { supabase } from "@/integrations/supabase/client"
+import { toast } from "sonner"
 
 export const useSettings = () => {
   const [settings, setSettings] = useState<Omit<SettingsState, "hasUnsavedChanges">>(() => {
@@ -32,19 +34,58 @@ export const useSettings = () => {
     return hasUnsavedChanges(originalSettings, settings)
   }, [originalSettings, settings])
 
-  // Load settings from localStorage on mount
+  // Load settings from localStorage and Supabase on mount
   useEffect(() => {
-    const savedSettings = localStorage.getItem("defibotx-settings")
-    if (savedSettings) {
+    const loadSettings = async () => {
+      setIsLoading(true);
       try {
-        const parsed = JSON.parse(savedSettings)
-        const { hasUnsavedChanges: _, ...settingsWithoutFlag } = parsed
-        setSettings(settingsWithoutFlag)
-        setOriginalSettings(deepClone(settingsWithoutFlag))
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Load profile from Supabase
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, phone_number')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (profile) {
+            // Load saved settings from localStorage
+            const savedSettings = localStorage.getItem("defibotx-settings");
+            let parsedSettings = defaultSettingsState;
+            
+            if (savedSettings) {
+              try {
+                parsedSettings = JSON.parse(savedSettings);
+              } catch (error) {
+                console.error("Failed to parse saved settings:", error);
+              }
+            }
+
+            // Merge with profile data from Supabase
+            const { hasUnsavedChanges: _, ...settingsWithoutFlag } = parsedSettings;
+            const updatedSettings = {
+              ...settingsWithoutFlag,
+              profile: {
+                ...settingsWithoutFlag.profile,
+                firstName: profile.username || '',
+                phone: profile.phone_number || '',
+              }
+            };
+
+            setSettings(updatedSettings);
+            setOriginalSettings(deepClone(updatedSettings));
+          }
+        }
       } catch (error) {
-        console.error("Failed to parse saved settings:", error)
+        console.error('Error loading settings:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    loadSettings();
   }, [])
 
   const updateProfile = useCallback((updates: Partial<UserProfile>) => {
@@ -110,8 +151,26 @@ export const useSettings = () => {
   const saveSettings = useCallback(async () => {
     setIsSaving(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Save username to Supabase
+        const { error } = await supabase
+          .from('profiles')
+          .update({ 
+            username: settings.profile.firstName.toLowerCase()
+          })
+          .eq('user_id', user.id);
+
+        if (error) {
+          if (error.code === '23505') {
+            toast.error("Username already taken");
+            return { success: false, error: "Username already taken" };
+          }
+          throw error;
+        }
+      }
 
       // Save to localStorage
       const settingsToSave = { ...settings, hasUnsavedChanges: false }
@@ -120,9 +179,11 @@ export const useSettings = () => {
       // Update original settings to mark as saved
       setOriginalSettings(deepClone(settings))
 
+      toast.success("Settings saved successfully");
       return { success: true }
     } catch (error) {
       console.error("Failed to save settings:", error)
+      toast.error("Failed to save settings");
       return { success: false, error: "Failed to save settings" }
     } finally {
       setIsSaving(false)

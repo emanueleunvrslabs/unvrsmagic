@@ -39,11 +39,12 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ profile, onProfileChan
           value={profile.phone}
           onChange={handleInputChange("phone")}
           placeholder="Enter your WhatsApp number"
-          className={!isPhoneValid && profile.phone ? "border-destructive" : ""}
+          disabled
+          className="bg-muted cursor-not-allowed"
         />
-        {!isPhoneValid && profile.phone && (
-          <p className="text-sm text-destructive">Please enter a valid phone number</p>
-        )}
+        <p className="text-xs text-muted-foreground">
+          WhatsApp number cannot be changed
+        </p>
       </div>
     </div>
   )
