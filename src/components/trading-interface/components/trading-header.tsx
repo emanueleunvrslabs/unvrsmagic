@@ -8,7 +8,8 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { Calendar, ChevronDown } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Calendar, ChevronDown, Search } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/integrations/supabase/client"
@@ -55,6 +56,7 @@ export function TradingHeader({
   const [availableAccounts, setAvailableAccounts] = useState<Array<{ id: string; name: string }>>([])
   const [tradingPairs, setTradingPairs] = useState<Array<{ symbol: string; name: string }>>([])
   const [isLoadingPairs, setIsLoadingPairs] = useState(false)
+  const [pairSearchQuery, setPairSearchQuery] = useState("")
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(2024, 4, 15), // May 15, 2024
     to: new Date(2024, 4, 22), // May 22, 2024
@@ -120,7 +122,13 @@ export function TradingHeader({
         if (response.ok) {
           const result = await response.json()
           if (result.success && result.data) {
-            setTradingPairs(result.data)
+            // Sort to put BTC/USDT first
+            const sortedPairs = result.data.sort((a: { symbol: string; name: string }, b: { symbol: string; name: string }) => {
+              if (a.name === "BTC/USDT") return -1
+              if (b.name === "BTC/USDT") return 1
+              return a.name.localeCompare(b.name)
+            })
+            setTradingPairs(sortedPairs)
           }
         }
       } catch (error) {
@@ -152,6 +160,11 @@ export function TradingHeader({
       setIsCalendarOpen(false)
     }
   }
+
+  const filteredTradingPairs = tradingPairs.filter(pair => 
+    pair.name.toLowerCase().includes(pairSearchQuery.toLowerCase()) ||
+    pair.symbol.toLowerCase().includes(pairSearchQuery.toLowerCase())
+  )
 
   return (
     <>
@@ -209,18 +222,28 @@ export function TradingHeader({
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Trading Pair</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search pairs..."
+                value={pairSearchQuery}
+                onChange={(e) => setPairSearchQuery(e.target.value)}
+                className="pl-8"
+                disabled={isLoadingPairs}
+              />
+            </div>
             <Select value={selectedPair} onValueChange={onPairChange} disabled={isLoadingPairs}>
               <SelectTrigger>
                 <SelectValue placeholder={isLoadingPairs ? "Loading pairs..." : "Select pair"} />
               </SelectTrigger>
               <SelectContent>
-                {tradingPairs.length === 0 ? (
+                {filteredTradingPairs.length === 0 ? (
                   <SelectItem value="none" disabled>
-                    {isLoadingPairs ? "Loading..." : "No trading pairs available"}
+                    {isLoadingPairs ? "Loading..." : pairSearchQuery ? "No pairs found" : "No trading pairs available"}
                   </SelectItem>
                 ) : (
-                  tradingPairs.map((pair) => (
+                  filteredTradingPairs.map((pair) => (
                     <SelectItem key={pair.symbol.toLowerCase()} value={pair.symbol.toLowerCase()}>
                       {pair.name}
                     </SelectItem>
