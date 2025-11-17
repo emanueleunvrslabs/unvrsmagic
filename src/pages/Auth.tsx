@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, X } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -19,6 +19,8 @@ export default function Auth() {
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -47,6 +49,40 @@ export default function Auth() {
       }
     }
   }, [phoneNumber, countryCode]);
+
+  // Check username availability in real-time
+  useEffect(() => {
+    if (step === "username" && username.length >= 3) {
+      const checkUsername = async () => {
+        setCheckingUsername(true);
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('username', username.toLowerCase())
+            .maybeSingle();
+
+          if (error) {
+            console.error('Error checking username:', error);
+            setUsernameAvailable(null);
+            return;
+          }
+
+          setUsernameAvailable(!data);
+        } catch (error) {
+          console.error('Error checking username:', error);
+          setUsernameAvailable(null);
+        } finally {
+          setCheckingUsername(false);
+        }
+      };
+
+      const timer = setTimeout(checkUsername, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setUsernameAvailable(null);
+    }
+  }, [username, step]);
 
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -319,27 +355,43 @@ export default function Auth() {
             <form onSubmit={handleSubmitUsername} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="johndoe"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))}
-                  required
-                  disabled={loading}
-                  minLength={3}
-                  maxLength={20}
-                  autoFocus
-                />
+                <div className="relative">
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="johndoe"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))}
+                    required
+                    disabled={loading}
+                    minLength={3}
+                    maxLength={20}
+                    autoFocus
+                    className="pr-10"
+                  />
+                  {username.length >= 3 && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {checkingUsername ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      ) : usernameAvailable === true ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : usernameAvailable === false ? (
+                        <X className="h-4 w-4 text-red-500" />
+                      ) : null}
+                    </div>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  3-20 characters, lowercase, no spaces
+                  {username.length >= 3 && usernameAvailable === false
+                    ? "Username already taken"
+                    : "3-20 characters, lowercase, no spaces"}
                 </p>
               </div>
               <Button 
                 type="submit" 
                 variant="outline"
                 className="w-full" 
-                disabled={loading}
+                disabled={loading || checkingUsername || usernameAvailable === false}
               >
                 {loading ? (
                   <>

@@ -9,15 +9,29 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useWalletConnection } from "@/hooks/use-wallet-connection";
 import { cn } from "@/lib/utils";
 import { Bell, ChevronDown, Copy, ExternalLink, LogOut, Settings, User, Wallet } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function Topbar() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const { isConnected, address, balance, disconnect, copyAddress } = useWalletConnection();
+  const navigate = useNavigate();
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/auth");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Error logging out");
+    }
   };
 
   return (
@@ -128,7 +142,7 @@ export function Topbar() {
               <User className="mr-2 h-4 w-4" />
               <Link to="/signup">Sign Up</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
             </DropdownMenuItem>
