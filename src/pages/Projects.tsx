@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,80 +13,163 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Package, Plus, Calendar, Archive, Trash2, ExternalLink } from "lucide-react";
+import { Package, Plus, Calendar, Archive, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useLocation } from "react-router-dom";
 
 type Project = {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   status: "active" | "archived";
-  createdAt: Date;
+  created_at: string;
 };
 
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: "1",
-      name: "Trading Bot v1",
-      description: "Automated trading bot for crypto markets",
-      status: "active",
-      createdAt: new Date("2024-01-15"),
-    },
-    {
-      id: "2",
-      name: "DCA Strategy",
-      description: "Dollar cost averaging implementation",
-      status: "active",
-      createdAt: new Date("2024-02-01"),
-    },
-  ]);
+  const location = useLocation();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [newProject, setNewProject] = useState({
     name: "",
     description: "",
   });
-  const [filter, setFilter] = useState<"all" | "active" | "archived">("all");
 
-  const handleCreateProject = () => {
+  // Determine filter from URL
+  const getFilterFromPath = () => {
+    if (location.pathname === "/projects/active") return "active";
+    if (location.pathname === "/projects/archived") return "archived";
+    return "all";
+  };
+
+  const [filter, setFilter] = useState<"all" | "active" | "archived">(getFilterFromPath());
+
+  // Update filter when URL changes
+  useEffect(() => {
+    setFilter(getFilterFromPath());
+  }, [location.pathname]);
+
+  // Fetch projects from database
+  const fetchProjects = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setProjects((data || []) as Project[]);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      toast.error("Failed to load projects");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleCreateProject = async () => {
     if (!newProject.name.trim()) {
       toast.error("Project name is required");
       return;
     }
 
-    const project: Project = {
-      id: Date.now().toString(),
-      name: newProject.name,
-      description: newProject.description,
-      status: "active",
-      createdAt: new Date(),
-    };
+    try {
+      setIsSaving(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("You must be logged in to create a project");
+        return;
+      }
 
-    setProjects([project, ...projects]);
-    setNewProject({ name: "", description: "" });
-    setIsModalOpen(false);
-    toast.success("Project created successfully");
+      const { data, error } = await supabase
+        .from("projects")
+        .insert({
+          name: newProject.name.trim(),
+          description: newProject.description.trim() || null,
+          user_id: user.id,
+          status: "active",
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setProjects([data as Project, ...projects]);
+      setNewProject({ name: "", description: "" });
+      setIsModalOpen(false);
+      toast.success("Project created successfully");
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast.error("Failed to create project");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleArchiveProject = (id: string) => {
-    setProjects(
-      projects.map((p) =>
-        p.id === id ? { ...p, status: p.status === "active" ? "archived" : "active" } : p
-      )
-    );
-    toast.success("Project status updated");
+  const handleArchiveProject = async (id: string) => {
+    const project = projects.find((p) => p.id === id);
+    if (!project) return;
+
+    const newStatus = project.status === "active" ? "archived" : "active";
+
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setProjects(
+        projects.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
+      );
+      toast.success(`Project ${newStatus === "archived" ? "archived" : "restored"}`);
+    } catch (error) {
+      console.error("Error updating project:", error);
+      toast.error("Failed to update project status");
+    }
   };
 
-  const handleDeleteProject = (id: string) => {
-    setProjects(projects.filter((p) => p.id !== id));
-    toast.success("Project deleted");
+  const handleDeleteProject = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setProjects(projects.filter((p) => p.id !== id));
+      toast.success("Project deleted");
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error("Failed to delete project");
+    }
   };
 
   const filteredProjects = projects.filter((p) => {
     if (filter === "all") return true;
     return p.status === filter;
   });
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -155,7 +238,7 @@ export default function Projects() {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {project.createdAt.toLocaleDateString()}
+                    {new Date(project.created_at).toLocaleDateString()}
                   </div>
                   <div
                     className={cn(
@@ -179,7 +262,9 @@ export default function Projects() {
               <Package className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-lg font-medium">No projects found</p>
               <p className="text-sm text-muted-foreground mb-4">
-                Create your first project to get started
+                {filter === "all"
+                  ? "Create your first project to get started"
+                  : `No ${filter} projects`}
               </p>
               <Button onClick={() => setIsModalOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -220,10 +305,19 @@ export default function Projects() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSaving}>
               Cancel
             </Button>
-            <Button onClick={handleCreateProject}>Create Project</Button>
+            <Button onClick={handleCreateProject} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Project"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
