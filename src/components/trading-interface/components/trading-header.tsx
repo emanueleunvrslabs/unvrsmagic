@@ -24,14 +24,6 @@ const mockExchanges = [
 
 // Account types will be fetched dynamically based on available accounts
 
-const mockTradingPairs = [
-  { symbol: "BTC/USDT", name: "Bitcoin / Tether" },
-  { symbol: "ETH/USDT", name: "Ethereum / Tether" },
-  { symbol: "BNB/USDT", name: "BNB / Tether" },
-  { symbol: "ADA/USDT", name: "Cardano / Tether" },
-  { symbol: "SOL/USDT", name: "Solana / Tether" },
-]
-
 interface TradingSettings {
   tradingView: boolean
   signals: boolean
@@ -61,6 +53,8 @@ export function TradingHeader({
 }: TradingHeaderProps) {
   const [connectedExchanges, setConnectedExchanges] = useState<Array<{ id: string; name: string }>>([])
   const [availableAccounts, setAvailableAccounts] = useState<Array<{ id: string; name: string }>>([])
+  const [tradingPairs, setTradingPairs] = useState<Array<{ symbol: string; name: string }>>([])
+  const [isLoadingPairs, setIsLoadingPairs] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(2024, 4, 15), // May 15, 2024
     to: new Date(2024, 4, 22), // May 22, 2024
@@ -104,6 +98,40 @@ export function TradingHeader({
 
     fetchAvailableAccounts()
   }, [])
+
+  // Fetch trading pairs from Bitget
+  useEffect(() => {
+    const fetchTradingPairs = async () => {
+      if (!selectedExchange) return
+      
+      setIsLoadingPairs(true)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-bitget-symbols`,
+          {
+            headers: {
+              Authorization: `Bearer ${session?.access_token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        )
+
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success && result.data) {
+            setTradingPairs(result.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching trading pairs:', error)
+      } finally {
+        setIsLoadingPairs(false)
+      }
+    }
+
+    fetchTradingPairs()
+  }, [selectedExchange])
 
   const formatDateRange = (range: DateRange | undefined): string => {
     if (!range?.from) {
@@ -182,16 +210,22 @@ export function TradingHeader({
             <CardTitle className="text-sm font-medium">Trading Pair</CardTitle>
           </CardHeader>
           <CardContent>
-            <Select value={selectedPair} onValueChange={onPairChange}>
+            <Select value={selectedPair} onValueChange={onPairChange} disabled={isLoadingPairs}>
               <SelectTrigger>
-                <SelectValue placeholder="Select pair" />
+                <SelectValue placeholder={isLoadingPairs ? "Loading pairs..." : "Select pair"} />
               </SelectTrigger>
               <SelectContent>
-                {mockTradingPairs.map((pair) => (
-                  <SelectItem key={pair.symbol.toLowerCase()} value={pair.symbol.toLowerCase()}>
-                    {pair.symbol}
+                {tradingPairs.length === 0 ? (
+                  <SelectItem value="none" disabled>
+                    {isLoadingPairs ? "Loading..." : "No trading pairs available"}
                   </SelectItem>
-                ))}
+                ) : (
+                  tradingPairs.map((pair) => (
+                    <SelectItem key={pair.symbol.toLowerCase()} value={pair.symbol.toLowerCase()}>
+                      {pair.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </CardContent>
