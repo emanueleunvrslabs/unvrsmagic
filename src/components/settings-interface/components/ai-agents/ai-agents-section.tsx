@@ -283,13 +283,6 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-2">AI Agent API Keys</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Connect your AI agent provider accounts to enable AI-powered features
-        </p>
-      </div>
-
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
