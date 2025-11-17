@@ -457,11 +457,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       id: "settings", 
       label: "Settings", 
       icon: Settings,
-      hasSubmenu: true,
-      submenuItems: [
-        { id: "settings-security", label: "AI Model API", icon: Zap, href: "/settings?tab=security" },
-        { id: "settings-exchanges", label: "Exchange Connection", icon: Store, href: "/settings?tab=exchanges" },
-      ],
+      href: "/settings",
     },
   ];
 
@@ -641,83 +637,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                 const Icon = item.icon;
                 const isActive = activeItem === item.id;
 
-                // Handle items with submenus
-                if (item.hasSubmenu && !collapsed) {
-                  const isParentActive = item.submenuItems?.some((subItem) => activeItem === subItem.id) || activeItem === item.id;
-
-                  return (
-                    <div key={item.id} className="space-y-1">
-                      <Collapsible open={openSubmenus[item.id]} className="space-y-1">
-                        <CollapsibleTrigger asChild>
-                          <Button
-                            variant={isParentActive ? "secondary" : "ghost"}
-                            className="w-full justify-between"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              toggleSubmenu(item.id);
-                            }}
-                          >
-                            <div className="flex items-center">
-                              <Icon className="mr-2 h-4 w-4" />
-                              <span>{item.label}</span>
-                            </div>
-                            <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", openSubmenus[item.id] ? "rotate-180" : "rotate-0")} />
-                          </Button>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="pl-6 space-y-1">
-                          {item.submenuItems?.map((subItem) => {
-                            const SubIcon = subItem.icon;
-                            const isSubActive = activeItem === subItem.id;
-                            return (
-                              <Button
-                                key={subItem.id}
-                                variant={isSubActive ? "secondary" : "ghost"}
-                                className="w-full justify-start"
-                                onClick={() => setActiveItem(subItem.id)}
-                                asChild={!!subItem.href}
-                              >
-                                {subItem.href ? (
-                                  <Link to={subItem.href} className="flex items-center w-full">
-                                    <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                                    <span className="truncate">{subItem.label}</span>
-                                  </Link>
-                                ) : (
-                                  <div className="flex items-center w-full">
-                                    <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                                    <span className="truncate">{subItem.label}</span>
-                                  </div>
-                                )}
-                              </Button>
-                            );
-                          })}
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </div>
-                  );
-                }
-
-                // Collapsed mode with submenu (show hover menu)
-                if (item.hasSubmenu && collapsed) {
-                  return (
-                    <Tooltip key={item.id}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant={isActive ? "secondary" : "ghost"}
-                          className="w-full px-2"
-                          onMouseEnter={(e) => handleSubmenuHover(item, e.currentTarget)}
-                          onMouseLeave={handleSubmenuLeave}
-                        >
-                          <Icon className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="font-normal">
-                        {item.label}
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                }
-
-                // Regular item (no submenu)
+                // Regular footer item (no submenu in Settings anymore)
                 return (
                   <Tooltip key={item.id}>
                     <TooltipTrigger asChild>
