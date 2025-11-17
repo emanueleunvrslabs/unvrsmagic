@@ -36,8 +36,18 @@ export default function Auth() {
     }
   }, [otp]);
 
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Auto-send OTP when phone number is complete
+  useEffect(() => {
+    if (step === "phone" && !loading && phoneNumber.length > 0) {
+      const requiredLength = countryCode === "+34" ? 9 : countryCode === "+39" ? 10 : 10;
+      if (phoneNumber.length === requiredLength) {
+        handleSendOtp(new Event("submit") as any);
+      }
+    }
+  }, [phoneNumber, countryCode]);
+
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     
     if (!phoneNumber) {
       toast.error("Please enter phone number");
@@ -147,7 +157,7 @@ export default function Auth() {
         </CardHeader>
         <CardContent>
           {step === "phone" ? (
-            <form onSubmit={handleSendOtp} className="space-y-4">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Phone number</Label>
                 <div className="flex gap-2">
@@ -165,30 +175,24 @@ export default function Auth() {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="3331234567"
+                    placeholder={countryCode === "+34" ? "612345678" : "3331234567"}
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
                     required
                     disabled={loading}
                     className="flex-1"
+                    maxLength={countryCode === "+34" ? 9 : 10}
+                    autoFocus
                   />
                 </div>
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Send OTP code"
+                {loading && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Sending code...
+                  </div>
                 )}
-              </Button>
-            </form>
+              </div>
+            </div>
           ) : (
             <div className="space-y-6">
               <div className="text-center space-y-4">
