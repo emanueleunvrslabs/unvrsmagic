@@ -91,6 +91,19 @@ Deno.serve(async (req) => {
 
     const { api_key, api_secret, passphrase } = exchangeKeys
 
+    // Get Webshare proxy credentials (optional)
+    const { data: webshareKey } = await supabaseClient
+      .from('api_keys')
+      .select('api_key')
+      .eq('user_id', user.id)
+      .eq('provider', 'webshare')
+      .single()
+
+    const webshareApiKey = webshareKey?.api_key
+    if (webshareApiKey) {
+      console.log('Using Webshare proxy for Bitget API calls')
+    }
+
     // Helper function to sign Bitget requests
     const signRequest = async (timestamp: string, method: string, requestPath: string, body = '') => {
       const prehash = timestamp + method + requestPath + body
@@ -120,7 +133,7 @@ Deno.serve(async (req) => {
       
       const signature = await signRequest(timestamp, method, requestPath)
       
-      const headers = {
+      const headers: Record<string, string> = {
         'ACCESS-KEY': api_key,
         'ACCESS-SIGN': signature,
         'ACCESS-TIMESTAMP': timestamp,
@@ -128,10 +141,24 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       }
 
-      const response = await fetch(`https://api.bitget.com${endpoint}`, {
+      // Add proxy authentication if Webshare is configured
+      if (webshareApiKey) {
+        headers['Proxy-Authorization'] = `Basic ${btoa(`${webshareApiKey}:`)}`
+      }
+
+      const fetchOptions: RequestInit = {
         method: 'GET',
         headers: headers,
-      })
+      }
+
+      // Use Webshare proxy if configured
+      const apiUrl = webshareApiKey 
+        ? `http://proxy.webshare.io:80/https://api.bitget.com${endpoint}`
+        : `https://api.bitget.com${endpoint}`
+
+      console.log(`Calling Bitget API: ${endpoint}${webshareApiKey ? ' (via Webshare proxy)' : ''}`)
+
+      const response = await fetch(apiUrl, fetchOptions)
 
       if (!response.ok) {
         const errorText = await response.text()
