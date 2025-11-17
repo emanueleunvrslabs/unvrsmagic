@@ -16,6 +16,7 @@ import { PortfolioSection } from "./components/portfolio-section";
 import { SettingsSection } from "./components/settings-section";
 import { StrategySection } from "./components/strategy-section";
 import { TradesSection } from "./components/trades-section";
+import { TradingInterface } from "@/components/trading-interface/index";
 import { useBotState } from "./hooks/use-bot-state";
 import type { Asset } from "./types";
 
@@ -147,13 +148,7 @@ export function AiBotDashboard() {
 
         {/* Place Order Tab */}
         <TabsContent value="place-order" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Order form content will be added here */}
-            <div className="rounded-lg border bg-card p-6">
-              <h3 className="text-lg font-semibold mb-4">Place Order</h3>
-              <p className="text-sm text-muted-foreground">Order placement interface coming soon...</p>
-            </div>
-          </div>
+          <TradingInterface />
         </TabsContent>
 
         {/* Portfolio Tab */}
