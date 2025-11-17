@@ -82,6 +82,7 @@ export type Database = {
           code: string
           created_at: string
           expires_at: string
+          failed_attempts: number
           id: string
           phone_number: string
           verified: boolean
@@ -90,6 +91,7 @@ export type Database = {
           code: string
           created_at?: string
           expires_at: string
+          failed_attempts?: number
           id?: string
           phone_number: string
           verified?: boolean
@@ -98,6 +100,7 @@ export type Database = {
           code?: string
           created_at?: string
           expires_at?: string
+          failed_attempts?: number
           id?: string
           phone_number?: string
           verified?: boolean

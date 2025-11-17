@@ -26,12 +26,11 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Find valid OTP
+    // Find valid OTP - first check for the phone number
     const { data: otpData, error: otpError } = await supabaseAdmin
       .from('otp_codes')
       .select('*')
       .eq('phone_number', phoneNumber)
-      .eq('code', code)
       .eq('verified', false)
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
@@ -42,6 +41,30 @@ serve(async (req) => {
       console.error('OTP verification failed:', otpError);
       return new Response(
         JSON.stringify({ error: 'Invalid or expired OTP code' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if OTP is locked due to too many failed attempts
+    if (otpData.failed_attempts >= 5) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many failed attempts. Please request a new OTP code.' 
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify the OTP code matches
+    if (otpData.code !== code) {
+      // Increment failed attempts
+      await supabaseAdmin
+        .from('otp_codes')
+        .update({ failed_attempts: otpData.failed_attempts + 1 })
+        .eq('id', otpData.id);
+
+      return new Response(
+        JSON.stringify({ error: 'Invalid OTP code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
