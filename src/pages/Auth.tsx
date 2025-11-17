@@ -389,8 +389,7 @@ export default function Auth() {
               </div>
               <Button 
                 type="submit" 
-                variant="outline"
-                className="w-full" 
+                className="w-full bg-primary/80 hover:bg-primary/90" 
                 disabled={loading || checkingUsername || usernameAvailable === false}
               >
                 {loading ? (
