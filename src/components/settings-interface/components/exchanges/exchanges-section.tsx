@@ -20,6 +20,7 @@ const EXCHANGES = [
   { id: "coinbase", name: "Coinbase", placeholder: "Enter API Key", description: "Crypto exchange", requiresSecret: true },
   { id: "kraken", name: "Kraken", placeholder: "Enter API Key", description: "Crypto trading platform", requiresSecret: true },
   { id: "bybit", name: "Bybit", placeholder: "Enter API Key", description: "Derivatives trading", requiresSecret: true },
+  { id: "bitget", name: "Bitget", placeholder: "Enter API Key", description: "Crypto derivatives exchange", requiresSecret: true },
 ]
 
 // Validation schemas for each exchange
@@ -35,6 +36,9 @@ const exchangeKeySchemas = {
   }),
   bybit: z.string().trim().min(20, {
     message: "Bybit API key must be at least 20 characters"
+  }),
+  bitget: z.string().trim().min(20, {
+    message: "Bitget API key must be at least 20 characters"
   })
 }
 
@@ -44,12 +48,14 @@ export const ExchangesSection: React.FC<ExchangesSectionProps> = () => {
     coinbase: "",
     kraken: "",
     bybit: "",
+    bitget: "",
   })
   const [apiSecrets, setApiSecrets] = useState<Record<string, string>>({
     binance: "",
     coinbase: "",
     kraken: "",
     bybit: "",
+    bitget: "",
   })
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [visibleSecrets, setVisibleSecrets] = useState<Set<string>>(new Set())
