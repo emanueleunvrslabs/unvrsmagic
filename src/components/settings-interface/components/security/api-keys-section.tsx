@@ -211,8 +211,14 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                 <TableCell className="text-sm text-muted-foreground">
                   {provider.description}
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {connectedProviders.has(provider.id) ? "Connected" : "Not connected"}
+                <TableCell>
+                  <span className={`text-sm font-medium ${
+                    connectedProviders.has(provider.id) 
+                      ? "text-green-600" 
+                      : "text-red-600"
+                  }`}>
+                    {connectedProviders.has(provider.id) ? "Connected" : "Not connected"}
+                  </span>
                 </TableCell>
                 <TableCell>
                   {connectedProviders.has(provider.id) ? (
