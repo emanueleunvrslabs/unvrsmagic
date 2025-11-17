@@ -40,7 +40,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({
       </SettingsSection>
 
       <SettingsSection title="NKMT Agents" description="Specialized AI agents for trading operations">
-        <NKMTAgentsSection />
+        <NKMTAgentsSection apiKeys={apiKeys} />
       </SettingsSection>
     </div>
   )

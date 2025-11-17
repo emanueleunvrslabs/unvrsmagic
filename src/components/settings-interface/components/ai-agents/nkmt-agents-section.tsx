@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/integrations/supabase/client"
+import type { ApiKey } from "../../types"
 
 const NKMT_AGENTS = [
   { id: "nkmt", name: "NKMT", model: "GPT-5.1 Thinking", description: "Main orchestrator", requiresApi: "openai" },
@@ -19,11 +20,20 @@ const NKMT_AGENTS = [
   { id: "reviewer", name: "Reviewer", model: "Claude Sonnet 4.5", description: "Trade review", requiresApi: "anthropic" },
 ]
 
-export const NKMTAgentsSection: React.FC = () => {
+export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys }) => {
   const [connectedApis, setConnectedApis] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    const normalizeProvider = (p: string) => {
+      if (!p) return p
+      const map: Record<string, string> = {
+        chatgpt: 'openai',
+        claude: 'anthropic',
+      }
+      return map[p] ?? p
+    }
+
     const loadConnectedApis = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
@@ -33,7 +43,7 @@ export const NKMTAgentsSection: React.FC = () => {
           .from('api_keys')
           .select('provider')
           .eq('user_id', user.id)
-          .in('provider', ['openai', 'anthropic', 'qwen'])
+          .in('provider', ['openai', 'anthropic', 'qwen', 'chatgpt', 'claude'])
 
         if (error) {
           console.error("Error loading API keys:", error)
@@ -41,7 +51,8 @@ export const NKMTAgentsSection: React.FC = () => {
         }
 
         if (data) {
-          const apis = new Set(data.map(item => item.provider))
+          const normalized = data.map((item) => normalizeProvider(item.provider))
+          const apis = new Set(normalized)
           console.log("NKMT: Loaded APIs:", Array.from(apis))
           setConnectedApis(apis)
         }
@@ -54,6 +65,14 @@ export const NKMTAgentsSection: React.FC = () => {
 
     loadConnectedApis()
   }, [])
+
+  // Merge providers coming from props (SecurityTab state) if available
+  useEffect(() => {
+    if (!apiKeys) return
+    const normalizeProvider = (p: string) => (p === 'chatgpt' ? 'openai' : p === 'claude' ? 'anthropic' : p)
+    const fromProps = new Set(apiKeys.map(k => normalizeProvider((k as any).provider)))
+    setConnectedApis(prev => new Set([...prev, ...fromProps]))
+  }, [apiKeys])
 
   const isAgentConnected = (agent: typeof NKMT_AGENTS[0]) => {
     // Code-based agents are always connected
