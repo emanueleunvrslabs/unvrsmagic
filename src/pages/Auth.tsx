@@ -337,6 +337,7 @@ export default function Auth() {
               </div>
               <Button 
                 type="submit" 
+                variant="outline"
                 className="w-full" 
                 disabled={loading}
               >
