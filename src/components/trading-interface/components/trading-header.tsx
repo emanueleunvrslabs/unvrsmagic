@@ -122,6 +122,8 @@ export function TradingHeader({
         if (response.ok) {
           const result = await response.json()
           if (result.success && result.data) {
+            console.log('Trading pairs loaded:', result.data.length, 'pairs')
+            console.log('Sample pairs:', result.data.slice(0, 5))
             // Sort to put BTC/USDT first
             const sortedPairs = result.data.sort((a: { symbol: string; name: string }, b: { symbol: string; name: string }) => {
               if (a.name === "BTC/USDT") return -1
@@ -161,10 +163,19 @@ export function TradingHeader({
     }
   }
 
-  const filteredTradingPairs = tradingPairs.filter(pair => 
-    pair.name.toLowerCase().includes(pairSearchQuery.toLowerCase()) ||
-    pair.symbol.toLowerCase().includes(pairSearchQuery.toLowerCase())
-  )
+  const filteredTradingPairs = tradingPairs.filter(pair => {
+    const searchLower = pairSearchQuery.toLowerCase()
+    const nameLower = pair.name.toLowerCase()
+    const symbolLower = pair.symbol.toLowerCase()
+    const matches = nameLower.includes(searchLower) || symbolLower.includes(searchLower)
+    return matches
+  })
+
+  console.log('Search query:', pairSearchQuery)
+  console.log('Filtered pairs count:', filteredTradingPairs.length)
+  if (pairSearchQuery && filteredTradingPairs.length > 0) {
+    console.log('First 5 filtered:', filteredTradingPairs.slice(0, 5))
+  }
 
   return (
     <>
