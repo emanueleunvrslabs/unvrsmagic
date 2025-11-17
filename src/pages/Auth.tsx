@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 export default function Auth() {
   const navigate = useNavigate();
   const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [countryCode, setCountryCode] = useState("+39");
+  const [countryCode, setCountryCode] = useState("+34");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState("");
   const [otp, setOtp] = useState("");
@@ -150,12 +150,12 @@ export default function Auth() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="+34">🇪🇸 +34</SelectItem>
                       <SelectItem value="+39">🇮🇹 +39</SelectItem>
-                      <SelectItem value="+1">🇺🇸 +1</SelectItem>
                       <SelectItem value="+44">🇬🇧 +44</SelectItem>
+                      <SelectItem value="+1">🇺🇸 +1</SelectItem>
                       <SelectItem value="+33">🇫🇷 +33</SelectItem>
                       <SelectItem value="+49">🇩🇪 +49</SelectItem>
-                      <SelectItem value="+34">🇪🇸 +34</SelectItem>
                       <SelectItem value="+41">🇨🇭 +41</SelectItem>
                     </SelectContent>
                   </Select>
