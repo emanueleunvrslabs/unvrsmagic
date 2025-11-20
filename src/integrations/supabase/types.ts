@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          message_type: string
+          payload: Json
+          priority: number | null
+          processed_at: string | null
+          receiver_agent: string
+          sender_agent: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message_type: string
+          payload: Json
+          priority?: number | null
+          processed_at?: string | null
+          receiver_agent: string
+          sender_agent: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message_type?: string
+          payload?: Json
+          priority?: number | null
+          processed_at?: string | null
+          receiver_agent?: string
+          sender_agent?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       agent_prompts: {
         Row: {
           agent_id: string
@@ -37,6 +76,42 @@ export type Database = {
           id?: string
           prompt?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      agent_state: {
+        Row: {
+          agent_name: string
+          created_at: string | null
+          id: string
+          last_error: string | null
+          last_execution: string | null
+          performance_metrics: Json | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          agent_name: string
+          created_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_execution?: string | null
+          performance_metrics?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          agent_name?: string
+          created_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_execution?: string | null
+          performance_metrics?: Json | null
+          status?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
