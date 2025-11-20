@@ -36,7 +36,11 @@ export const MktDataInterface = () => {
   const ohlcvArray = (chartSourceData?.ohlcv as any[]) || []
   const chartData = ohlcvArray.map((candle: any) => ({
     timestamp: candle.timestamp_ms,
-    price: candle.close
+    open: candle.open,
+    high: candle.high,
+    low: candle.low,
+    close: candle.close,
+    volume: candle.volume
   }))
 
   // Calculate metrics from OHLCV data
