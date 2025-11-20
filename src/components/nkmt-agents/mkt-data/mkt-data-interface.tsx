@@ -9,14 +9,16 @@ import { MktDataActivityLogs } from "./mkt-data-activity-logs"
 import { MktDataLiveTickers } from "./mkt-data-live-tickers"
 import { MktDataOrderBook } from "./mkt-data-order-book"
 
-const TOP_SYMBOLS = [
+const TOP_SYMBOLS_FALLBACK = [
   'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BGBUSDT', 'XRPUSDT', 
   'USDCUSDT', 'BNBUSDT', 'ADAUSDT', 'DOGEUSDT', 'TRXUSDT'
 ]
-
+ 
 export const MktDataInterface = () => {
   const { data, isLoading, error, initializeConfig } = useMktData()
-  const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT')
+  const availableSymbols = Array.from(new Set(data.map(d => d.symbol)))
+  const symbols = availableSymbols.length > 0 ? availableSymbols : TOP_SYMBOLS_FALLBACK
+  const [selectedSymbol, setSelectedSymbol] = useState(symbols[0] || 'BTCUSDT')
 
   useEffect(() => {
     initializeConfig()
@@ -45,7 +47,7 @@ export const MktDataInterface = () => {
   const volume24h = ohlcvArray.reduce((sum: number, candle: any) => sum + (candle.volume || 0), 0) / 1000000
 
   // Get live ticker data from database
-  const liveTickers = TOP_SYMBOLS.slice(0, 3).map(sym => {
+  const liveTickers = symbols.slice(0, 3).map(sym => {
     const symData = data.find(d => d.symbol === sym && d.timeframe === '1h' && d.market_type === 'spot')
     const ohlcv = (symData?.ohlcv as any[]) || []
     const latest = ohlcv[ohlcv.length - 1]
@@ -62,12 +64,12 @@ export const MktDataInterface = () => {
         low24h: 0
       }
     }
-
+ 
     const change = first?.close ? ((latest.close - first.close) / first.close) * 100 : 0
     const high = Math.max(...ohlcv.map((c: any) => c.high || 0))
     const low = Math.min(...ohlcv.filter((c: any) => c.low > 0).map((c: any) => c.low || Infinity))
     const vol = ohlcv.reduce((sum: number, c: any) => sum + (c.volume || 0), 0) / 1000000
-
+ 
     return {
       symbol: sym,
       shortName: sym.replace('USDT', ''),
@@ -194,7 +196,7 @@ export const MktDataInterface = () => {
             <Card>
               <CardContent className="pt-6">
                 <MktDataSymbolSelector
-                  symbols={TOP_SYMBOLS}
+                  symbols={symbols}
                   selectedSymbol={selectedSymbol}
                   onSymbolChange={setSelectedSymbol}
                 />
