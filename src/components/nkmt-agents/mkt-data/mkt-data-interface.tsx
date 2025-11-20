@@ -43,6 +43,13 @@ export const MktDataInterface = () => {
     macd: false
   })
 
+  // Aggiorna automaticamente il grafico per mostrare la moneta analizzata
+  useEffect(() => {
+    if (lastUpdatedSymbol) {
+      setSelectedSymbol(lastUpdatedSymbol)
+    }
+  }, [lastUpdatedSymbol])
+
   // Fetch real order book data from Bitget
   const { data: orderBookData, isLoading: orderBookLoading } = useBitgetOrderBook(selectedSymbol)
 
