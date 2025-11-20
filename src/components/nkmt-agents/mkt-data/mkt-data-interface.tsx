@@ -20,7 +20,7 @@ const TOP_SYMBOLS_FALLBACK = [
 ]
  
 export const MktDataInterface = () => {
-  const { data, isLoading, error, initializeConfig } = useMktData()
+  const { data, isLoading, error, initializeConfig, lastUpdatedSymbol } = useMktData()
   const availableSymbols = Array.from(new Set(data.map(d => d.symbol)))
   const symbols = availableSymbols.length > 0 ? availableSymbols : TOP_SYMBOLS_FALLBACK
   const [selectedSymbol, setSelectedSymbol] = useState(symbols[0] || 'BTCUSDT')
@@ -344,6 +344,7 @@ export const MktDataInterface = () => {
                   priceChange={priceChange}
                   volume24h={volume24h}
                   indicators={indicators}
+                  isLive={lastUpdatedSymbol === selectedSymbol}
                 />
               </div>
             </div>

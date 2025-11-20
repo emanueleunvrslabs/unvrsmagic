@@ -29,6 +29,7 @@ export const useMktData = () => {
   const [data, setData] = useState<MktDataResult[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastUpdatedSymbol, setLastUpdatedSymbol] = useState<string | null>(null)
 
   useEffect(() => {
     let channel: RealtimeChannel
@@ -72,6 +73,11 @@ export const useMktData = () => {
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             setData(prevData => {
               const newRecord = payload.new as MktDataResult
+              
+              // Set the last updated symbol for live indicator
+              setLastUpdatedSymbol(newRecord.symbol)
+              setTimeout(() => setLastUpdatedSymbol(null), 5000) // Clear after 5 seconds
+              
               const existingIndex = prevData.findIndex(
                 item => item.id === newRecord.id
               )
@@ -131,6 +137,7 @@ export const useMktData = () => {
     data,
     isLoading,
     error,
-    initializeConfig
+    initializeConfig,
+    lastUpdatedSymbol
   }
 }
