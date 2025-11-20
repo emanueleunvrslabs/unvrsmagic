@@ -39,16 +39,28 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Bitget API error:', errorText)
+      console.error('Bitget API error response:', errorText)
 
       // Try to parse Bitget error response to handle specific symbol errors
       try {
-        const errorJson = JSON.parse(errorText) as { code?: string; msg?: string }
-        if (errorJson.code === '40309' || errorJson.code === '40034') {
+        const errorJson = JSON.parse(errorText) as { code?: string; msg?: string; data?: unknown }
+        console.log('Parsed Bitget error:', { code: errorJson.code, msg: errorJson.msg })
+        
+        // Check for unavailable symbol error codes
+        const isSymbolNotAvailable = 
+          errorJson.code === '40309' || 
+          errorJson.code === '40034' ||
+          (errorJson.msg && (
+            errorJson.msg.includes('does not exist') ||
+            errorJson.msg.includes('has been removed')
+          ))
+        
+        if (isSymbolNotAvailable) {
+          console.log(`Symbol ${symbol} not available on Bitget`)
           return new Response(
             JSON.stringify({
               error: 'Symbol not available',
-              code: errorJson.code,
+              code: errorJson.code || '40034',
               message: `${symbol} is not available on Bitget`,
             }),
             {
@@ -57,10 +69,11 @@ Deno.serve(async (req) => {
             }
           )
         }
-      } catch (_) {
-        // If parsing fails, fall back to generic error handling
+      } catch (parseError) {
+        console.error('Failed to parse Bitget error response:', parseError)
       }
 
+      // If we reach here, it's not a symbol availability error
       throw new Error(`Bitget API error: ${response.status} ${errorText}`)
     }
 
