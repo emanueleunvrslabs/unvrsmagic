@@ -16,8 +16,15 @@ interface MktDataLiveTickersProps {
 }
 
 export const MktDataLiveTickers = ({ tickers }: MktDataLiveTickersProps) => {
-  const formatPrice = (price: number) => `$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-  const formatVolume = (volume: number) => `$${(volume / 1000000).toFixed(2)}M`
+  const formatPrice = (price: number | null | undefined) => {
+    if (price == null || isNaN(price)) return '$0.00'
+    return `$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+  
+  const formatVolume = (volume: number | null | undefined) => {
+    if (volume == null || isNaN(volume)) return '$0.00M'
+    return `$${(volume / 1000000).toFixed(2)}M`
+  }
 
   return (
     <Card>
@@ -51,7 +58,7 @@ export const MktDataLiveTickers = ({ tickers }: MktDataLiveTickersProps) => {
                   <div className="text-right">
                     <p className="text-xl font-bold">{formatPrice(ticker.price)}</p>
                     <p className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                      {isPositive ? '+' : ''}{ticker.change24h.toFixed(2)}%
+                      {isPositive ? '+' : ''}{(ticker.change24h || 0).toFixed(2)}%
                     </p>
                   </div>
                 </div>
