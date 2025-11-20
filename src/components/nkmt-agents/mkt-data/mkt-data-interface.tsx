@@ -44,18 +44,13 @@ export const MktDataInterface = () => {
     rsi: false,
     macd: false
   })
-  const [isTransitioning, setIsTransitioning] = useState(false)
 
-  // Aggiorna automaticamente il grafico per mostrare la moneta analizzata con animazione
+  // Aggiorna automaticamente il grafico per mostrare la moneta analizzata
   useEffect(() => {
-    if (lastUpdatedSymbol && lastUpdatedSymbol !== selectedSymbol) {
-      setIsTransitioning(true)
-      setTimeout(() => {
-        setSelectedSymbol(lastUpdatedSymbol)
-        setTimeout(() => setIsTransitioning(false), 50)
-      }, 300)
+    if (lastUpdatedSymbol) {
+      setSelectedSymbol(lastUpdatedSymbol)
     }
-  }, [lastUpdatedSymbol, selectedSymbol])
+  }, [lastUpdatedSymbol])
 
   // Fetch real order book data from Bitget
   const { data: orderBookData, isLoading: orderBookLoading } = useBitgetOrderBook(selectedSymbol)
@@ -412,24 +407,15 @@ export const MktDataInterface = () => {
 
               {/* Price Chart */}
               <div className="flex-1">
-                <div 
-                  key={selectedSymbol}
-                  className={`transition-all duration-300 ${
-                    isTransitioning 
-                      ? 'opacity-0 scale-95' 
-                      : 'opacity-100 scale-100 animate-fade-in'
-                  }`}
-                >
-                  <MktDataChart
-                    symbol={selectedSymbol}
-                    data={chartData}
-                    currentPrice={currentPrice}
-                    priceChange={priceChange}
-                    volume24h={volume24h}
-                    indicators={indicators}
-                    isLive={lastUpdatedSymbol === selectedSymbol}
-                  />
-                </div>
+                <MktDataChart
+                  symbol={selectedSymbol}
+                  data={chartData}
+                  currentPrice={currentPrice}
+                  priceChange={priceChange}
+                  volume24h={volume24h}
+                  indicators={indicators}
+                  isLive={lastUpdatedSymbol === selectedSymbol}
+                />
               </div>
             </div>
 
