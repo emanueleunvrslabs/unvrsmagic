@@ -352,13 +352,17 @@ export const MktDataInterface = () => {
           {/* Second row: Live Tickers + Order Book */}
           <div className="grid grid-cols-12 gap-6">
             {/* Live Tickers */}
-            <div className="col-span-12 lg:col-span-4">
-              <MktDataLiveTickers tickers={liveTickers} />
+            <div className="col-span-12 lg:col-span-4 flex">
+              <div className="flex-1">
+                <MktDataLiveTickers tickers={liveTickers} />
+              </div>
             </div>
 
             {/* Order Book */}
-            <div className="col-span-12 lg:col-span-8">
-              <MktDataOrderBook {...orderBook} />
+            <div className="col-span-12 lg:col-span-8 flex">
+              <div className="flex-1">
+                <MktDataOrderBook {...orderBook} />
+              </div>
             </div>
           </div>
         </div>
