@@ -242,7 +242,7 @@ export const MktDataInterface = () => {
       ) : data.length > 0 ? (
         <div className="space-y-6">
           {/* First row: Symbol Selector + Chart + Activity Logs */}
-          <div className="grid grid-cols-12 gap-6 items-start">
+          <div className="grid grid-cols-12 gap-6">
             {/* Symbol Selector */}
             <div className="col-span-12 lg:col-span-2">
               <Card>
