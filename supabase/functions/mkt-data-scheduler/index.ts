@@ -19,7 +19,8 @@ const TOP_100_SYMBOLS = [
 ]
 
 Deno.serve(async (req) => {
-  console.log('🚀 MKT.DATA Scheduler started at', new Date().toISOString())
+  const startTime = Date.now()
+  console.log('🚀 [MKT.DATA Scheduler] Started at', new Date().toISOString())
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -31,6 +32,24 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // Log function to persist logs
+    const logToDatabase = async (userId: string, level: string, message: string, metadata?: any) => {
+      try {
+        await supabaseClient.functions.invoke('agent-logger', {
+          body: {
+            action: 'log',
+            agent_name: 'mkt.data',
+            user_id: userId,
+            log_level: level,
+            message,
+            metadata: metadata || {}
+          }
+        })
+      } catch (logError) {
+        console.error('❌ [MKT.DATA] Failed to persist log:', logError)
+      }
+    }
+
     // Fetch all users with enabled mkt_data_config
     const { data: configs, error: configError } = await supabaseClient
       .from('mkt_data_config')
@@ -38,20 +57,37 @@ Deno.serve(async (req) => {
       .eq('enabled', true)
 
     if (configError) {
-      console.error('Error fetching configs:', configError)
+      console.error('❌ [MKT.DATA] Error fetching configs:', configError)
       return new Response(
         JSON.stringify({ error: 'Failed to fetch configurations' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log(`Processing ${configs?.length || 0} user configurations`)
+    console.log(`📋 [MKT.DATA] Processing ${configs?.length || 0} user configurations`)
 
     const results = []
 
     // Process each user configuration
     for (const config of configs || []) {
+      const userStartTime = Date.now()
+      
       try {
+        await logToDatabase(config.user_id, 'info', `Starting data collection for user`, {
+          symbols_count: TOP_100_SYMBOLS.length,
+          timeframes: config.timeframes,
+          market_types: config.market_types
+        })
+
+        // Update agent state to processing
+        await supabaseClient.functions.invoke('agent-message-broker', {
+          body: {
+            action: 'update_agent_state',
+            agent_name: 'mkt.data',
+            user_id: config.user_id,
+            status: 'processing'
+          }
+        })
         // Fetch user's API keys
         const { data: apiKeys } = await supabaseClient
           .from('api_keys')
@@ -60,12 +96,18 @@ Deno.serve(async (req) => {
           .in('provider', ['coingecko', 'coinmarketcap'])
 
         if (!apiKeys || apiKeys.length === 0) {
-          console.log(`No API keys found for user ${config.user_id}, skipping`)
+          await logToDatabase(config.user_id, 'warning', 'No API keys found, skipping data collection')
+          console.log(`⚠️ [MKT.DATA] No API keys found for user ${config.user_id}, skipping`)
           continue
         }
 
         const coinGeckoKey = apiKeys.find(k => k.provider === 'coingecko')?.api_key
         const coinMarketCapKey = apiKeys.find(k => k.provider === 'coinmarketcap')?.api_key
+
+        await logToDatabase(config.user_id, 'info', 'API keys retrieved', {
+          has_coingecko: !!coinGeckoKey,
+          has_coinmarketcap: !!coinMarketCapKey
+        })
 
         // Use TOP 100 symbols
         const symbols = TOP_100_SYMBOLS
@@ -73,7 +115,10 @@ Deno.serve(async (req) => {
         const marketTypes = config.market_types || ['spot', 'futures']
         const lookbackBars = config.lookback_bars || 100
 
-        console.log(`Processing user ${config.user_id} with ${symbols.length} symbols`)
+        console.log(`📊 [MKT.DATA] Processing user ${config.user_id} with ${symbols.length} symbols`)
+        
+        let successCount = 0
+        let errorCount = 0
 
         // Process data in batches to avoid timeouts
         const batchSize = 10
@@ -140,28 +185,48 @@ Deno.serve(async (req) => {
                       })
 
                     if (insertError) {
-                      console.error(`Error saving data for ${symbol}:`, insertError)
+                      errorCount++
+                      console.error(`❌ [MKT.DATA] Error saving data for ${symbol}:`, insertError)
+                    } else {
+                      successCount++
                     }
                   }
                 } catch (error) {
-                  console.error(`Error processing ${symbol} ${marketType} ${timeframe}:`, error)
+                  errorCount++
+                  console.error(`❌ [MKT.DATA] Error processing ${symbol} ${marketType} ${timeframe}:`, error)
                 }
               }
             }
           }
         }
 
+        const userDuration = Date.now() - userStartTime
+        
+        await logToDatabase(config.user_id, 'info', 'Data collection completed', {
+          success_count: successCount,
+          error_count: errorCount,
+          duration_ms: userDuration,
+          symbols_processed: symbols.length
+        })
+
         results.push({
           user_id: config.user_id,
           symbols_processed: symbols.length,
+          success_count: successCount,
+          error_count: errorCount,
           status: 'completed'
         })
       } catch (error) {
-        console.error(`Error processing user ${config.user_id}:`, error)
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        await logToDatabase(config.user_id, 'error', 'Data collection failed', {
+          error: errorMessage
+        })
+        
+        console.error(`❌ [MKT.DATA] Error processing user ${config.user_id}:`, error)
         results.push({
           user_id: config.user_id,
           status: 'error',
-          error: error instanceof Error ? error.message : String(error)
+          error: errorMessage
         })
       }
     }
