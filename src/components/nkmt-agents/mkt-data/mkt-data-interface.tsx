@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, TrendingUp, Database } from "lucide-react"
 import { useMktData } from "@/hooks/use-mkt-data"
+import { useBitgetOrderBook } from "@/hooks/use-bitget-orderbook"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { MktDataSymbolSelector } from "./mkt-data-symbol-selector"
 import { MktDataChart } from "./mkt-data-chart"
@@ -32,6 +33,9 @@ export const MktDataInterface = () => {
     rsi: false,
     macd: false
   })
+
+  // Fetch real order book data from Bitget
+  const { data: orderBookData, isLoading: orderBookLoading } = useBitgetOrderBook(selectedSymbol)
 
   useEffect(() => {
     initializeConfig()
@@ -146,9 +150,9 @@ export const MktDataInterface = () => {
     status: 'success' as const
   }))
 
-  // Generate mock order book based on current price
+  // Generate mock order book as fallback if API call fails
   const basePrice = currentPrice || 91618
-  const orderBook = {
+  const mockOrderBook = {
     symbol: selectedSymbol.replace('USDT', ''),
     spread: 0.01,
     spreadPercent: 0.0001,
@@ -171,6 +175,9 @@ export const MktDataInterface = () => {
       }
     })
   }
+
+  // Use real data if available, otherwise fall back to mock
+  const orderBook = orderBookData || mockOrderBook
 
   return (
     <div className="space-y-6">
