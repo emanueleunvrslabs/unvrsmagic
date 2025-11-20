@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp } from "lucide-react"
+import { TrendingUp, Activity } from "lucide-react"
 import { ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Bar, Line } from "recharts"
+import { Badge } from "@/components/ui/badge"
 
 interface MktDataChartProps {
   symbol: string
@@ -31,6 +32,7 @@ interface MktDataChartProps {
     rsi: boolean
     macd: boolean
   }
+  isLive?: boolean
 }
 
 interface CandleProps {
@@ -87,7 +89,7 @@ const Candlestick = ({ x, y, width, height, open, close, high, low }: CandleProp
   )
 }
 
-export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24h, indicators }: MktDataChartProps) => {
+export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24h, indicators, isLive = false }: MktDataChartProps) => {
   const chartData = data.map(item => ({
     time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     open: item.open,
@@ -112,6 +114,12 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
             <CardTitle>{symbol}</CardTitle>
+            {isLive && (
+              <Badge variant="default" className="animate-pulse bg-green-500 text-white">
+                <Activity className="h-3 w-3 mr-1" />
+                Analyzing
+              </Badge>
+            )}
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">24h Volume</p>
