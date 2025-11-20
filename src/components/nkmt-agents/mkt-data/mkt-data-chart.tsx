@@ -47,9 +47,19 @@ interface CandleProps {
 const Candlestick = ({ x, y, width, height, open, close, high, low }: CandleProps) => {
   const isPositive = close >= open
   const color = isPositive ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'
-  
-  const candleY = Math.min(open, close)
-  const candleHeight = Math.abs(close - open)
+
+  // height: pixel height of full candle range (high-low)
+  // y: pixel y of high price (top)
+  const priceRange = high - low || 1
+  const yScale = height / priceRange
+
+  const highY = y
+  const lowY = y + (high - low) * yScale
+  const openY = y + (high - open) * yScale
+  const closeY = y + (high - close) * yScale
+
+  const candleY = Math.min(openY, closeY)
+  const candleHeight = Math.max(Math.abs(closeY - openY), 1)
   const candleX = x + width / 2
 
   return (
@@ -57,18 +67,18 @@ const Candlestick = ({ x, y, width, height, open, close, high, low }: CandleProp
       {/* Shadow (wick) */}
       <line
         x1={candleX}
-        y1={high}
+        y1={highY}
         x2={candleX}
-        y2={low}
+        y2={lowY}
         stroke={color}
         strokeWidth={1}
       />
       {/* Body */}
       <rect
-        x={x}
+        x={x + width * 0.15}
         y={candleY}
-        width={width}
-        height={candleHeight || 1}
+        width={width * 0.7}
+        height={candleHeight}
         fill={color}
         stroke={color}
         strokeWidth={1}
