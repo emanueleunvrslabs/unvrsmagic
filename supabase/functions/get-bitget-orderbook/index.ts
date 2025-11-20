@@ -46,11 +46,11 @@ Deno.serve(async (req) => {
     const data: BitgetOrderBookResponse = await response.json()
     
     // Handle specific Bitget error codes
-    if (data.code === '40309') {
+    if (data.code === '40309' || data.code === '40034') {
       return new Response(
         JSON.stringify({ 
           error: 'Symbol not available',
-          code: '40309',
+          code: data.code,
           message: `${symbol} is not available on Bitget`
         }),
         {
