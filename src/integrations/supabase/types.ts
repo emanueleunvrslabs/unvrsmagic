@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_alerts: {
+        Row: {
+          agent_name: string
+          alert_type: string
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean
+          severity: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          agent_name: string
+          alert_type: string
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean
+          severity: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          agent_name?: string
+          alert_type?: string
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean
+          severity?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agent_logs: {
         Row: {
           action: string | null
