@@ -109,6 +109,58 @@ Deno.serve(async (req) => {
         sources: Array.from(aggregatedData.sources)
       })
 
+      // Detect anomalies and critical signals
+      const alerts = []
+      
+      for (const symbolData of aggregatedData.symbols) {
+        // Price anomaly detection (>10% change)
+        if (symbolData.price_change_percent && Math.abs(symbolData.price_change_percent) > 10) {
+          alerts.push({
+            user_id: userId,
+            agent_name: 'nkmt',
+            alert_type: 'price_anomaly',
+            severity: Math.abs(symbolData.price_change_percent) > 20 ? 'critical' : 'high',
+            title: `${symbolData.symbol} Price Alert`,
+            message: `${symbolData.symbol} has ${symbolData.price_change_percent > 0 ? 'increased' : 'decreased'} by ${Math.abs(symbolData.price_change_percent).toFixed(2)}%`,
+            metadata: { 
+              symbol: symbolData.symbol, 
+              price_change_percent: symbolData.price_change_percent, 
+              price: symbolData.price 
+            }
+          })
+        }
+        
+        // Volume spike detection (>3x average)
+        if (symbolData.volume_change_percent && symbolData.volume_change_percent > 300) {
+          alerts.push({
+            user_id: userId,
+            agent_name: 'nkmt',
+            alert_type: 'volume_spike',
+            severity: 'high',
+            title: `${symbolData.symbol} Volume Spike`,
+            message: `${symbolData.symbol} trading volume has spiked by ${symbolData.volume_change_percent.toFixed(0)}%`,
+            metadata: { 
+              symbol: symbolData.symbol, 
+              volume_change_percent: symbolData.volume_change_percent, 
+              volume: symbolData.volume 
+            }
+          })
+        }
+      }
+      
+      // Insert alerts into database
+      if (alerts.length > 0) {
+        const { error: alertError } = await supabaseClient
+          .from('agent_alerts')
+          .insert(alerts)
+        
+        if (alertError) {
+          console.error('[NKMT Orchestrator] Failed to insert alerts:', alertError)
+        } else {
+          console.log(`[NKMT Orchestrator] Created ${alerts.length} alerts for user ${userId}`)
+        }
+      }
+
       // Send aggregated data to other agents (SIGNAL.MAKER, RISK.MGR, etc.)
       const agentsToNotify = ['signal.maker', 'risk.mgr', 'market.modeler']
       
