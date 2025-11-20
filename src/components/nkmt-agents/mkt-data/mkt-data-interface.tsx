@@ -196,6 +196,7 @@ export const MktDataInterface = () => {
 
   // Use real data if available, otherwise fall back to mock
   const orderBook = orderBookData || mockOrderBook
+  const isSymbolNotAvailable = !orderBookLoading && !orderBookData
 
   return (
     <div className="space-y-6">
@@ -439,7 +440,18 @@ export const MktDataInterface = () => {
             {/* Order Book */}
             <div className="col-span-12 lg:col-span-8 flex">
               <div className="flex-1">
-                <MktDataOrderBook {...orderBook} />
+                {isSymbolNotAvailable ? (
+                  <Card className="h-full">
+                    <CardContent className="py-8">
+                      <div className="text-center text-muted-foreground">
+                        <p className="text-sm">Symbol {selectedSymbol} is not available on Bitget</p>
+                        <p className="text-xs mt-2">Please select another symbol</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <MktDataOrderBook {...orderBook} />
+                )}
               </div>
             </div>
           </div>
