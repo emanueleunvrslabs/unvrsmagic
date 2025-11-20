@@ -45,6 +45,21 @@ Deno.serve(async (req) => {
 
     const data: BitgetOrderBookResponse = await response.json()
     
+    // Handle specific Bitget error codes
+    if (data.code === '40309') {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Symbol not available',
+          code: '40309',
+          message: `${symbol} is not available on Bitget`
+        }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+    
     if (data.code !== '00000') {
       throw new Error(`Bitget API returned error: ${data.msg}`)
     }
