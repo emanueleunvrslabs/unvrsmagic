@@ -93,13 +93,13 @@ Deno.serve(async (req) => {
                     if (coinId) {
                       const days = getTimeframeDays(timeframe, lookbackBars)
                       const response = await fetch(
-                        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`,
+                        `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`,
                         { headers: { 'x-cg-pro-api-key': coinGeckoKey } }
                       )
                       
                       if (response.ok) {
                         const data = await response.json()
-                        ohlcvData = normalizeCoingeckoData(data, timeframe, lookbackBars)
+                        ohlcvData = normalizeCoingeckoOHLCData(data, lookbackBars)
                         dataSource = 'coingecko'
                       }
                     }
@@ -218,54 +218,20 @@ function getTimeframeDays(timeframe: string, bars: number): number {
   return Math.ceil(bars * daysPerBar)
 }
 
-function normalizeCoingeckoData(data: any, timeframe: string, bars: number): any[] {
-  if (!data.prices || data.prices.length === 0) {
+function normalizeCoingeckoOHLCData(data: any, bars: number): any[] {
+  if (!data || !Array.isArray(data) || data.length === 0) {
     return []
   }
 
-  const timeframeMs = {
-    '1m': 60000,
-    '5m': 300000,
-    '15m': 900000,
-    '1h': 3600000,
-    '4h': 14400000,
-    '1d': 86400000
-  }[timeframe] || 3600000
-
-  const ohlcv = []
-  let currentCandle: any = null
-
-  for (const [timestamp, price] of data.prices) {
-    const candleTime = Math.floor(timestamp / timeframeMs) * timeframeMs
-
-    if (!currentCandle || currentCandle.timestamp_ms !== candleTime) {
-      if (currentCandle) {
-        ohlcv.push(currentCandle)
-      }
-      currentCandle = {
-        timestamp_ms: candleTime,
-        open: price,
-        high: price,
-        low: price,
-        close: price,
-        volume: 0
-      }
-    }
-
-    currentCandle.high = Math.max(currentCandle.high, price)
-    currentCandle.low = Math.min(currentCandle.low, price)
-    currentCandle.close = price
-  }
-
-  if (currentCandle) {
-    ohlcv.push(currentCandle)
-  }
-
-  if (data.total_volumes) {
-    for (let i = 0; i < Math.min(ohlcv.length, data.total_volumes.length); i++) {
-      ohlcv[i].volume = data.total_volumes[i][1] || 0
-    }
-  }
+  // CoinGecko OHLC format: [timestamp, open, high, low, close]
+  const ohlcv = data.map(([timestamp, open, high, low, close]: number[]) => ({
+    timestamp_ms: timestamp,
+    open,
+    high,
+    low,
+    close,
+    volume: 0 // OHLC endpoint doesn't provide volume
+  }))
 
   return ohlcv.slice(-bars)
 }
