@@ -40,6 +40,27 @@ Deno.serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Bitget API error:', errorText)
+
+      // Try to parse Bitget error response to handle specific symbol errors
+      try {
+        const errorJson = JSON.parse(errorText) as { code?: string; msg?: string }
+        if (errorJson.code === '40309' || errorJson.code === '40034') {
+          return new Response(
+            JSON.stringify({
+              error: 'Symbol not available',
+              code: errorJson.code,
+              message: `${symbol} is not available on Bitget`,
+            }),
+            {
+              status: 404,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          )
+        }
+      } catch (_) {
+        // If parsing fails, fall back to generic error handling
+      }
+
       throw new Error(`Bitget API error: ${response.status} ${errorText}`)
     }
 
