@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import {
   Activity,
   BarChart,
+  Bell,
   Bot,
   ChevronDown,
   ChevronLeft,
@@ -233,6 +234,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         setActiveItem("nkmt-reviewer");
       }
       setOpenSubmenus((prev) => ({ ...prev, "nkmt": true }));
+    } else if (pathname === "/notifications") {
+      setActiveItem("notifications");
     } else {
       // Extract the main path without subpaths
       const mainPath = pathname.split("/")[1];
@@ -387,9 +390,10 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "nkmt-signal", label: "Signal.maker", icon: Zap, href: "/nkmt/signal-maker" },
             { id: "nkmt-risk", label: "Risk.mgr", icon: CreditCard, href: "/nkmt/risk-mgr" },
             { id: "nkmt-executor", label: "Trade.executor", icon: Bot, href: "/nkmt/trade-executor" },
-            { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
+        { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
           ],
         },
+        { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
         { id: "my-assets", label: "My Assets", icon: Coins, href: "/my-assets" },
         { id: "my-analytics", label: "My Analytics", icon: LineChart, href: "/my-analytics" },
       ],
