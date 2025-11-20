@@ -166,6 +166,83 @@ Deno.serve(async (req) => {
       }
     }
 
+    console.log('📨 [MKT.DATA Scheduler] Sending data to NKMT orchestrator')
+
+    // For each user, fetch their collected data and send messages to NKMT
+    for (const config of configs || []) {
+      try {
+        const { data: collectedData } = await supabaseClient
+          .from('mkt_data_results')
+          .select('*')
+          .eq('user_id', config.user_id)
+          .order('updated_at', { ascending: false })
+          .limit(100)
+
+        if (collectedData && collectedData.length > 0) {
+          // Group by symbol for aggregation
+          const symbolGroups = collectedData.reduce((acc: any, item: any) => {
+            const key = `${item.symbol}_${item.market_type}_${item.timeframe}`
+            if (!acc[key]) acc[key] = []
+            acc[key].push(item)
+            return acc
+          }, {})
+
+          // Send messages for each symbol/timeframe/market combination
+          for (const [key, items] of Object.entries(symbolGroups)) {
+            const latestItem = (items as any[])[0]
+            const ohlcv = latestItem.ohlcv || []
+            const latestCandle = ohlcv[ohlcv.length - 1]
+
+            await supabaseClient.functions.invoke('agent-message-broker', {
+              body: {
+                action: 'send',
+                sender_agent: 'mkt.data',
+                receiver_agent: 'nkmt',
+                message_type: 'market_data_update',
+                payload: {
+                  symbol: latestItem.symbol,
+                  timeframe: latestItem.timeframe,
+                  market_type: latestItem.market_type,
+                  latest_price: latestCandle?.close || 0,
+                  volume_24h: latestCandle?.volume || 0,
+                  data_points: ohlcv.length,
+                  data_sources: latestItem.data_sources || [],
+                  confidence_score: latestItem.confidence_score || 0,
+                  timestamp: new Date().toISOString()
+                },
+                priority: 7,
+                user_id: config.user_id
+              }
+            })
+
+            console.log(`📤 [MKT.DATA] Sent message for ${latestItem.symbol} ${latestItem.timeframe} ${latestItem.market_type}`)
+          }
+
+          // Update agent state
+          await supabaseClient.functions.invoke('agent-message-broker', {
+            body: {
+              action: 'update_agent_state',
+              agent_name: 'mkt.data',
+              user_id: config.user_id,
+              status: 'idle',
+              performance_metrics: {
+                last_collection_at: new Date().toISOString(),
+                total_data_points: collectedData.length,
+                unique_symbols: Object.keys(symbolGroups).length,
+                data_sources_used: [...new Set(collectedData.flatMap((d: any) => d.data_sources || []))]
+              }
+            }
+          })
+
+          console.log(`✅ [MKT.DATA] Updated agent state for user ${config.user_id}`)
+        }
+      } catch (msgError) {
+        console.error(`❌ [MKT.DATA] Error sending messages for user ${config.user_id}:`, msgError)
+      }
+    }
+
+    console.log('✅ [MKT.DATA Scheduler] Completed all operations')
+
     return new Response(
       JSON.stringify({ 
         success: true, 

@@ -208,7 +208,9 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       setOpenSubmenus((prev) => ({ ...prev, "settings": true }));
     } else if (pathname.startsWith("/nkmt")) {
       // Handle NKMT agents and exchanges
-      if (pathname === "/nkmt/bitget" || pathname === "/nkmt/binance" || pathname === "/nkmt/okx") {
+      if (pathname === "/nkmt/dashboard") {
+        setActiveItem("nkmt-dashboard");
+      } else if (pathname === "/nkmt/bitget" || pathname === "/nkmt/binance" || pathname === "/nkmt/okx") {
         const exchange = pathname.split("/")[2];
         setActiveItem(`nkmt-${exchange}`);
       } else if (pathname === "/nkmt/mkt-data") {
@@ -367,6 +369,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           icon: Layers,
           hasSubmenu: true,
           submenuItems: [
+            // NKMT Dashboard as first item
+            { id: "nkmt-dashboard", label: "NKMT", icon: Cpu, href: "/nkmt/dashboard" },
             // Dynamically add connected exchanges
             ...exchanges.map((ex) => ({
               id: `nkmt-${ex.exchange}`,

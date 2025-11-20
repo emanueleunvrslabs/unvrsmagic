@@ -25,6 +25,7 @@ import ExecutionLogs from "./pages/ExecutionLogs";
 import Auth from "./pages/Auth";
 import ProjectDetail from "./pages/ProjectDetail";
 import MktData from "./pages/MktData";
+import NKMTDashboard from "./pages/NKMTDashboard";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +47,8 @@ const App = () => (
           <Route path="/portfolio-tracker" element={<ProtectedRoute><PortfolioTracker /></ProtectedRoute>} />
           <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
           <Route path="/nkmt/mkt-data" element={<ProtectedRoute><MktData /></ProtectedRoute>} />
-          <Route path="/nkmt" element={<Navigate to="/nkmt/bitget" replace />} />
+          <Route path="/nkmt/dashboard" element={<ProtectedRoute><NKMTDashboard /></ProtectedRoute>} />
+          <Route path="/nkmt" element={<Navigate to="/nkmt/dashboard" replace />} />
           <Route path="/ai-bot" element={<Navigate to="/nkmt/bitget" replace />} />
           <Route path="/arbitrage-bot" element={<ProtectedRoute><ArbitrageBot /></ProtectedRoute>} />
           <Route path="/dca-bot" element={<ProtectedRoute><DcaBot /></ProtectedRoute>} />
