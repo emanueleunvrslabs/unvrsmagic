@@ -1,22 +1,73 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp } from "lucide-react"
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import { ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Bar } from "recharts"
 
 interface MktDataChartProps {
   symbol: string
   data: Array<{
     timestamp: number
-    price: number
+    open: number
+    high: number
+    low: number
+    close: number
+    volume: number
   }>
   currentPrice: number
   priceChange: number
   volume24h: number
 }
 
+interface CandleProps {
+  x: number
+  y: number
+  width: number
+  height: number
+  open: number
+  close: number
+  high: number
+  low: number
+}
+
+const Candlestick = ({ x, y, width, height, open, close, high, low }: CandleProps) => {
+  const isPositive = close >= open
+  const color = isPositive ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'
+  
+  const candleY = Math.min(open, close)
+  const candleHeight = Math.abs(close - open)
+  const candleX = x + width / 2
+
+  return (
+    <g>
+      {/* Shadow (wick) */}
+      <line
+        x1={candleX}
+        y1={high}
+        x2={candleX}
+        y2={low}
+        stroke={color}
+        strokeWidth={1}
+      />
+      {/* Body */}
+      <rect
+        x={x}
+        y={candleY}
+        width={width}
+        height={candleHeight || 1}
+        fill={color}
+        stroke={color}
+        strokeWidth={1}
+      />
+    </g>
+  )
+}
+
 export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24h }: MktDataChartProps) => {
   const chartData = data.map(item => ({
     time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-    price: item.price
+    open: item.open,
+    high: item.high,
+    low: item.low,
+    close: item.close
   }))
 
   const isPositive = priceChange >= 0
@@ -43,7 +94,7 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
+          <ComposedChart data={chartData}>
             <XAxis 
               dataKey="time" 
               stroke="hsl(var(--muted-foreground))"
@@ -52,7 +103,7 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
               fontSize={12}
-              domain={['dataMin - 100', 'dataMax + 100']}
+              domain={['auto', 'auto']}
             />
             <Tooltip 
               contentStyle={{
@@ -60,16 +111,45 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '6px'
               }}
+              content={({ active, payload }) => {
+                if (!active || !payload || !payload[0]) return null
+                const data = payload[0].payload
+                return (
+                  <div className="bg-background border border-border rounded-md p-2 text-xs">
+                    <p className="font-semibold">{data.time}</p>
+                    <p className="text-muted-foreground">O: ${data.open?.toFixed(2)}</p>
+                    <p className="text-muted-foreground">H: ${data.high?.toFixed(2)}</p>
+                    <p className="text-muted-foreground">L: ${data.low?.toFixed(2)}</p>
+                    <p className="text-muted-foreground">C: ${data.close?.toFixed(2)}</p>
+                  </div>
+                )
+              }}
             />
-            <Line 
-              type="monotone" 
-              dataKey="price" 
-              stroke="hsl(var(--primary))" 
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
+            <Bar 
+              dataKey="high"
+              shape={(props: any) => {
+                const { x, y, width, height, payload } = props
+                if (!payload) return null
+                
+                // Calculate scale for candlestick positioning
+                const yScale = height / (payload.high - payload.low)
+                const baseY = y
+                
+                return (
+                  <Candlestick
+                    x={x}
+                    y={baseY}
+                    width={width}
+                    height={yScale}
+                    open={payload.open}
+                    close={payload.close}
+                    high={payload.high}
+                    low={payload.low}
+                  />
+                )
+              }}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
