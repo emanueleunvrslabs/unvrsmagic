@@ -22,7 +22,7 @@ export const MktDataOrderBook = ({ symbol, spread, spreadPercent, bids, asks }: 
   const formatTotal = (total: number) => `$${total.toLocaleString()}`
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Order Book</CardTitle>
@@ -32,7 +32,7 @@ export const MktDataOrderBook = ({ symbol, spread, spreadPercent, bids, asks }: 
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         <div className="space-y-2">
           <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground pb-2 border-b">
             <span>Price (USDT)</span>
