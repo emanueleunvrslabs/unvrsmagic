@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Bell, BellOff, Check, CheckCheck, AlertCircle, AlertTriangle, Info, Activity } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { NotificationPermissionBanner } from "./notification-permission-banner"
 
 export const NotificationCenterInterface = () => {
   const { data: alerts, isLoading, markAsRead, markAllAsRead, unreadCount } = useAgentAlerts()
@@ -76,6 +77,8 @@ export const NotificationCenterInterface = () => {
 
   return (
     <div className="space-y-6">
+      <NotificationPermissionBanner />
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Notification Center</h1>
