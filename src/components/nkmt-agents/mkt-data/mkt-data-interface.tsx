@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Activity, TrendingUp, Database, FileText } from "lucide-react"
+import { Activity, TrendingUp, Database, FileText, RefreshCw } from "lucide-react"
 import { useMktData } from "@/hooks/use-mkt-data"
 import { useBitgetOrderBook } from "@/hooks/use-bitget-orderbook"
+import { useTriggerMktData } from "@/hooks/use-trigger-mkt-data"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { MktDataSymbolSelector } from "./mkt-data-symbol-selector"
 import { MktDataChart } from "./mkt-data-chart"
@@ -30,6 +31,7 @@ const TOP_SYMBOLS_FALLBACK = [
  
 export const MktDataInterface = () => {
   const { data, isLoading, error, initializeConfig, lastUpdatedSymbol } = useMktData()
+  const { triggerDataCollection, isTriggering } = useTriggerMktData()
   const availableSymbols = Array.from(new Set(data.map(d => d.symbol)))
   const symbols = availableSymbols.length > 0 ? availableSymbols : TOP_SYMBOLS_FALLBACK
   const [selectedSymbol, setSelectedSymbol] = useState(symbols[0] || 'BTCUSDT')
@@ -209,20 +211,30 @@ export const MktDataInterface = () => {
             Real-time market data collection for top cryptocurrencies
           </p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <FileText className="h-4 w-4 mr-2" />
-              Prompt
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Mkt.data Agent Prompt</DialogTitle>
-              <DialogDescription>
-                System prompt used by the MKT.DATA agent
-              </DialogDescription>
-            </DialogHeader>
+        <div className="flex gap-2">
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={triggerDataCollection}
+            disabled={isTriggering}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isTriggering ? 'animate-spin' : ''}`} />
+            {isTriggering ? 'Raccolta in corso...' : 'Raccogli Dati Ora'}
+          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Prompt
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Mkt.data Agent Prompt</DialogTitle>
+                <DialogDescription>
+                  System prompt used by the MKT.DATA agent
+                </DialogDescription>
+              </DialogHeader>
             <div className="space-y-4">
               <div className="rounded-lg bg-muted p-4">
                 <h3 className="font-semibold mb-2">Role</h3>
@@ -248,6 +260,7 @@ export const MktDataInterface = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
