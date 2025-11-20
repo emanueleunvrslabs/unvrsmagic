@@ -8,6 +8,7 @@ import { MktDataChart } from "./mkt-data-chart"
 import { MktDataActivityLogs } from "./mkt-data-activity-logs"
 import { MktDataLiveTickers } from "./mkt-data-live-tickers"
 import { MktDataOrderBook } from "./mkt-data-order-book"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const TOP_SYMBOLS_FALLBACK = [
   'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BGBUSDT', 'XRPUSDT', 
@@ -19,6 +20,7 @@ export const MktDataInterface = () => {
   const availableSymbols = Array.from(new Set(data.map(d => d.symbol)))
   const symbols = availableSymbols.length > 0 ? availableSymbols : TOP_SYMBOLS_FALLBACK
   const [selectedSymbol, setSelectedSymbol] = useState(symbols[0] || 'BTCUSDT')
+  const [selectedTimeframe, setSelectedTimeframe] = useState<'1h' | '4h' | '1d'>('1h')
 
   useEffect(() => {
     initializeConfig()
@@ -27,8 +29,8 @@ export const MktDataInterface = () => {
   // Get all data for the selected symbol (all timeframes and market types)
   const symbolData = data.filter(d => d.symbol === selectedSymbol)
   
-  // Prioritize 1h spot data for the chart
-  const chartSourceData = symbolData.find(d => d.timeframe === '1h' && d.market_type === 'spot') || symbolData[0]
+  // Get data for the selected timeframe and prioritize spot market
+  const chartSourceData = symbolData.find(d => d.timeframe === selectedTimeframe && d.market_type === 'spot') || symbolData[0]
   
   // Extract OHLCV data and transform for chart
   const ohlcvArray = (chartSourceData?.ohlcv as any[]) || []
@@ -204,8 +206,22 @@ export const MktDataInterface = () => {
             </Card>
           </div>
 
-          {/* Chart */}
-          <div className="col-span-6">
+          {/* Chart with Timeframe Selector */}
+          <div className="col-span-6 space-y-4">
+            {/* Timeframe Selector */}
+            <Card>
+              <CardContent className="pt-6">
+                <Tabs value={selectedTimeframe} onValueChange={(v) => setSelectedTimeframe(v as '1h' | '4h' | '1d')}>
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="1h">1H</TabsTrigger>
+                    <TabsTrigger value="4h">4H</TabsTrigger>
+                    <TabsTrigger value="1d">1D</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            {/* Chart */}
             <MktDataChart
               symbol={selectedSymbol}
               data={chartData}
