@@ -244,8 +244,8 @@ export const MktDataInterface = () => {
           {/* First row: Symbol Selector + Chart + Activity Logs */}
           <div className="grid grid-cols-12 gap-6">
             {/* Symbol Selector */}
-            <div className="col-span-12 lg:col-span-2">
-              <Card>
+            <div className="col-span-12 lg:col-span-2 flex">
+              <Card className="flex-1">
                 <CardContent className="pt-6">
                   <MktDataSymbolSelector
                     symbols={symbols}
@@ -342,8 +342,10 @@ export const MktDataInterface = () => {
             </div>
 
             {/* Activity Logs */}
-            <div className="col-span-12 lg:col-span-4">
-              <MktDataActivityLogs logs={activityLogs} />
+            <div className="col-span-12 lg:col-span-4 flex">
+              <div className="flex-1">
+                <MktDataActivityLogs logs={activityLogs} />
+              </div>
             </div>
           </div>
 
