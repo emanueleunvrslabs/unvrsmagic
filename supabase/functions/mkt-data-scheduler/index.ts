@@ -10,9 +10,9 @@ const TOP_100_SYMBOLS = [
   'MANAUSDT', 'RNDRUSDT', 'MKRUSDT', 'LDOUSDT', 'FTMUSDT', 'ARBUSDT', 'OPUSDT', 'SUIUSDT',
   'PEPEUSDT', 'RUNEUSDT', 'BEAMUSDT', 'FLOWUSDT', 'AXSUSDT', 'CFXUSDT', 'TIAUSDT', 'STXUSDT',
   'FLOKIUSDT', 'WLDUSDT', 'SEIUSDT', 'CRVUSDT', 'SNXUSDT', 'GALAUSDT', 'CHZUSDT', 'BTCDOMUSDT',
-  'ENJUSDT', 'PYTHUSDT', 'COMPUSDT', 'ONEUSDT', 'ZILUSDT', 'WAVESUSDT', 'KLAYUSDT', 'JUPUSDT',
+  'ENJUSDT', 'PYTHUSDT', 'COMPUSDT', 'ONEUSDT', 'ZILUSDT', 'WAVESUSDT', 'JUPUSDT',
   'MINAUSDT', 'CKBUSDT', 'ZECUSDT', 'DASHUSDT', 'BATUSDT', 'IOTAUSDT', 'OMGUSDT', 'CELRUSDT',
-  'NKNUSDT', 'RVNUSDT', 'ZENUSDT', 'QTUMUSDT', 'ICXUSDT', 'THETAUSDT', 'XTZUSDT', 'ONTUSDT',
+  'NKNUSDT', 'RVNUSDT', 'ZENUSDT', 'QTUMUSDT', 'ICXUSDT', 'XTZUSDT', 'ONTUSDT',
   'LRCUSDT', 'KAVAUSDT', 'BANDUSDT', 'COTIUSDT', 'RLCUSDT', 'BALUSDT', 'OCEANUSDT', 'YFIUSDT',
   '1INCHUSDT', 'SUSHIUSDT', 'YFIIUSDT', 'DYDXUSDT', 'ENSUSDT', 'WOOUSDT', 'CHRUSDT', 'JSTOMUSDT',
   'HNTUSDT', 'FXSUSDT', 'MOVRUSDT', 'TRBUSDT'
@@ -88,115 +88,76 @@ Deno.serve(async (req) => {
             status: 'processing'
           }
         })
-        // Fetch user's API keys
-        const { data: apiKeys } = await supabaseClient
-          .from('api_keys')
-          .select('provider, api_key')
-          .eq('user_id', config.user_id)
-          .in('provider', ['coingecko', 'coinmarketcap'])
-
-        if (!apiKeys || apiKeys.length === 0) {
-          await logToDatabase(config.user_id, 'warning', 'No API keys found, skipping data collection')
-          console.log(`⚠️ [MKT.DATA] No API keys found for user ${config.user_id}, skipping`)
-          continue
-        }
-
-        const coinGeckoKey = apiKeys.find(k => k.provider === 'coingecko')?.api_key
-        const coinMarketCapKey = apiKeys.find(k => k.provider === 'coinmarketcap')?.api_key
-
-        await logToDatabase(config.user_id, 'info', 'API keys retrieved', {
-          has_coingecko: !!coinGeckoKey,
-          has_coinmarketcap: !!coinMarketCapKey
-        })
 
         // Use TOP 100 symbols
         const symbols = TOP_100_SYMBOLS
         const timeframes = config.timeframes || ['1h', '4h', '1d']
         const marketTypes = config.market_types || ['spot', 'futures']
-        const lookbackBars = config.lookback_bars || 100
+        const lookbackBars = config.lookback_bars || 500
 
         console.log(`📊 [MKT.DATA] Processing user ${config.user_id} with ${symbols.length} symbols`)
         
+        // Get user's auth token by creating a temporary client
+        const { data: { user: adminUser }, error: userError } = await supabaseClient.auth.admin.getUserById(config.user_id)
+        
+        if (userError || !adminUser) {
+          console.error(`❌ [MKT.DATA] Cannot get user ${config.user_id}:`, userError)
+          await logToDatabase(config.user_id, 'error', 'Failed to get user authentication')
+          continue
+        }
+
+        // Call the mkt-data-agent with batches of symbols
+        const batchSize = 20 // Process 20 symbols at a time
         let successCount = 0
         let errorCount = 0
 
-        // Process data in batches to avoid timeouts
-        const batchSize = 10
         for (let i = 0; i < symbols.length; i += batchSize) {
           const batchSymbols = symbols.slice(i, i + batchSize)
           
-          for (const symbol of batchSymbols) {
-            for (const marketType of marketTypes) {
-              for (const timeframe of timeframes) {
-                try {
-                  let ohlcvData = null
-                  let dataSource = null
+          console.log(`📦 [MKT.DATA] Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(symbols.length / batchSize)} for user ${config.user_id}`)
+          
+          try {
+            // Create a service role client to act as the user
+            const userSupabaseClient = createClient(
+              Deno.env.get('SUPABASE_URL') ?? '',
+              Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+            )
 
-                  // Try CoinGecko first
-                  if (coinGeckoKey) {
-                    const coinId = await getCoinGeckoId(symbol, coinGeckoKey)
-                    if (coinId) {
-                      const days = getTimeframeDays(timeframe, lookbackBars)
-                      const response = await fetch(
-                        `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`,
-                        { headers: { 'x-cg-pro-api-key': coinGeckoKey } }
-                      )
-                      
-                      if (response.ok) {
-                        const data = await response.json()
-                        ohlcvData = normalizeCoingeckoOHLCData(data, lookbackBars)
-                        dataSource = 'coingecko'
-                      }
-                    }
-                  }
-
-                  // If no data from CoinGecko, try CoinMarketCap
-                  if (!ohlcvData && coinMarketCapKey) {
-                    const cmcSymbol = symbol.replace('USDT', '').replace('USD', '')
-                    const response = await fetch(
-                      `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${cmcSymbol}`,
-                      { headers: { 'X-CMC_PRO_API_KEY': coinMarketCapKey } }
-                    )
-                    
-                    if (response.ok) {
-                      const data = await response.json()
-                      ohlcvData = normalizeCoinMarketCapData(data, cmcSymbol)
-                      dataSource = 'coinmarketcap'
-                    }
-                  }
-
-                  // Save to database if we have data
-                  if (ohlcvData && ohlcvData.length > 0) {
-                    const { error: insertError } = await supabaseClient
-                      .from('mkt_data_results')
-                      .upsert({
-                        user_id: config.user_id,
-                        symbol,
-                        market_type: marketType,
-                        timeframe,
-                        ohlcv: ohlcvData,
-                        data_sources: [dataSource],
-                        confidence_score: dataSource === 'coingecko' ? 85 : 75,
-                        notes: `Data from ${dataSource}`,
-                        updated_at: new Date().toISOString()
-                      }, {
-                        onConflict: 'user_id,symbol,market_type,timeframe',
-                        ignoreDuplicates: false
-                      })
-
-                    if (insertError) {
-                      errorCount++
-                      console.error(`❌ [MKT.DATA] Error saving data for ${symbol}:`, insertError)
-                    } else {
-                      successCount++
-                    }
-                  }
-                } catch (error) {
-                  errorCount++
-                  console.error(`❌ [MKT.DATA] Error processing ${symbol} ${marketType} ${timeframe}:`, error)
-                }
+            // Call mkt-data-agent
+            const { data: agentResponse, error: agentError } = await userSupabaseClient.functions.invoke('mkt-data-agent', {
+              body: {
+                symbols: batchSymbols,
+                timeframes,
+                lookback_bars: lookbackBars,
+                market_types: marketTypes
+              },
+              headers: {
+                // Set authorization as the user
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
               }
+            })
+
+            if (agentError) {
+              console.error(`❌ [MKT.DATA] Agent error for batch ${i}-${i + batchSize}:`, agentError)
+              errorCount += batchSymbols.length
+              continue
             }
+
+            if (agentResponse?.success) {
+              successCount += agentResponse.symbols?.length || 0
+              errorCount += agentResponse.errors?.length || 0
+              
+              console.log(`✅ [MKT.DATA] Batch processed: ${agentResponse.symbols?.length || 0} success, ${agentResponse.errors?.length || 0} errors`)
+            }
+
+          } catch (batchError) {
+            console.error(`❌ [MKT.DATA] Error processing batch:`, batchError)
+            errorCount += batchSymbols.length
+          }
+
+          // Add a small delay between batches to avoid rate limiting
+          if (i + batchSize < symbols.length) {
+            await new Promise(resolve => setTimeout(resolve, 100))
           }
         }
 
@@ -209,33 +170,20 @@ Deno.serve(async (req) => {
           symbols_processed: symbols.length
         })
 
+        console.log(`✅ [MKT.DATA] User ${config.user_id} completed: ${successCount} success, ${errorCount} errors in ${userDuration}ms`)
+
         results.push({
           user_id: config.user_id,
           symbols_processed: symbols.length,
           success_count: successCount,
           error_count: errorCount,
-          status: 'completed'
+          status: 'completed',
+          duration_ms: userDuration
         })
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        await logToDatabase(config.user_id, 'error', 'Data collection failed', {
-          error: errorMessage
-        })
-        
-        console.error(`❌ [MKT.DATA] Error processing user ${config.user_id}:`, error)
-        results.push({
-          user_id: config.user_id,
-          status: 'error',
-          error: errorMessage
-        })
-      }
-    }
 
-    console.log('📨 [MKT.DATA Scheduler] Sending data to NKMT orchestrator')
+        // Send messages to NKMT orchestrator with collected data
+        console.log('📨 [MKT.DATA] Sending data to NKMT orchestrator')
 
-    // For each user, fetch their collected data and send messages to NKMT
-    for (const config of configs || []) {
-      try {
         const { data: collectedData } = await supabaseClient
           .from('mkt_data_results')
           .select('*')
@@ -271,8 +219,8 @@ Deno.serve(async (req) => {
                   latest_price: latestCandle?.close || 0,
                   volume_24h: latestCandle?.volume || 0,
                   data_points: ohlcv.length,
-                  data_sources: latestItem.data_sources || [],
-                  confidence_score: latestItem.confidence_score || 0,
+                  data_sources: latestItem.data_sources || ['bitget'],
+                  confidence_score: latestItem.confidence_score || 95,
                   timestamp: new Date().toISOString()
                 },
                 priority: 7,
@@ -283,7 +231,7 @@ Deno.serve(async (req) => {
             console.log(`📤 [MKT.DATA] Sent message for ${latestItem.symbol} ${latestItem.timeframe} ${latestItem.market_type}`)
           }
 
-          // Update agent state
+          // Update agent state to idle
           await supabaseClient.functions.invoke('agent-message-broker', {
             body: {
               action: 'update_agent_state',
@@ -294,106 +242,51 @@ Deno.serve(async (req) => {
                 last_collection_at: new Date().toISOString(),
                 total_data_points: collectedData.length,
                 unique_symbols: Object.keys(symbolGroups).length,
-                data_sources_used: [...new Set(collectedData.flatMap((d: any) => d.data_sources || []))]
+                data_sources_used: ['bitget']
               }
             }
           })
-
-          console.log(`✅ [MKT.DATA] Updated agent state for user ${config.user_id}`)
         }
-      } catch (msgError) {
-        console.error(`❌ [MKT.DATA] Error sending messages for user ${config.user_id}:`, msgError)
+
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        await logToDatabase(config.user_id, 'error', 'Data collection failed', {
+          error: errorMessage
+        })
+        
+        console.error(`❌ [MKT.DATA] Error processing user ${config.user_id}:`, error)
+        results.push({
+          user_id: config.user_id,
+          status: 'error',
+          error: errorMessage
+        })
       }
     }
 
-    console.log('✅ [MKT.DATA Scheduler] Completed all operations')
+    const totalDuration = Date.now() - startTime
+    console.log(`✅ [MKT.DATA Scheduler] Completed in ${totalDuration}ms`)
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        processed: results.length,
-        results 
+      JSON.stringify({
+        success: true,
+        results,
+        total_duration_ms: totalDuration,
+        scheduler_info: {
+          started_at: new Date(startTime).toISOString(),
+          completed_at: new Date().toISOString()
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Error in mkt-data-scheduler:', error)
+    console.error('❌ [MKT.DATA Scheduler] Fatal error:', error)
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      JSON.stringify({ 
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
-
-// Helper functions
-async function getCoinGeckoId(symbol: string, apiKey: string): Promise<string | null> {
-  try {
-    const searchSymbol = symbol.replace('USDT', '').replace('USD', '').toLowerCase()
-    const response = await fetch(
-      `https://api.coingecko.com/api/v3/search?query=${searchSymbol}`,
-      { headers: { 'x-cg-pro-api-key': apiKey } }
-    )
-    
-    if (response.ok) {
-      const data = await response.json()
-      if (data.coins && data.coins.length > 0) {
-        return data.coins[0].id
-      }
-    }
-  } catch (error) {
-    console.error('Error getting CoinGecko ID:', error)
-  }
-  return null
-}
-
-function getTimeframeDays(timeframe: string, bars: number): number {
-  const timeframeMap: { [key: string]: number } = {
-    '1m': 1 / 1440,
-    '5m': 5 / 1440,
-    '15m': 15 / 1440,
-    '1h': 1 / 24,
-    '4h': 4 / 24,
-    '1d': 1
-  }
-  const daysPerBar = timeframeMap[timeframe] || 1
-  return Math.ceil(bars * daysPerBar)
-}
-
-function normalizeCoingeckoOHLCData(data: any, bars: number): any[] {
-  if (!data || !Array.isArray(data) || data.length === 0) {
-    return []
-  }
-
-  // CoinGecko OHLC format: [timestamp, open, high, low, close]
-  const ohlcv = data.map(([timestamp, open, high, low, close]: number[]) => ({
-    timestamp_ms: timestamp,
-    open,
-    high,
-    low,
-    close,
-    volume: 0 // OHLC endpoint doesn't provide volume
-  }))
-
-  return ohlcv.slice(-bars)
-}
-
-function normalizeCoinMarketCapData(data: any, symbol: string): any[] {
-  try {
-    const quote = data?.data?.[symbol.toUpperCase()]?.quote?.USD
-    if (!quote) return []
-
-    const now = Date.now()
-    return [{
-      timestamp_ms: now,
-      open: quote.price,
-      high: quote.price,
-      low: quote.price,
-      close: quote.price,
-      volume: quote.volume_24h || 0
-    }]
-  } catch (error) {
-    console.error('Error normalizing CMC data:', error)
-    return []
-  }
-}

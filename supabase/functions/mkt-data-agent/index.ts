@@ -5,7 +5,6 @@ interface MktDataInput {
   symbols: string[]
   timeframes: string[]
   lookback_bars: number
-  data_sources: string
   market_types: string[]
 }
 
@@ -16,6 +15,25 @@ interface OHLCVBar {
   low: number
   close: number
   volume: number
+}
+
+interface BitgetCandleResponse {
+  code: string
+  msg: string
+  data: string[][] // [timestamp, open, high, low, close, volume, quoteVolume]
+}
+
+// Map timeframes to Bitget granularity
+const timeframeMap: Record<string, string> = {
+  '1m': '1m',
+  '5m': '5m',
+  '15m': '15m',
+  '30m': '30m',
+  '1h': '1H',
+  '4h': '4H',
+  '12h': '12H',
+  '1d': '1D',
+  '1w': '1W'
 }
 
 Deno.serve(async (req) => {
@@ -52,244 +70,184 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Fetch API keys from database
-    const { data: apiKeys, error: apiError } = await supabaseClient
-      .from('api_keys')
-      .select('provider, api_key')
-      .eq('user_id', user.id)
-      .in('provider', ['coingecko', 'coinmarketcap'])
-
-    if (apiError) {
-      console.error('Error fetching API keys:', apiError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch API keys' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const coinGeckoKey = apiKeys?.find(k => k.provider === 'coingecko')?.api_key
-    const coinMarketCapKey = apiKeys?.find(k => k.provider === 'coinmarketcap')?.api_key
+    console.log(`[MKT.DATA][INFO] Starting data collection for ${input.symbols.length} symbols`)
 
     const output = {
-      data_sources_used: [] as any[],
+      data_sources_used: ['bitget'],
       symbols: [] as any[],
       errors: [] as any[]
     }
 
     // Process each symbol
     for (const symbol of input.symbols) {
-      const symbolData = {
-        symbol,
-        markets: [] as any[]
-      }
-
-      // Fetch data for each market type
-      for (const marketType of input.market_types || ['spot']) {
-        const marketData = {
-          market_type: marketType,
-          timeframes: [] as any[]
+      try {
+        console.log(`[MKT.DATA][INFO] Processing ${symbol}`)
+        
+        const symbolData = {
+          symbol,
+          markets: [] as any[]
         }
 
-        // Fetch data from CoinGecko if available
-        if (coinGeckoKey) {
-          try {
-            const coinId = await getCoinGeckoId(symbol, coinGeckoKey)
-            if (coinId) {
-              output.data_sources_used.push({
-                name: 'coingecko',
-                notes: 'Market data from CoinGecko API'
+        // Fetch data for each market type
+        for (const marketType of input.market_types || ['spot']) {
+          const marketData = {
+            market_type: marketType,
+            timeframes: [] as any[]
+          }
+
+          // Fetch data for each timeframe
+          for (const timeframe of input.timeframes) {
+            try {
+              const bitgetGranularity = timeframeMap[timeframe] || '1H'
+              const limit = Math.min(input.lookback_bars || 500, 1000) // Bitget max is 1000
+              
+              console.log(`[MKT.DATA][DEBUG] Fetching ${symbol} ${timeframe} from Bitget (${limit} bars)`)
+
+              const url = `https://api.bitget.com/api/v2/spot/market/candles?symbol=${symbol}&granularity=${bitgetGranularity}&limit=${limit}`
+              
+              const response = await fetch(url, {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'locale': 'en-US'
+                }
               })
 
-              for (const timeframe of input.timeframes) {
-                const days = getTimeframeDays(timeframe, input.lookback_bars)
-                const response = await fetch(
-                  `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`,
-                  {
-                    headers: {
-                      'x-cg-pro-api-key': coinGeckoKey
-                    }
-                  }
-                )
-
-                if (response.ok) {
-                  const data = await response.json()
-                  const ohlcv = normalizeCoingeckoData(data, timeframe, input.lookback_bars)
-                  
-                  marketData.timeframes.push({
-                    timeframe,
-                    ohlcv,
-                    confidence_score: 85,
-                    notes: 'Data from CoinGecko'
-                  })
-                } else {
-                  output.errors.push({
-                    symbol,
-                    market_type: marketType,
-                    timeframe,
-                    message: `CoinGecko API error: ${response.status}`
-                  })
-                }
-              }
-            }
-          } catch (error) {
-            output.errors.push({
-              symbol,
-              market_type: marketType,
-              message: `CoinGecko error: ${error instanceof Error ? error.message : String(error)}`
-            })
-          }
-        }
-
-        // Fetch data from CoinMarketCap if available
-        if (coinMarketCapKey && marketData.timeframes.length === 0) {
-          try {
-            output.data_sources_used.push({
-              name: 'coinmarketcap',
-              notes: 'Market data from CoinMarketCap API'
-            })
-
-            const cmcSymbol = symbol.replace('USDT', '').replace('USD', '')
-            const response = await fetch(
-              `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${cmcSymbol}`,
-              {
-                headers: {
-                  'X-CMC_PRO_API_KEY': coinMarketCapKey
-                }
-              }
-            )
-
-            if (response.ok) {
-              const data = await response.json()
-              
-              for (const timeframe of input.timeframes) {
-                const ohlcv = normalizeCoinMarketCapData(data, cmcSymbol)
+              if (!response.ok) {
+                const errorText = await response.text()
+                console.error(`[MKT.DATA][ERROR] Bitget API error for ${symbol}:`, errorText)
                 
-                marketData.timeframes.push({
+                // Check if symbol doesn't exist
+                try {
+                  const errorJson = JSON.parse(errorText)
+                  if (errorJson.code === '40034' || errorJson.code === '40309') {
+                    console.log(`[MKT.DATA][INFO] Symbol ${symbol} not available on Bitget, skipping`)
+                    continue
+                  }
+                } catch (_) {
+                  // Continue with generic error handling
+                }
+                
+                output.errors.push({
+                  symbol,
+                  timeframe,
+                  market_type: marketType,
+                  error: `Bitget API error: ${response.status}`
+                })
+                continue
+              }
+
+              const data: BitgetCandleResponse = await response.json()
+
+              if (data.code !== '00000') {
+                console.error(`[MKT.DATA][ERROR] Bitget returned error code ${data.code} for ${symbol}:`, data.msg)
+                
+                // Skip unavailable symbols
+                if (data.code === '40034' || data.code === '40309') {
+                  console.log(`[MKT.DATA][INFO] Symbol ${symbol} not available on Bitget, skipping`)
+                  continue
+                }
+                
+                output.errors.push({
+                  symbol,
+                  timeframe,
+                  market_type: marketType,
+                  error: data.msg
+                })
+                continue
+              }
+
+              // Transform Bitget candles to our OHLCV format
+              const ohlcv: OHLCVBar[] = data.data.map(candle => ({
+                timestamp_ms: parseInt(candle[0]),
+                open: parseFloat(candle[1]),
+                high: parseFloat(candle[2]),
+                low: parseFloat(candle[3]),
+                close: parseFloat(candle[4]),
+                volume: parseFloat(candle[5])
+              }))
+
+              console.log(`[MKT.DATA][INFO] Retrieved ${ohlcv.length} candles for ${symbol} ${timeframe}`)
+
+              // Save to database
+              const { error: saveError } = await supabaseClient
+                .from('mkt_data_results')
+                .upsert({
+                  user_id: user.id,
+                  symbol,
+                  market_type: marketType,
                   timeframe,
                   ohlcv,
-                  confidence_score: 75,
-                  notes: 'Snapshot data from CoinMarketCap (limited historical data)'
+                  data_sources: ['bitget'],
+                  confidence_score: 95,
+                  notes: `Data from Bitget API (${ohlcv.length} bars)`
+                }, {
+                  onConflict: 'user_id,symbol,market_type,timeframe'
                 })
+
+              if (saveError) {
+                console.error(`[MKT.DATA][ERROR] Error saving data for ${symbol}:`, saveError)
+                output.errors.push({
+                  symbol,
+                  timeframe,
+                  market_type: marketType,
+                  error: saveError.message
+                })
+                continue
               }
-            } else {
+
+              marketData.timeframes.push({
+                timeframe,
+                bars_collected: ohlcv.length,
+                confidence_score: 95,
+                notes: 'Data from Bitget'
+              })
+
+            } catch (timeframeError) {
+              console.error(`[MKT.DATA][ERROR] Error processing ${symbol} ${timeframe}:`, timeframeError)
               output.errors.push({
                 symbol,
+                timeframe,
                 market_type: marketType,
-                message: `CoinMarketCap API error: ${response.status}`
+                error: timeframeError instanceof Error ? timeframeError.message : 'Unknown error'
               })
             }
-          } catch (error) {
-            output.errors.push({
-              symbol,
-              market_type: marketType,
-              message: `CoinMarketCap error: ${error instanceof Error ? error.message : String(error)}`
-            })
+          }
+
+          if (marketData.timeframes.length > 0) {
+            symbolData.markets.push(marketData)
           }
         }
 
-        if (marketData.timeframes.length > 0) {
-          symbolData.markets.push(marketData)
+        if (symbolData.markets.length > 0) {
+          output.symbols.push(symbolData)
         }
-      }
 
-      if (symbolData.markets.length > 0) {
-        output.symbols.push(symbolData)
-      } else {
+      } catch (symbolError) {
+        console.error(`[MKT.DATA][ERROR] Error processing symbol ${symbol}:`, symbolError)
         output.errors.push({
           symbol,
-          message: 'No data available from configured sources'
+          error: symbolError instanceof Error ? symbolError.message : 'Unknown error'
         })
       }
     }
 
-    // Remove duplicates from data_sources_used
-    output.data_sources_used = Array.from(
-      new Map(output.data_sources_used.map(item => [item.name, item])).values()
-    )
+    console.log(`[MKT.DATA][INFO] Completed. Processed ${output.symbols.length} symbols with ${output.errors.length} errors`)
 
-    return new Response(
-      JSON.stringify(output),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({
+      success: true,
+      ...output
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
 
   } catch (error) {
-    console.error('Error in mkt-data-agent:', error)
+    console.error('[MKT.DATA][ERROR] Fatal error:', error)
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      JSON.stringify({ 
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
-
-// Helper functions
-async function getCoinGeckoId(symbol: string, apiKey: string): Promise<string | null> {
-  try {
-    const searchSymbol = symbol.replace('USDT', '').replace('USD', '').toLowerCase()
-    const response = await fetch(
-      `https://api.coingecko.com/api/v3/search?query=${searchSymbol}`,
-      {
-        headers: {
-          'x-cg-pro-api-key': apiKey
-        }
-      }
-    )
-    
-    if (response.ok) {
-      const data = await response.json()
-      if (data.coins && data.coins.length > 0) {
-        return data.coins[0].id
-      }
-    }
-  } catch (error) {
-    console.error('Error getting CoinGecko ID:', error)
-  }
-  return null
-}
-
-function getTimeframeDays(timeframe: string, lookbackBars: number): number {
-  const timeframeMap: Record<string, number> = {
-    '1m': lookbackBars / (24 * 60),
-    '5m': lookbackBars / (24 * 12),
-    '15m': lookbackBars / (24 * 4),
-    '1h': lookbackBars / 24,
-    '4h': lookbackBars / 6,
-    '1d': lookbackBars
-  }
-  return Math.ceil(timeframeMap[timeframe] || lookbackBars)
-}
-
-function normalizeCoingeckoData(data: any, timeframe: string, lookbackBars: number): any[] {
-  if (!data.prices || data.prices.length === 0) {
-    return []
-  }
-
-  const prices = data.prices.slice(-lookbackBars)
-  const volumes = data.total_volumes?.slice(-lookbackBars) || []
-
-  return prices.map((price: any, index: number) => {
-    const timestamp = price[0]
-    const close = price[1]
-    const volume = volumes[index] ? volumes[index][1] : 0
-
-    // For CoinGecko, we approximate OHLC from close prices
-    const open = index > 0 ? prices[index - 1][1] : close
-    const high = Math.max(open, close) * 1.005 // Approximate high
-    const low = Math.min(open, close) * 0.995  // Approximate low
-
-    return [timestamp, open, high, low, close, volume]
-  })
-}
-
-function normalizeCoinMarketCapData(data: any, symbol: string): any[] {
-  if (!data.data || !data.data[symbol]) {
-    return []
-  }
-
-  const quote = data.data[symbol].quote.USD
-  const timestamp = new Date(data.data[symbol].last_updated).getTime()
-  const price = quote.price
-  const volume = quote.volume_24h
-
-  // CMC provides only current snapshot, so we return single bar
-  return [[timestamp, price, price, price, price, volume]]
-}
