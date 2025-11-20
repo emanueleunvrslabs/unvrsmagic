@@ -242,7 +242,7 @@ export const MktDataInterface = () => {
       ) : data.length > 0 ? (
         <div className="space-y-6">
           {/* First row: Symbol Selector + Chart + Activity Logs */}
-          <div className="grid grid-cols-12 gap-6">
+          <div className="grid grid-cols-12 gap-6 items-start">
             {/* Symbol Selector */}
             <div className="col-span-12 lg:col-span-2">
               <Card>
@@ -257,7 +257,7 @@ export const MktDataInterface = () => {
             </div>
 
             {/* Chart with Timeframe Selector */}
-            <div className="col-span-12 lg:col-span-6 space-y-4">
+            <div className="col-span-12 lg:col-span-6 space-y-4 flex flex-col">
               {/* Timeframe and Indicators Selector */}
               <Card>
                 <CardContent className="pt-6 space-y-4">
@@ -329,14 +329,16 @@ export const MktDataInterface = () => {
               </Card>
 
               {/* Price Chart */}
-              <MktDataChart
-                symbol={selectedSymbol}
-                data={chartData}
-                currentPrice={currentPrice}
-                priceChange={priceChange}
-                volume24h={volume24h}
-                indicators={indicators}
-              />
+              <div className="flex-1">
+                <MktDataChart
+                  symbol={selectedSymbol}
+                  data={chartData}
+                  currentPrice={currentPrice}
+                  priceChange={priceChange}
+                  volume24h={volume24h}
+                  indicators={indicators}
+                />
+              </div>
             </div>
 
             {/* Activity Logs */}
