@@ -15,3 +15,22 @@ verify_jwt = true
 [functions.mkt-data-scheduler]
 verify_jwt = false
 
+[functions.signal-maker-agent]
+verify_jwt = false
+
+[functions.market-modeler-agent]
+verify_jwt = false
+
+[functions.risk-manager-agent]
+verify_jwt = false
+
+[functions.agent-message-broker]
+verify_jwt = false
+
+[functions.agent-logger]
+verify_jwt = false
+
+[functions.nkmt-orchestrator]
+verify_jwt = false
+
+
