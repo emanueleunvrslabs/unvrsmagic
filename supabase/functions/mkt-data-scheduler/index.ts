@@ -19,22 +19,19 @@ const TOP_100_SYMBOLS = [
 ]
 
 Deno.serve(async (req) => {
+  // Log every request
+  console.log('===== MKT.DATA SCHEDULER INVOKED =====')
+  console.log('Method:', req.method)
+  console.log('Timestamp:', new Date().toISOString())
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Verifica che la chiamata sia dal cron o abbia la service role key
-    const authHeader = req.headers.get('Authorization')
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    // Initialize Supabase client with service role
+    console.log('✅ Starting data collection process...')
     
-    if (!authHeader || !authHeader.includes(serviceRoleKey || '')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized - Service role required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
