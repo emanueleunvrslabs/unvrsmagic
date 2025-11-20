@@ -22,79 +22,102 @@ export const MktDataInterface = () => {
     initializeConfig()
   }, [])
 
-  // Get selected symbol data
-  const selectedData = data.find(d => d.symbol === selectedSymbol && d.timeframe === '1h')
-  const ohlcvData = selectedData?.ohlcv as any[] || []
+  // Get all data for the selected symbol (all timeframes and market types)
+  const symbolData = data.filter(d => d.symbol === selectedSymbol)
   
-  // Mock data for demonstration (will be replaced with real data)
-  const chartData = ohlcvData.slice(-24).map((candle: any) => ({
-    timestamp: candle[0],
-    price: candle[4] // close price
+  // Prioritize 1h spot data for the chart
+  const chartSourceData = symbolData.find(d => d.timeframe === '1h' && d.market_type === 'spot') || symbolData[0]
+  
+  // Extract OHLCV data and transform for chart
+  const ohlcvArray = (chartSourceData?.ohlcv as any[]) || []
+  const chartData = ohlcvArray.map((candle: any) => ({
+    timestamp: candle.timestamp_ms,
+    price: candle.close
   }))
 
-  const currentPrice = ohlcvData[ohlcvData.length - 1]?.[4] || 91774.58
-  const priceChange = 0.17
-  const volume24h = 0.01
+  // Calculate metrics from OHLCV data
+  const latestCandle = ohlcvArray[ohlcvArray.length - 1]
+  const firstCandle = ohlcvArray[0]
+  const currentPrice = latestCandle?.close || 0
+  const priceChange = firstCandle?.close 
+    ? ((currentPrice - firstCandle.close) / firstCandle.close) * 100 
+    : 0
+  const volume24h = ohlcvArray.reduce((sum: number, candle: any) => sum + (candle.volume || 0), 0) / 1000000
 
-  const activityLogs = [
-    {
-      id: '1',
-      type: 'orderbook' as const,
-      symbol: 'BTCUSDT',
-      details: '📊 Depth: 20 levels',
-      timestamp: '12:32:40',
-      duration: '1029ms',
-      status: 'success' as const
-    },
-    {
-      id: '2',
-      type: 'candles' as const,
-      symbol: 'BTCUSDT',
-      details: '📊 Records: 24 • Timeframe: 1h',
-      timestamp: '12:32:39',
-      duration: '619ms',
-      status: 'success' as const
-    },
-    {
-      id: '3',
-      type: 'tickers' as const,
-      symbol: 'Multiple',
-      details: '📊 Records: 791 • Pairs: LINKUSDT, UNIUSDT, SUSHIUSDT, COMPUSDT, AAVEUSDT',
-      timestamp: '12:32:38',
-      duration: '822ms',
-      status: 'success' as const
-    },
-    {
-      id: '4',
-      type: 'orderbook' as const,
-      symbol: 'BTCUSDT',
-      details: '📊 Depth: 20 levels',
-      timestamp: '22:00:36',
-      duration: '687ms',
-      status: 'success' as const
+  // Get live ticker data from database
+  const liveTickers = TOP_SYMBOLS.slice(0, 3).map(sym => {
+    const symData = data.find(d => d.symbol === sym && d.timeframe === '1h' && d.market_type === 'spot')
+    const ohlcv = (symData?.ohlcv as any[]) || []
+    const latest = ohlcv[ohlcv.length - 1]
+    const first = ohlcv[0]
+    
+    if (!latest) {
+      return {
+        symbol: sym,
+        shortName: sym.replace('USDT', ''),
+        price: 0,
+        change24h: 0,
+        volume24h: 0,
+        high24h: 0,
+        low24h: 0
+      }
     }
-  ]
 
-  const liveTickers = [
-    { symbol: 'BTC/USDT', shortName: 'BTC', price: 91618.63, change24h: 0.11, volume24h: 668540000, high24h: 93166.67, low24h: 88611.72 },
-    { symbol: 'ETH/USDT', shortName: 'ETH', price: 3006.82, change24h: -2.58, volume24h: 378940000, high24h: 3109.17, low24h: 2873.57 },
-    { symbol: 'SOL/USDT', shortName: 'SOL', price: 141.83, change24h: 2.04, volume24h: 87090000, high24h: 144.78, low24h: 130.53 }
-  ]
+    const change = first?.close ? ((latest.close - first.close) / first.close) * 100 : 0
+    const high = Math.max(...ohlcv.map((c: any) => c.high || 0))
+    const low = Math.min(...ohlcv.filter((c: any) => c.low > 0).map((c: any) => c.low || Infinity))
+    const vol = ohlcv.reduce((sum: number, c: any) => sum + (c.volume || 0), 0) / 1000000
 
+    return {
+      symbol: sym,
+      shortName: sym.replace('USDT', ''),
+      price: latest.close,
+      change24h: change,
+      volume24h: vol,
+      high24h: high,
+      low24h: low === Infinity ? latest.close : low
+    }
+  })
+
+  // Activity logs from recent updates
+  const recentUpdates = data
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+    .slice(0, 10)
+  
+  const activityLogs = recentUpdates.map((item, idx) => ({
+    id: `log-${idx}`,
+    type: 'candles' as const,
+    symbol: item.symbol,
+    details: `📊 Records: ${(item.ohlcv as any[])?.length || 0} • Timeframe: ${item.timeframe} • ${item.market_type}`,
+    timestamp: new Date(item.updated_at).toLocaleTimeString(),
+    duration: `${item.confidence_score}% confidence`,
+    status: 'success' as const
+  }))
+
+  // Generate mock order book based on current price
+  const basePrice = currentPrice || 91618
   const orderBook = {
-    symbol: 'BTC',
+    symbol: selectedSymbol.replace('USDT', ''),
     spread: 0.01,
     spreadPercent: 0.0001,
-    bids: Array.from({ length: 15 }, (_, i) => ({
-      price: 91618.64 - i * 0.01,
-      amount: 0.01 + Math.random() * 0.7,
-      total: (91618.64 - i * 0.01) * (0.01 + Math.random() * 0.7)
-    })),
-    asks: Array.from({ length: 15 }, (_, i) => ({
-      price: 91619.75 + i * 0.01,
-      amount: 0.01 + Math.random() * 0.7,
-      total: (91619.75 + i * 0.01) * (0.01 + Math.random() * 0.7)
-    }))
+    bids: Array.from({ length: 15 }, (_, i) => {
+      const price = basePrice - i * 0.01
+      const amount = 0.01 + Math.random() * 0.7
+      return {
+        price,
+        amount,
+        total: price * amount
+      }
+    }),
+    asks: Array.from({ length: 15 }, (_, i) => {
+      const price = basePrice + 1 + i * 0.01
+      const amount = 0.01 + Math.random() * 0.7
+      return {
+        price,
+        amount,
+        total: price * amount
+      }
+    })
   }
 
   return (
@@ -102,7 +125,7 @@ export const MktDataInterface = () => {
       <div>
         <h1 className="text-3xl font-bold">Mkt.data Agent</h1>
         <p className="text-muted-foreground mt-2">
-          Market data collection running automatically in background for top 100 cryptocurrencies
+          Real-time market data collection for top cryptocurrencies
         </p>
       </div>
 
@@ -164,7 +187,7 @@ export const MktDataInterface = () => {
             </div>
           </CardContent>
         </Card>
-      ) : (
+      ) : data.length > 0 ? (
         <div className="grid grid-cols-12 gap-6">
           {/* Symbol Selector */}
           <div className="col-span-2">
@@ -205,6 +228,14 @@ export const MktDataInterface = () => {
             <MktDataOrderBook {...orderBook} />
           </div>
         </div>
+      ) : (
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center text-muted-foreground">
+              <p>No market data available yet. The agent will start collecting data automatically.</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   )
