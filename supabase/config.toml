@@ -33,4 +33,7 @@ verify_jwt = false
 [functions.nkmt-orchestrator]
 verify_jwt = false
 
+[functions.get-bitget-orderbook]
+verify_jwt = false
+
 
