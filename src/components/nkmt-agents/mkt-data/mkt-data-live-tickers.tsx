@@ -27,14 +27,14 @@ export const MktDataLiveTickers = ({ tickers }: MktDataLiveTickersProps) => {
   }
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5" />
           <CardTitle>Live Tickers</CardTitle>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         <div className="space-y-3">
           {tickers.map((ticker) => {
             const isPositive = ticker.change24h >= 0
