@@ -97,7 +97,7 @@ export const MktDataInterface = () => {
   const volume24h = ohlcvArray.reduce((sum: number, candle: any) => sum + (candle.volume || 0), 0) / 1000000
 
   // Get live ticker data from database
-  const liveTickers = symbols.slice(0, 3).map(sym => {
+  const liveTickers = symbols.slice(0, 10).map(sym => {
     const symData = data.find(d => d.symbol === sym && d.timeframe === '1h' && d.market_type === 'spot')
     const ohlcv = (symData?.ohlcv as any[]) || []
     const latest = ohlcv[ohlcv.length - 1]
