@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Activity, TrendingUp, Database } from "lucide-react"
+import { Activity, TrendingUp, Database, FileText } from "lucide-react"
 import { useMktData } from "@/hooks/use-mkt-data"
 import { useBitgetOrderBook } from "@/hooks/use-bitget-orderbook"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -13,6 +13,15 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { applyIndicators } from "@/lib/technical-indicators"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 const TOP_SYMBOLS_FALLBACK = [
   'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BGBUSDT', 'XRPUSDT', 
@@ -181,11 +190,52 @@ export const MktDataInterface = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Mkt.data Agent</h1>
-        <p className="text-muted-foreground mt-2">
-          Real-time market data collection for top cryptocurrencies
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Mkt.data Agent</h1>
+          <p className="text-muted-foreground mt-2">
+            Real-time market data collection for top cryptocurrencies
+          </p>
+        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <FileText className="h-4 w-4 mr-2" />
+              Prompt
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Mkt.data Agent Prompt</DialogTitle>
+              <DialogDescription>
+                System prompt used by the MKT.DATA agent
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="rounded-lg bg-muted p-4">
+                <h3 className="font-semibold mb-2">Role</h3>
+                <p className="text-sm text-muted-foreground">
+                  Collect spot market OHLCV data for top 100 cryptocurrencies from CoinGecko and CoinMarketCap APIs.
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted p-4">
+                <h3 className="font-semibold mb-2">Parameters</h3>
+                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                  <li>Timeframes: 1h, 4h, 1d</li>
+                  <li>Lookback: 100 bars</li>
+                  <li>Frequency: Every 5 minutes</li>
+                  <li>Markets: Spot & Futures</li>
+                </ul>
+              </div>
+              <div className="rounded-lg bg-muted p-4">
+                <h3 className="font-semibold mb-2">Output</h3>
+                <p className="text-sm text-muted-foreground">
+                  Stores normalized OHLCV data with confidence scores in mkt_data_results and notifies NKMT orchestrator.
+                </p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
