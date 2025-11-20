@@ -240,116 +240,122 @@ export const MktDataInterface = () => {
           </CardContent>
         </Card>
       ) : data.length > 0 ? (
-        <div className="grid grid-cols-12 gap-6">
-          {/* Symbol Selector */}
-          <div className="col-span-2">
-            <Card>
-              <CardContent className="pt-6">
-                <MktDataSymbolSelector
-                  symbols={symbols}
-                  selectedSymbol={selectedSymbol}
-                  onSymbolChange={setSelectedSymbol}
-                />
-              </CardContent>
-            </Card>
-          </div>
+        <div className="space-y-6">
+          {/* First row: Symbol Selector + Chart + Activity Logs */}
+          <div className="grid grid-cols-12 gap-6">
+            {/* Symbol Selector */}
+            <div className="col-span-12 lg:col-span-2">
+              <Card>
+                <CardContent className="pt-6">
+                  <MktDataSymbolSelector
+                    symbols={symbols}
+                    selectedSymbol={selectedSymbol}
+                    onSymbolChange={setSelectedSymbol}
+                  />
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Chart with Timeframe Selector */}
-          <div className="col-span-6 space-y-4">
-            {/* Timeframe and Indicators Selector */}
-            <Card>
-              <CardContent className="pt-6 space-y-4">
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Timeframe</Label>
-                  <Tabs value={selectedTimeframe} onValueChange={(v) => setSelectedTimeframe(v as '1h' | '4h' | '1d')}>
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="1h">1H</TabsTrigger>
-                      <TabsTrigger value="4h">4H</TabsTrigger>
-                      <TabsTrigger value="1d">1D</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-                
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Technical Indicators</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="sma20" 
-                        checked={indicators.sma20}
-                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, sma20: !!checked }))}
-                      />
-                      <Label htmlFor="sma20" className="text-xs cursor-pointer">SMA 20</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="sma50" 
-                        checked={indicators.sma50}
-                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, sma50: !!checked }))}
-                      />
-                      <Label htmlFor="sma50" className="text-xs cursor-pointer">SMA 50</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="ema12" 
-                        checked={indicators.ema12}
-                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, ema12: !!checked }))}
-                      />
-                      <Label htmlFor="ema12" className="text-xs cursor-pointer">EMA 12</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="ema26" 
-                        checked={indicators.ema26}
-                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, ema26: !!checked }))}
-                      />
-                      <Label htmlFor="ema26" className="text-xs cursor-pointer">EMA 26</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="rsi" 
-                        checked={indicators.rsi}
-                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, rsi: !!checked }))}
-                      />
-                      <Label htmlFor="rsi" className="text-xs cursor-pointer">RSI</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="macd" 
-                        checked={indicators.macd}
-                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, macd: !!checked }))}
-                      />
-                      <Label htmlFor="macd" className="text-xs cursor-pointer">MACD</Label>
+            {/* Chart with Timeframe Selector */}
+            <div className="col-span-12 lg:col-span-6 space-y-4">
+              {/* Timeframe and Indicators Selector */}
+              <Card>
+                <CardContent className="pt-6 space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">Timeframe</Label>
+                    <Tabs value={selectedTimeframe} onValueChange={(v) => setSelectedTimeframe(v as '1h' | '4h' | '1d')}>
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="1h">1H</TabsTrigger>
+                        <TabsTrigger value="4h">4H</TabsTrigger>
+                        <TabsTrigger value="1d">1D</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">Technical Indicators</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="sma20" 
+                          checked={indicators.sma20}
+                          onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, sma20: !!checked }))}
+                        />
+                        <Label htmlFor="sma20" className="text-xs cursor-pointer">SMA 20</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="sma50" 
+                          checked={indicators.sma50}
+                          onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, sma50: !!checked }))}
+                        />
+                        <Label htmlFor="sma50" className="text-xs cursor-pointer">SMA 50</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="ema12" 
+                          checked={indicators.ema12}
+                          onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, ema12: !!checked }))}
+                        />
+                        <Label htmlFor="ema12" className="text-xs cursor-pointer">EMA 12</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="ema26" 
+                          checked={indicators.ema26}
+                          onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, ema26: !!checked }))}
+                        />
+                        <Label htmlFor="ema26" className="text-xs cursor-pointer">EMA 26</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="rsi" 
+                          checked={indicators.rsi}
+                          onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, rsi: !!checked }))}
+                        />
+                        <Label htmlFor="rsi" className="text-xs cursor-pointer">RSI</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="macd" 
+                          checked={indicators.macd}
+                          onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, macd: !!checked }))}
+                        />
+                        <Label htmlFor="macd" className="text-xs cursor-pointer">MACD</Label>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Chart */}
-            <MktDataChart
-              symbol={selectedSymbol}
-              data={chartData}
-              currentPrice={currentPrice}
-              priceChange={priceChange}
-              volume24h={volume24h}
-              indicators={indicators}
-            />
+              {/* Price Chart */}
+              <MktDataChart
+                symbol={selectedSymbol}
+                data={chartData}
+                currentPrice={currentPrice}
+                priceChange={priceChange}
+                volume24h={volume24h}
+                indicators={indicators}
+              />
+            </div>
+
+            {/* Activity Logs */}
+            <div className="col-span-12 lg:col-span-4">
+              <MktDataActivityLogs logs={activityLogs} />
+            </div>
           </div>
 
-          {/* Activity Logs */}
-          <div className="col-span-4">
-            <MktDataActivityLogs logs={activityLogs} />
-          </div>
+          {/* Second row: Live Tickers + Order Book */}
+          <div className="grid grid-cols-12 gap-6">
+            {/* Live Tickers */}
+            <div className="col-span-12 lg:col-span-4">
+              <MktDataLiveTickers tickers={liveTickers} />
+            </div>
 
-          {/* Live Tickers */}
-          <div className="col-span-4">
-            <MktDataLiveTickers tickers={liveTickers} />
-          </div>
-
-          {/* Order Book */}
-          <div className="col-span-8">
-            <MktDataOrderBook {...orderBook} />
+            {/* Order Book */}
+            <div className="col-span-12 lg:col-span-8">
+              <MktDataOrderBook {...orderBook} />
+            </div>
           </div>
         </div>
       ) : (
