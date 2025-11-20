@@ -66,7 +66,8 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
               dataKey="price" 
               stroke="hsl(var(--primary))" 
               strokeWidth={2}
-              dot={false}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
             />
           </LineChart>
         </ResponsiveContainer>
