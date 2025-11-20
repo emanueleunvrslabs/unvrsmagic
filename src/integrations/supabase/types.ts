@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_logs: {
+        Row: {
+          action: string | null
+          agent_name: string
+          created_at: string | null
+          duration_ms: number | null
+          id: string
+          log_level: string
+          message: string
+          metadata: Json | null
+          timestamp: string | null
+          user_id: string
+        }
+        Insert: {
+          action?: string | null
+          agent_name: string
+          created_at?: string | null
+          duration_ms?: number | null
+          id?: string
+          log_level: string
+          message: string
+          metadata?: Json | null
+          timestamp?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string | null
+          agent_name?: string
+          created_at?: string | null
+          duration_ms?: number | null
+          id?: string
+          log_level?: string
+          message?: string
+          metadata?: Json | null
+          timestamp?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       agent_messages: {
         Row: {
           created_at: string | null
