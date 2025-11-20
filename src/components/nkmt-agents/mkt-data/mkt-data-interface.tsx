@@ -9,6 +9,9 @@ import { MktDataActivityLogs } from "./mkt-data-activity-logs"
 import { MktDataLiveTickers } from "./mkt-data-live-tickers"
 import { MktDataOrderBook } from "./mkt-data-order-book"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { applyIndicators } from "@/lib/technical-indicators"
 
 const TOP_SYMBOLS_FALLBACK = [
   'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BGBUSDT', 'XRPUSDT', 
@@ -21,6 +24,14 @@ export const MktDataInterface = () => {
   const symbols = availableSymbols.length > 0 ? availableSymbols : TOP_SYMBOLS_FALLBACK
   const [selectedSymbol, setSelectedSymbol] = useState(symbols[0] || 'BTCUSDT')
   const [selectedTimeframe, setSelectedTimeframe] = useState<'1h' | '4h' | '1d'>('1h')
+  const [indicators, setIndicators] = useState({
+    sma20: false,
+    sma50: false,
+    ema12: false,
+    ema26: false,
+    rsi: false,
+    macd: false
+  })
 
   useEffect(() => {
     initializeConfig()
@@ -34,13 +45,46 @@ export const MktDataInterface = () => {
   
   // Extract OHLCV data and transform for chart
   const ohlcvArray = (chartSourceData?.ohlcv as any[]) || []
-  const chartData = ohlcvArray.map((candle: any) => ({
+  
+  // Calculate technical indicators
+  const technicalIndicators = ohlcvArray.length > 0 ? applyIndicators(
+    ohlcvArray.map((c: any) => ({
+      open: c.open,
+      high: c.high,
+      low: c.low,
+      close: c.close,
+      volume: c.volume || 0,
+      timestamp: c.timestamp_ms
+    })),
+    {
+      sma: indicators.sma20 || indicators.sma50 ? [
+        ...(indicators.sma20 ? [20] : []),
+        ...(indicators.sma50 ? [50] : [])
+      ] : undefined,
+      ema: indicators.ema12 || indicators.ema26 ? [
+        ...(indicators.ema12 ? [12] : []),
+        ...(indicators.ema26 ? [26] : [])
+      ] : undefined,
+      rsi: indicators.rsi,
+      macd: indicators.macd
+    }
+  ) : { sma: {}, ema: {}, rsi: null, macd: null }
+  
+  const chartData = ohlcvArray.map((candle: any, idx: number) => ({
     timestamp: candle.timestamp_ms,
     open: candle.open,
     high: candle.high,
     low: candle.low,
     close: candle.close,
-    volume: candle.volume
+    volume: candle.volume,
+    sma20: technicalIndicators.sma[20]?.[idx],
+    sma50: technicalIndicators.sma[50]?.[idx],
+    ema12: technicalIndicators.ema[12]?.[idx],
+    ema26: technicalIndicators.ema[26]?.[idx],
+    rsi: technicalIndicators.rsi?.[idx],
+    macd: technicalIndicators.macd?.macd[idx],
+    macdSignal: technicalIndicators.macd?.signal[idx],
+    macdHistogram: technicalIndicators.macd?.histogram[idx]
   }))
 
   // Calculate metrics from OHLCV data
@@ -212,16 +256,73 @@ export const MktDataInterface = () => {
 
           {/* Chart with Timeframe Selector */}
           <div className="col-span-6 space-y-4">
-            {/* Timeframe Selector */}
+            {/* Timeframe and Indicators Selector */}
             <Card>
-              <CardContent className="pt-6">
-                <Tabs value={selectedTimeframe} onValueChange={(v) => setSelectedTimeframe(v as '1h' | '4h' | '1d')}>
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="1h">1H</TabsTrigger>
-                    <TabsTrigger value="4h">4H</TabsTrigger>
-                    <TabsTrigger value="1d">1D</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+              <CardContent className="pt-6 space-y-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Timeframe</Label>
+                  <Tabs value={selectedTimeframe} onValueChange={(v) => setSelectedTimeframe(v as '1h' | '4h' | '1d')}>
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="1h">1H</TabsTrigger>
+                      <TabsTrigger value="4h">4H</TabsTrigger>
+                      <TabsTrigger value="1d">1D</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Technical Indicators</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="sma20" 
+                        checked={indicators.sma20}
+                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, sma20: !!checked }))}
+                      />
+                      <Label htmlFor="sma20" className="text-xs cursor-pointer">SMA 20</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="sma50" 
+                        checked={indicators.sma50}
+                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, sma50: !!checked }))}
+                      />
+                      <Label htmlFor="sma50" className="text-xs cursor-pointer">SMA 50</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="ema12" 
+                        checked={indicators.ema12}
+                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, ema12: !!checked }))}
+                      />
+                      <Label htmlFor="ema12" className="text-xs cursor-pointer">EMA 12</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="ema26" 
+                        checked={indicators.ema26}
+                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, ema26: !!checked }))}
+                      />
+                      <Label htmlFor="ema26" className="text-xs cursor-pointer">EMA 26</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="rsi" 
+                        checked={indicators.rsi}
+                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, rsi: !!checked }))}
+                      />
+                      <Label htmlFor="rsi" className="text-xs cursor-pointer">RSI</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="macd" 
+                        checked={indicators.macd}
+                        onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, macd: !!checked }))}
+                      />
+                      <Label htmlFor="macd" className="text-xs cursor-pointer">MACD</Label>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -232,6 +333,7 @@ export const MktDataInterface = () => {
               currentPrice={currentPrice}
               priceChange={priceChange}
               volume24h={volume24h}
+              indicators={indicators}
             />
           </div>
 

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp } from "lucide-react"
-import { ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Bar } from "recharts"
+import { ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Bar, Line } from "recharts"
 
 interface MktDataChartProps {
   symbol: string
@@ -11,10 +11,26 @@ interface MktDataChartProps {
     low: number
     close: number
     volume: number
+    sma20?: number | null
+    sma50?: number | null
+    ema12?: number | null
+    ema26?: number | null
+    rsi?: number | null
+    macd?: number | null
+    macdSignal?: number | null
+    macdHistogram?: number | null
   }>
   currentPrice: number
   priceChange: number
   volume24h: number
+  indicators: {
+    sma20: boolean
+    sma50: boolean
+    ema12: boolean
+    ema26: boolean
+    rsi: boolean
+    macd: boolean
+  }
 }
 
 interface CandleProps {
@@ -61,13 +77,20 @@ const Candlestick = ({ x, y, width, height, open, close, high, low }: CandleProp
   )
 }
 
-export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24h }: MktDataChartProps) => {
+export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24h, indicators }: MktDataChartProps) => {
   const chartData = data.map(item => ({
     time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     open: item.open,
     high: item.high,
     low: item.low,
-    close: item.close
+    close: item.close,
+    sma20: item.sma20,
+    sma50: item.sma50,
+    ema12: item.ema12,
+    ema26: item.ema26,
+    rsi: item.rsi,
+    macd: item.macd,
+    macdSignal: item.macdSignal
   }))
 
   const isPositive = priceChange >= 0
@@ -149,6 +172,68 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
                 )
               }}
             />
+            
+            {/* Technical Indicators */}
+            {indicators.sma20 && (
+              <Line 
+                type="monotone" 
+                dataKey="sma20" 
+                stroke="hsl(var(--chart-1))" 
+                strokeWidth={2}
+                dot={false}
+                name="SMA 20"
+              />
+            )}
+            {indicators.sma50 && (
+              <Line 
+                type="monotone" 
+                dataKey="sma50" 
+                stroke="hsl(var(--chart-3))" 
+                strokeWidth={2}
+                dot={false}
+                name="SMA 50"
+              />
+            )}
+            {indicators.ema12 && (
+              <Line 
+                type="monotone" 
+                dataKey="ema12" 
+                stroke="hsl(var(--chart-4))" 
+                strokeWidth={2}
+                dot={false}
+                name="EMA 12"
+              />
+            )}
+            {indicators.ema26 && (
+              <Line 
+                type="monotone" 
+                dataKey="ema26" 
+                stroke="hsl(var(--chart-5))" 
+                strokeWidth={2}
+                dot={false}
+                name="EMA 26"
+              />
+            )}
+            {indicators.macd && (
+              <Line 
+                type="monotone" 
+                dataKey="macd" 
+                stroke="hsl(var(--primary))" 
+                strokeWidth={1.5}
+                dot={false}
+                name="MACD"
+              />
+            )}
+            {indicators.macd && (
+              <Line 
+                type="monotone" 
+                dataKey="macdSignal" 
+                stroke="hsl(var(--destructive))" 
+                strokeWidth={1.5}
+                dot={false}
+                name="Signal"
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </CardContent>
