@@ -4,6 +4,7 @@ import { Activity, TrendingUp, Database, FileText, RefreshCw } from "lucide-reac
 import { useMktData } from "@/hooks/use-mkt-data"
 import { useBitgetOrderBook } from "@/hooks/use-bitget-orderbook"
 import { useTriggerMktData } from "@/hooks/use-trigger-mkt-data"
+import { useBitgetHistoricalData } from "@/hooks/use-bitget-historical"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { MktDataSymbolSelector } from "./mkt-data-symbol-selector"
 import { MktDataChart } from "./mkt-data-chart"
@@ -55,6 +56,13 @@ export const MktDataInterface = () => {
   // Fetch real order book data from Bitget
   const { data: orderBookData, isLoading: orderBookLoading } = useBitgetOrderBook(selectedSymbol)
 
+  // Fetch storico direttamente da Bitget se il database ha poche candele
+  const { data: bitgetHistorical, isLoading: bitgetLoading } = useBitgetHistoricalData(
+    selectedSymbol,
+    selectedTimeframe,
+    500
+  )
+
   useEffect(() => {
     initializeConfig()
   }, [])
@@ -65,8 +73,13 @@ export const MktDataInterface = () => {
   // Get data for the selected timeframe and prioritize spot market
   const chartSourceData = symbolData.find(d => d.timeframe === selectedTimeframe && d.market_type === 'spot') || symbolData[0]
   
-  // Extract OHLCV data and transform for chart
-  const ohlcvArray = (chartSourceData?.ohlcv as any[]) || []
+  // Extract OHLCV data from backend
+  const dbOhlcvArray = (chartSourceData?.ohlcv as any[]) || []
+
+  // Scegli la sorgente migliore: se dal backend ho meno di 10 candele, uso Bitget
+  const ohlcvArray = dbOhlcvArray.length >= 10
+    ? dbOhlcvArray
+    : (bitgetHistorical as any[]) || []
   
   // Calculate technical indicators
   const technicalIndicators = ohlcvArray.length > 0 ? applyIndicators(
