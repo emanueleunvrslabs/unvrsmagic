@@ -8,7 +8,7 @@ import { useBitgetHistoricalData } from "@/hooks/use-bitget-historical"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { MktDataSymbolSelector } from "./mkt-data-symbol-selector"
 import { MktDataChart } from "./mkt-data-chart"
-import { MktDataActivityLogs } from "./mkt-data-activity-logs"
+import { NKMTLogsViewer } from "../nkmt-dashboard/nkmt-logs-viewer"
 import { MktDataLiveTickers } from "./mkt-data-live-tickers"
 import { MktDataOrderBook } from "./mkt-data-order-book"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -433,10 +433,10 @@ export const MktDataInterface = () => {
               </div>
             </div>
 
-            {/* Activity Logs */}
+            {/* Agent Logs */}
             <div className="col-span-12 lg:col-span-4 flex">
               <div className="flex-1">
-                <MktDataActivityLogs logs={activityLogs} />
+                <NKMTLogsViewer />
               </div>
             </div>
           </div>
