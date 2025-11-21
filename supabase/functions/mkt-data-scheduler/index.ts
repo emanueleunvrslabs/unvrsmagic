@@ -144,10 +144,21 @@ Deno.serve(async (req) => {
             }
 
             if (agentResponse?.success) {
-              successCount += agentResponse.symbols?.length || 0
-              errorCount += agentResponse.errors?.length || 0
+              const batchSuccess = agentResponse.symbols?.length || 0
+              const batchErrors = agentResponse.errors?.length || 0
+
+              successCount += batchSuccess
+              errorCount += batchErrors
               
-              console.log(`✅ [MKT.DATA] Batch processed: ${agentResponse.symbols?.length || 0} success, ${agentResponse.errors?.length || 0} errors`)
+              console.log(`✅ [MKT.DATA] Batch processed: ${batchSuccess} success, ${batchErrors} errors`)
+
+              if (agentResponse.symbols && agentResponse.symbols.length > 0) {
+                for (const symbolResult of agentResponse.symbols as any[]) {
+                  await logToDatabase(config.user_id, 'info', `Processed symbol ${symbolResult.symbol}`, {
+                    markets: symbolResult.markets || []
+                  })
+                }
+              }
             }
 
           } catch (batchError) {
