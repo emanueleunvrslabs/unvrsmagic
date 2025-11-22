@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, Activity } from "lucide-react"
-import { ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Bar, Line } from "recharts"
+import { ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Line } from "recharts"
 import { Badge } from "@/components/ui/badge"
 
 interface MktDataChartProps {
@@ -35,56 +35,62 @@ interface MktDataChartProps {
   isLive?: boolean
 }
 
-interface CandleProps {
-  x: number
-  y: number
-  width: number
-  height: number
-  open: number
-  close: number
-  high: number
-  low: number
-}
-
-const Candlestick = ({ x, y, width, height, open, close, high, low }: CandleProps) => {
-  const isPositive = close >= open
-  const color = isPositive ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'
-
-  // height: pixel height of full candle range (high-low)
-  // y: pixel y of high price (top)
-  const priceRange = high - low || 1
-  const yScale = height / priceRange
-
-  const highY = y
-  const lowY = y + (high - low) * yScale
-  const openY = y + (high - open) * yScale
-  const closeY = y + (high - close) * yScale
-
-  const candleY = Math.min(openY, closeY)
-  const candleHeight = Math.max(Math.abs(closeY - openY), 1)
-  const candleX = x + width / 2
-
+// Candlestick custom layer component
+const CandlestickLayer = (props: any) => {
+  const { data, xAxisMap, yAxisMap, margin, width, height } = props
+  if (!data || !xAxisMap || !yAxisMap) return null
+  
+  const xAxis = xAxisMap[0]
+  const yAxis = yAxisMap['price']
+  if (!xAxis || !yAxis) return null
+  
+  const { scale: xScale } = xAxis
+  const { scale: yScale } = yAxis
+  
+  // Calculate bar width based on data points
+  const barWidth = Math.max(3, (width - margin.left - margin.right) / data.length * 0.7)
+  
   return (
-    <g>
-      {/* Shadow (wick) */}
-      <line
-        x1={candleX}
-        y1={highY}
-        x2={candleX}
-        y2={lowY}
-        stroke={color}
-        strokeWidth={1}
-      />
-      {/* Body */}
-      <rect
-        x={x + width * 0.15}
-        y={candleY}
-        width={width * 0.7}
-        height={candleHeight}
-        fill={color}
-        stroke={color}
-        strokeWidth={1}
-      />
+    <g className="recharts-candlestick-layer">
+      {data.map((item: any, index: number) => {
+        if (!item.open || !item.close || !item.high || !item.low) return null
+        
+        const isPositive = item.close >= item.open
+        const color = isPositive ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'
+        
+        const xPos = xScale(item.time)
+        const highY = yScale(item.high)
+        const lowY = yScale(item.low)
+        const openY = yScale(item.open)
+        const closeY = yScale(item.close)
+        
+        const candleY = Math.min(openY, closeY)
+        const candleHeight = Math.abs(closeY - openY) || 1
+        
+        return (
+          <g key={`candle-${index}`}>
+            {/* Wick */}
+            <line
+              x1={xPos}
+              y1={highY}
+              x2={xPos}
+              y2={lowY}
+              stroke={color}
+              strokeWidth={1}
+            />
+            {/* Body */}
+            <rect
+              x={xPos - barWidth / 2}
+              y={candleY}
+              width={barWidth}
+              height={candleHeight}
+              fill={color}
+              stroke={color}
+              strokeWidth={1}
+            />
+          </g>
+        )
+      })}
     </g>
   )
 }
@@ -135,16 +141,18 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <ComposedChart data={chartData}>
+          <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <XAxis 
               dataKey="time" 
               stroke="hsl(var(--muted-foreground))"
               fontSize={12}
             />
             <YAxis 
+              yAxisId="price"
               stroke="hsl(var(--muted-foreground))"
               fontSize={12}
-              domain={['auto', 'auto']}
+              domain={['dataMin - 10', 'dataMax + 10']}
+              tickFormatter={(value) => `$${value.toLocaleString()}`}
             />
             <Tooltip 
               contentStyle={{
@@ -166,89 +174,79 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
                 )
               }}
             />
-            <Bar 
-              dataKey="high"
-              shape={(props: any) => {
-                const { x, y, width, height, payload } = props
-                if (!payload) return null
-                
-                // Calculate scale for candlestick positioning
-                const yScale = height / (payload.high - payload.low)
-                const baseY = y
-                
-                return (
-                  <Candlestick
-                    x={x}
-                    y={baseY}
-                    width={width}
-                    height={yScale}
-                    open={payload.open}
-                    close={payload.close}
-                    high={payload.high}
-                    low={payload.low}
-                  />
-                )
-              }}
-            />
+            
+            <CandlestickLayer />
             
             {/* Technical Indicators */}
             {indicators.sma20 && (
               <Line 
+                yAxisId="price"
                 type="monotone" 
                 dataKey="sma20" 
                 stroke="hsl(var(--chart-1))" 
                 strokeWidth={2}
                 dot={false}
+                isAnimationActive={false}
                 name="SMA 20"
               />
             )}
             {indicators.sma50 && (
               <Line 
+                yAxisId="price"
                 type="monotone" 
                 dataKey="sma50" 
                 stroke="hsl(var(--chart-3))" 
                 strokeWidth={2}
                 dot={false}
+                isAnimationActive={false}
                 name="SMA 50"
               />
             )}
             {indicators.ema12 && (
               <Line 
+                yAxisId="price"
                 type="monotone" 
                 dataKey="ema12" 
                 stroke="hsl(var(--chart-4))" 
                 strokeWidth={2}
                 dot={false}
+                isAnimationActive={false}
                 name="EMA 12"
               />
             )}
             {indicators.ema26 && (
               <Line 
+                yAxisId="price"
                 type="monotone" 
                 dataKey="ema26" 
                 stroke="hsl(var(--chart-5))" 
                 strokeWidth={2}
                 dot={false}
+                isAnimationActive={false}
                 name="EMA 26"
               />
             )}
             {indicators.macd && (
               <Line 
+                yAxisId="price"
                 type="monotone" 
                 dataKey="macd" 
                 stroke="hsl(var(--primary))" 
                 strokeWidth={1.5}
                 dot={false}
+                isAnimationActive={false}
                 name="MACD"
               />
             )}
             {indicators.macd && (
               <Line 
+                yAxisId="price"
                 type="monotone" 
                 dataKey="macdSignal" 
                 stroke="hsl(var(--destructive))" 
                 strokeWidth={1.5}
                 dot={false}
+                isAnimationActive={false}
                 name="Signal"
               />
             )}
