@@ -30,7 +30,7 @@ const App = () => (
           <Sonner />
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<Navigate to="/auth" replace />} />
+          <Route path="/" element={<ProtectedRoute><NKMTDashboard /></ProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
           <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
@@ -42,6 +42,20 @@ const App = () => (
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
           <Route path="/bot-templates" element={<ProtectedRoute><BotTemplates /></ProtectedRoute>} />
+          {/* Redirects for removed pages */}
+          <Route path="/overview" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/my-assets" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/my-analytics" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/trading" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/wallets" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/portfolio-tracker" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/signal-bot" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/dca-bot" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/arbitrage-bot" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/pump-screener" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/defi-protocols" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/defi-center/*" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/control-panel/*" element={<Navigate to="/nkmt/dashboard" replace />} />
           <Route path="/invite-friends" element={<Navigate to="/settings" replace />} />
           <Route path="/help-center" element={<Navigate to="/settings" replace />} />
           <Route path="*" element={<NotFound />} />
