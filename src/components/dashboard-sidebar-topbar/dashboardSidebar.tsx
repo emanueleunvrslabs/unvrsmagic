@@ -604,7 +604,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           </div>
 
           {/* Footer */}
-          <div className="mt-auto border-t border-border p-3">
+          <div className="mt-auto p-3">
             <div className="space-y-1">
               {footerItems.map((item) => {
                 const Icon = item.icon;
