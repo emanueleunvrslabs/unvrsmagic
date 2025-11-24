@@ -21,6 +21,11 @@ import NotificationCenter from "./pages/NotificationCenter";
 import Marketplace from "./pages/Marketplace";
 import AdminProjects from "./pages/AdminProjects";
 import AiSocialDashboard from "./pages/AiSocial/AiSocialDashboard";
+import GenerateImage from "./pages/AiSocial/GenerateImage";
+import GenerateVideo from "./pages/AiSocial/GenerateVideo";
+import SchedulePost from "./pages/AiSocial/SchedulePost";
+import Workflows from "./pages/AiSocial/Workflows";
+import Connection from "./pages/AiSocial/Connection";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +49,11 @@ const App = () => (
           <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
           <Route path="/admin/projects" element={<ProtectedRoute><AdminProjects /></ProtectedRoute>} />
           <Route path="/ai-social" element={<ProtectedRoute><AiSocialDashboard /></ProtectedRoute>} />
+          <Route path="/ai-social/generate-image" element={<ProtectedRoute><GenerateImage /></ProtectedRoute>} />
+          <Route path="/ai-social/generate-video" element={<ProtectedRoute><GenerateVideo /></ProtectedRoute>} />
+          <Route path="/ai-social/schedule" element={<ProtectedRoute><SchedulePost /></ProtectedRoute>} />
+          <Route path="/ai-social/workflows" element={<ProtectedRoute><Workflows /></ProtectedRoute>} />
+          <Route path="/ai-social/connection" element={<ProtectedRoute><Connection /></ProtectedRoute>} />
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />

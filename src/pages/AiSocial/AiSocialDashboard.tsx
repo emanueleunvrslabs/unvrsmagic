@@ -10,70 +10,70 @@ export default function AiSocialDashboard() {
         <div>
           <h1 className="text-3xl font-bold">Ai Social</h1>
           <p className="text-muted-foreground mt-2">
-            Crea e programma contenuti visual AI per i tuoi social media
+            Create and schedule AI-powered visual content for your social media
           </p>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="overview">Panoramica</TabsTrigger>
-            <TabsTrigger value="content">Contenuti</TabsTrigger>
-            <TabsTrigger value="scheduled">Programmati</TabsTrigger>
-            <TabsTrigger value="workflows">Flussi Automatici</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
+            <TabsTrigger value="workflows">Workflows</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Contenuti Totali</CardTitle>
+                  <CardTitle className="text-sm font-medium">Total Content</CardTitle>
                   <Image className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">+0 questo mese</p>
+                  <p className="text-xs text-muted-foreground">+0 this month</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Video Generati</CardTitle>
+                  <CardTitle className="text-sm font-medium">Generated Videos</CardTitle>
                   <Video className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">+0 questo mese</p>
+                  <p className="text-xs text-muted-foreground">+0 this month</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Post Programmati</CardTitle>
+                  <CardTitle className="text-sm font-medium">Scheduled Posts</CardTitle>
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">Prossimi 7 giorni</p>
+                  <p className="text-xs text-muted-foreground">Next 7 days</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Flussi Attivi</CardTitle>
+                  <CardTitle className="text-sm font-medium">Active Workflows</CardTitle>
                   <Zap className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">Automazioni attive</p>
+                  <p className="text-xs text-muted-foreground">Active automations</p>
                 </CardContent>
               </Card>
             </div>
 
             <Card>
               <CardHeader>
-                <CardTitle>Inizia Subito</CardTitle>
+                <CardTitle>Get Started</CardTitle>
                 <CardDescription>
-                  Genera contenuti visual con AI e programma la pubblicazione sui social
+                  Generate AI visual content and schedule social media posts
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -82,10 +82,10 @@ export default function AiSocialDashboard() {
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Image className="h-5 w-5" />
-                        Genera Immagine
+                        Generate Image
                       </CardTitle>
                       <CardDescription>
-                        Crea immagini con Nano Banana
+                        Create images with Nano Banana
                       </CardDescription>
                     </CardHeader>
                   </Card>
@@ -94,10 +94,10 @@ export default function AiSocialDashboard() {
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Video className="h-5 w-5" />
-                        Genera Video
+                        Generate Video
                       </CardTitle>
                       <CardDescription>
-                        Crea video con Veo3
+                        Create videos with Veo3
                       </CardDescription>
                     </CardHeader>
                   </Card>
@@ -106,10 +106,10 @@ export default function AiSocialDashboard() {
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Calendar className="h-5 w-5" />
-                        Programma Post
+                        Schedule Post
                       </CardTitle>
                       <CardDescription>
-                        Schedula contenuti per i social
+                        Schedule content for social media
                       </CardDescription>
                     </CardHeader>
                   </Card>
@@ -118,10 +118,10 @@ export default function AiSocialDashboard() {
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Zap className="h-5 w-5" />
-                        Crea Flusso
+                        Create Workflow
                       </CardTitle>
                       <CardDescription>
-                        Automazione contenuti AI
+                        Automate AI content generation
                       </CardDescription>
                     </CardHeader>
                   </Card>
@@ -133,14 +133,14 @@ export default function AiSocialDashboard() {
           <TabsContent value="content">
             <Card>
               <CardHeader>
-                <CardTitle>I Tuoi Contenuti</CardTitle>
+                <CardTitle>Your Content</CardTitle>
                 <CardDescription>
-                  Gestisci immagini e video generati con AI
+                  Manage AI-generated images and videos
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12 text-muted-foreground">
-                  Nessun contenuto ancora. Inizia a creare!
+                  No content yet. Start creating!
                 </div>
               </CardContent>
             </Card>
@@ -149,14 +149,14 @@ export default function AiSocialDashboard() {
           <TabsContent value="scheduled">
             <Card>
               <CardHeader>
-                <CardTitle>Post Programmati</CardTitle>
+                <CardTitle>Scheduled Posts</CardTitle>
                 <CardDescription>
-                  Visualizza e gestisci i post schedulati
+                  View and manage scheduled posts
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12 text-muted-foreground">
-                  Nessun post programmato
+                  No scheduled posts
                 </div>
               </CardContent>
             </Card>
@@ -165,14 +165,14 @@ export default function AiSocialDashboard() {
           <TabsContent value="workflows">
             <Card>
               <CardHeader>
-                <CardTitle>Flussi Automatici</CardTitle>
+                <CardTitle>Automated Workflows</CardTitle>
                 <CardDescription>
-                  Configura automazioni per generare e pubblicare contenuti
+                  Configure automations to generate and publish content
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12 text-muted-foreground">
-                  Nessun flusso configurato
+                  No workflows configured
                 </div>
               </CardContent>
             </Card>
