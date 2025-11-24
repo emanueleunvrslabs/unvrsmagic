@@ -25,6 +25,7 @@ import {
   Folder,
   Gauge,
   HelpCircle,
+  Image,
   Layers,
   LayoutDashboard,
   LineChart,
@@ -387,6 +388,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           hasSubmenu: true,
           submenuItems: [
             { id: "ai-social-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/ai-social" },
+            { id: "ai-social-gallery", label: "Gallery", icon: Image, href: "/ai-social/gallery" },
             { id: "ai-social-generate-image", label: "Generate Images", icon: Gauge, href: "/ai-social/generate-image" },
             { id: "ai-social-generate-video", label: "Generate Videos", icon: Gauge, href: "/ai-social/generate-video" },
             { id: "ai-social-schedule", label: "Schedule Posts", icon: Gauge, href: "/ai-social/schedule" },
