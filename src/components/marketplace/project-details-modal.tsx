@@ -45,7 +45,7 @@ export function ProjectDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] max-w-5xl overflow-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-3">
             {project.icon && <span className="text-3xl">{project.icon}</span>}
@@ -118,15 +118,14 @@ export function ProjectDetailsModal({
             </div>
 
             {/* Getting Started */}
-            {!isAdded && (
-              <div className="rounded-lg bg-muted/50 p-4">
-                <h3 className="mb-2 text-sm font-semibold">Getting Started</h3>
-                <p className="text-sm text-muted-foreground">
-                  Click "Add to Dashboard" below to add this project to your personal workspace. 
-                  It will appear in your sidebar navigation and you'll be able to access it anytime.
-                </p>
-              </div>
-            )}
+            <div className="rounded-lg bg-muted/50 p-4">
+              <h3 className="mb-2 text-sm font-semibold">Getting Started</h3>
+              <p className="text-sm text-muted-foreground">
+                {!isAdded 
+                  ? "Click 'Add Now' to add this project to your personal workspace. It will appear in your sidebar navigation and you'll be able to access it anytime."
+                  : "This project is already added to your dashboard. You can access it from your sidebar navigation or click 'Open Project' to view it now."}
+              </p>
+            </div>
           </div>
 
           {/* Right column - Purchase Options */}
