@@ -604,40 +604,42 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           </div>
 
           {/* Footer */}
-          <div className="mt-auto p-3">
-            <div className="space-y-1">
-              {footerItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeItem === item.id;
+          {footerItems.length > 0 && (
+            <div className="mt-auto p-3">
+              <div className="space-y-1">
+                {footerItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeItem === item.id;
 
-                // Regular footer item (no submenu in Settings anymore)
-                return (
-                  <Tooltip key={item.id}>
-                    <TooltipTrigger asChild>
-                      {'href' in item && item.href ? (
-                        <Button variant="ghost" className={cn("w-full justify-start", collapsed ? "px-2" : "px-2")} asChild>
-                          <Link to={item.href}>
+                  // Regular footer item (no submenu in Settings anymore)
+                  return (
+                    <Tooltip key={item.id}>
+                      <TooltipTrigger asChild>
+                        {'href' in item && item.href ? (
+                          <Button variant="ghost" className={cn("w-full justify-start", collapsed ? "px-2" : "px-2")} asChild>
+                            <Link to={item.href}>
+                              <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
+                              {!collapsed && <span>{item.label}</span>}
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" className={cn("w-full justify-start", collapsed ? "px-2" : "px-2")} onClick={() => setActiveItem(item.id)}>
                             <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
                             {!collapsed && <span>{item.label}</span>}
-                          </Link>
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" className={cn("w-full justify-start", collapsed ? "px-2" : "px-2")} onClick={() => setActiveItem(item.id)}>
-                          <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
-                          {!collapsed && <span>{item.label}</span>}
-                        </Button>
+                          </Button>
+                        )}
+                      </TooltipTrigger>
+                      {collapsed && (
+                        <TooltipContent side="right" className="font-normal">
+                          {item.label}
+                        </TooltipContent>
                       )}
-                    </TooltipTrigger>
-                    {collapsed && (
-                      <TooltipContent side="right" className="font-normal">
-                        {item.label}
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                );
-              })}
+                    </Tooltip>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </TooltipProvider>
       </aside>
 
