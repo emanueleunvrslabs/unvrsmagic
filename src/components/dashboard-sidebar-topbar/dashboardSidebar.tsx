@@ -44,6 +44,9 @@ import { useTheme } from "next-themes";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useUserProjects } from "@/hooks/useUserProjects";
+import { useMarketplaceProjects } from "@/hooks/useMarketplaceProjects";
 
 type MenuItem = {
   id: string;
@@ -149,6 +152,9 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const [mounted, setMounted] = useState(false);
   const [projects, setProjects] = useState<Array<{ id: string; name: string; status: string }>>([]);
   const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
+  const { isOwner, isAdmin, isUser } = useUserRole();
+  const { userProjects } = useUserProjects();
+  const { allProjects } = useMarketplaceProjects();
   const [hoveredSubmenu, setHoveredSubmenu] = useState<{
     item: MenuItem;
     position: { x: number; y: number };
@@ -312,47 +318,49 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     }, 150); // Small delay to allow moving to submenu
   };
 
-  const menuItems: MenuSection[] = [
-    {
+  // Build menu items based on role
+  const menuItems: MenuSection[] = [];
+
+  // User section - for all users
+  if (isUser || isAdmin || isOwner) {
+    const userProjectItems = userProjects.map((up) => ({
+      id: `user-project-${up.project_id}`,
+      label: up.project.name,
+      icon: Folder,
+      hasSubmenu: true,
+      submenuItems: [
+        { id: `user-project-${up.project_id}-dashboard`, label: "Dashboard", icon: LayoutDashboard, href: `/projects/${up.project_id}` },
+      ],
+    }));
+
+    menuItems.push({
       section: "User",
       items: [
-        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/nkmt/dashboard" },
+        { id: "marketplace", label: "Marketplace", icon: Store, href: "/marketplace" },
+        ...userProjectItems,
       ],
-    },
-    {
+    });
+  }
+
+  // Admin section - only for owner
+  if (isOwner) {
+    menuItems.push({
       section: "Admin",
       items: [
-        {
-          id: "projects",
-          label: "Projects",
-          icon: Package,
-          hasSubmenu: true,
-          submenuItems: [
-            ...projects.map((project) => ({
-              id: `project-${project.id}`,
-              label: project.name,
-              icon: Folder,
-              href: `/projects/${project.id}`,
-              status: project.status as 'active' | 'archived',
-            })),
-          ],
-        },
+        { id: "admin-projects", label: "Gestione Progetti", icon: Settings, href: "/admin/projects" },
         {
           id: "nkmt",
           label: "NKMT",
           icon: Layers,
           hasSubmenu: true,
           submenuItems: [
-            // NKMT Dashboard as first item
             { id: "nkmt-dashboard", label: "NKMT", icon: Cpu, href: "/nkmt/dashboard" },
-            // Dynamically add connected exchanges
             ...exchanges.map((ex) => ({
               id: `nkmt-${ex.exchange}`,
-              label: ex.exchange.charAt(0).toUpperCase() + ex.exchange.slice(1), // Capitalize first letter
+              label: ex.exchange.charAt(0).toUpperCase() + ex.exchange.slice(1),
               icon: Store,
               href: `/nkmt/${ex.exchange}`,
             })),
-            // Static NKMT agents
             { id: "nkmt-mkt-data", label: "Mkt.data", icon: Database, href: "/nkmt/mkt-data" },
             { id: "nkmt-deriv-data", label: "Deriv.data", icon: Database, href: "/nkmt/deriv-data" },
             { id: "nkmt-sentiment", label: "Sentiment.scout", icon: Activity, href: "/nkmt/sentiment-scout" },
@@ -367,17 +375,16 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         { id: "strategies-marketplace", label: "Strategies Marketplace", icon: Store, href: "/strategies-marketplace" },
         { id: "bot-templates", label: "Bot Templates", icon: Package, href: "/bot-templates" },
       ],
-    },
-    {
-      section: "Preferences",
-      items: [
-        { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
-        { id: "invite-friends", label: "Invite Friends", icon: UserPlus, href: "/invite-friends" },
-        { id: "subscription", label: "Subscription", icon: CreditCard, href: "/subscription" },
-        { id: "help-center", label: "Help Center", icon: HelpCircle, href: "/help-center" },
-      ],
-    },
-  ];
+    });
+  }
+
+  // Preferences section - for all users
+  menuItems.push({
+    section: "Preferences",
+    items: [
+      { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
+    ],
+  });
 
   const footerItems: MenuItem[] = [];
 
