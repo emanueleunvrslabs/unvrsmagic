@@ -460,8 +460,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             </div>
             {!collapsed && (
               <div className="flex flex-col">
-                <span className="text-lg font-semibold tracking-tight">DefibotX</span>
-                <span className="text-xs text-muted-foreground">AI Trading</span>
+                <span className="text-lg font-semibold tracking-tight">UNVRS MAGIC AI</span>
               </div>
             )}
           </div>
