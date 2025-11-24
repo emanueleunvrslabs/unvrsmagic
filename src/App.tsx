@@ -27,6 +27,7 @@ import GenerateVideo from "./pages/AiSocial/GenerateVideo";
 import SchedulePost from "./pages/AiSocial/SchedulePost";
 import Workflows from "./pages/AiSocial/Workflows";
 import Connection from "./pages/AiSocial/Connection";
+import Gallery from "./pages/AiSocial/Gallery";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/projects" element={<ProtectedRoute><AdminProjects /></ProtectedRoute>} />
           <Route path="/ai-social" element={<ProtectedRoute><AiSocialDashboard /></ProtectedRoute>} />
+          <Route path="/ai-social/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
           <Route path="/ai-social/generate-image" element={<ProtectedRoute><GenerateImage /></ProtectedRoute>} />
           <Route path="/ai-social/generate-video" element={<ProtectedRoute><GenerateVideo /></ProtectedRoute>} />
           <Route path="/ai-social/schedule" element={<ProtectedRoute><SchedulePost /></ProtectedRoute>} />
