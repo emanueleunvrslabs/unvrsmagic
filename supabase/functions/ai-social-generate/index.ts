@@ -135,25 +135,43 @@ serve(async (req) => {
     const maxAttempts = 60; // Wait up to 60 seconds
 
     while (attempts < maxAttempts) {
-      const statusResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}`, {
+      const statusResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}/status`, {
         headers: {
           "Authorization": `Key ${FAL_KEY}`,
         },
       });
 
       if (!statusResponse.ok) {
-        throw new Error(`Failed to fetch status: ${await statusResponse.text()}`);
+        const errorText = await statusResponse.text();
+        console.error(`Status check failed: ${statusResponse.status} ${errorText}`);
+        throw new Error(`Failed to fetch status: ${errorText}`);
       }
 
       const statusData = await statusResponse.json();
       console.log(`Status check ${attempts + 1}:`, JSON.stringify(statusData));
 
-      if (statusData.status === "COMPLETED") {
-        resultData = statusData;
+      // Check if request is completed
+      if (statusData.status === "COMPLETED" || statusData.completed_at) {
+        // Get the actual result
+        const resultResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}`, {
+          headers: {
+            "Authorization": `Key ${FAL_KEY}`,
+          },
+        });
+
+        if (!resultResponse.ok) {
+          throw new Error(`Failed to fetch result: ${await resultResponse.text()}`);
+        }
+
+        resultData = await resultResponse.json();
+        console.log("Got completed result:", JSON.stringify(resultData));
         break;
       } else if (statusData.status === "FAILED") {
         console.error("Generation failed with error:", statusData.error);
         throw new Error(`Generation failed: ${JSON.stringify(statusData.error)}`);
+      } else if (statusData.detail && statusData.detail.includes("still in progress")) {
+        // Request is still processing, continue polling
+        console.log(`Request still in progress, attempt ${attempts + 1}/${maxAttempts}`);
       }
 
       // Wait 1 second before next poll
