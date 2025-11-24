@@ -9,9 +9,11 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Check, X } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Auth() {
   const navigate = useNavigate();
+  const { isOwner } = useUserRole();
   const [step, setStep] = useState<"phone" | "otp" | "username">("phone");
   const [countryCode, setCountryCode] = useState("+34");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -165,7 +167,19 @@ export default function Auth() {
           if (profile?.username) {
             // User already has username, go to dashboard
             toast.success("Login successful!");
-            navigate("/overview");
+            
+            // Check user role and redirect accordingly
+            const { data: roleData } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', user.id)
+              .single();
+            
+            if (roleData?.role === 'owner') {
+              navigate("/admin/dashboard");
+            } else {
+              navigate("/nkmt/dashboard");
+            }
           } else {
             // New user or user without username, go to username step
             setStep("username");
@@ -236,7 +250,19 @@ export default function Auth() {
       }
 
       toast.success("Username set successfully!");
-      navigate("/overview");
+      
+      // Check user role and redirect accordingly
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+      
+      if (roleData?.role === 'owner') {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/nkmt/dashboard");
+      }
     } catch (error) {
       console.error("Error setting username:", error);
       toast.error("Error setting username. Please try again.");
