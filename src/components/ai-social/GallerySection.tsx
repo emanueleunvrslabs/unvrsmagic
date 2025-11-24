@@ -362,7 +362,7 @@ export function GallerySection() {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{previewItem?.title}</DialogTitle>
           </DialogHeader>
@@ -371,7 +371,7 @@ export function GallerySection() {
               <img
                 src={previewItem.media_url}
                 alt={previewItem.title}
-                className="w-full rounded-lg"
+                className="w-full max-h-[60vh] object-contain rounded-lg"
               />
             )}
             <div className="space-y-2">
