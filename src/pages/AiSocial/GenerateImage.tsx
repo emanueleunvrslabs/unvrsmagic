@@ -21,6 +21,16 @@ export default function GenerateImage() {
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
+  // Update aspect ratio to "auto" when switching to image-to-image
+  const handleModeChange = (newMode: "text-to-image" | "image-to-image") => {
+    setMode(newMode);
+    if (newMode === "image-to-image") {
+      setAspectRatio("auto");
+    } else {
+      setAspectRatio("1:1");
+    }
+  };
+
   const handleGenerate = async () => {
     if (!prompt) {
       toast.error("Please enter a prompt");
@@ -60,9 +70,9 @@ export default function GenerateImage() {
           prompt,
           mode,
           inputImage: mode === "image-to-image" ? inputImage : undefined,
-          aspectRatio: mode === "text-to-image" ? aspectRatio : undefined,
-          resolution: mode === "text-to-image" ? resolution : undefined,
-          outputFormat: mode === "text-to-image" ? outputFormat : undefined
+          aspectRatio,
+          resolution,
+          outputFormat
         }
       });
 
@@ -102,7 +112,7 @@ export default function GenerateImage() {
                   <Button
                     type="button"
                     variant={mode === "text-to-image" ? "default" : "outline"}
-                    onClick={() => setMode("text-to-image")}
+                    onClick={() => handleModeChange("text-to-image")}
                     className={`flex-1 ${mode !== "text-to-image" ? "border-primary text-primary" : ""}`}
                   >
                     Text to Image
@@ -110,7 +120,7 @@ export default function GenerateImage() {
                   <Button
                     type="button"
                     variant={mode === "image-to-image" ? "default" : "outline"}
-                    onClick={() => setMode("image-to-image")}
+                    onClick={() => handleModeChange("image-to-image")}
                     className={`flex-1 ${mode !== "image-to-image" ? "border-primary text-primary" : ""}`}
                   >
                     Image to Image
@@ -159,56 +169,55 @@ export default function GenerateImage() {
                 />
               </div>
 
-              {mode === "text-to-image" && (
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
-                    <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1:1">1:1 (Square)</SelectItem>
-                        <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-                        <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                        <SelectItem value="4:3">4:3</SelectItem>
-                        <SelectItem value="3:4">3:4</SelectItem>
-                        <SelectItem value="21:9">21:9 (Ultrawide)</SelectItem>
-                        <SelectItem value="3:2">3:2</SelectItem>
-                        <SelectItem value="2:3">2:3</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="resolution">Resolution</Label>
-                    <Select value={resolution} onValueChange={setResolution}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1K">1K</SelectItem>
-                        <SelectItem value="2K">2K</SelectItem>
-                        <SelectItem value="4K">4K</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="output-format">Output Format</Label>
-                    <Select value={outputFormat} onValueChange={setOutputFormat}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="png">PNG</SelectItem>
-                        <SelectItem value="jpeg">JPEG</SelectItem>
-                        <SelectItem value="webp">WEBP</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
+                  <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mode === "image-to-image" && <SelectItem value="auto">Auto</SelectItem>}
+                      <SelectItem value="1:1">1:1 (Square)</SelectItem>
+                      <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                      <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                      <SelectItem value="4:3">4:3</SelectItem>
+                      <SelectItem value="3:4">3:4</SelectItem>
+                      <SelectItem value="21:9">21:9 (Ultrawide)</SelectItem>
+                      <SelectItem value="3:2">3:2</SelectItem>
+                      <SelectItem value="2:3">2:3</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="resolution">Resolution</Label>
+                  <Select value={resolution} onValueChange={setResolution}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1K">1K</SelectItem>
+                      <SelectItem value="2K">2K</SelectItem>
+                      <SelectItem value="4K">4K</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="output-format">Output Format</Label>
+                  <Select value={outputFormat} onValueChange={setOutputFormat}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="png">PNG</SelectItem>
+                      <SelectItem value="jpeg">JPEG</SelectItem>
+                      <SelectItem value="webp">WEBP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
               <Button 
                 onClick={handleGenerate} 

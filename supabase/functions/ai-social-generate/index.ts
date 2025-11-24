@@ -94,7 +94,8 @@ serve(async (req) => {
     if (mode === "image-to-image") {
       // For image-to-image, use image_urls array (required parameter)
       requestBody.image_urls = [inputImage];
-      // Note: aspect_ratio defaults to "auto" for image-to-image
+      // Include aspect_ratio (defaults to "auto" but can be specified)
+      requestBody.aspect_ratio = aspectRatio || "auto";
     } else {
       // For text-to-image, include aspect_ratio
       requestBody.aspect_ratio = aspectRatio || "1:1";
