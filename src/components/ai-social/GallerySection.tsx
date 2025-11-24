@@ -378,16 +378,16 @@ export function GallerySection() {
               <p className="text-sm text-muted-foreground">
                 <strong>Prompt:</strong> {previewItem?.prompt}
               </p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className={getStatusColor(previewItem?.status || "")}>
-                  {previewItem?.status}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  {previewItem?.created_at && new Date(previewItem.created_at).toLocaleString()}
-                </span>
-              </div>
-              {previewItem?.media_url && (
-                <div className="flex gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={getStatusColor(previewItem?.status || "")}>
+                    {previewItem?.status}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {previewItem?.created_at && new Date(previewItem.created_at).toLocaleString()}
+                  </span>
+                </div>
+                {previewItem?.media_url && (
                   <Button
                     variant="outline"
                     onClick={() => previewItem.media_url && handleDownload(previewItem.media_url, previewItem.title)}
@@ -395,8 +395,8 @@ export function GallerySection() {
                     <Download className="h-4 w-4 mr-2" />
                     Download
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </DialogContent>
