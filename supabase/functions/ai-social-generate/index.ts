@@ -21,6 +21,13 @@ serve(async (req) => {
       );
     }
 
+    if (mode === "image-to-image" && !inputImage) {
+      return new Response(
+        JSON.stringify({ error: "Input image is required for image-to-image mode" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Create Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -70,7 +77,7 @@ serve(async (req) => {
 
     // Determine the endpoint based on mode
     const endpoint = mode === "image-to-image" 
-      ? "fal-ai/nano-banana/edit" 
+      ? "fal-ai/nano-banana-pro/edit" 
       : "fal-ai/nano-banana-pro";
 
     console.log(`Generating ${type} with endpoint ${endpoint}, mode: ${mode}`);
@@ -79,14 +86,18 @@ serve(async (req) => {
     const requestBody: any = {
       prompt: prompt,
       num_images: 1,
-      aspect_ratio: aspectRatio || "1:1",
       output_format: outputFormat || "png",
       resolution: resolution || "1K"
     };
 
-    // Add input image for image-to-image mode
-    if (mode === "image-to-image" && inputImage) {
+    // Add mode-specific parameters
+    if (mode === "image-to-image") {
+      // For image-to-image, use image_urls array (required parameter)
       requestBody.image_urls = [inputImage];
+      // Note: aspect_ratio defaults to "auto" for image-to-image
+    } else {
+      // For text-to-image, include aspect_ratio
+      requestBody.aspect_ratio = aspectRatio || "1:1";
     }
 
     console.log("Request body:", JSON.stringify(requestBody));
@@ -201,11 +212,8 @@ serve(async (req) => {
     // Extract image URL from the result
     console.log("Result data:", JSON.stringify(resultData));
     
-    // Try different possible response structures
-    const generatedImageUrl = 
-      resultData.output?.images?.[0]?.url || 
-      resultData.images?.[0]?.url ||
-      resultData.data?.images?.[0]?.url;
+    // The response structure is { images: [{ url: "...", ... }] }
+    const generatedImageUrl = resultData.images?.[0]?.url;
 
     console.log("Extracted image URL:", generatedImageUrl);
 
