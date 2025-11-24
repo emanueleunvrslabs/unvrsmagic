@@ -71,7 +71,7 @@ serve(async (req) => {
     // Determine the endpoint based on mode
     const endpoint = mode === "image-to-image" 
       ? "fal-ai/nano-banana/edit" 
-      : "fal-ai/nano-banana";
+      : "fal-ai/nano-banana-pro";
 
     console.log(`Generating ${type} with endpoint ${endpoint}, mode: ${mode}`);
 
