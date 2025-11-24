@@ -83,24 +83,24 @@ export default function GenerateImage() {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex gap-6 p-6">
+      <div className="h-[calc(100vh-4rem)] flex gap-4 p-4">
         {/* Left Panel - Controls */}
-        <div className="w-[480px] flex flex-col gap-6 bg-card border rounded-xl p-6">
+        <div className="w-[480px] flex flex-col gap-4 bg-card border rounded-xl p-4">
           {/* Generation Mode */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label className="text-sm font-medium">Generation Mode</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 variant={mode === "text-to-image" ? "default" : "outline"}
                 onClick={() => setMode("text-to-image")}
-                className="h-12"
+                className="h-10"
               >
                 Text to Image
               </Button>
               <Button
                 variant={mode === "image-to-image" ? "default" : "outline"}
                 onClick={() => setMode("image-to-image")}
-                className="h-12"
+                className="h-10"
               >
                 Image to Image
               </Button>
@@ -109,46 +109,46 @@ export default function GenerateImage() {
 
           {/* Reference Images */}
           {mode === "image-to-image" && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label className="text-sm font-medium">Reference Images</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="outline"
-                  className="h-32 border-dashed flex flex-col gap-2"
+                  className="h-24 border-dashed flex flex-col gap-2"
                 >
-                  <Upload className="h-6 w-6" />
-                  <span className="text-sm">Upload</span>
+                  <Upload className="h-5 w-5" />
+                  <span className="text-xs">Upload</span>
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-32 flex flex-col gap-2 bg-primary/10"
+                  className="h-24 flex flex-col gap-2 bg-primary/10"
                 >
-                  <Sparkles className="h-6 w-6 text-primary" />
-                  <span className="text-sm text-primary font-medium">Generate Model</span>
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <span className="text-xs text-primary font-medium">Generate Model</span>
                 </Button>
               </div>
             </div>
           )}
 
           {/* Description */}
-          <div className="space-y-3 flex-1">
+          <div className="space-y-2 flex-1">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">Description</Label>
-              <Button variant="ghost" size="sm" className="h-8 gap-2">
-                <Sparkles className="h-4 w-4" />
+              <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs">
+                <Sparkles className="h-3.5 w-3.5" />
                 Boost
               </Button>
             </div>
             <Textarea
               placeholder="Describe how to transform the reference images..."
-              className="min-h-[200px] resize-none bg-background"
+              className="min-h-[160px] resize-none bg-background"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
             />
           </div>
 
           {/* Format */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label className="text-sm font-medium">Format</Label>
             <div className="flex gap-2 flex-wrap">
               {aspectRatioOptions.map((option) => (
@@ -157,7 +157,7 @@ export default function GenerateImage() {
                   variant={aspectRatio === option.value ? "default" : "outline"}
                   size="sm"
                   onClick={() => setAspectRatio(option.value as AspectRatio)}
-                  className="flex-1 min-w-[100px]"
+                  className="flex-1 min-w-[90px] h-8 text-xs"
                 >
                   {option.label}
                 </Button>
@@ -170,16 +170,16 @@ export default function GenerateImage() {
             onClick={handleGenerate}
             disabled={loading}
             size="lg"
-            className="w-full h-14 text-base gap-2"
+            className="w-full h-11 text-sm gap-2"
           >
             {loading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Generating...
               </>
             ) : (
               <>
-                <Sparkles className="h-5 w-5" />
+                <Sparkles className="h-4 w-4" />
                 Generate Image with Nano 🦀
               </>
             )}
@@ -228,13 +228,13 @@ export default function GenerateImage() {
 
           {/* Action Buttons */}
           {generatedImage && (
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" size="lg" className="h-14 gap-2">
-                <Share2 className="h-5 w-5" />
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="lg" className="h-10 gap-2">
+                <Share2 className="h-4 w-4" />
                 Publish
               </Button>
-              <Button variant="outline" size="lg" className="h-14 gap-2">
-                <MessageCircle className="h-5 w-5" />
+              <Button variant="outline" size="lg" className="h-10 gap-2">
+                <MessageCircle className="h-4 w-4" />
                 WhatsApp
               </Button>
             </div>
