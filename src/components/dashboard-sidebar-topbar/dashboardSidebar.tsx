@@ -141,9 +141,9 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const pathname = location.pathname;
   const [activeItem, setActiveItem] = useState("");
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
-    "settings": true,  // Apri sempre
-    "nkmt": true,      // Apri sempre
-    "projects": true,  // Apri sempre
+    "settings": false,
+    "nkmt": false,
+    "projects": false,
   });
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
