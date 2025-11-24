@@ -14,7 +14,8 @@ import { GallerySection } from "@/components/ai-social/GallerySection";
 export default function GenerateImage() {
   const [prompt, setPrompt] = useState("");
   const [mode, setMode] = useState<"text-to-image" | "image-to-image">("text-to-image");
-  const [inputImage, setInputImage] = useState<string | null>(null);
+  const [inputImages, setInputImages] = useState<string[]>([]);
+  const [imageUrl, setImageUrl] = useState("");
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [resolution, setResolution] = useState("1K");
   const [outputFormat, setOutputFormat] = useState("png");
@@ -31,14 +32,38 @@ export default function GenerateImage() {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setInputImages(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAddUrl = () => {
+    if (imageUrl.trim()) {
+      setInputImages(prev => [...prev, imageUrl.trim()]);
+      setImageUrl("");
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setInputImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleGenerate = async () => {
     if (!prompt) {
       toast.error("Please enter a prompt");
       return;
     }
 
-    if (mode === "image-to-image" && !inputImage) {
-      toast.error("Please upload an input image");
+    if (mode === "image-to-image" && inputImages.length === 0) {
+      toast.error("Please upload at least one input image or add an image URL");
       return;
     }
 
@@ -69,7 +94,7 @@ export default function GenerateImage() {
           type: "image",
           prompt,
           mode,
-          inputImage: mode === "image-to-image" ? inputImage : undefined,
+          inputImages: mode === "image-to-image" ? inputImages : undefined,
           aspectRatio,
           resolution,
           outputFormat
@@ -129,29 +154,69 @@ export default function GenerateImage() {
               </div>
 
               {mode === "image-to-image" && (
-                <div className="space-y-2">
-                  <Label htmlFor="input-image">Input Image</Label>
-                  <Input
-                    id="input-image"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setInputImage(reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                  />
-                  {inputImage && (
-                    <img 
-                      src={inputImage} 
-                      alt="Input" 
-                      className="w-full rounded-lg mt-2 max-h-48 object-contain"
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="input-image">Upload Images</Label>
+                    <Input
+                      id="input-image"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileUpload}
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="image-url">Add Image from URL</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="image-url"
+                        type="url"
+                        placeholder="https://example.com/image.jpg"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddUrl();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddUrl}
+                        disabled={!imageUrl.trim()}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+
+                  {inputImages.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Uploaded Images ({inputImages.length})</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {inputImages.map((img, index) => (
+                          <div key={index} className="relative group">
+                            <img 
+                              src={img} 
+                              alt={`Input ${index + 1}`}
+                              className="w-full rounded-lg aspect-square object-cover"
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
