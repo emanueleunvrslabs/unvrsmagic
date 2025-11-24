@@ -314,7 +314,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   const menuItems: MenuSection[] = [
     {
-      section: "Main",
+      section: "User",
       items: [
         { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/nkmt/dashboard" },
         {
@@ -363,7 +363,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       ],
     },
     {
-      section: "Marketplace",
+      section: "Admin",
       items: [
         { id: "strategies-marketplace", label: "Strategies Marketplace", icon: Store, href: "/strategies-marketplace" },
         { id: "bot-templates", label: "Bot Templates", icon: Package, href: "/bot-templates" },
