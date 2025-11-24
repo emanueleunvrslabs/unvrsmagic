@@ -148,14 +148,13 @@ serve(async (req) => {
     const maxAttempts = 60; // Wait up to 60 seconds
 
     while (attempts < maxAttempts) {
-      // Poll the main endpoint directly (no /status for edit endpoint)
-      const statusResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}`, {
+      // Poll the status endpoint
+      const statusResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}/status`, {
         headers: {
           "Authorization": `Key ${FAL_KEY}`,
         },
       });
 
-      // First try to parse the response body
       const statusText = await statusResponse.text();
       let statusData;
       
@@ -168,28 +167,27 @@ serve(async (req) => {
 
       console.log(`Status check ${attempts + 1}:`, JSON.stringify(statusData));
 
-      // Check if it's a "still in progress" message - this is normal, not an error
-      if (statusData.detail && statusData.detail.includes("still in progress")) {
-        console.log(`Request still in progress, attempt ${attempts + 1}/${maxAttempts}`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        attempts++;
-        continue;
-      }
-
-      // Check if the response indicates an error (but not in-progress)
-      if (!statusResponse.ok && !statusData.status) {
-        console.error(`Status check failed: ${statusResponse.status} ${statusText}`);
-        throw new Error(`Failed to fetch status: ${statusText}`);
-      }
-
       // Check if request is completed
-      if (statusData.status === "COMPLETED" || statusData.images) {
-        resultData = statusData;
+      if (statusData.status === "COMPLETED") {
+        // Fetch the actual result
+        const resultResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}`, {
+          headers: {
+            "Authorization": `Key ${FAL_KEY}`,
+          },
+        });
+
+        if (!resultResponse.ok) {
+          throw new Error(`Failed to fetch result: ${await resultResponse.text()}`);
+        }
+
+        resultData = await resultResponse.json();
         console.log("Got completed result:", JSON.stringify(resultData));
         break;
       } else if (statusData.status === "FAILED") {
         console.error("Generation failed with error:", statusData.error);
         throw new Error(`Generation failed: ${JSON.stringify(statusData.error)}`);
+      } else if (statusData.status === "IN_PROGRESS" || statusData.status === "IN_QUEUE") {
+        console.log(`Request ${statusData.status}, attempt ${attempts + 1}/${maxAttempts}`);
       }
 
       // Wait 1 second before next poll
