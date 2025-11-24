@@ -378,7 +378,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     menuItems.push({
       section: "Admin",
       items: [
-        { id: "admin-projects", label: "Gestione Progetti", icon: Settings, href: "/admin/projects" },
+        { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
         {
           id: "ai-social",
           label: "Ai Social",
@@ -386,10 +386,11 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           hasSubmenu: true,
           submenuItems: [
             { id: "ai-social-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/ai-social" },
-            { id: "ai-social-generate-image", label: "Genera Immagini", icon: Gauge, href: "/ai-social/generate-image" },
-            { id: "ai-social-generate-video", label: "Genera Video", icon: Gauge, href: "/ai-social/generate-video" },
-            { id: "ai-social-schedule", label: "Programma Post", icon: Gauge, href: "/ai-social/schedule" },
-            { id: "ai-social-workflows", label: "Flussi Automatici", icon: Repeat, href: "/ai-social/workflows" },
+            { id: "ai-social-generate-image", label: "Generate Images", icon: Gauge, href: "/ai-social/generate-image" },
+            { id: "ai-social-generate-video", label: "Generate Videos", icon: Gauge, href: "/ai-social/generate-video" },
+            { id: "ai-social-schedule", label: "Schedule Posts", icon: Gauge, href: "/ai-social/schedule" },
+            { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
+            { id: "ai-social-connection", label: "Connection", icon: Layers, href: "/ai-social/connection" },
           ],
         },
         {
