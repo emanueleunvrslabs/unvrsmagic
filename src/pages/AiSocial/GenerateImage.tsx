@@ -160,7 +160,7 @@ export default function GenerateImage() {
               </div>
 
               {mode === "text-to-image" && (
-                <>
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
                     <Select value={aspectRatio} onValueChange={setAspectRatio}>
@@ -207,7 +207,7 @@ export default function GenerateImage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </>
+                </div>
               )}
 
               <Button 
