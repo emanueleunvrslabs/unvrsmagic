@@ -317,6 +317,11 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       section: "User",
       items: [
         { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/nkmt/dashboard" },
+      ],
+    },
+    {
+      section: "Admin",
+      items: [
         {
           id: "projects",
           label: "Projects",
@@ -359,12 +364,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
           ],
         },
-        { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
-      ],
-    },
-    {
-      section: "Admin",
-      items: [
         { id: "strategies-marketplace", label: "Strategies Marketplace", icon: Store, href: "/strategies-marketplace" },
         { id: "bot-templates", label: "Bot Templates", icon: Package, href: "/bot-templates" },
       ],
@@ -372,6 +371,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     {
       section: "Preferences",
       items: [
+        { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
         { id: "invite-friends", label: "Invite Friends", icon: UserPlus, href: "/invite-friends" },
         { id: "subscription", label: "Subscription", icon: CreditCard, href: "/subscription" },
         { id: "help-center", label: "Help Center", icon: HelpCircle, href: "/help-center" },
