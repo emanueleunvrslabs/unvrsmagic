@@ -323,15 +323,46 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   // User section - for all users
   if (isUser || isAdmin || isOwner) {
-    const userProjectItems = userProjects.map((up) => ({
-      id: `user-project-${up.project_id}`,
-      label: up.project.name,
-      icon: Folder,
-      hasSubmenu: true,
-      submenuItems: [
-        { id: `user-project-${up.project_id}-dashboard`, label: "Dashboard", icon: LayoutDashboard, href: `/projects/${up.project_id}` },
-      ],
-    }));
+    const userProjectItems = userProjects.map((up) => {
+      // Special handling for NKMT project
+      if (up.project.route === '/nkmt') {
+        return {
+          id: `user-project-${up.project_id}`,
+          label: up.project.name,
+          icon: Layers,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "nkmt-dashboard", label: "NKMT", icon: Cpu, href: "/nkmt/dashboard" },
+            ...exchanges.map((ex) => ({
+              id: `nkmt-${ex.exchange}`,
+              label: ex.exchange.charAt(0).toUpperCase() + ex.exchange.slice(1),
+              icon: Store,
+              href: `/nkmt/${ex.exchange}`,
+            })),
+            { id: "nkmt-mkt-data", label: "Mkt.data", icon: Database, href: "/nkmt/mkt-data" },
+            { id: "nkmt-deriv-data", label: "Deriv.data", icon: Database, href: "/nkmt/deriv-data" },
+            { id: "nkmt-sentiment", label: "Sentiment.scout", icon: Activity, href: "/nkmt/sentiment-scout" },
+            { id: "nkmt-chain", label: "Chain.analyst", icon: Layers, href: "/nkmt/chain-analyst" },
+            { id: "nkmt-modeler", label: "Market.modeler", icon: PieChart, href: "/nkmt/market-modeler" },
+            { id: "nkmt-signal", label: "Signal.maker", icon: Zap, href: "/nkmt/signal-maker" },
+            { id: "nkmt-risk", label: "Risk.mgr", icon: CreditCard, href: "/nkmt/risk-mgr" },
+            { id: "nkmt-executor", label: "Trade.executor", icon: Bot, href: "/nkmt/trade-executor" },
+            { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
+          ],
+        };
+      }
+      
+      // Generic handling for other projects
+      return {
+        id: `user-project-${up.project_id}`,
+        label: up.project.name,
+        icon: Folder,
+        hasSubmenu: true,
+        submenuItems: [
+          { id: `user-project-${up.project_id}-dashboard`, label: "Dashboard", icon: LayoutDashboard, href: `/projects/${up.project_id}` },
+        ],
+      };
+    });
 
     menuItems.push({
       section: "User",
