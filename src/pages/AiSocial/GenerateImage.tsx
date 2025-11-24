@@ -83,9 +83,9 @@ export default function GenerateImage() {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex gap-4 p-4">
+      <div className="flex gap-4 p-4 min-h-screen">
         {/* Left Panel - Controls */}
-        <div className="w-[480px] flex flex-col gap-4 bg-card border rounded-xl p-4">
+        <div className="w-[480px] flex flex-col gap-4 bg-card border rounded-xl p-4 h-fit sticky top-4">
           {/* Generation Mode */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Generation Mode</Label>
