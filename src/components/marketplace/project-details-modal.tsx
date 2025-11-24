@@ -134,16 +134,20 @@ export function ProjectDetailsModal({
             <div className="rounded-lg border p-4">
               <h3 className="mb-4 text-lg font-semibold">Purchase Options</h3>
               <div className="space-y-4">
-                <div className="rounded-lg bg-muted/50 p-4">
+                {/* Free Access Option - Recommended */}
+                <div className="rounded-md border-2 border-primary bg-primary/5 p-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium">Access Type</span>
-                    <Badge variant="outline" className="border-green-500 text-green-500">
-                      Free
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge>Recommended</Badge>
+                      <span className="font-medium">Free Access</span>
+                    </div>
+                    <div className="text-xl font-bold">
+                      $0.00
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    This project is available at no cost. Add it to your dashboard to get started.
-                  </p>
+                  <div className="mb-3 text-sm text-muted-foreground">
+                    Full access at no cost
+                  </div>
                   {!isAdded ? (
                     <Button 
                       className="w-full gap-2" 
@@ -155,7 +159,7 @@ export function ProjectDetailsModal({
                       ) : (
                         <Plus className="h-4 w-4" />
                       )}
-                      <span>Add to Dashboard</span>
+                      <span>Add Now</span>
                     </Button>
                   ) : (
                     <Button 
@@ -170,21 +174,24 @@ export function ProjectDetailsModal({
                     </Button>
                   )}
                 </div>
-                
-                <Separator />
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">License</span>
-                    <span className="font-medium">Free to Use</span>
+
+                {/* Features List */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span>Free updates</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Updates</span>
-                    <span className="font-medium">Lifetime</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span>Technical support</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Support</span>
-                    <span className="font-medium">Included</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span>Use on multiple exchanges</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span>Customizable parameters</span>
                   </div>
                 </div>
               </div>
