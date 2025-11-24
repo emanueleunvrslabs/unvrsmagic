@@ -315,7 +315,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     {
       section: "Main",
       items: [
-        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/" },
+        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/nkmt/dashboard" },
         {
           id: "projects",
           label: "Projects",
