@@ -148,7 +148,8 @@ serve(async (req) => {
     const maxAttempts = 60; // Wait up to 60 seconds
 
     while (attempts < maxAttempts) {
-      const statusResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}/status`, {
+      // Poll the main endpoint directly (no /status for edit endpoint)
+      const statusResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}`, {
         headers: {
           "Authorization": `Key ${FAL_KEY}`,
         },
@@ -175,26 +176,15 @@ serve(async (req) => {
         continue;
       }
 
-      // Check if the status check itself failed (not just in progress)
-      if (!statusResponse.ok && statusData.status !== "COMPLETED") {
+      // Check if the response indicates an error (but not in-progress)
+      if (!statusResponse.ok && !statusData.status) {
         console.error(`Status check failed: ${statusResponse.status} ${statusText}`);
         throw new Error(`Failed to fetch status: ${statusText}`);
       }
 
       // Check if request is completed
-      if (statusData.status === "COMPLETED" || statusData.completed_at) {
-        // Get the actual result
-        const resultResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}`, {
-          headers: {
-            "Authorization": `Key ${FAL_KEY}`,
-          },
-        });
-
-        if (!resultResponse.ok) {
-          throw new Error(`Failed to fetch result: ${await resultResponse.text()}`);
-        }
-
-        resultData = await resultResponse.json();
+      if (statusData.status === "COMPLETED" || statusData.images) {
+        resultData = statusData;
         console.log("Got completed result:", JSON.stringify(resultData));
         break;
       } else if (statusData.status === "FAILED") {
