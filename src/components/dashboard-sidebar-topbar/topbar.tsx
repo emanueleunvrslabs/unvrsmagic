@@ -139,8 +139,8 @@ export function Topbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Wallet Connection */}
-        {isConnected ? (
+        {/* Wallet Connection - only show if connected */}
+        {isConnected && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="default" size="sm" className="gap-2">
@@ -176,11 +176,6 @@ export function Topbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          <Button variant="default" size="sm" className="hidden sm:flex" onClick={() => setShowWalletModal(true)}>
-            <Wallet className="mr-2 h-4 w-4" />
-            <span className="hidden lg:block"> Connect Wallet</span>
-          </Button>
         )}
 
         <DropdownMenu>
@@ -214,17 +209,6 @@ export function Topbar() {
             <div className="px-2 py-1.5 sm:hidden">
               <ThemeToggle className="w-full" />
             </div>
-            {!isConnected && (
-              <>
-                <DropdownMenuSeparator className="sm:hidden" />
-                <div className="px-2 py-1.5 sm:hidden">
-                  <Button variant="default" size="sm" className="w-full" onClick={() => setShowWalletModal(true)}>
-                    <Wallet className="mr-2 h-4 w-4" />
-                    Connect Wallet
-                  </Button>
-                </div>
-              </>
-            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
