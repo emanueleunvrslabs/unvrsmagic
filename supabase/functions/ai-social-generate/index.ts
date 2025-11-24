@@ -45,7 +45,7 @@ serve(async (req) => {
       .from("api_keys")
       .select("api_key")
       .eq("user_id", user.id)
-      .eq("provider", "Fal")
+      .eq("provider", "fal")
       .single();
 
     if (apiKeyError || !apiKeyData) {
