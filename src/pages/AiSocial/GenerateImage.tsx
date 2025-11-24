@@ -103,7 +103,7 @@ export default function GenerateImage() {
                     type="button"
                     variant={mode === "text-to-image" ? "default" : "outline"}
                     onClick={() => setMode("text-to-image")}
-                    className={`flex-1 ${mode !== "text-to-image" ? "border-primary" : ""}`}
+                    className={`flex-1 ${mode !== "text-to-image" ? "border-primary text-primary" : ""}`}
                   >
                     Text to Image
                   </Button>
@@ -111,7 +111,7 @@ export default function GenerateImage() {
                     type="button"
                     variant={mode === "image-to-image" ? "default" : "outline"}
                     onClick={() => setMode("image-to-image")}
-                    className={`flex-1 ${mode !== "image-to-image" ? "border-primary" : ""}`}
+                    className={`flex-1 ${mode !== "image-to-image" ? "border-primary text-primary" : ""}`}
                   >
                     Image to Image
                   </Button>
