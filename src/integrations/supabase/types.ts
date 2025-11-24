@@ -223,6 +223,155 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_social_content: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          media_url: string | null
+          metadata: Json | null
+          prompt: string
+          status: string
+          thumbnail_url: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          media_url?: string | null
+          metadata?: Json | null
+          prompt: string
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          media_url?: string | null
+          metadata?: Json | null
+          prompt?: string
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_social_scheduled_posts: {
+        Row: {
+          caption: string | null
+          content_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          platforms: string[]
+          published_at: string | null
+          scheduled_at: string
+          status: string
+          updated_at: string | null
+          user_id: string
+          workflow_id: string | null
+        }
+        Insert: {
+          caption?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          platforms?: string[]
+          published_at?: string | null
+          scheduled_at: string
+          status?: string
+          updated_at?: string | null
+          user_id: string
+          workflow_id?: string | null
+        }
+        Update: {
+          caption?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          platforms?: string[]
+          published_at?: string | null
+          scheduled_at?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_social_scheduled_posts_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "ai_social_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_social_workflows: {
+        Row: {
+          active: boolean | null
+          content_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          last_run_at: string | null
+          name: string
+          next_run_at: string | null
+          platforms: string[]
+          prompt_template: string
+          schedule_config: Json
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          content_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          last_run_at?: string | null
+          name: string
+          next_run_at?: string | null
+          platforms?: string[]
+          prompt_template: string
+          schedule_config: Json
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          content_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          last_run_at?: string | null
+          name?: string
+          next_run_at?: string | null
+          platforms?: string[]
+          prompt_template?: string
+          schedule_config?: Json
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           api_key: string

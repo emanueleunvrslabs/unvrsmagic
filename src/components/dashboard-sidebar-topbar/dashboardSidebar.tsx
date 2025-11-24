@@ -380,6 +380,19 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       items: [
         { id: "admin-projects", label: "Gestione Progetti", icon: Settings, href: "/admin/projects" },
         {
+          id: "ai-social",
+          label: "Ai Social",
+          icon: CircleDollarSign,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "ai-social-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/ai-social" },
+            { id: "ai-social-generate-image", label: "Genera Immagini", icon: Gauge, href: "/ai-social/generate-image" },
+            { id: "ai-social-generate-video", label: "Genera Video", icon: Gauge, href: "/ai-social/generate-video" },
+            { id: "ai-social-schedule", label: "Programma Post", icon: Gauge, href: "/ai-social/schedule" },
+            { id: "ai-social-workflows", label: "Flussi Automatici", icon: Repeat, href: "/ai-social/workflows" },
+          ],
+        },
+        {
           id: "nkmt",
           label: "NKMT",
           icon: Layers,
