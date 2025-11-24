@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Download, Trash2, Image as ImageIcon, Video } from "lucide-react";
+import { Search, Download, Trash2, Image as ImageIcon, Video, Maximize2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ContentItem {
   id: string;
@@ -38,6 +44,7 @@ export function GallerySection() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [previewItem, setPreviewItem] = useState<ContentItem | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -258,7 +265,8 @@ export function GallerySection() {
                         <img
                           src={item.media_url}
                           alt={item.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={() => setPreviewItem(item)}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -267,6 +275,15 @@ export function GallerySection() {
                       )}
                       {/* Hover Actions */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        {item.type === "image" && (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setPreviewItem(item)}
+                          >
+                            <Maximize2 className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="secondary"
@@ -342,6 +359,48 @@ export function GallerySection() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Image Preview Dialog */}
+      <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{previewItem?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {previewItem?.media_url && (
+              <img
+                src={previewItem.media_url}
+                alt={previewItem.title}
+                className="w-full rounded-lg"
+              />
+            )}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                <strong>Prompt:</strong> {previewItem?.prompt}
+              </p>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className={getStatusColor(previewItem?.status || "")}>
+                  {previewItem?.status}
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {previewItem?.created_at && new Date(previewItem.created_at).toLocaleString()}
+                </span>
+              </div>
+              {previewItem?.media_url && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => previewItem.media_url && handleDownload(previewItem.media_url, previewItem.title)}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
