@@ -3,40 +3,89 @@ import { useMarketplaceProjects } from "@/hooks/useMarketplaceProjects";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { Loader2 } from "lucide-react";
 import { ProjectCard } from "@/components/marketplace/project-card";
-import { ProjectDetailsModal } from "@/components/marketplace/project-details-modal";
+import { StrategyDetailsModal } from "@/components/strategies-marketplace-interface/components/strategy-details-modal";
 import { useState } from "react";
+import type { Strategy } from "@/components/strategies-marketplace-interface/types";
 
 export default function Marketplace() {
   const { projects, loading } = useMarketplaceProjects();
   const { userProjects, addProject, removeProject } = useUserProjects();
-  const [selectedProject, setSelectedProject] = useState<any | null>(null);
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isProjectAdded = (projectId: string) => {
     return userProjects.some((up) => up.project_id === projectId);
   };
 
+  // Convert project to strategy format for the modal
+  const convertProjectToStrategy = (project: any): Strategy => {
+    return {
+      id: project.id,
+      name: project.name,
+      description: project.description || "No description available",
+      category: "AI-Powered",
+      price: 0,
+      isFree: true,
+      rating: 5,
+      reviews: 0,
+      purchases: userProjects.length,
+      winRate: 100,
+      returns: { daily: 0, weekly: 0, monthly: 0, yearly: 0 },
+      risk: "Low" as const,
+      creator: {
+        id: "defibotx",
+        name: "DefibotX",
+        verified: true,
+        avatar: project.icon || "🤖",
+        strategies: projects.length,
+        followers: 0
+      },
+      tags: ["Project", "Dashboard", "Free"],
+      isFavorite: false,
+      isPurchased: isProjectAdded(project.id),
+      isNew: false,
+      isTrending: false,
+      isFeatured: false,
+      maxDrawdown: 0,
+      profitFactor: 1,
+      timeInMarket: 100,
+      tradesPerDay: 0,
+      supportedExchanges: ["Bitget", "Binance", "OKX"],
+      supportedPairs: ["BTC/USDT", "ETH/USDT"],
+      lastUpdated: new Date().toISOString(),
+      chartData: {
+        "1D": [],
+        "1W": [],
+        "1M": [],
+        "3M": [],
+        "6M": [],
+        "1Y": [],
+        "All": []
+      }
+    };
+  };
+
   const handleViewDetails = (project: any) => {
-    setSelectedProject(project);
+    const strategy = convertProjectToStrategy(project);
+    setSelectedStrategy(strategy);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedProject(null);
+    setSelectedStrategy(null);
   };
 
-  const handleAddProject = () => {
-    if (selectedProject) {
-      addProject.mutate(selectedProject.id);
+  const handlePurchase = (strategyId: string) => {
+    const project = projects.find(p => p.id === strategyId);
+    if (project) {
+      if (isProjectAdded(strategyId)) {
+        removeProject.mutate(strategyId);
+      } else {
+        addProject.mutate(strategyId);
+      }
     }
-  };
-
-  const handleRemoveProject = () => {
-    if (selectedProject) {
-      removeProject.mutate(selectedProject.id);
-      handleCloseModal();
-    }
+    handleCloseModal();
   };
 
   if (loading) {
@@ -79,14 +128,12 @@ export default function Marketplace() {
         )}
       </div>
 
-      <ProjectDetailsModal
-        project={selectedProject}
+      <StrategyDetailsModal
+        strategy={selectedStrategy}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        isAdded={selectedProject ? isProjectAdded(selectedProject.id) : false}
-        onAddProject={handleAddProject}
-        onRemoveProject={handleRemoveProject}
-        isLoading={addProject.isPending || removeProject.isPending}
+        onToggleFavorite={() => {}}
+        onPurchase={handlePurchase}
       />
     </DashboardLayout>
   );
