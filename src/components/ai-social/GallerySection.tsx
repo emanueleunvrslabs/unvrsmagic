@@ -284,8 +284,20 @@ export function GallerySection() {
                       </div>
                     </>
                   ) : item.status === "generating" ? (
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-4 relative group">
                       <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                      <p className="text-xs text-muted-foreground">Generating...</p>
+                      {/* Delete button for generating items */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setDeleteId(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
