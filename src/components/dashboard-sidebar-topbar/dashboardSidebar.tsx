@@ -378,6 +378,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     menuItems.push({
       section: "Admin",
       items: [
+        { id: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
         { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
         {
           id: "ai-social",

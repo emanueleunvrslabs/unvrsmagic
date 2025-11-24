@@ -20,6 +20,7 @@ import NKMTDashboard from "./pages/NKMTDashboard";
 import NotificationCenter from "./pages/NotificationCenter";
 import Marketplace from "./pages/Marketplace";
 import AdminProjects from "./pages/AdminProjects";
+import AdminDashboard from "./pages/AdminDashboard";
 import AiSocialDashboard from "./pages/AiSocial/AiSocialDashboard";
 import GenerateImage from "./pages/AiSocial/GenerateImage";
 import GenerateVideo from "./pages/AiSocial/GenerateVideo";
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/nkmt" element={<Navigate to="/nkmt/dashboard" replace />} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationCenter /></ProtectedRoute>} />
           <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/projects" element={<ProtectedRoute><AdminProjects /></ProtectedRoute>} />
           <Route path="/ai-social" element={<ProtectedRoute><AiSocialDashboard /></ProtectedRoute>} />
           <Route path="/ai-social/generate-image" element={<ProtectedRoute><GenerateImage /></ProtectedRoute>} />
