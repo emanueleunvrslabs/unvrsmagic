@@ -79,6 +79,9 @@ serve(async (req) => {
     const endpoint = mode === "image-to-image" 
       ? "fal-ai/nano-banana-pro/edit" 
       : "fal-ai/nano-banana-pro";
+    
+    // For status checking, use base endpoint without subpath
+    const baseEndpoint = "fal-ai/nano-banana-pro";
 
     console.log(`Generating ${type} with endpoint ${endpoint}, mode: ${mode}`);
 
@@ -148,8 +151,8 @@ serve(async (req) => {
     const maxAttempts = 60; // Wait up to 60 seconds
 
     while (attempts < maxAttempts) {
-      // Poll the status endpoint
-      const statusResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}/status`, {
+      // Poll the status endpoint - use baseEndpoint without subpath
+      const statusResponse = await fetch(`https://queue.fal.run/${baseEndpoint}/requests/${requestId}/status`, {
         headers: {
           "Authorization": `Key ${FAL_KEY}`,
         },
@@ -169,8 +172,8 @@ serve(async (req) => {
 
       // Check if request is completed
       if (statusData.status === "COMPLETED") {
-        // Fetch the actual result
-        const resultResponse = await fetch(`https://queue.fal.run/${endpoint}/requests/${requestId}`, {
+        // Fetch the actual result - use baseEndpoint without subpath
+        const resultResponse = await fetch(`https://queue.fal.run/${baseEndpoint}/requests/${requestId}`, {
           headers: {
             "Authorization": `Key ${FAL_KEY}`,
           },
