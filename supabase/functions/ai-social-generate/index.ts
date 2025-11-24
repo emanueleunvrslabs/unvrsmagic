@@ -145,52 +145,43 @@ serve(async (req) => {
 
     console.log(`Fal request queued with ID: ${requestId}`);
 
-    // Poll for the result
+    // Poll for the result by directly checking the result endpoint
+    // The /status endpoint returns 405 for this model, so we poll the result endpoint instead
     let resultData;
     let attempts = 0;
     const maxAttempts = 60; // Wait up to 60 seconds
 
     while (attempts < maxAttempts) {
-      // Poll the status endpoint - use baseEndpoint without subpath
-      const statusResponse = await fetch(`https://queue.fal.run/${baseEndpoint}/requests/${requestId}/status`, {
+      // Poll the result endpoint directly
+      const resultResponse = await fetch(`https://queue.fal.run/${baseEndpoint}/requests/${requestId}`, {
         headers: {
           "Authorization": `Key ${FAL_KEY}`,
         },
       });
 
-      const statusText = await statusResponse.text();
-      let statusData;
-      
-      try {
-        statusData = JSON.parse(statusText);
-      } catch (e) {
-        console.error(`Failed to parse status response: ${statusText}`);
-        throw new Error(`Invalid status response: ${statusText}`);
-      }
+      console.log(`Poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
 
-      console.log(`Status check ${attempts + 1}:`, JSON.stringify(statusData));
-
-      // Check if request is completed
-      if (statusData.status === "COMPLETED") {
-        // Fetch the actual result - use baseEndpoint without subpath
-        const resultResponse = await fetch(`https://queue.fal.run/${baseEndpoint}/requests/${requestId}`, {
-          headers: {
-            "Authorization": `Key ${FAL_KEY}`,
-          },
-        });
-
-        if (!resultResponse.ok) {
-          throw new Error(`Failed to fetch result: ${await resultResponse.text()}`);
-        }
-
+      // If 200, the request is completed
+      if (resultResponse.status === 200) {
         resultData = await resultResponse.json();
         console.log("Got completed result:", JSON.stringify(resultData));
         break;
-      } else if (statusData.status === "FAILED") {
-        console.error("Generation failed with error:", statusData.error);
-        throw new Error(`Generation failed: ${JSON.stringify(statusData.error)}`);
-      } else if (statusData.status === "IN_PROGRESS" || statusData.status === "IN_QUEUE") {
-        console.log(`Request ${statusData.status}, attempt ${attempts + 1}/${maxAttempts}`);
+      }
+      
+      // If 202, still processing
+      if (resultResponse.status === 202) {
+        const statusInfo = await resultResponse.json();
+        console.log(`Request in progress:`, JSON.stringify(statusInfo));
+        
+        // Check if it failed
+        if (statusInfo.status === "FAILED") {
+          console.error("Generation failed:", statusInfo.error);
+          throw new Error(`Generation failed: ${JSON.stringify(statusInfo.error)}`);
+        }
+      } else if (resultResponse.status !== 404) {
+        // Unexpected status code (404 means not ready yet, which is normal)
+        const errorText = await resultResponse.text();
+        console.error(`Unexpected status ${resultResponse.status}:`, errorText);
       }
 
       // Wait 1 second before next poll
