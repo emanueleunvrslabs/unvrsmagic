@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -21,6 +21,7 @@ export default function GenerateImage() {
   const [outputFormat, setOutputFormat] = useState("png");
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update aspect ratio to "auto" when switching to image-to-image
   const handleModeChange = (newMode: "text-to-image" | "image-to-image") => {
@@ -43,6 +44,11 @@ export default function GenerateImage() {
       };
       reader.readAsDataURL(file);
     });
+    
+    // Reset file input after reading
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleAddUrl = () => {
@@ -159,6 +165,7 @@ export default function GenerateImage() {
                     <Label htmlFor="input-image">Upload Images</Label>
                     <Input
                       id="input-image"
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
                       multiple
