@@ -2,8 +2,10 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Video, Calendar, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function AiSocialDashboard() {
+  const navigate = useNavigate();
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -78,7 +80,10 @@ export default function AiSocialDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Card className="cursor-pointer hover:bg-accent transition-colors">
+                  <Card 
+                    className="cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => navigate('/ai-social/generate-image')}
+                  >
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Image className="h-5 w-5" />
@@ -90,7 +95,10 @@ export default function AiSocialDashboard() {
                     </CardHeader>
                   </Card>
 
-                  <Card className="cursor-pointer hover:bg-accent transition-colors">
+                  <Card 
+                    className="cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => navigate('/ai-social/generate-video')}
+                  >
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Video className="h-5 w-5" />
@@ -102,7 +110,10 @@ export default function AiSocialDashboard() {
                     </CardHeader>
                   </Card>
 
-                  <Card className="cursor-pointer hover:bg-accent transition-colors">
+                  <Card 
+                    className="cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => navigate('/ai-social/schedule-post')}
+                  >
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Calendar className="h-5 w-5" />
@@ -114,7 +125,10 @@ export default function AiSocialDashboard() {
                     </CardHeader>
                   </Card>
 
-                  <Card className="cursor-pointer hover:bg-accent transition-colors">
+                  <Card 
+                    className="cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => navigate('/ai-social/workflows')}
+                  >
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Zap className="h-5 w-5" />
