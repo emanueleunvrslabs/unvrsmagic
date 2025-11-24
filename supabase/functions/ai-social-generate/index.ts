@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contentId, type, prompt, mode, inputImage } = await req.json();
+    const { contentId, type, prompt, mode, inputImage, aspectRatio, resolution, outputFormat } = await req.json();
 
     if (!contentId || !type || !prompt) {
       return new Response(
@@ -78,12 +78,18 @@ serve(async (req) => {
     // Prepare request body
     const requestBody: any = {
       prompt: prompt,
+      num_images: 1,
+      aspect_ratio: aspectRatio || "1:1",
+      output_format: outputFormat || "png",
+      resolution: resolution || "1K"
     };
 
     // Add input image for image-to-image mode
     if (mode === "image-to-image" && inputImage) {
       requestBody.image_urls = [inputImage];
     }
+
+    console.log("Request body:", JSON.stringify(requestBody));
 
     // Call Fal API
     const response = await fetch(`https://queue.fal.run/${endpoint}`, {
@@ -140,12 +146,13 @@ serve(async (req) => {
       }
 
       const statusData = await statusResponse.json();
-      console.log(`Status check ${attempts + 1}: ${statusData.status}`);
+      console.log(`Status check ${attempts + 1}:`, JSON.stringify(statusData));
 
       if (statusData.status === "COMPLETED") {
         resultData = statusData;
         break;
       } else if (statusData.status === "FAILED") {
+        console.error("Generation failed with error:", statusData.error);
         throw new Error(`Generation failed: ${JSON.stringify(statusData.error)}`);
       }
 
@@ -159,9 +166,18 @@ serve(async (req) => {
     }
 
     // Extract image URL from the result
-    const generatedImageUrl = resultData.output?.images?.[0]?.url;
+    console.log("Result data:", JSON.stringify(resultData));
+    
+    // Try different possible response structures
+    const generatedImageUrl = 
+      resultData.output?.images?.[0]?.url || 
+      resultData.images?.[0]?.url ||
+      resultData.data?.images?.[0]?.url;
+
+    console.log("Extracted image URL:", generatedImageUrl);
 
     if (!generatedImageUrl) {
+      console.error("No image URL found in response:", JSON.stringify(resultData));
       await supabase
         .from("ai_social_content")
         .update({ 
