@@ -41,14 +41,22 @@ serve(async (req) => {
     }
 
     // Get Fal API key from database
+    console.log("Looking up Fal API key for user:", user.id);
     const { data: apiKeyData, error: apiKeyError } = await supabase
       .from("api_keys")
       .select("api_key")
       .eq("user_id", user.id)
       .eq("provider", "fal")
-      .single();
+      .maybeSingle();
 
-    if (apiKeyError || !apiKeyData) {
+    console.log("API key lookup result:", { found: !!apiKeyData, error: apiKeyError });
+
+    if (apiKeyError) {
+      console.error("Database error looking up Fal API key:", apiKeyError);
+      throw new Error(`Database error: ${apiKeyError.message}`);
+    }
+
+    if (!apiKeyData) {
       throw new Error("Fal API key not found. Please configure it in AI Models API settings.");
     }
 
