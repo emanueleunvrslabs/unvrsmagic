@@ -11,13 +11,19 @@ import { Loader2 } from "lucide-react";
 
 export default function GenerateImage() {
   const [prompt, setPrompt] = useState("");
-  const [title, setTitle] = useState("");
+  const [mode, setMode] = useState<"text-to-image" | "image-to-image">("text-to-image");
+  const [inputImage, setInputImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
   const handleGenerate = async () => {
-    if (!prompt || !title) {
-      toast.error("Please fill in all fields");
+    if (!prompt) {
+      toast.error("Please enter a prompt");
+      return;
+    }
+
+    if (mode === "image-to-image" && !inputImage) {
+      toast.error("Please upload an input image");
       return;
     }
 
@@ -34,7 +40,7 @@ export default function GenerateImage() {
           type: "image",
           prompt,
           status: "pending",
-          title
+          title: mode === "text-to-image" ? "Text to Image" : "Image to Image"
         } as any)
         .select()
         .single();
@@ -46,7 +52,9 @@ export default function GenerateImage() {
         body: {
           contentId: content.id,
           type: "image",
-          prompt
+          prompt,
+          mode,
+          inputImage: mode === "image-to-image" ? inputImage : undefined
         }
       });
 
@@ -81,20 +89,62 @@ export default function GenerateImage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  placeholder="My awesome image"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
+                <Label>Mode</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={mode === "text-to-image" ? "default" : "outline"}
+                    onClick={() => setMode("text-to-image")}
+                    className="flex-1"
+                  >
+                    Text to Image
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={mode === "image-to-image" ? "default" : "outline"}
+                    onClick={() => setMode("image-to-image")}
+                    className="flex-1"
+                  >
+                    Image to Image
+                  </Button>
+                </div>
               </div>
+
+              {mode === "image-to-image" && (
+                <div className="space-y-2">
+                  <Label htmlFor="input-image">Input Image</Label>
+                  <Input
+                    id="input-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setInputImage(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  {inputImage && (
+                    <img 
+                      src={inputImage} 
+                      alt="Input" 
+                      className="w-full rounded-lg mt-2 max-h-48 object-contain"
+                    />
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="prompt">Prompt</Label>
                 <Textarea
                   id="prompt"
-                  placeholder="Describe the image you want to generate..."
+                  placeholder={mode === "text-to-image" 
+                    ? "Describe the image you want to generate..." 
+                    : "Describe how you want to modify the image..."}
                   rows={6}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
