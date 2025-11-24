@@ -141,14 +141,32 @@ serve(async (req) => {
         },
       });
 
-      if (!statusResponse.ok) {
-        const errorText = await statusResponse.text();
-        console.error(`Status check failed: ${statusResponse.status} ${errorText}`);
-        throw new Error(`Failed to fetch status: ${errorText}`);
+      // First try to parse the response body
+      const statusText = await statusResponse.text();
+      let statusData;
+      
+      try {
+        statusData = JSON.parse(statusText);
+      } catch (e) {
+        console.error(`Failed to parse status response: ${statusText}`);
+        throw new Error(`Invalid status response: ${statusText}`);
       }
 
-      const statusData = await statusResponse.json();
       console.log(`Status check ${attempts + 1}:`, JSON.stringify(statusData));
+
+      // Check if it's a "still in progress" message - this is normal, not an error
+      if (statusData.detail && statusData.detail.includes("still in progress")) {
+        console.log(`Request still in progress, attempt ${attempts + 1}/${maxAttempts}`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        attempts++;
+        continue;
+      }
+
+      // Check if the status check itself failed (not just in progress)
+      if (!statusResponse.ok && statusData.status !== "COMPLETED") {
+        console.error(`Status check failed: ${statusResponse.status} ${statusText}`);
+        throw new Error(`Failed to fetch status: ${statusText}`);
+      }
 
       // Check if request is completed
       if (statusData.status === "COMPLETED" || statusData.completed_at) {
@@ -169,9 +187,6 @@ serve(async (req) => {
       } else if (statusData.status === "FAILED") {
         console.error("Generation failed with error:", statusData.error);
         throw new Error(`Generation failed: ${JSON.stringify(statusData.error)}`);
-      } else if (statusData.detail && statusData.detail.includes("still in progress")) {
-        // Request is still processing, continue polling
-        console.log(`Request still in progress, attempt ${attempts + 1}/${maxAttempts}`);
       }
 
       // Wait 1 second before next poll
