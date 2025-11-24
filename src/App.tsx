@@ -8,21 +8,11 @@ import { NotificationProvider } from "@/components/notifications/notification-pr
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Overview from "./pages/Overview";
-import Trading from "./pages/Trading";
-import Wallets from "./pages/Wallets";
-import MyAssets from "./pages/MyAssets";
-import PortfolioTracker from "./pages/PortfolioTracker";
 import AiBot from "./pages/AiBot";
-import ArbitrageBot from "./pages/ArbitrageBot";
-import DcaBot from "./pages/DcaBot";
 import StrategiesMarketplace from "./pages/StrategiesMarketplace";
 import BotTemplates from "./pages/BotTemplates";
 import Settings from "./pages/Settings";
 import Subscription from "./pages/Subscription";
-import BotSettings from "./pages/BotSettings";
-import DeFiProtocols from "./pages/DeFiProtocols";
-import ExecutionLogs from "./pages/ExecutionLogs";
 import Auth from "./pages/Auth";
 import ProjectDetail from "./pages/ProjectDetail";
 import MktData from "./pages/MktData";
@@ -42,37 +32,15 @@ const App = () => (
           <Routes>
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/overview" element={<ProtectedRoute><Overview /></ProtectedRoute>} />
-          <Route path="/trading" element={<ProtectedRoute><Trading /></ProtectedRoute>} />
           <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
-          <Route path="/wallets" element={<ProtectedRoute><Wallets /></ProtectedRoute>} />
-          <Route path="/my-assets" element={<ProtectedRoute><MyAssets /></ProtectedRoute>} />
-          <Route path="/portfolio-tracker" element={<ProtectedRoute><PortfolioTracker /></ProtectedRoute>} />
           <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
           <Route path="/nkmt/mkt-data" element={<ProtectedRoute><MktData /></ProtectedRoute>} />
           <Route path="/nkmt/dashboard" element={<ProtectedRoute><NKMTDashboard /></ProtectedRoute>} />
           <Route path="/nkmt" element={<Navigate to="/nkmt/dashboard" replace />} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationCenter /></ProtectedRoute>} />
-          <Route path="/ai-bot" element={<Navigate to="/nkmt/bitget" replace />} />
-          <Route path="/arbitrage-bot" element={<ProtectedRoute><ArbitrageBot /></ProtectedRoute>} />
-          <Route path="/dca-bot" element={<ProtectedRoute><DcaBot /></ProtectedRoute>} />
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
-          <Route path="/bot-settings" element={<ProtectedRoute><BotSettings /></ProtectedRoute>} />
-          <Route path="/defi-protocols" element={<ProtectedRoute><DeFiProtocols /></ProtectedRoute>} />
-          <Route path="/execution-logs" element={<ProtectedRoute><ExecutionLogs /></ProtectedRoute>} />
-          {/* Control Panel prefixed routes */}
-          <Route path="/control-panel/overview" element={<ProtectedRoute><Overview /></ProtectedRoute>} />
-          <Route path="/control-panel/bot-settings" element={<ProtectedRoute><BotSettings /></ProtectedRoute>} />
-          <Route path="/control-panel/execution-logs" element={<ProtectedRoute><ExecutionLogs /></ProtectedRoute>} />
-          {/* Legacy/extra links redirects */}
-          <Route path="/my-analytics" element={<Navigate to="/portfolio-tracker" replace />} />
-          <Route path="/signal-bot" element={<Navigate to="/ai-bot" replace />} />
-          <Route path="/pump-screener" element={<Navigate to="/trading" replace />} />
-          <Route path="/defi-center/yield-farming" element={<Navigate to="/defi-protocols" replace />} />
-          <Route path="/defi-center/staking-pools" element={<Navigate to="/defi-protocols" replace />} />
-          <Route path="/defi-center/liquidity-tracker" element={<Navigate to="/defi-protocols" replace />} />
           <Route path="/bot-templates" element={<ProtectedRoute><BotTemplates /></ProtectedRoute>} />
           <Route path="/invite-friends" element={<Navigate to="/settings" replace />} />
           <Route path="/help-center" element={<Navigate to="/settings" replace />} />

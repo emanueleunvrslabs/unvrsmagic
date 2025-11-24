@@ -141,8 +141,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const pathname = location.pathname;
   const [activeItem, setActiveItem] = useState("");
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
-    "control-panel": false,
-    "defi-center": false,
     "settings": location.pathname === "/settings",  // Apri se siamo già in settings
     "nkmt": false,
   });
@@ -160,39 +158,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   useEffect(() => {
     if (pathname === "/") {
       setActiveItem("dashboard");
-    } else if (pathname === "/my-assets") {
-      setActiveItem("my-assets");
-    } else if (pathname === "/my-analytics") {
-      setActiveItem("my-analytics");
-    } else if (pathname === "/trading") {
-      setActiveItem("trading");
-    } else if (pathname === "/projects") {
-      setActiveItem("new-project");
-      setOpenSubmenus((prev) => ({ ...prev, projects: true }));
-    } else if (pathname === "/projects/active") {
-      setActiveItem("active-projects");
-      setOpenSubmenus((prev) => ({ ...prev, projects: true }));
-    } else if (pathname === "/projects/archived") {
-      setActiveItem("archived-projects");
-      setOpenSubmenus((prev) => ({ ...prev, projects: true }));
-    } else if (pathname === "/control-panel/overview") {
-      setActiveItem("overview");
-      setOpenSubmenus((prev) => ({ ...prev, "control-panel": true }));
-    } else if (pathname === "/control-panel/bot-settings") {
-      setActiveItem("bot-settings");
-      setOpenSubmenus((prev) => ({ ...prev, "control-panel": true }));
-    } else if (pathname === "/control-panel/execution-logs") {
-      setActiveItem("execution-logs");
-      setOpenSubmenus((prev) => ({ ...prev, "control-panel": true }));
-    } else if (pathname === "/defi-center/yield-farming") {
-      setActiveItem("yield-farming");
-      setOpenSubmenus((prev) => ({ ...prev, "defi-center": true }));
-    } else if (pathname === "/defi-center/staking-pools") {
-      setActiveItem("staking-pools");
-      setOpenSubmenus((prev) => ({ ...prev, "defi-center": true }));
-    } else if (pathname === "/defi-center/liquidity-tracker") {
-      setActiveItem("liquidity-tracker");
-      setOpenSubmenus((prev) => ({ ...prev, "defi-center": true }));
     } else if (pathname === "/settings") {
       // Get tab from URL params
       const searchParams = new URLSearchParams(location.search);
@@ -390,57 +355,10 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "nkmt-signal", label: "Signal.maker", icon: Zap, href: "/nkmt/signal-maker" },
             { id: "nkmt-risk", label: "Risk.mgr", icon: CreditCard, href: "/nkmt/risk-mgr" },
             { id: "nkmt-executor", label: "Trade.executor", icon: Bot, href: "/nkmt/trade-executor" },
-        { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
+            { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
           ],
         },
         { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
-        { id: "my-assets", label: "My Assets", icon: Coins, href: "/my-assets" },
-        { id: "my-analytics", label: "My Analytics", icon: LineChart, href: "/my-analytics" },
-      ],
-    },
-    {
-      section: "Trading & Bots",
-      items: [
-        { id: "trading", label: "Trading", icon: BarChart, href: "/trading" },
-        {
-          id: "control-panel",
-          label: "Control Panel",
-          icon: Gauge,
-          hasSubmenu: true,
-          submenuItems: [
-            { id: "overview", label: "Overview", icon: LayoutDashboard, href: "/control-panel/overview" },
-            { id: "bot-settings", label: "Bot Settings", icon: Cog, href: "/control-panel/bot-settings" },
-            { id: "execution-logs", label: "Execution Logs", icon: FileText, href: "/control-panel/execution-logs" },
-          ],
-        },
-        { id: "signal-bot", label: "Signal Bot", icon: Zap, href: "/signal-bot" },
-        { id: "dca-bot", label: "DCA Bot", icon: Repeat, href: "/dca-bot" },
-        { id: "arbitrage-bot", label: "Arbitrage Bot", icon: Layers, href: "/arbitrage-bot" },
-        { id: "pump-screener", label: "Pump Screener", icon: TrendingUp, href: "/pump-screener" },
-      ],
-    },
-    {
-      section: "DeFi & Portfolio",
-      items: [
-        {
-          id: "defi-center",
-          label: "DeFi Center",
-          icon: CircleDollarSign,
-          hasSubmenu: true,
-          submenuItems: [
-            { id: "yield-farming", label: "Yield Farming", icon: TrendingUp, href: "/defi-center/yield-farming" },
-            { id: "staking-pools", label: "Staking Pools", icon: Database, href: "/defi-center/staking-pools" },
-            {
-              id: "liquidity-tracker",
-              label: "Liquidity Tracker",
-              icon: Activity,
-              href: "/defi-center/liquidity-tracker",
-            },
-          ],
-        },
-        { id: "portfolio-tracker", label: "Portfolio Tracker", icon: PieChart, href: "/portfolio-tracker" },
-        { id: "wallets", label: "Wallets", icon: Wallet, href: "/wallets" },
-        { id: "defi-protocols", label: "DeFi Protocols", icon: Layers, href: "/defi-protocols" },
       ],
     },
     {
