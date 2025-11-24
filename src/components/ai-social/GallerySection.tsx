@@ -374,7 +374,7 @@ export function GallerySection() {
                 className="w-full max-h-[60vh] object-contain rounded-lg"
               />
             )}
-            <div className="space-y-2">
+            <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 <strong>Prompt:</strong> {previewItem?.prompt}
               </p>
