@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -13,6 +14,9 @@ export default function GenerateImage() {
   const [prompt, setPrompt] = useState("");
   const [mode, setMode] = useState<"text-to-image" | "image-to-image">("text-to-image");
   const [inputImage, setInputImage] = useState<string | null>(null);
+  const [aspectRatio, setAspectRatio] = useState("1:1");
+  const [resolution, setResolution] = useState("1K");
+  const [outputFormat, setOutputFormat] = useState("png");
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
@@ -54,7 +58,10 @@ export default function GenerateImage() {
           type: "image",
           prompt,
           mode,
-          inputImage: mode === "image-to-image" ? inputImage : undefined
+          inputImage: mode === "image-to-image" ? inputImage : undefined,
+          aspectRatio: mode === "text-to-image" ? aspectRatio : undefined,
+          resolution: mode === "text-to-image" ? resolution : undefined,
+          outputFormat: mode === "text-to-image" ? outputFormat : undefined
         }
       });
 
@@ -150,6 +157,57 @@ export default function GenerateImage() {
                   onChange={(e) => setPrompt(e.target.value)}
                 />
               </div>
+
+              {mode === "text-to-image" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
+                    <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1:1">1:1 (Square)</SelectItem>
+                        <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                        <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                        <SelectItem value="4:3">4:3</SelectItem>
+                        <SelectItem value="3:4">3:4</SelectItem>
+                        <SelectItem value="21:9">21:9 (Ultrawide)</SelectItem>
+                        <SelectItem value="3:2">3:2</SelectItem>
+                        <SelectItem value="2:3">2:3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="resolution">Resolution</Label>
+                    <Select value={resolution} onValueChange={setResolution}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1K">1K</SelectItem>
+                        <SelectItem value="2K">2K</SelectItem>
+                        <SelectItem value="4K">4K</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="output-format">Output Format</Label>
+                    <Select value={outputFormat} onValueChange={setOutputFormat}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="png">PNG</SelectItem>
+                        <SelectItem value="jpeg">JPEG</SelectItem>
+                        <SelectItem value="webp">WEBP</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
 
               <Button 
                 onClick={handleGenerate} 
