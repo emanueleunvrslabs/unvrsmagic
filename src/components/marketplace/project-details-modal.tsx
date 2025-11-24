@@ -56,85 +56,162 @@ export function ProjectDetailsModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Project Information */}
-          <div className="rounded-lg border p-4">
-            <h3 className="mb-4 text-lg font-semibold">Project Information</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Status</span>
-                <Badge variant={isAdded ? "default" : "secondary"}>
-                  {isAdded ? (
-                    <>
-                      <Check className="h-3 w-3 mr-1" />
-                      Added to Dashboard
-                    </>
+        <div className="grid grid-cols-1 gap-6 py-4 md:grid-cols-3">
+          {/* Left column - Project Information */}
+          <div className="space-y-4 md:col-span-2">
+            <div className="rounded-lg border p-4">
+              <h3 className="mb-4 text-lg font-semibold">Project Information</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Status</span>
+                  <Badge variant={isAdded ? "default" : "secondary"}>
+                    {isAdded ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" />
+                        Added to Dashboard
+                      </>
+                    ) : (
+                      "Available"
+                    )}
+                  </Badge>
+                </div>
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Route Path</span>
+                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                    {project.route}
+                  </code>
+                </div>
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Project Type</span>
+                  <Badge variant="outline">Marketplace Project</Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Project Features */}
+            <div className="rounded-lg border p-4">
+              <h3 className="mb-4 text-lg font-semibold">What's Included</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Full access to project features and functionality</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Integration with your dashboard</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Real-time updates and synchronization</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Manage directly from your sidebar menu</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Getting Started */}
+            {!isAdded && (
+              <div className="rounded-lg bg-muted/50 p-4">
+                <h3 className="mb-2 text-sm font-semibold">Getting Started</h3>
+                <p className="text-sm text-muted-foreground">
+                  Click "Add to Dashboard" below to add this project to your personal workspace. 
+                  It will appear in your sidebar navigation and you'll be able to access it anytime.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Right column - Purchase Options */}
+          <div className="space-y-4">
+            <div className="rounded-lg border p-4">
+              <h3 className="mb-4 text-lg font-semibold">Purchase Options</h3>
+              <div className="space-y-4">
+                <div className="rounded-lg bg-muted/50 p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium">Access Type</span>
+                    <Badge variant="outline" className="border-green-500 text-green-500">
+                      Free
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    This project is available at no cost. Add it to your dashboard to get started.
+                  </p>
+                  {!isAdded ? (
+                    <Button 
+                      className="w-full gap-2" 
+                      onClick={onAddProject}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      <span>Add to Dashboard</span>
+                    </Button>
                   ) : (
-                    "Available"
+                    <Button 
+                      variant="outline" 
+                      className="w-full gap-2"
+                      asChild
+                    >
+                      <a href={project.route} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4" />
+                        <span>Open Project</span>
+                      </a>
+                    </Button>
                   )}
-                </Badge>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">License</span>
+                    <span className="font-medium">Free to Use</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Updates</span>
+                    <span className="font-medium">Lifetime</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Support</span>
+                    <span className="font-medium">Included</span>
+                  </div>
+                </div>
               </div>
-              
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Route Path</span>
-                <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
-                  {project.route}
-                </code>
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Project Type</span>
-                <Badge variant="outline">Marketplace Project</Badge>
+            </div>
+
+            <div className="rounded-lg border p-4">
+              <h3 className="mb-4 text-lg font-semibold">Project Details</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Category</span>
+                  <Badge variant="secondary">Application</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Version</span>
+                  <span className="text-sm font-medium">Latest</span>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Project Features */}
-          <div className="rounded-lg border p-4">
-            <h3 className="mb-4 text-lg font-semibold">What's Included</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <span>Full access to project features and functionality</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <span>Integration with your dashboard</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <span>Real-time updates and synchronization</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <span>Manage directly from your sidebar menu</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Getting Started */}
-          {!isAdded && (
-            <div className="rounded-lg bg-muted/50 p-4">
-              <h3 className="mb-2 text-sm font-semibold">Getting Started</h3>
-              <p className="text-sm text-muted-foreground">
-                Click "Add to Dashboard" below to add this project to your personal workspace. 
-                It will appear in your sidebar navigation and you'll be able to access it anytime.
-              </p>
-            </div>
-          )}
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+        <DialogFooter>
           {isAdded ? (
             <>
               <Button
                 variant="outline"
                 className="gap-2"
-                onClick={onClose}
                 asChild
               >
                 <a href={project.route} target="_blank" rel="noopener noreferrer">
@@ -156,7 +233,7 @@ export function ProjectDetailsModal({
             </>
           ) : (
             <Button
-              className="gap-2 w-full sm:w-auto"
+              className="gap-2"
               onClick={onAddProject}
               disabled={isLoading}
             >
@@ -165,7 +242,7 @@ export function ProjectDetailsModal({
               ) : (
                 <Plus className="h-4 w-4" />
               )}
-              <span>Add to Dashboard</span>
+              <span>Add Now</span>
             </Button>
           )}
         </DialogFooter>
