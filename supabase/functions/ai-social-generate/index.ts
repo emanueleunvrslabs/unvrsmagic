@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contentId, type, prompt, mode, inputImage, aspectRatio, resolution, outputFormat } = await req.json();
+    const { contentId, type, prompt, mode, inputImages, aspectRatio, resolution, outputFormat } = await req.json();
 
     if (!contentId || !type || !prompt) {
       return new Response(
@@ -21,9 +21,9 @@ serve(async (req) => {
       );
     }
 
-    if (mode === "image-to-image" && !inputImage) {
+    if (mode === "image-to-image" && (!inputImages || inputImages.length === 0)) {
       return new Response(
-        JSON.stringify({ error: "Input image is required for image-to-image mode" }),
+        JSON.stringify({ error: "At least one input image is required for image-to-image mode" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -93,7 +93,8 @@ serve(async (req) => {
     // Add mode-specific parameters
     if (mode === "image-to-image") {
       // For image-to-image, use image_urls array (required parameter)
-      requestBody.image_urls = [inputImage];
+      // Can accept multiple images
+      requestBody.image_urls = inputImages;
       // Include aspect_ratio (defaults to "auto" but can be specified)
       requestBody.aspect_ratio = aspectRatio || "auto";
     } else {
