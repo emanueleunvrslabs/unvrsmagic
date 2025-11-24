@@ -436,17 +436,17 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                             <CollapsibleTrigger asChild>
                               <Button
                                 variant={isParentActive ? "secondary" : "ghost"}
-                                className="w-full justify-between"
+                                className="w-full justify-between px-4"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   toggleSubmenu(item.id);
                                 }}
                               >
                                 <div className="flex items-center">
-                                  <Icon className="mr-2 h-4 w-4" />
+                                  <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
                                   <span>{item.label}</span>
                                 </div>
-                                <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", openSubmenus[item.id] ? "rotate-180" : "rotate-0")} />
+                                <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200", openSubmenus[item.id] ? "rotate-180" : "rotate-0")} />
                               </Button>
                             </CollapsibleTrigger>
                             <CollapsibleContent className="pl-6 space-y-1">
