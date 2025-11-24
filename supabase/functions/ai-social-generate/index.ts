@@ -98,7 +98,7 @@ serve(async (req) => {
         "Authorization": `Key ${FAL_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ input: requestBody })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
