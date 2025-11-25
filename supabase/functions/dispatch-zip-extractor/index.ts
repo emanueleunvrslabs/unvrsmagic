@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as zip from "https://deno.land/x/zipjs@v2.7.34/index.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,32 +29,49 @@ serve(async (req) => {
       throw new Error("Invalid user");
     }
 
-    const { storageFilePath } = await req.json();
+    const { storageFilePath, fileName, fileSize } = await req.json();
 
     if (!storageFilePath) {
       throw new Error("Missing storage file path");
     }
 
-    console.log("Extracting ZIP file from storage:", storageFilePath);
+    console.log("Registering ZIP file:", storageFilePath);
 
-    // Download the ZIP file from storage
-    const { data: zipData, error: downloadError } = await supabaseClient.storage
+    // Get public URL for the uploaded file
+    const { data: { publicUrl } } = supabaseClient.storage
       .from("dispatch-files")
-      .download(storageFilePath);
+      .getPublicUrl(storageFilePath);
 
-    if (downloadError || !zipData) {
-      throw new Error(`Failed to download ZIP file: ${downloadError?.message}`);
+    // Register the ZIP file in the database for later processing by the orchestrator
+    const { error: dbError } = await supabaseClient
+      .from("dispatch_files")
+      .insert({
+        user_id: user.id,
+        file_type: "LETTURE_ZIP",
+        file_name: fileName || storageFilePath.split('/').pop(),
+        file_url: publicUrl,
+        file_size: fileSize || 0,
+        upload_source: "direct",
+        status: "pending_extraction",
+        metadata: { 
+          original_path: storageFilePath,
+          requires_extraction: true
+        },
+      });
+
+    if (dbError) {
+      console.error("Database insert error:", dbError);
+      throw dbError;
     }
 
-    const extractedFiles: { fileName: string; fileSize: number; filePath: string }[] = [];
-
-    // Recursively extract all ZIP files
-    await extractZipRecursive(zipData, user.id, supabaseClient, extractedFiles, storageFilePath);
-
-    console.log(`Successfully extracted ${extractedFiles.length} files from ZIP`);
+    console.log("ZIP file registered successfully for later processing");
 
     return new Response(
-      JSON.stringify({ success: true, extractedFiles, totalFiles: extractedFiles.length }),
+      JSON.stringify({ 
+        success: true, 
+        message: "File registrato. L'estrazione avverrà durante l'elaborazione.",
+        fileName: fileName || storageFilePath.split('/').pop()
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -73,88 +89,3 @@ serve(async (req) => {
     );
   }
 });
-
-async function extractZipRecursive(
-  zipBlob: Blob,
-  userId: string,
-  supabaseClient: any,
-  extractedFiles: { fileName: string; fileSize: number; filePath: string }[],
-  parentPath: string
-): Promise<void> {
-  const zipReader = new zip.ZipReader(new zip.BlobReader(zipBlob));
-  const entries = await zipReader.getEntries();
-
-  console.log(`Found ${entries.length} entries in ZIP`);
-
-  for (const entry of entries) {
-    if (entry.directory || !entry.getData) {
-      continue;
-    }
-
-    console.log(`Processing entry: ${entry.filename}`);
-
-    const writer = new zip.BlobWriter();
-    const fileBlob = await entry.getData(writer);
-    const fileName = entry.filename.split('/').pop() || entry.filename;
-
-    // Check if this is another ZIP file
-    if (fileName.toLowerCase().endsWith('.zip')) {
-      console.log(`Found nested ZIP: ${fileName}, extracting recursively...`);
-      await extractZipRecursive(fileBlob, userId, supabaseClient, extractedFiles, `${parentPath}/${fileName}`);
-    } else if (
-      fileName.toLowerCase().endsWith('.csv') ||
-      fileName.toLowerCase().endsWith('.xml') ||
-      fileName.toLowerCase().endsWith('.xlsx')
-    ) {
-      // This is a data file, upload it
-      const timestamp = Date.now();
-      const filePath = `${userId}/letture/extracted/${timestamp}_${fileName}`;
-      
-      console.log(`Uploading extracted file: ${fileName} (${fileBlob.size} bytes)`);
-
-      const { error: uploadError } = await supabaseClient.storage
-        .from("dispatch-files")
-        .upload(filePath, fileBlob);
-
-      if (uploadError) {
-        console.error(`Failed to upload ${fileName}:`, uploadError);
-        continue;
-      }
-
-      const { data: { publicUrl } } = supabaseClient.storage
-        .from("dispatch-files")
-        .getPublicUrl(filePath);
-
-      const { error: dbError } = await supabaseClient
-        .from("dispatch_files")
-        .insert({
-          user_id: userId,
-          file_type: "LETTURE",
-          file_name: fileName,
-          file_url: publicUrl,
-          file_size: fileBlob.size,
-          upload_source: "extracted",
-          status: "uploaded",
-          metadata: { 
-            extracted_from: parentPath,
-            original_path: entry.filename 
-          },
-        });
-
-      if (dbError) {
-        console.error(`Failed to insert ${fileName} to database:`, dbError);
-        continue;
-      }
-
-      extractedFiles.push({
-        fileName,
-        fileSize: fileBlob.size,
-        filePath,
-      });
-
-      console.log(`Successfully processed: ${fileName}`);
-    }
-  }
-
-  await zipReader.close();
-}
