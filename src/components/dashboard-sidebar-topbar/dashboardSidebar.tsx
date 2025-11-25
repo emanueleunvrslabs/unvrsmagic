@@ -27,6 +27,7 @@ import {
   HelpCircle,
   Image,
   Layers,
+  Truck,
   LayoutDashboard,
   LineChart,
   Menu,
@@ -393,6 +394,15 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "ai-social-schedule", label: "Schedule Posts", icon: Gauge, href: "/ai-social/schedule" },
             { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
             { id: "ai-social-connection", label: "Connection", icon: Layers, href: "/ai-social/connection" },
+          ],
+        },
+        {
+          id: "dispacciamento",
+          label: "Dispacciamento",
+          icon: Truck,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "dispacciamento-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dispacciamento" },
           ],
         },
         {
