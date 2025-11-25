@@ -9,13 +9,13 @@ const corsHeaders = {
 
 // AI Model Configuration per Agent
 const AGENT_MODELS = {
-  'DISPATCH.BRAIN': { provider: 'anthropic', model: 'claude-sonnet-4-5-20250514' },
+  'DISPATCH.BRAIN': { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
   'ANAGRAFICA.INTAKE': { provider: 'openai', model: 'gpt-4.1-2025-04-14' },
   'IP.ASSIMILATOR': { provider: 'qwen', model: 'qwen-max' },
-  'HISTORY.RESOLVER': { provider: 'anthropic', model: 'claude-sonnet-4-5-20250514' },
+  'HISTORY.RESOLVER': { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
   'LP.PROFILER': { provider: 'qwen', model: 'qwen-max' },
   'AGG.SCHEDULER': { provider: 'qwen', model: 'qwen-max' },
-  'QA.WATCHDOG': { provider: 'anthropic', model: 'claude-sonnet-4-5-20250514' },
+  'QA.WATCHDOG': { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
   'EXPORT.HUB': { provider: 'openai', model: 'gpt-4.1-2025-04-14' },
 } as const;
 
@@ -521,7 +521,7 @@ Analizza la curva IP e identifica pattern o anomalie.`,
     await updateAgentState(supabase, jobId, userId, 'HISTORY.RESOLVER', 'running');
     await logAgentActivity(supabase, userId, 'HISTORY.RESOLVER', 'info', `Elaborazione POD orari (O) zona ${zoneCode} - Parsing letture e incrocio`, { files: lettureFiles.length });
     
-    const historyResult = await processHistoryStep(supabase, userId, lettureFiles, dispatchMonth, historicalMonth, zoneCode, anagraficaResult.pod_codes_o);
+    const historyResult = await processHistoryStep(supabase, userId, jobId, lettureFiles, dispatchMonth, historicalMonth, zoneCode, anagraficaResult.pod_codes_o);
     
     // AI analysis for HISTORY.RESOLVER
     const historyDefaultPrompt = `Sei HISTORY.RESOLVER, agente specializzato nell'applicazione della logica T-12 per POD orari usando dati storici.
@@ -1531,6 +1531,7 @@ async function processIpStep(supabase: any, userId: string, files: any[], histor
 async function processHistoryStep(
   supabase: any, 
   userId: string, 
+  jobId: string,
   files: any[], 
   dispatchMonth: string, 
   historicalMonth: string, 
@@ -1539,8 +1540,8 @@ async function processHistoryStep(
 ) {
   console.log(`Processing history step for zone ${zoneCode}, letture files: ${files.length}, POD O from anagrafica: ${podCodesO.length}`);
   
-  // Extract POD codes from letture files
-  const lettureResult = await extractPodsFromLettureFiles(supabase, files);
+  // Extract POD codes from letture files - pass jobId and userId for large file processing
+  const lettureResult = await extractPodsFromLettureFiles(supabase, files, jobId, userId);
   
   // PODs are already deduplicated in extractPodsFromLettureFiles
   const uniquePodsInLetture = lettureResult.allPods;
