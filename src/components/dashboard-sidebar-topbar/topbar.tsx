@@ -196,10 +196,12 @@ export function Topbar() {
               <User className="mr-2 h-4 w-4" />
               <Link to="/settings?tab=profile">Profile</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Zap className="mr-2 h-4 w-4" />
-              <Link to="/settings?tab=security">AI Model API</Link>
-            </DropdownMenuItem>
+            {isOwner && (
+              <DropdownMenuItem>
+                <Zap className="mr-2 h-4 w-4" />
+                <Link to="/settings?tab=security">AI Model API</Link>
+              </DropdownMenuItem>
+            )}
             {hasNkmtProject && (
               <DropdownMenuItem>
                 <Store className="mr-2 h-4 w-4" />
