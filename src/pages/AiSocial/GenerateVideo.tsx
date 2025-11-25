@@ -19,10 +19,16 @@ export default function GenerateVideo() {
   const [duration, setDuration] = useState("6s");
   const [loading, setLoading] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
 
   const handleGenerate = async () => {
     if (!prompt) {
       toast.error("Please enter a prompt");
+      return;
+    }
+
+    if (mode === "image-to-video" && !imageUrl) {
+      toast.error("Please provide an image URL for image-to-video mode");
       return;
     }
 
@@ -50,6 +56,8 @@ export default function GenerateVideo() {
           contentId: content.id,
           type: "video",
           prompt,
+          mode,
+          imageUrl: mode === "image-to-video" ? imageUrl : undefined,
           aspectRatio,
           resolution,
           duration
@@ -100,6 +108,22 @@ export default function GenerateVideo() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {mode === "image-to-video" && (
+                <div className="space-y-2">
+                  <Label htmlFor="imageUrl">Image URL</Label>
+                  <Input
+                    id="imageUrl"
+                    type="url"
+                    placeholder="https://example.com/image.jpg"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Image should be 720p or higher in 16:9 or 9:16 aspect ratio
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="prompt">Prompt</Label>
