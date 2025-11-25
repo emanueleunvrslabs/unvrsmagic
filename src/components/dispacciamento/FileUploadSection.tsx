@@ -34,8 +34,9 @@ export function FileUploadSection() {
 
     setIsUploading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      const { data, error: authError } = await supabase.auth.getUser();
+      if (authError || !data?.user) throw new Error("User not authenticated");
+      const user = data.user;
 
       for (const file of lettureFiles) {
         const filePath = `${user.id}/letture/${Date.now()}_${file.name}`;
@@ -83,8 +84,9 @@ export function FileUploadSection() {
 
     setIsUploading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      const { data, error: authError } = await supabase.auth.getUser();
+      if (authError || !data?.user) throw new Error("User not authenticated");
+      const user = data.user;
 
       for (const file of ipFiles) {
         const filePath = `${user.id}/ip/${Date.now()}_${file.name}`;
@@ -132,8 +134,9 @@ export function FileUploadSection() {
 
     setIsUploading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      const { data, error: authError } = await supabase.auth.getUser();
+      if (authError || !data?.user) throw new Error("User not authenticated");
+      const user = data.user;
 
       for (const file of anagraficaFiles) {
         const filePath = `${user.id}/anagrafica/${Date.now()}_${file.name}`;
