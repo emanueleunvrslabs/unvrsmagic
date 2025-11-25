@@ -102,8 +102,8 @@ export default function GenerateVideo() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="text-to-video">Text to Video</SelectItem>
-                    <SelectItem value="first-last-frame">First/Last Frame to Video</SelectItem>
                     <SelectItem value="image-to-video">Image to Video</SelectItem>
+                    <SelectItem value="first-last-frame">First/Last Frame to Video</SelectItem>
                     <SelectItem value="reference-to-video">Reference to Video</SelectItem>
                   </SelectContent>
                 </Select>
