@@ -29,7 +29,18 @@ export default function Auth() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/overview");
+        // Check user role and redirect accordingly
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (roleData?.role === 'owner') {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/marketplace");
+        }
       }
     };
     checkSession();
@@ -178,7 +189,7 @@ export default function Auth() {
             if (roleData?.role === 'owner') {
               navigate("/admin/dashboard");
             } else {
-              navigate("/nkmt/dashboard");
+              navigate("/marketplace");
             }
           } else {
             // New user or user without username, go to username step
@@ -261,7 +272,7 @@ export default function Auth() {
       if (roleData?.role === 'owner') {
         navigate("/admin/dashboard");
       } else {
-        navigate("/nkmt/dashboard");
+        navigate("/marketplace");
       }
     } catch (error) {
       console.error("Error setting username:", error);
