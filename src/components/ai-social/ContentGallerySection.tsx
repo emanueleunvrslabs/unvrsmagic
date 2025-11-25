@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Download, Trash2, Maximize2, Play, X, Loader2 } from "lucide-react";
+import { Download, Trash2, Maximize2, Play, X, Loader2, Instagram } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -322,7 +322,7 @@ export function ContentGallerySection() {
                     {/* Social platforms badges */}
                     {item.workflow?.platforms?.map((platform: string) => (
                       <span key={platform} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm capitalize bg-pink-500/10 text-pink-400 border-pink-500/20">
-                        {platform === "instagram" && "📷 "}
+                        {platform === "instagram" && <Instagram className="h-3 w-3" />}
                         {platform === "facebook" && "👍 "}
                         {platform === "twitter" && "🐦 "}
                         {platform === "linkedin" && "💼 "}
