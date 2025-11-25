@@ -8,10 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { ImageGallerySection } from "@/components/ai-social/ImageGallerySection";
+import { useUserCredits } from "@/hooks/useUserCredits";
+import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+const IMAGE_COST = 1; // €1 per image
 
 export default function GenerateImage() {
+  const navigate = useNavigate();
+  const { credits, isLoading: creditsLoading } = useUserCredits();
   const [prompt, setPrompt] = useState("");
   const [mode, setMode] = useState<"text-to-image" | "image-to-image">("text-to-image");
   const [inputImages, setInputImages] = useState<string[]>([]);
@@ -22,6 +29,8 @@ export default function GenerateImage() {
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const hasInsufficientCredits = !creditsLoading && (credits?.balance || 0) < IMAGE_COST;
 
   // Update aspect ratio to "auto" when switching to image-to-image
   const handleModeChange = (newMode: "text-to-image" | "image-to-image") => {
@@ -63,6 +72,12 @@ export default function GenerateImage() {
   };
 
   const handleGenerate = async () => {
+    // Check credits first
+    if (hasInsufficientCredits) {
+      toast.error("Crediti insufficienti. Vai al Wallet per acquistare crediti.");
+      return;
+    }
+
     if (!prompt) {
       toast.error("Please enter a prompt");
       return;
@@ -145,6 +160,19 @@ export default function GenerateImage() {
             Create images with AI using Nano Banana
           </p>
         </div>
+
+        {hasInsufficientCredits && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Crediti insufficienti</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>Hai bisogno di almeno €{IMAGE_COST} per generare un'immagine.</span>
+              <Button variant="outline" size="sm" onClick={() => navigate("/wallet")}>
+                Vai al Wallet
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
@@ -300,7 +328,7 @@ export default function GenerateImage() {
 
               <Button 
                 onClick={handleGenerate} 
-                disabled={loading}
+                disabled={loading || hasInsufficientCredits}
                 className="w-full"
               >
                 {loading ? (
@@ -308,8 +336,10 @@ export default function GenerateImage() {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
                   </>
+                ) : hasInsufficientCredits ? (
+                  "Crediti insufficienti"
                 ) : (
-                  "Generate Image"
+                  `Generate Image (€${IMAGE_COST})`
                 )}
               </Button>
             </CardContent>
