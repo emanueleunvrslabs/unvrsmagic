@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -45,6 +46,14 @@ export default function Workflows() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Video-specific state
+  const [duration, setDuration] = useState("6s");
+  const [generateAudio, setGenerateAudio] = useState(true);
+  const [firstFrameImage, setFirstFrameImage] = useState<string>("");
+  const [lastFrameImage, setLastFrameImage] = useState<string>("");
+  const firstFrameInputRef = useRef<HTMLInputElement>(null);
+  const lastFrameInputRef = useRef<HTMLInputElement>(null);
   
   // Scheduling state
   const [scheduleFrequency, setScheduleFrequency] = useState<string>("daily");
@@ -141,12 +150,97 @@ export default function Workflows() {
     if (type === "video") {
       setAspectRatio("16:9");
       setResolution("720p");
+      setDuration("6s");
     } else {
       setAspectRatio("1:1");
       setResolution("1K");
     }
     // Clear uploaded images when changing type
     setUploadedImages([]);
+    setFirstFrameImage("");
+    setLastFrameImage("");
+  };
+
+  const handleGenerationModeChange = (mode: string) => {
+    setGenerationMode(mode);
+    // Clear images when changing mode
+    setUploadedImages([]);
+    setFirstFrameImage("");
+    setLastFrameImage("");
+    // Set default duration for reference-to-video
+    if (mode === "reference-to-video") {
+      setDuration("8s");
+    }
+  };
+
+  const handleFirstFrameUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${session.user.id}/${Date.now()}-first-frame.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('ai-social-uploads')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('ai-social-uploads')
+        .getPublicUrl(fileName);
+
+      setFirstFrameImage(publicUrl);
+      toast.success("First frame uploaded");
+    } catch (error) {
+      console.error("Error uploading first frame:", error);
+      toast.error("Failed to upload first frame");
+    } finally {
+      setIsUploading(false);
+      if (firstFrameInputRef.current) {
+        firstFrameInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleLastFrameUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${session.user.id}/${Date.now()}-last-frame.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('ai-social-uploads')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('ai-social-uploads')
+        .getPublicUrl(fileName);
+
+      setLastFrameImage(publicUrl);
+      toast.success("Last frame uploaded");
+    } catch (error) {
+      console.error("Error uploading last frame:", error);
+      toast.error("Failed to upload last frame");
+    } finally {
+      setIsUploading(false);
+      if (lastFrameInputRef.current) {
+        lastFrameInputRef.current.value = '';
+      }
+    }
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,6 +328,10 @@ export default function Workflows() {
           resolution: resolution,
           output_format: outputFormat,
           image_urls: uploadedImages,
+          first_frame_image: firstFrameImage,
+          last_frame_image: lastFrameImage,
+          duration: duration,
+          generate_audio: generateAudio,
           frequency: scheduleFrequency,
           times: scheduleTimes,
           days: scheduleDays
@@ -285,6 +383,10 @@ export default function Workflows() {
     setOutputFormat(workflow.schedule_config?.output_format || 'png');
     setSelectedPlatforms(workflow.platforms || []);
     setUploadedImages(workflow.schedule_config?.image_urls || []);
+    setFirstFrameImage(workflow.schedule_config?.first_frame_image || '');
+    setLastFrameImage(workflow.schedule_config?.last_frame_image || '');
+    setDuration(workflow.schedule_config?.duration || '6s');
+    setGenerateAudio(workflow.schedule_config?.generate_audio !== false);
     setScheduleFrequency(workflow.schedule_config?.frequency || 'daily');
     // Support both old single time and new multiple times format
     const times = workflow.schedule_config?.times || (workflow.schedule_config?.time ? [workflow.schedule_config.time] : ['09:00']);
@@ -342,6 +444,10 @@ export default function Workflows() {
     setOutputFormat("png");
     setSelectedPlatforms([]);
     setUploadedImages([]);
+    setFirstFrameImage("");
+    setLastFrameImage("");
+    setDuration("6s");
+    setGenerateAudio(true);
     setScheduleFrequency("daily");
     setScheduleTimes(["09:00"]);
     setScheduleDays(["monday", "wednesday", "friday"]);
@@ -688,7 +794,7 @@ export default function Workflows() {
                   </SelectContent>
                 </Select>
               ) : (
-                <Select value={generationMode} onValueChange={setGenerationMode}>
+                <Select value={generationMode} onValueChange={handleGenerationModeChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -781,6 +887,194 @@ export default function Workflows() {
               </div>
             )}
 
+            {/* Image Upload for Image-to-Video and Reference-to-Video modes */}
+            {(generationMode === "image-to-video" || generationMode === "reference-to-video") && (
+              <div className="space-y-3">
+                <Label>{generationMode === "reference-to-video" ? "Reference Images" : "Input Images"}</Label>
+                <div className="border border-dashed border-border rounded-lg p-4">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                  />
+                  
+                  {uploadedImages.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-3">
+                        {uploadedImages.map((url, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={url}
+                              alt={`Uploaded ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add More Images
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      className="flex flex-col items-center justify-center py-6 cursor-pointer hover:bg-muted/50 rounded-lg transition-colors"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-8 w-8 text-muted-foreground animate-spin mb-2" />
+                          <p className="text-sm text-muted-foreground">Uploading...</p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">
+                            {generationMode === "reference-to-video" 
+                              ? "Upload reference images for character/object consistency" 
+                              : "Upload images to animate"}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP supported</p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* First/Last Frame Upload for First-Last-Frame mode */}
+            {generationMode === "first-last-frame" && (
+              <div className="space-y-3">
+                <Label>First & Last Frame Images</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* First Frame */}
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">First Frame</Label>
+                    <div className="border border-dashed border-border rounded-lg p-4">
+                      <input
+                        type="file"
+                        ref={firstFrameInputRef}
+                        onChange={handleFirstFrameUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      
+                      {firstFrameImage ? (
+                        <div className="relative group">
+                          <img
+                            src={firstFrameImage}
+                            alt="First frame"
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => setFirstFrameImage("")}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          className="flex flex-col items-center justify-center py-6 cursor-pointer hover:bg-muted/50 rounded-lg transition-colors"
+                          onClick={() => firstFrameInputRef.current?.click()}
+                        >
+                          {isUploading ? (
+                            <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
+                          ) : (
+                            <>
+                              <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                              <p className="text-xs text-muted-foreground">Upload first frame</p>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Last Frame */}
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Last Frame</Label>
+                    <div className="border border-dashed border-border rounded-lg p-4">
+                      <input
+                        type="file"
+                        ref={lastFrameInputRef}
+                        onChange={handleLastFrameUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      
+                      {lastFrameImage ? (
+                        <div className="relative group">
+                          <img
+                            src={lastFrameImage}
+                            alt="Last frame"
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => setLastFrameImage("")}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          className="flex flex-col items-center justify-center py-6 cursor-pointer hover:bg-muted/50 rounded-lg transition-colors"
+                          onClick={() => lastFrameInputRef.current?.click()}
+                        >
+                          {isUploading ? (
+                            <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
+                          ) : (
+                            <>
+                              <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                              <p className="text-xs text-muted-foreground">Upload last frame</p>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  AI will generate video content that transitions from first frame to last frame
+                </p>
+              </div>
+            )}
+
             {/* Description with AI Enhancement */}
             <div className="space-y-2">
               <Label>Description</Label>
@@ -867,31 +1161,73 @@ export default function Workflows() {
 
             {/* Video-specific settings */}
             {workflowType === "video" && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Aspect Ratio</Label>
-                  <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-                      <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  {generationMode !== "reference-to-video" && (
+                    <div className="space-y-2">
+                      <Label>Aspect Ratio</Label>
+                      <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                          <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label>Resolution</Label>
+                    <Select value={resolution} onValueChange={setResolution}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="720p">720p</SelectItem>
+                        <SelectItem value="1080p">1080p</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Duration</Label>
+                    <Select 
+                      value={duration} 
+                      onValueChange={setDuration} 
+                      disabled={generationMode === "reference-to-video"}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {generationMode === "reference-to-video" ? (
+                          <SelectItem value="8s">8 seconds</SelectItem>
+                        ) : (
+                          <>
+                            <SelectItem value="4s">4 seconds</SelectItem>
+                            <SelectItem value="6s">6 seconds</SelectItem>
+                            <SelectItem value="8s">8 seconds</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Resolution</Label>
-                  <Select value={resolution} onValueChange={setResolution}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="720p">720p</SelectItem>
-                      <SelectItem value="1080p">1080p</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center justify-between space-x-2 py-2">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="generate-audio">Generate Audio</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Disable to save 50% credits
+                    </p>
+                  </div>
+                  <Switch
+                    id="generate-audio"
+                    checked={generateAudio}
+                    onCheckedChange={setGenerateAudio}
+                  />
                 </div>
               </div>
             )}
