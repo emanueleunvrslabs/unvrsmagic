@@ -36,6 +36,7 @@ import DispatchLpProfiler from "./pages/dispacciamento/DispatchLpProfiler";
 import DispatchAggScheduler from "./pages/dispacciamento/DispatchAggScheduler";
 import DispatchQaWatchdog from "./pages/dispacciamento/DispatchQaWatchdog";
 import DispatchExportHub from "./pages/dispacciamento/DispatchExportHub";
+import Wallet from "./pages/Wallet";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/nkmt" element={<Navigate to="/nkmt/dashboard" replace />} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationCenter /></ProtectedRoute>} />
           <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+          <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/projects" element={<ProtectedRoute><AdminProjects /></ProtectedRoute>} />
           <Route path="/ai-social" element={<ProtectedRoute><AiSocialDashboard /></ProtectedRoute>} />
