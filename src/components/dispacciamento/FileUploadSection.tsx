@@ -195,7 +195,7 @@ export function FileUploadSection() {
               <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <Input
                 type="file"
-                accept=".csv,.xml,.xlsx"
+                accept=".csv,.xml,.xlsx,.zip"
                 onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                 className="max-w-md mx-auto"
               />
@@ -210,7 +210,7 @@ export function FileUploadSection() {
               <AlertCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div className="text-sm text-muted-foreground">
                 <p className="font-medium mb-1">Supporto per file di grandi dimensioni</p>
-                <p>Il sistema supporta file fino a 500 MB. Per file più grandi, utilizza il caricamento da URL.</p>
+                <p>Il sistema supporta file CSV, XML, XLSX e ZIP fino a 500 MB. Per file più grandi, utilizza il caricamento da URL.</p>
               </div>
             </div>
 
