@@ -417,10 +417,10 @@ export default function Workflows() {
                                 key={platform} 
                                 className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-400 border border-pink-500/20 backdrop-blur-sm capitalize"
                               >
-                                {platform === 'instagram' && '📸'}
-                                {platform === 'facebook' && '📘'}
-                                {platform === 'twitter' && '🐦'}
-                                {platform === 'linkedin' && '💼'}
+                                {platform === 'instagram' && '📸 '}
+                                {platform === 'facebook' && '📘 '}
+                                {platform === 'twitter' && '🐦 '}
+                                {platform === 'linkedin' && '💼 '}
                                 {platform}
                               </span>
                             ))}
