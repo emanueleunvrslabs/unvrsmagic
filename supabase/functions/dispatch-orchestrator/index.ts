@@ -34,12 +34,10 @@ serve(async (req) => {
       throw new Error('No zones specified');
     }
 
-    // Calculate T-12 historical month
     const [year, month] = dispatchMonth.split('-').map(Number);
     const historicalYear = year - 1;
     const historicalMonth = `${historicalYear}-${month.toString().padStart(2, '0')}`;
 
-    // Create a job for each zone
     const jobIds: string[] = [];
     
     for (const zone of zones) {
@@ -66,7 +64,6 @@ serve(async (req) => {
       console.log('Job created for zone:', zone, 'ID:', job.id);
       jobIds.push(job.id);
 
-      // Start background orchestration for each zone
       const backgroundTask = orchestrateAgents(supabase, job.id, user.id, zone, dispatchMonth, historicalMonth);
       
       if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
@@ -109,7 +106,6 @@ async function orchestrateAgents(
 
     await logAgentActivity(supabase, userId, 'DISPATCH.BRAIN', 'info', `Orchestrazione avviata per zona ${zoneCode}`, { jobId, dispatchMonth, zoneCode });
 
-    // Get user files for this specific zone
     const { data: userFiles, error: filesError } = await supabase
       .from('dispatch_files')
       .select('*')
@@ -122,7 +118,6 @@ async function orchestrateAgents(
 
     console.log(`Found ${userFiles?.length || 0} files for user`);
 
-    // Filter files by zone where applicable
     const anagraficaFiles = userFiles?.filter((f: any) => 
       f.file_type === 'ANAGRAFICA' && (f.zone_code === zoneCode || !f.zone_code)
     ) || [];
@@ -150,12 +145,16 @@ async function orchestrateAgents(
     // Step 3: HISTORY.RESOLVER (50%)
     await updateJobProgress(supabase, jobId, 'HISTORY.RESOLVER', 50);
     await updateAgentState(supabase, jobId, userId, 'HISTORY.RESOLVER', 'running');
-    await logAgentActivity(supabase, userId, 'HISTORY.RESOLVER', 'info', `Elaborazione POD orari (O) zona ${zoneCode}`, { files: lettureFiles.length });
+    await logAgentActivity(supabase, userId, 'HISTORY.RESOLVER', 'info', `Elaborazione POD orari (O) zona ${zoneCode} - Parsing letture e incrocio`, { files: lettureFiles.length });
     
     const historyResult = await processHistoryStep(supabase, userId, lettureFiles, dispatchMonth, historicalMonth, zoneCode, anagraficaResult.pod_codes_o);
     await updateAgentState(supabase, jobId, userId, 'HISTORY.RESOLVER', 'completed', historyResult);
+    await logAgentActivity(supabase, userId, 'HISTORY.RESOLVER', 'info', 
+      `Incrocio completato: ${historyResult.pods_with_data} POD con dati, ${historyResult.pods_without_data} senza dati`, 
+      { pods_with_data: historyResult.pods_with_data, pods_without_data: historyResult.pods_without_data }
+    );
 
-    // Step 4: AGG.SCHEDULER (70%) - Now IP + O only (no LP)
+    // Step 4: AGG.SCHEDULER (70%)
     await updateJobProgress(supabase, jobId, 'AGG.SCHEDULER', 70);
     await updateAgentState(supabase, jobId, userId, 'AGG.SCHEDULER', 'running');
     await logAgentActivity(supabase, userId, 'AGG.SCHEDULER', 'info', `Aggregazione curve IP + O zona ${zoneCode}`);
@@ -179,7 +178,7 @@ async function orchestrateAgents(
     const exportResult = await processExportStep(supabase, aggResult, qaResult, zoneCode);
     await updateAgentState(supabase, jobId, userId, 'EXPORT.HUB', 'completed', exportResult);
 
-    // Save final results for this zone (IP + O only, no LP)
+    // Save final results
     const { error: resultError } = await supabase
       .from('dispatch_results')
       .insert({
@@ -192,16 +191,21 @@ async function orchestrateAgents(
         o_curve: aggResult.o_curve,
         total_pods: anagraficaResult.total_pods_o,
         pods_with_data: historyResult.pods_with_data,
-        pods_without_data: anagraficaResult.total_pods_o - historyResult.pods_with_data,
+        pods_without_data: historyResult.pods_without_data,
         quality_score: qaResult.quality_score,
-        metadata: { ...exportResult, zone: zoneCode, ip_pods_deducted: anagraficaResult.ip_pods_deducted }
+        metadata: { 
+          ...exportResult, 
+          zone: zoneCode, 
+          ip_pods_deducted: anagraficaResult.ip_pods_deducted,
+          pods_in_letture: historyResult.unique_pods_in_letture,
+          pods_missing: historyResult.pods_missing
+        }
       });
 
     if (resultError) {
       console.error('Error saving results for zone:', zoneCode, resultError);
     }
 
-    // Update job as completed
     await supabase
       .from('dispatch_jobs')
       .update({
@@ -236,7 +240,6 @@ async function orchestrateAgents(
 // Helper function to download file content from storage
 async function downloadFileContent(supabase: any, fileUrl: string): Promise<ArrayBuffer | null> {
   try {
-    // Extract storage path from URL
     const urlParts = fileUrl.split('/storage/v1/object/public/');
     if (urlParts.length < 2) {
       console.error('Invalid storage URL format:', fileUrl);
@@ -270,14 +273,12 @@ function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: str
   const lines = content.split('\n').filter(line => line.trim());
   if (lines.length === 0) return { podCodesO: [], podCodesLP: [], allPods: [] };
   
-  // Parse header to find column indices
   const headerLine = lines[0];
   const separator = headerLine.includes(';') ? ';' : ',';
   const headers = headerLine.split(separator).map(h => h.trim().toUpperCase());
   
   console.log('CSV Headers found:', headers);
   
-  // Find relevant column indices - try multiple possible column names
   const podColNames = ['POD', 'CODICE_POD', 'COD_POD', 'CODICE POD', 'PUNTO_PRELIEVO'];
   const typeColNames = ['TRATTAMENTO', 'TIPO_TRATTAMENTO', 'TIPO_MISURATORE', 'TIPO', 'TIPOLOGIA', 'TIPO_CONTATORE', 'TIPO TRATTAMENTO'];
   
@@ -306,9 +307,7 @@ function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: str
   const podCodesLP: string[] = [];
   const allPods: any[] = [];
   
-  // If we couldn't find the columns, try to infer from data
   if (podColIndex === -1) {
-    // Look for column that starts with "IT" (Italian POD format)
     for (let i = 0; i < headers.length; i++) {
       if (lines.length > 1) {
         const firstDataRow = lines[1].split(separator);
@@ -320,7 +319,6 @@ function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: str
     }
   }
   
-  // Parse data rows
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(separator).map(v => v.trim().replace(/"/g, ''));
     
@@ -339,15 +337,11 @@ function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: str
     
     allPods.push(pod);
     
-    // Categorize by meter type
-    // O = Orario (hourly metered)
-    // LP, T1, T2, T3, MONO, etc. = Load Profile (non-hourly)
     if (meterType === 'O' || meterType === 'ORARIO' || meterType === '1' || meterType === 'TM') {
       podCodesO.push(podCode);
     } else if (meterType) {
       podCodesLP.push(podCode);
     } else {
-      // If no type specified, assume based on POD format or count as O by default
       podCodesO.push(podCode);
     }
   }
@@ -355,6 +349,184 @@ function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: str
   console.log(`Parsed ${allPods.length} total PODs: ${podCodesO.length} type O, ${podCodesLP.length} type LP`);
   
   return { podCodesO, podCodesLP, allPods };
+}
+
+// Parse letture files (PDO, SOS) to extract POD codes with readings
+function parseLettureCSV(content: string): string[] {
+  const podCodes: string[] = [];
+  const lines = content.split('\n').filter(line => line.trim());
+  
+  if (lines.length === 0) return podCodes;
+  
+  const headerLine = lines[0];
+  const separator = headerLine.includes(';') ? ';' : ',';
+  const headers = headerLine.split(separator).map(h => h.trim().toUpperCase());
+  
+  // Find POD column - common names in PDO/SOS files
+  const podColNames = ['POD', 'CODICE_POD', 'COD_POD', 'CODICE POD', 'PUNTO_PRELIEVO', 'PUNTO PRELIEVO', 'IDENTIFICATIVO_POD'];
+  let podColIndex = -1;
+  
+  for (const name of podColNames) {
+    const idx = headers.indexOf(name);
+    if (idx !== -1) {
+      podColIndex = idx;
+      break;
+    }
+  }
+  
+  // If not found by header, try to find column with IT* POD codes
+  if (podColIndex === -1) {
+    for (let i = 0; i < headers.length; i++) {
+      if (lines.length > 1) {
+        const firstDataRow = lines[1].split(separator);
+        if (firstDataRow[i]?.trim().startsWith('IT')) {
+          podColIndex = i;
+          break;
+        }
+      }
+    }
+  }
+  
+  if (podColIndex === -1) {
+    console.log('Could not find POD column in letture file');
+    return podCodes;
+  }
+  
+  // Extract POD codes from data rows
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(separator).map(v => v.trim().replace(/"/g, ''));
+    if (values.length > podColIndex) {
+      const podCode = values[podColIndex];
+      if (podCode && podCode.startsWith('IT') && podCode.length > 10) {
+        podCodes.push(podCode);
+      }
+    }
+  }
+  
+  return podCodes;
+}
+
+// Parse XML files (common format for PDO/SOS)
+function parseLettureXML(content: string): string[] {
+  const podCodes: string[] = [];
+  
+  // Simple regex-based XML parsing for POD codes
+  // Look for common XML tags containing POD codes
+  const podPatterns = [
+    /<POD>([^<]+)<\/POD>/gi,
+    /<CodPod>([^<]+)<\/CodPod>/gi,
+    /<CodicePOD>([^<]+)<\/CodicePOD>/gi,
+    /<CODICE_POD>([^<]+)<\/CODICE_POD>/gi,
+    /<PuntoPrelievo>([^<]+)<\/PuntoPrelievo>/gi,
+    /POD="([^"]+)"/gi,
+    /CodPod="([^"]+)"/gi,
+  ];
+  
+  for (const pattern of podPatterns) {
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      const podCode = match[1].trim();
+      if (podCode.startsWith('IT') && podCode.length > 10) {
+        podCodes.push(podCode);
+      }
+    }
+  }
+  
+  return podCodes;
+}
+
+// Extract POD codes from letture files (ZIP containing CSV/XML)
+async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise<{ allPods: string[], filesProcessed: number, warnings: string[] }> {
+  const allPods: string[] = [];
+  let filesProcessed = 0;
+  const warnings: string[] = [];
+  
+  for (const file of files) {
+    try {
+      const content = await downloadFileContent(supabase, file.file_url);
+      if (!content) {
+        warnings.push(`Impossibile scaricare: ${file.file_name}`);
+        continue;
+      }
+      
+      const fileName = file.file_name.toLowerCase();
+      
+      if (fileName.endsWith('.zip')) {
+        // Process ZIP file
+        try {
+          const zip = await JSZip.loadAsync(content);
+          const innerFiles = Object.keys(zip.files).filter(name => !zip.files[name].dir);
+          
+          console.log(`Processing ZIP ${file.file_name} with ${innerFiles.length} files`);
+          
+          for (const innerFileName of innerFiles) {
+            const innerContent = await zip.files[innerFileName].async('string');
+            const lowerName = innerFileName.toLowerCase();
+            
+            let pods: string[] = [];
+            if (lowerName.endsWith('.csv')) {
+              pods = parseLettureCSV(innerContent);
+            } else if (lowerName.endsWith('.xml')) {
+              pods = parseLettureXML(innerContent);
+            }
+            
+            if (pods.length > 0) {
+              console.log(`Found ${pods.length} PODs in ${innerFileName}`);
+              allPods.push(...pods);
+              filesProcessed++;
+            }
+            
+            // Handle nested ZIPs
+            if (lowerName.endsWith('.zip')) {
+              try {
+                const nestedZipData = await zip.files[innerFileName].async('arraybuffer');
+                const nestedZip = await JSZip.loadAsync(nestedZipData);
+                const nestedFiles = Object.keys(nestedZip.files).filter(name => !nestedZip.files[name].dir);
+                
+                for (const nestedFileName of nestedFiles) {
+                  const nestedContent = await nestedZip.files[nestedFileName].async('string');
+                  const nestedLowerName = nestedFileName.toLowerCase();
+                  
+                  let nestedPods: string[] = [];
+                  if (nestedLowerName.endsWith('.csv')) {
+                    nestedPods = parseLettureCSV(nestedContent);
+                  } else if (nestedLowerName.endsWith('.xml')) {
+                    nestedPods = parseLettureXML(nestedContent);
+                  }
+                  
+                  if (nestedPods.length > 0) {
+                    console.log(`Found ${nestedPods.length} PODs in nested ${nestedFileName}`);
+                    allPods.push(...nestedPods);
+                    filesProcessed++;
+                  }
+                }
+              } catch (nestedErr) {
+                console.error(`Error processing nested ZIP ${innerFileName}:`, nestedErr);
+              }
+            }
+          }
+        } catch (zipError) {
+          console.error('Error processing ZIP:', zipError);
+          warnings.push(`Errore estrazione ZIP: ${file.file_name}`);
+        }
+      } else if (fileName.endsWith('.csv')) {
+        const textContent = new TextDecoder().decode(content);
+        const pods = parseLettureCSV(textContent);
+        allPods.push(...pods);
+        filesProcessed++;
+      } else if (fileName.endsWith('.xml')) {
+        const textContent = new TextDecoder().decode(content);
+        const pods = parseLettureXML(textContent);
+        allPods.push(...pods);
+        filesProcessed++;
+      }
+    } catch (error) {
+      console.error(`Error processing letture file ${file.file_name}:`, error);
+      warnings.push(`Errore elaborazione: ${file.file_name}`);
+    }
+  }
+  
+  return { allPods, filesProcessed, warnings };
 }
 
 // Parse IP Detail file to get IP POD codes
@@ -374,7 +546,6 @@ async function parseIPDetailFile(supabase: any, fileUrl: string): Promise<string
       for (let i = 1; i < lines.length; i++) {
         const separator = lines[0].includes(';') ? ';' : ',';
         const values = lines[i].split(separator);
-        // Find POD code (typically starts with "IT")
         for (const val of values) {
           const cleanVal = val.trim().replace(/"/g, '');
           if (cleanVal.startsWith('IT') && cleanVal.length > 10) {
@@ -383,9 +554,6 @@ async function parseIPDetailFile(supabase: any, fileUrl: string): Promise<string
           }
         }
       }
-    } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
-      // For Excel files, we'd need xlsx library - for now log and skip
-      console.log('Excel IP_DETAIL file detected, skipping for now');
     }
   } catch (error) {
     console.error('Error parsing IP detail file:', error);
@@ -394,7 +562,7 @@ async function parseIPDetailFile(supabase: any, fileUrl: string): Promise<string
   return ipPodCodes;
 }
 
-// Processing step functions - Real parsing implementation
+// Processing step functions
 async function processAnagraficaStep(supabase: any, userId: string, files: any[], ipDetailFiles: any[], zoneCode: string) {
   console.log(`Processing anagrafica for zone ${zoneCode}, files: ${files.length}, ipDetailFiles: ${ipDetailFiles.length}`);
   
@@ -403,7 +571,6 @@ async function processAnagraficaStep(supabase: any, userId: string, files: any[]
   let totalPodsProcessed = 0;
   const warnings: string[] = [];
   
-  // Process each anagrafica file
   for (const file of files) {
     try {
       const fileUrl = file.file_url;
@@ -418,7 +585,6 @@ async function processAnagraficaStep(supabase: any, userId: string, files: any[]
       }
       
       if (fileName.endsWith('.zip')) {
-        // Handle ZIP files
         try {
           const zip = await JSZip.loadAsync(content);
           const csvFiles = Object.keys(zip.files).filter(name => 
@@ -439,7 +605,6 @@ async function processAnagraficaStep(supabase: any, userId: string, files: any[]
           warnings.push(`Errore nell'estrazione del file ZIP: ${file.file_name}`);
         }
       } else if (fileName.endsWith('.csv')) {
-        // Handle CSV files directly
         const textContent = new TextDecoder().decode(content);
         const parsed = parseAnagraficaCSV(textContent, zoneCode);
         allPodCodesO = allPodCodesO.concat(parsed.podCodesO);
@@ -452,11 +617,9 @@ async function processAnagraficaStep(supabase: any, userId: string, files: any[]
     }
   }
   
-  // Deduplicate POD codes
   allPodCodesO = [...new Set(allPodCodesO)];
   allPodCodesLP = [...new Set(allPodCodesLP)];
   
-  // Parse IP detail files to deduct IP PODs
   let ipPodCodes: string[] = [];
   for (const ipFile of ipDetailFiles) {
     const ipPods = await parseIPDetailFile(supabase, ipFile.file_url);
@@ -464,7 +627,6 @@ async function processAnagraficaStep(supabase: any, userId: string, files: any[]
   }
   ipPodCodes = [...new Set(ipPodCodes)];
   
-  // Deduct IP PODs from O list
   const originalOCount = allPodCodesO.length;
   allPodCodesO = allPodCodesO.filter(pod => !ipPodCodes.includes(pod));
   const ipPodsDeducted = originalOCount - allPodCodesO.length;
@@ -508,32 +670,47 @@ async function processHistoryStep(
   zoneCode: string,
   podCodesO: string[]
 ) {
-  // For now, generate curve - in full implementation would parse readings
+  console.log(`Processing history step for zone ${zoneCode}, letture files: ${files.length}, POD O from anagrafica: ${podCodesO.length}`);
+  
+  // Extract POD codes from letture files
+  const lettureResult = await extractPodsFromLettureFiles(supabase, files);
+  
+  // Deduplicate POD codes from letture
+  const uniquePodsInLetture = [...new Set(lettureResult.allPods)];
+  
+  console.log(`Found ${uniquePodsInLetture.length} unique POD codes in letture files`);
+  
+  // Cross-reference: Find PODs that are in BOTH anagrafica (O) AND letture
+  const podsWithData = podCodesO.filter(pod => uniquePodsInLetture.includes(pod));
+  const podsWithoutData = podCodesO.filter(pod => !uniquePodsInLetture.includes(pod));
+  
+  console.log(`Cross-reference result: ${podsWithData.length} POD with data, ${podsWithoutData.length} POD without data`);
+  
+  // Generate curve (in full implementation, would aggregate actual readings)
   const o_curve = Array.from({ length: 96 }, (_, i) => {
     const hour = Math.floor(i / 4);
     return hour >= 8 && hour <= 18 ? Math.random() * 500 + 200 : Math.random() * 100 + 50;
   });
   
-  // Calculate pods_with_data based on files available
-  // In full implementation, would cross-reference readings with POD codes
-  const podsWithData = files.length > 0 ? Math.min(podCodesO.length, Math.floor(podCodesO.length * 0.9)) : 0;
-  
   return {
     pod_curves: o_curve,
-    pods_with_data: podsWithData,
-    files_processed: files.length,
+    pods_with_data: podsWithData.length,
+    pods_without_data: podsWithoutData.length,
+    pods_matching: podsWithData,
+    pods_missing: podsWithoutData.slice(0, 100), // Store first 100 for reference
+    unique_pods_in_letture: uniquePodsInLetture.length,
+    files_processed: lettureResult.filesProcessed,
     zone: zoneCode,
     total_pod_o_from_anagrafica: podCodesO.length,
-    warnings: []
+    warnings: lettureResult.warnings
   };
 }
 
-// AGG.SCHEDULER - Only IP + O (no LP)
 async function processAggStep(supabase: any, ipResult: any, historyResult: any) {
   const dispatch_curve = Array.from({ length: 96 }, (_, i) => {
     const ip = ipResult.typical_day_curve[i] || 0;
     const o = historyResult.pod_curves[i] || 0;
-    return ip + o; // Only IP + O, no LP
+    return ip + o;
   });
   
   return {
