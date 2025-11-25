@@ -72,11 +72,20 @@ serve(async (req) => {
 
           console.log(`Processing scheduled post ${post.id} for workflow: ${workflow.name}`);
 
-          // Mark as processing
-          await supabase
+          // Mark as processing with optimistic locking (only if still scheduled)
+          const { data: updatedPost } = await supabase
             .from("ai_social_scheduled_posts")
             .update({ status: "processing" })
-            .eq("id", post.id);
+            .eq("id", post.id)
+            .eq("status", "scheduled")
+            .select()
+            .maybeSingle();
+
+          // If no row was updated, another instance already took this post
+          if (!updatedPost) {
+            console.log(`Post ${post.id} already being processed by another instance, skipping`);
+            continue;
+          }
 
           // Run the workflow
           await runWorkflow(supabase, workflow, post.id);
