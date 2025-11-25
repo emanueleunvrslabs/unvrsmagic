@@ -497,10 +497,9 @@ export default function Workflows() {
                 {workflows.map((workflow) => (
                   <Card key={workflow.id} className="bg-muted/30">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-medium">{workflow.name}</h3>
-                          <div className="flex flex-wrap gap-2 mt-2 items-center">
+                      <div>
+                        <h3 className="font-medium">{workflow.name}</h3>
+                        <div className="flex flex-wrap gap-2 mt-2 items-center">
                             {/* Run Now Button */}
                             <Button
                               variant="outline"
@@ -590,39 +589,42 @@ export default function Workflows() {
                                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                                   </svg>
                                 )}
-                                {platform}
-                              </span>
-                            ))}
+                            {platform}
+                            </span>
+                          ))}
+                          
+                          {/* Action Buttons - on same row as badges */}
+                          <div className="flex items-center gap-1 ml-auto">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => handleToggleWorkflowActive(workflow.id, workflow.active)}
+                              title={workflow.active ? "Pause workflow" : "Activate workflow"}
+                            >
+                              {workflow.active ? (
+                                <Pause className="h-3.5 w-3.5" />
+                              ) : (
+                                <Play className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => handleEditWorkflow(workflow)}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => setDeleteWorkflowId(workflow.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleToggleWorkflowActive(workflow.id, workflow.active)}
-                            title={workflow.active ? "Pause workflow" : "Activate workflow"}
-                          >
-                            {workflow.active ? (
-                              <Pause className="h-4 w-4" />
-                            ) : (
-                              <Play className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditWorkflow(workflow)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => setDeleteWorkflowId(workflow.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
                         </div>
                       </div>
                     </CardContent>
