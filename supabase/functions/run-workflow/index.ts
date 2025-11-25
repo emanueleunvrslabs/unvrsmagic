@@ -76,7 +76,7 @@ serve(async (req) => {
         prompt: workflow.prompt_template,
         type: workflow.content_type,
         status: "generating",
-        metadata: { workflow_id: workflowId }
+        metadata: { workflow_id: workflowId, execution_type: "run_now" }
       })
       .select()
       .single();
