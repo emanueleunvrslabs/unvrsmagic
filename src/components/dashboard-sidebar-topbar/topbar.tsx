@@ -1,7 +1,6 @@
 "use client";
 
 import { SearchBar } from "@/components/search-bar";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -118,8 +117,6 @@ export function Topbar() {
 
       {/* Right section */}
       <div className="flex items-center gap-2">
-        <ThemeToggle variant="ghost" className="hidden sm:flex" />
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" className="relative">
@@ -205,10 +202,6 @@ export function Topbar() {
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="sm:hidden" />
-            <div className="px-2 py-1.5 sm:hidden">
-              <ThemeToggle className="w-full" />
-            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
