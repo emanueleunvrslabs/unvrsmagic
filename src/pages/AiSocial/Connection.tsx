@@ -87,8 +87,33 @@ export default function Connection() {
       return;
     }
     
-    toast.info("OAuth flow not yet implemented");
+    try {
+      const { data, error } = await supabase.functions.invoke('instagram-oauth', {
+        body: {},
+        method: 'GET',
+      });
+
+      if (error) throw error;
+
+      if (data.authUrl) {
+        // Redirect to Instagram OAuth
+        window.location.href = data.authUrl;
+      }
+    } catch (error) {
+      console.error("Error starting OAuth:", error);
+      toast.error("Failed to connect Instagram");
+    }
   };
+
+  useEffect(() => {
+    // Check if redirected back from OAuth
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true') {
+      toast.success("Instagram connected successfully!");
+      window.history.replaceState({}, '', '/ai-social/connection');
+      checkCredentials();
+    }
+  }, []);
   return (
     <DashboardLayout>
       <div className="space-y-6">
