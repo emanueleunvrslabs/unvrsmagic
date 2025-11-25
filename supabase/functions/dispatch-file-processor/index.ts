@@ -7,9 +7,11 @@ const corsHeaders = {
 };
 
 // Configuration for chunked processing
-const MAX_PROCESSING_TIME_MS = 50000; // 50 seconds max (leave buffer for response)
-const BATCH_SIZE = 500; // Files per batch in nested ZIP processing
-const MAX_MEMORY_MB = 400; // Stay under Deno memory limit
+const MAX_PROCESSING_TIME_MS = 45000; // 45 seconds max (leave buffer for response)
+const BATCH_SIZE = 100; // Files per batch in nested ZIP processing (reduced for memory)
+const MAX_MEMORY_MB = 150; // Conservative memory limit for edge functions
+const MAX_DOWNLOADABLE_FILE_MB = 50; // Maximum file size we can safely download into memory
+const SAMPLE_SIZE_FOR_LARGE_FILES = 50; // Number of nested files to sample from large archives
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -110,6 +112,18 @@ serve(async (req) => {
   }
 });
 
+// Extract POD codes from filename patterns (e.g., IT001E12345678_2024.zip)
+function extractPodFromFilename(filename: string): string[] {
+  const pods: string[] = [];
+  // Italian POD format: IT + 3 chars + E + 8 digits (total 14 chars)
+  const podPattern = /IT\d{3}E\d{8}/gi;
+  const matches = filename.match(podPattern);
+  if (matches) {
+    pods.push(...matches.map(p => p.toUpperCase()));
+  }
+  return pods;
+}
+
 // Download file with streaming support
 async function downloadFile(supabase: any, fileUrl: string): Promise<Uint8Array | null> {
   try {
@@ -155,6 +169,44 @@ async function processLettureFileChunked(
   let skippedFiles = 0;
   const warnings: string[] = [];
   const fileName = file.file_name.toLowerCase();
+  const fileSizeMB = (file.file_size || 0) / (1024 * 1024);
+
+  // Check file size BEFORE downloading to prevent memory issues
+  if (fileSizeMB > MAX_DOWNLOADABLE_FILE_MB) {
+    console.log(`File ${file.file_name} (${fileSizeMB.toFixed(2)} MB) exceeds safe download limit (${MAX_DOWNLOADABLE_FILE_MB} MB)`);
+    
+    // For very large files, we can only extract POD codes from filename patterns
+    // or return a warning asking user to upload smaller files
+    const extractedFromFilename = extractPodFromFilename(file.file_name);
+    if (extractedFromFilename.length > 0) {
+      console.log(`Extracted ${extractedFromFilename.length} PODs from filename`);
+      return {
+        success: true,
+        pod_codes: extractedFromFilename,
+        total_pods: extractedFromFilename.length,
+        files_processed: 0,
+        files_skipped: 1,
+        chunk_index: chunkIndex,
+        total_chunks_needed: 1,
+        more_chunks_needed: false,
+        warnings: [`File ${file.file_name} (${fileSizeMB.toFixed(0)}MB) troppo grande per elaborazione diretta. Limite: ${MAX_DOWNLOADABLE_FILE_MB}MB. Carica file più piccoli o dividi l'archivio.`],
+        skipped_due_to_size: true
+      };
+    }
+    
+    return {
+      success: true,
+      pod_codes: [],
+      total_pods: 0,
+      files_processed: 0,
+      files_skipped: 1,
+      chunk_index: chunkIndex,
+      total_chunks_needed: 1,
+      more_chunks_needed: false,
+      warnings: [`File ${file.file_name} (${fileSizeMB.toFixed(0)}MB) troppo grande. Limite memoria edge function: ${MAX_DOWNLOADABLE_FILE_MB}MB. Si prega di caricare file più piccoli o dividere l'archivio ZIP in parti.`],
+      skipped_due_to_size: true
+    };
+  }
 
   // Check if we have previous chunk data
   const { data: previousChunks } = await supabase
