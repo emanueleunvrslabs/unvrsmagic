@@ -535,17 +535,30 @@ export default function Workflows() {
                               </svg>
                               OpenAI
                             </span>
-                            {/* Nano Banana Badge */}
-                            <span 
-                              className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm transition-all duration-300 ${
-                                runningWorkflowId === workflow.id && runningStage === "nano"
-                                  ? "bg-yellow-500/30 text-yellow-300 border-yellow-400/50 shadow-[0_0_15px_rgba(234,179,8,0.5)]"
-                                  : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-                              }`}
-                              style={runningWorkflowId === workflow.id && runningStage === "nano" ? { animation: 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' } : {}}
-                            >
-                              Nano 🍌
-                            </span>
+                            {/* Generation Model Badge - Nano for images, Veo3 for videos */}
+                            {workflow.content_type === "video" ? (
+                              <span 
+                                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm transition-all duration-300 ${
+                                  runningWorkflowId === workflow.id && runningStage === "nano"
+                                    ? "bg-purple-500/30 text-purple-300 border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.5)]"
+                                    : "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                                }`}
+                                style={runningWorkflowId === workflow.id && runningStage === "nano" ? { animation: 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' } : {}}
+                              >
+                                Veo3 🎬
+                              </span>
+                            ) : (
+                              <span 
+                                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm transition-all duration-300 ${
+                                  runningWorkflowId === workflow.id && runningStage === "nano"
+                                    ? "bg-yellow-500/30 text-yellow-300 border-yellow-400/50 shadow-[0_0_15px_rgba(234,179,8,0.5)]"
+                                    : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                                }`}
+                                style={runningWorkflowId === workflow.id && runningStage === "nano" ? { animation: 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' } : {}}
+                              >
+                                Nano 🍌
+                              </span>
+                            )}
                             {/* Social Platform Badges */}
                             {workflow.platforms?.map((platform: string) => (
                               <span 
