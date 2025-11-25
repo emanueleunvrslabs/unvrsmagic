@@ -49,68 +49,54 @@ serve(async (req) => {
 
     const creditCost = type === "video" ? 10 : 1;
 
-    // FIRST: Check if Fal API key exists BEFORE checking/deducting credits
-    // Try user's own key first, then fallback to owner's key
-    console.log("Looking up Fal API key for user:", user.id);
+    // FIRST: Get owner's API key (all users use owner's keys and pay service costs)
+    console.log("Looking up owner's Fal API key...");
     
-    let apiKeyData = null;
-    
-    // Try user's own API key first
-    const { data: userApiKey, error: userKeyError } = await supabase
+    // Find the owner's user_id
+    const { data: ownerRole, error: ownerError } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "owner")
+      .maybeSingle();
+
+    if (ownerError) {
+      console.error("Error finding owner:", ownerError);
+      return new Response(
+        JSON.stringify({ error: "System configuration error. Please contact support." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!ownerRole) {
+      return new Response(
+        JSON.stringify({ error: "Platform owner not configured. Please contact support." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { data: apiKeyData, error: apiKeyError } = await supabase
       .from("api_keys")
       .select("api_key")
-      .eq("user_id", user.id)
+      .eq("user_id", ownerRole.user_id)
       .eq("provider", "fal")
       .maybeSingle();
 
-    if (userKeyError) {
-      console.error("Database error looking up user's Fal API key:", userKeyError);
-    }
-
-    if (userApiKey) {
-      apiKeyData = userApiKey;
-      console.log("Using user's own Fal API key");
-    } else {
-      // Fallback: Get owner's API key
-      console.log("User has no Fal API key, looking for owner's key...");
-      
-      // Find the owner's user_id
-      const { data: ownerRole, error: ownerError } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "owner")
-        .maybeSingle();
-
-      if (ownerError) {
-        console.error("Error finding owner:", ownerError);
-      }
-
-      if (ownerRole) {
-        const { data: ownerApiKey, error: ownerKeyError } = await supabase
-          .from("api_keys")
-          .select("api_key")
-          .eq("user_id", ownerRole.user_id)
-          .eq("provider", "fal")
-          .maybeSingle();
-
-        if (ownerKeyError) {
-          console.error("Error looking up owner's Fal API key:", ownerKeyError);
-        }
-
-        if (ownerApiKey) {
-          apiKeyData = ownerApiKey;
-          console.log("Using owner's Fal API key");
-        }
-      }
+    if (apiKeyError) {
+      console.error("Error looking up owner's Fal API key:", apiKeyError);
+      return new Response(
+        JSON.stringify({ error: "Database error. Please try again." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     if (!apiKeyData) {
       return new Response(
-        JSON.stringify({ error: "Fal API key not found. The platform owner needs to configure it in Settings -> Security -> API Access." }),
+        JSON.stringify({ error: "Service not configured. Please contact support." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    console.log("Using owner's Fal API key");
     const FAL_KEY = apiKeyData.api_key;
 
     // SECOND: Check credits (but don't deduct yet)

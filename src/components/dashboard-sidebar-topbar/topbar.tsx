@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useWalletConnection } from "@/hooks/use-wallet-connection";
+import { useUserProjects } from "@/hooks/useUserProjects";
+import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import {
   Activity,
@@ -53,7 +55,12 @@ export function Topbar() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const { isConnected, address, balance, disconnect, copyAddress } = useWalletConnection();
+  const { userProjects } = useUserProjects();
+  const { isOwner } = useUserRole();
   const navigate = useNavigate();
+
+  // Check if NKMT is added to user's projects
+  const hasNkmtProject = isOwner || userProjects.some(up => up.project.route === '/nkmt');
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -193,10 +200,12 @@ export function Topbar() {
               <Zap className="mr-2 h-4 w-4" />
               <Link to="/settings?tab=security">AI Model API</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Store className="mr-2 h-4 w-4" />
-              <Link to="/settings?tab=exchanges">Exchange Connection</Link>
-            </DropdownMenuItem>
+            {hasNkmtProject && (
+              <DropdownMenuItem>
+                <Store className="mr-2 h-4 w-4" />
+                <Link to="/settings?tab=exchanges">Exchange Connection</Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
