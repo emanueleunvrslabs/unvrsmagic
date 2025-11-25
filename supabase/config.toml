@@ -6,6 +6,9 @@ verify_jwt = true
 [functions.instagram-oauth]
 verify_jwt = false
 
+[functions.enhance-workflow-prompt]
+verify_jwt = true
+
 [functions.dispatch-orchestrator]
 verify_jwt = true
 
