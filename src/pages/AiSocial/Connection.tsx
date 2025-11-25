@@ -2,10 +2,8 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Link, Settings } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Link } from "lucide-react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,14 +16,10 @@ export default function Connection() {
         return;
       }
 
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/instagram-oauth?action=start`;
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/instagram-oauth?action=start&user_id=${session.user.id}`;
       
       const response = await fetch(functionUrl, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
       });
 
       if (!response.ok) {
