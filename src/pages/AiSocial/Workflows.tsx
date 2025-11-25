@@ -31,7 +31,7 @@ export default function Workflows() {
   const [workflowType, setWorkflowType] = useState<"image" | "video">("image");
   const [generationMode, setGenerationMode] = useState<string>("text-to-image");
   const [description, setDescription] = useState("");
-  const [enhancedPrompt, setEnhancedPrompt] = useState("");
+  
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [resolution, setResolution] = useState("1K");
   const [outputFormat, setOutputFormat] = useState("png");
@@ -109,7 +109,7 @@ export default function Workflows() {
       if (error) throw error;
       
       if (data?.enhancedPrompt) {
-        setEnhancedPrompt(data.enhancedPrompt);
+        setDescription(data.enhancedPrompt);
         toast.success("Prompt enhanced successfully!");
       } else if (data?.error) {
         toast.error(data.error);
@@ -189,7 +189,7 @@ export default function Workflows() {
   };
 
   const handleSaveWorkflow = async () => {
-    const finalPrompt = enhancedPrompt || description;
+    const finalPrompt = description;
     
     if (!finalPrompt.trim()) {
       toast.error("Please enter a description");
@@ -262,8 +262,7 @@ export default function Workflows() {
     setEditingWorkflowId(workflow.id);
     setWorkflowType(workflow.content_type);
     setGenerationMode(workflow.schedule_config?.generation_mode || (workflow.content_type === 'image' ? 'text-to-image' : 'text-to-video'));
-    setDescription(workflow.description || '');
-    setEnhancedPrompt(workflow.prompt_template || '');
+    setDescription(workflow.prompt_template || workflow.description || '');
     setAspectRatio(workflow.schedule_config?.aspect_ratio || '1:1');
     setResolution(workflow.schedule_config?.resolution || '1K');
     setOutputFormat(workflow.schedule_config?.output_format || 'png');
@@ -320,7 +319,6 @@ export default function Workflows() {
     setWorkflowType("image");
     setGenerationMode("text-to-image");
     setDescription("");
-    setEnhancedPrompt("");
     setAspectRatio("1:1");
     setResolution("1K");
     setOutputFormat("png");
@@ -604,25 +602,6 @@ export default function Workflows() {
               </Button>
             </div>
 
-            {/* Enhanced Prompt Preview */}
-            {enhancedPrompt && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Enhanced Prompt</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEnhancedPrompt("")}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="bg-muted/50 rounded-lg p-3 text-sm">
-                  {enhancedPrompt}
-                </div>
-              </div>
-            )}
 
             {/* Image-specific settings */}
             {workflowType === "image" && (
