@@ -84,7 +84,8 @@ export default function GenerateVideo() {
 
       if (createError) throw createError;
 
-      const { data, error } = await supabase.functions.invoke("ai-social-generate", {
+      // Call edge function to start generation (non-blocking)
+      supabase.functions.invoke("ai-social-generate", {
         body: {
           contentId: content.id,
           type: "video",
@@ -96,16 +97,17 @@ export default function GenerateVideo() {
           duration,
           generateAudio
         }
+      }).then(({ error }) => {
+        if (error) {
+          console.error("Error starting video generation:", error);
+        }
       });
 
-      if (error) throw error;
-
-      setGeneratedVideo(data.mediaUrl);
-      toast.success("Video generated successfully!");
+      toast.success("Video generation started! You can navigate away, it will continue in background.");
       
     } catch (error) {
       console.error("Error generating video:", error);
-      toast.error("Failed to generate video");
+      toast.error("Failed to start video generation");
     } finally {
       setLoading(false);
     }
