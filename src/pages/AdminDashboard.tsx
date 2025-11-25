@@ -327,144 +327,144 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Monthly Spending Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Credits Spent per Month</CardTitle>
-            <CardDescription>Last 6 months spending overview</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loadingMonthly ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : monthlySpending && monthlySpending.length > 0 ? (
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlySpending}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                    <XAxis 
-                      dataKey="month" 
-                      tick={{ fontSize: 12 }}
-                      className="text-muted-foreground"
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 12 }}
-                      className="text-muted-foreground"
-                      tickFormatter={(value) => `€${value}`}
-                    />
-                    <Tooltip 
-                      formatter={(value: number) => [`€${value.toFixed(2)}`, 'Spent']}
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <Bar 
-                      dataKey="amount" 
-                      fill="hsl(var(--primary))" 
-                      radius={[4, 4, 0, 0]}
-                      fillOpacity={0.6}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No spending data available
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent Transactions Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Transactions</CardTitle>
-            <CardDescription>Credit purchases and usage history</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loadingTransactions ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : transactionsData?.transactions && transactionsData.transactions.length > 0 ? (
-              <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactionsData.transactions.map((tx) => (
-                      <TableRow key={tx.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {Number(tx.amount) > 0 ? (
-                              <ArrowUpRight className="h-4 w-4 text-green-500" />
-                            ) : (
-                              <ArrowDownRight className="h-4 w-4 text-red-500" />
-                            )}
-                            <Badge variant={tx.type === 'purchase' ? 'default' : 'secondary'}>
-                              {tx.type === 'purchase' ? 'Purchase' : 'Usage'}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-[200px] truncate">
-                          {tx.description || '-'}
-                        </TableCell>
-                        <TableCell>
-                          <span className={Number(tx.amount) > 0 ? 'text-green-500' : 'text-red-500'}>
-                            {Number(tx.amount) > 0 ? '+' : ''}€{Number(tx.amount).toFixed(2)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                
-                {/* Pagination Controls */}
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/30">
-                  <p className="text-sm text-muted-foreground">
-                    Page {txPage + 1} of {totalPages} ({transactionsData.totalCount} transactions)
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setTxPage(p => Math.max(0, p - 1))}
-                      disabled={txPage === 0}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setTxPage(p => Math.min(totalPages - 1, p + 1))}
-                      disabled={txPage >= totalPages - 1}
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Monthly Spending Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Credits Spent per Month</CardTitle>
+              <CardDescription>Last 6 months spending overview</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingMonthly ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No transactions yet
-              </p>
-            )}
-          </CardContent>
-        </Card>
+              ) : monthlySpending && monthlySpending.length > 0 ? (
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={monthlySpending}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fontSize: 12 }}
+                        className="text-muted-foreground"
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        className="text-muted-foreground"
+                        tickFormatter={(value) => `€${value}`}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`€${value.toFixed(2)}`, 'Spent']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))', 
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="amount" 
+                        fill="hsl(var(--primary))" 
+                        radius={[4, 4, 0, 0]}
+                        fillOpacity={0.6}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No spending data available
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Transactions Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Transactions</CardTitle>
+              <CardDescription>Credit purchases and usage history</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingTransactions ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : transactionsData?.transactions && transactionsData.transactions.length > 0 ? (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {transactionsData.transactions.map((tx) => (
+                        <TableRow key={tx.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {Number(tx.amount) > 0 ? (
+                                <ArrowUpRight className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <ArrowDownRight className="h-4 w-4 text-red-500" />
+                              )}
+                              <Badge variant={tx.type === 'purchase' ? 'default' : 'secondary'}>
+                                {tx.type === 'purchase' ? 'Purchase' : 'Usage'}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate">
+                            {tx.description || '-'}
+                          </TableCell>
+                          <TableCell>
+                            <span className={Number(tx.amount) > 0 ? 'text-green-500' : 'text-red-500'}>
+                              {Number(tx.amount) > 0 ? '+' : ''}€{Number(tx.amount).toFixed(2)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  
+                  {/* Pagination Controls */}
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/30">
+                    <p className="text-sm text-muted-foreground">
+                      Page {txPage + 1} of {totalPages} ({transactionsData.totalCount} total)
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setTxPage(p => Math.max(0, p - 1))}
+                        disabled={txPage === 0}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setTxPage(p => Math.min(totalPages - 1, p + 1))}
+                        disabled={txPage >= totalPages - 1}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No transactions yet
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
