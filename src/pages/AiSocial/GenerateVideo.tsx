@@ -9,6 +9,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { GallerySection } from "@/components/ai-social/GallerySection";
 
 export default function GenerateVideo() {
   const [prompt, setPrompt] = useState("");
@@ -190,6 +191,8 @@ export default function GenerateVideo() {
             </CardContent>
           </Card>
         </div>
+
+        <GallerySection />
       </div>
     </DashboardLayout>
   );
