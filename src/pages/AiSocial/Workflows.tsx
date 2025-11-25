@@ -581,7 +581,6 @@ export default function Workflows() {
 
   const handleRunNow = async (workflow: any) => {
     setRunningWorkflowId(workflow.id);
-    setRunningStage("openai");
     const isVideo = workflow.content_type === "video";
     
     const startTime = Date.now();
@@ -590,25 +589,35 @@ export default function Workflows() {
       return `${elapsed}s`;
     };
     
-    toast.info("Starting workflow...", { description: "Preparing and sending request..." });
-    
     let pollingInterval: NodeJS.Timeout | null = null;
-    let contentId: string | null = null;
-    let lastStatus: string | null = null;
     
     try {
-      // Call the edge function - it returns immediately with contentId
+      // Stage 1: OpenAI preparation (show for 3 seconds)
+      setRunningStage("openai");
+      toast.info("Preparing workflow...", { description: "Processing prompt and parameters..." });
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Start the edge function
       const invokePromise = supabase.functions.invoke('run-workflow', {
         body: { workflowId: workflow.id }
       });
 
-      // Wait a moment for content record to be created, then start polling
+      // Wait for content record to be created
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Start polling for actual content status
-      const pollForContent = async (): Promise<{ status: string; media_url?: string } | null> => {
+      // Stage 2: Generation stage - poll until completion
+      setRunningStage("nano");
+      toast.info(`Starting ${isVideo ? 'video' : 'image'} generation...`, { 
+        description: `${isVideo ? 'Veo3' : 'Nano Banana'} is starting...` 
+      });
+      
+      let pollCount = 0;
+      let contentCompleted = false;
+      
+      const pollForCompletion = async (): Promise<boolean> => {
+        pollCount++;
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return null;
+        if (!session) return false;
 
         const { data: contents } = await supabase
           .from('ai_social_content')
@@ -620,70 +629,53 @@ export default function Workflows() {
 
         if (contents && contents.length > 0) {
           const content = contents[0];
-          contentId = content.id;
-          return { status: content.status, media_url: content.media_url };
-        }
-        return null;
-      };
-
-      // Poll and update UI with real status
-      const updateUIFromStatus = async () => {
-        const result = await pollForContent();
-        if (!result) return;
-
-        const { status, media_url } = result;
-        
-        // Only update if status changed
-        if (status !== lastStatus) {
-          lastStatus = status;
           
-          if (status === 'generating') {
-            setRunningStage("nano");
-            if (isVideo) {
-              toast.info(`Generating video... (${formatElapsed()})`, { 
-                description: "Veo3 is working... this takes 60-120 seconds" 
-              });
-            } else {
-              toast.info(`Generating image... (${formatElapsed()})`, { 
-                description: "Nano Banana is working... this takes 30-60 seconds" 
-              });
-            }
-          } else if (status === 'completed' && media_url) {
-            // Content is ready, now check if publishing to Instagram
-            if (workflow.platforms?.includes("instagram")) {
-              setRunningStage("instagram");
-              toast.info(`Publishing to Instagram... (${formatElapsed()})`, { 
-                description: "Uploading content to Instagram..." 
-              });
-            }
+          // Show progress update every 10 seconds (every ~3 polls)
+          if (pollCount % 3 === 0 && content.status === 'generating') {
+            toast.info(`${isVideo ? 'Video' : 'Image'} generating... (${formatElapsed()})`, { 
+              description: `${isVideo ? 'Veo3' : 'Nano Banana'} is working... please wait` 
+            });
+          }
+          
+          if (content.status === 'completed' && content.media_url) {
+            return true; // Generation complete!
+          } else if (content.status === 'failed') {
+            throw new Error(content.error_message || 'Generation failed');
           }
         }
+        
+        return false; // Keep polling
       };
-
-      // Poll every 3 seconds
-      pollingInterval = setInterval(updateUIFromStatus, 3000);
       
-      // Initial poll
-      await updateUIFromStatus();
-
-      // Wait for edge function to complete (this includes Instagram publishing)
+      // Poll every 3 seconds until generation completes
+      while (!contentCompleted) {
+        contentCompleted = await pollForCompletion();
+        if (!contentCompleted) {
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      }
+      
+      toast.success(`${isVideo ? 'Video' : 'Image'} generated! (${formatElapsed()})`, {
+        description: "Media ready!"
+      });
+      
+      // Stage 3: Instagram publishing (if configured)
+      if (workflow.platforms?.includes("instagram")) {
+        setRunningStage("instagram");
+        toast.info("Publishing to Instagram...", { 
+          description: "Uploading and creating post..." 
+        });
+        // Wait for Instagram publishing to complete (give it 10 seconds to show the badge)
+        await new Promise(resolve => setTimeout(resolve, 10000));
+      }
+      
+      // Wait for edge function to fully complete
       const { data, error } = await invokePromise;
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      // Clean up polling
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
-        pollingInterval = null;
-      }
-
-      if (error) {
-        throw error;
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      // Show success message with total time
+      // Final success message
       const totalTime = formatElapsed();
       if (data?.instagram?.success) {
         toast.success(`Workflow completed! (${totalTime})`, { 
@@ -699,7 +691,6 @@ export default function Workflows() {
         });
       }
 
-      // Refresh workflows to update last_run_at
       refetchWorkflows();
     } catch (error) {
       console.error("Error running workflow:", error);
