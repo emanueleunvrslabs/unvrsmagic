@@ -1,6 +1,8 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -95,6 +97,21 @@ const AdminDashboard = () => {
       const totalSpent = data?.reduce((sum, u) => sum + Number(u.total_spent || 0), 0) || 0;
       
       return { totalBalance, totalPurchased, totalSpent };
+    }
+  });
+
+  // Fetch recent credit transactions
+  const { data: recentTransactions, isLoading: loadingTransactions } = useQuery({
+    queryKey: ['admin-recent-transactions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('credit_transactions')
+        .select('id, amount, type, description, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data || [];
     }
   });
 
@@ -259,6 +276,65 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Recent Transactions Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Transactions</CardTitle>
+            <CardDescription>Latest credit purchases and usage</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingTransactions ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : recentTransactions && recentTransactions.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentTransactions.map((tx) => (
+                    <TableRow key={tx.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {Number(tx.amount) > 0 ? (
+                            <ArrowUpRight className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <ArrowDownRight className="h-4 w-4 text-red-500" />
+                          )}
+                          <Badge variant={tx.type === 'purchase' ? 'default' : 'secondary'}>
+                            {tx.type === 'purchase' ? 'Purchase' : 'Usage'}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate">
+                        {tx.description || '-'}
+                      </TableCell>
+                      <TableCell>
+                        <span className={Number(tx.amount) > 0 ? 'text-green-500' : 'text-red-500'}>
+                          {Number(tx.amount) > 0 ? '+' : ''}€{Number(tx.amount).toFixed(2)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No transactions yet
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
