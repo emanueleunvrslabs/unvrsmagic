@@ -489,16 +489,17 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         </button>
 
         {/* Header */}
-        <div className={cn("flex h-16 items-center py-4", collapsed ? "justify-center px-2" : "px-3")}>
-          <div className="flex items-center gap-2">
+        <div className={cn("flex h-16 items-center py-4 transition-all duration-300", collapsed ? "justify-center px-2" : "px-3")}>
+          <div className="flex items-center gap-2 overflow-hidden">
             <div className="flex h-8 w-8 items-center justify-center rounded-md overflow-hidden flex-shrink-0">
               <img src={unvrsLogo} alt="UNVRS Labs" className="h-8 w-8 object-cover" />
             </div>
-            {!collapsed && (
-              <div className="flex flex-col">
-                <span className="text-lg font-semibold tracking-tight">UNVRS MAGIC AI</span>
-              </div>
-            )}
+            <div className={cn(
+              "flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
+              collapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+            )}>
+              <span className="text-lg font-semibold tracking-tight whitespace-nowrap">UNVRS MAGIC AI</span>
+            </div>
           </div>
         </div>
 
