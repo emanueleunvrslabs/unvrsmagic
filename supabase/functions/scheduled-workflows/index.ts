@@ -22,7 +22,7 @@ serve(async (req) => {
     // Query scheduled posts that are due (scheduled_at <= now AND status = 'scheduled')
     const { data: scheduledPosts, error: postsError } = await supabase
       .from("ai_social_scheduled_posts")
-      .select("*, ai_social_workflows(*)")
+      .select("*")
       .eq("status", "scheduled")
       .lte("scheduled_at", now.toISOString())
       .order("scheduled_at", { ascending: true });
@@ -45,9 +45,14 @@ serve(async (req) => {
     const processScheduledPosts = async () => {
       for (const post of scheduledPosts) {
         try {
-          const workflow = post.ai_social_workflows;
-          if (!workflow) {
-            console.error(`No workflow found for scheduled post ${post.id}`);
+          // Fetch workflow separately
+          const { data: workflow, error: workflowError } = await supabase
+            .from("ai_social_workflows")
+            .select("*")
+            .eq("id", post.workflow_id)
+            .maybeSingle();
+          if (workflowError || !workflow) {
+            console.error(`No workflow found for scheduled post ${post.id}:`, workflowError);
             await supabase
               .from("ai_social_scheduled_posts")
               .update({ status: "failed", error_message: "Workflow not found" })
@@ -113,7 +118,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: `Processing ${scheduledPosts.length} scheduled posts`,
-        posts: scheduledPosts.map(p => ({ id: p.id, workflow: p.ai_social_workflows?.name }))
+        posts: scheduledPosts.map(p => ({ id: p.id, workflow_id: p.workflow_id }))
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
