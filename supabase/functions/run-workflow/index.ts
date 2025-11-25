@@ -98,94 +98,101 @@ serve(async (req) => {
       throw new Error("Failed to create content record");
     }
 
-    console.log("Content record created:", content.id);
-
-    // Start background processing
-    const backgroundTask = async () => {
-      try {
-        const scheduleConfig = workflow.schedule_config || {};
-        const isVideo = workflow.content_type === "video";
-        
-        let generatedMediaUrl: string;
-        
-        if (isVideo) {
-          generatedMediaUrl = await generateVideo(FAL_KEY, workflow, scheduleConfig);
-        } else {
-          generatedMediaUrl = await generateImage(FAL_KEY, workflow, scheduleConfig);
-        }
-
-        console.log("Media generated:", generatedMediaUrl);
-
-        // Update content record with generated media
-        await supabase
-          .from("ai_social_content")
-          .update({ 
-            status: "completed",
-            media_url: generatedMediaUrl,
-            thumbnail_url: generatedMediaUrl
-          })
-          .eq("id", content.id);
-
-        // Post to Instagram if connected
-        if (hasInstagram && instagramData) {
-          console.log("Publishing to Instagram...");
-          
-          try {
-            const accessToken = instagramData.api_key;
-            const igUserId = instagramData.owner_id;
-
-            if (isVideo) {
-              await publishVideoToInstagram(
-                accessToken,
-                igUserId,
-                generatedMediaUrl,
-                workflow.description || workflow.prompt_template.substring(0, 200) + "..."
-              );
-            } else {
-              await publishImageToInstagram(
-                accessToken,
-                igUserId,
-                generatedMediaUrl,
-                workflow.description || workflow.prompt_template.substring(0, 200) + "..."
-              );
-            }
-          } catch (igError) {
-            console.error("Instagram publishing error:", igError);
-          }
-        }
-
-        // Update workflow last_run_at
-        await supabase
-          .from("ai_social_workflows")
-          .update({ last_run_at: new Date().toISOString() })
-          .eq("id", workflowId);
-
-      } catch (error) {
-        console.error("Background task error:", error);
-        // Update content record with error
-        await supabase
-          .from("ai_social_content")
-          .update({ 
-            status: "failed",
-            error_message: error instanceof Error ? error.message : "Unknown error"
-          })
-          .eq("id", content.id);
+    // Process synchronously so client can poll real progress
+    try {
+      const scheduleConfig = workflow.schedule_config || {};
+      const isVideo = workflow.content_type === "video";
+      
+      let generatedMediaUrl: string;
+      
+      if (isVideo) {
+        generatedMediaUrl = await generateVideo(FAL_KEY, workflow, scheduleConfig);
+      } else {
+        generatedMediaUrl = await generateImage(FAL_KEY, workflow, scheduleConfig);
       }
-    };
 
-    // Use waitUntil to run in background
-    // @ts-ignore - EdgeRuntime is available in Supabase Edge Functions
-    EdgeRuntime.waitUntil(backgroundTask());
+      console.log("Media generated:", generatedMediaUrl);
 
-    // Return immediately with content ID for polling
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        contentId: content.id,
-        status: "generating"
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+      // Update content record with generated media
+      await supabase
+        .from("ai_social_content")
+        .update({ 
+          status: "completed",
+          media_url: generatedMediaUrl,
+          thumbnail_url: generatedMediaUrl
+        })
+        .eq("id", content.id);
+
+      let instagramResult: { success: boolean; error?: string } = { success: false };
+
+      // Post to Instagram if connected
+      if (hasInstagram && instagramData) {
+        console.log("Publishing to Instagram...");
+        
+        try {
+          const accessToken = instagramData.api_key;
+          const igUserId = instagramData.owner_id;
+
+          if (isVideo) {
+            await publishVideoToInstagram(
+              accessToken,
+              igUserId,
+              generatedMediaUrl,
+              workflow.description || workflow.prompt_template.substring(0, 200) + "..."
+            );
+          } else {
+            await publishImageToInstagram(
+              accessToken,
+              igUserId,
+              generatedMediaUrl,
+              workflow.description || workflow.prompt_template.substring(0, 200) + "..."
+            );
+          }
+          instagramResult = { success: true };
+        } catch (igError) {
+          console.error("Instagram publishing error:", igError);
+          instagramResult = { success: false, error: igError instanceof Error ? igError.message : "Unknown error" };
+        }
+      }
+
+      // Update workflow last_run_at
+      await supabase
+        .from("ai_social_workflows")
+        .update({ last_run_at: new Date().toISOString() })
+        .eq("id", workflowId);
+
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          contentId: content.id,
+          status: "completed",
+          mediaUrl: generatedMediaUrl,
+          instagram: hasInstagram ? instagramResult : undefined
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+
+    } catch (error) {
+      console.error("Generation error:", error);
+      // Update content record with error
+      await supabase
+        .from("ai_social_content")
+        .update({ 
+          status: "failed",
+          error_message: error instanceof Error ? error.message : "Unknown error"
+        })
+        .eq("id", content.id);
+
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          contentId: content.id,
+          status: "failed",
+          error: error instanceof Error ? error.message : "Unknown error"
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
   } catch (error) {
     console.error("Error in run-workflow:", error);
