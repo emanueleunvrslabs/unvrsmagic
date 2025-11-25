@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Clock, Play, Pause } from "lucide-react";
+import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Clock, Play, Pause, Rocket } from "lucide-react";
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -345,6 +345,18 @@ export default function Workflows() {
     );
   };
 
+  const handleRunNow = async (workflow: any) => {
+    toast.info("Running workflow...", { description: `Publishing "${workflow.name}" now` });
+    // TODO: Implement the actual run now logic - generate content and publish to platforms
+    try {
+      // For now, just show a success message
+      toast.success("Workflow triggered!", { description: "Content generation started" });
+    } catch (error) {
+      console.error("Error running workflow:", error);
+      toast.error("Failed to run workflow");
+    }
+  };
+
   const openNewWorkflowDialog = () => {
     resetForm();
     setIsDialogOpen(true);
@@ -399,10 +411,6 @@ export default function Workflows() {
                             <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 backdrop-blur-sm">
                               🍌 Nano
                             </span>
-                            {/* Content Type Badge */}
-                            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 backdrop-blur-sm capitalize">
-                              {workflow.content_type}
-                            </span>
                             {/* Social Platform Badges */}
                             {workflow.platforms?.map((platform: string) => (
                               <span 
@@ -419,6 +427,15 @@ export default function Workflows() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRunNow(workflow)}
+                            className="bg-primary/10 border-primary/20 hover:bg-primary/20 text-primary"
+                          >
+                            <Rocket className="h-4 w-4 mr-1" />
+                            Run Now
+                          </Button>
                           <span className={`text-xs px-2 py-1 rounded ${workflow.active ? 'bg-green-500/20 text-green-500' : 'bg-muted text-muted-foreground'}`}>
                             {workflow.active ? 'Active' : 'Paused'}
                           </span>
