@@ -129,47 +129,39 @@ async function orchestrateAgents(
     const ipDetailFiles = userFiles?.filter((f: any) => f.file_type === 'IP_DETAIL') || [];
     const lettureFiles = userFiles?.filter((f: any) => f.file_type === 'LETTURE') || [];
 
-    // Step 1: ANAGRAFICA.INTAKE (10%)
-    await updateJobProgress(supabase, jobId, 'ANAGRAFICA.INTAKE', 10);
+    // Step 1: ANAGRAFICA.INTAKE (15%)
+    await updateJobProgress(supabase, jobId, 'ANAGRAFICA.INTAKE', 15);
     await updateAgentState(supabase, jobId, userId, 'ANAGRAFICA.INTAKE', 'running');
-    await logAgentActivity(supabase, userId, 'ANAGRAFICA.INTAKE', 'info', `Elaborazione anagrafica POD zona ${zoneCode}`, { files: anagraficaFiles.length, zone: zoneCode });
+    await logAgentActivity(supabase, userId, 'ANAGRAFICA.INTAKE', 'info', `Elaborazione anagrafica POD zona ${zoneCode} (solo tipo O)`, { files: anagraficaFiles.length, zone: zoneCode });
     
     const anagraficaResult = await processAnagraficaStep(supabase, userId, anagraficaFiles, ipDetailFiles, zoneCode);
     await updateAgentState(supabase, jobId, userId, 'ANAGRAFICA.INTAKE', 'completed', anagraficaResult);
 
-    // Step 2: IP.ASSIMILATOR (25%)
-    await updateJobProgress(supabase, jobId, 'IP.ASSIMILATOR', 25);
+    // Step 2: IP.ASSIMILATOR (30%)
+    await updateJobProgress(supabase, jobId, 'IP.ASSIMILATOR', 30);
     await updateAgentState(supabase, jobId, userId, 'IP.ASSIMILATOR', 'running');
     await logAgentActivity(supabase, userId, 'IP.ASSIMILATOR', 'info', `Elaborazione illuminazione pubblica zona ${zoneCode}`, { files: ipFiles.length });
     
     const ipResult = await processIpStep(supabase, userId, ipFiles, historicalMonth, zoneCode);
     await updateAgentState(supabase, jobId, userId, 'IP.ASSIMILATOR', 'completed', ipResult);
 
-    // Step 3: HISTORY.RESOLVER (40%)
-    await updateJobProgress(supabase, jobId, 'HISTORY.RESOLVER', 40);
+    // Step 3: HISTORY.RESOLVER (50%)
+    await updateJobProgress(supabase, jobId, 'HISTORY.RESOLVER', 50);
     await updateAgentState(supabase, jobId, userId, 'HISTORY.RESOLVER', 'running');
-    await logAgentActivity(supabase, userId, 'HISTORY.RESOLVER', 'info', `Elaborazione POD orari zona ${zoneCode}`, { files: lettureFiles.length });
+    await logAgentActivity(supabase, userId, 'HISTORY.RESOLVER', 'info', `Elaborazione POD orari (O) zona ${zoneCode}`, { files: lettureFiles.length });
     
     const historyResult = await processHistoryStep(supabase, userId, lettureFiles, dispatchMonth, historicalMonth, zoneCode);
     await updateAgentState(supabase, jobId, userId, 'HISTORY.RESOLVER', 'completed', historyResult);
 
-    // Step 4: LP.PROFILER (55%)
-    await updateJobProgress(supabase, jobId, 'LP.PROFILER', 55);
-    await updateAgentState(supabase, jobId, userId, 'LP.PROFILER', 'running');
-    await logAgentActivity(supabase, userId, 'LP.PROFILER', 'info', `Applicazione profili di carico zona ${zoneCode}`);
-    
-    const lpResult = await processLpStep(supabase, userId, dispatchMonth, zoneCode);
-    await updateAgentState(supabase, jobId, userId, 'LP.PROFILER', 'completed', lpResult);
-
-    // Step 5: AGG.SCHEDULER (70%)
+    // Step 4: AGG.SCHEDULER (70%) - Now IP + O only (no LP)
     await updateJobProgress(supabase, jobId, 'AGG.SCHEDULER', 70);
     await updateAgentState(supabase, jobId, userId, 'AGG.SCHEDULER', 'running');
-    await logAgentActivity(supabase, userId, 'AGG.SCHEDULER', 'info', `Aggregazione curve zona ${zoneCode}`);
+    await logAgentActivity(supabase, userId, 'AGG.SCHEDULER', 'info', `Aggregazione curve IP + O zona ${zoneCode}`);
     
-    const aggResult = await processAggStep(supabase, ipResult, historyResult, lpResult);
+    const aggResult = await processAggStep(supabase, ipResult, historyResult);
     await updateAgentState(supabase, jobId, userId, 'AGG.SCHEDULER', 'completed', aggResult);
 
-    // Step 6: QA.WATCHDOG (85%)
+    // Step 5: QA.WATCHDOG (85%)
     await updateJobProgress(supabase, jobId, 'QA.WATCHDOG', 85);
     await updateAgentState(supabase, jobId, userId, 'QA.WATCHDOG', 'running');
     await logAgentActivity(supabase, userId, 'QA.WATCHDOG', 'info', `Controllo qualità dati zona ${zoneCode}`);
@@ -177,7 +169,7 @@ async function orchestrateAgents(
     const qaResult = await processQaStep(supabase, aggResult);
     await updateAgentState(supabase, jobId, userId, 'QA.WATCHDOG', 'completed', qaResult);
 
-    // Step 7: EXPORT.HUB (95%)
+    // Step 6: EXPORT.HUB (95%)
     await updateJobProgress(supabase, jobId, 'EXPORT.HUB', 95);
     await updateAgentState(supabase, jobId, userId, 'EXPORT.HUB', 'running');
     await logAgentActivity(supabase, userId, 'EXPORT.HUB', 'info', `Generazione output zona ${zoneCode}`);
@@ -185,7 +177,7 @@ async function orchestrateAgents(
     const exportResult = await processExportStep(supabase, aggResult, qaResult, zoneCode);
     await updateAgentState(supabase, jobId, userId, 'EXPORT.HUB', 'completed', exportResult);
 
-    // Save final results for this zone
+    // Save final results for this zone (IP + O only, no LP)
     const { error: resultError } = await supabase
       .from('dispatch_results')
       .insert({
@@ -196,10 +188,9 @@ async function orchestrateAgents(
         curve_96_values: aggResult.dispatch_curve,
         ip_curve: aggResult.ip_curve,
         o_curve: aggResult.o_curve,
-        lp_curve: aggResult.lp_curve,
-        total_pods: anagraficaResult.total_pods,
+        total_pods: anagraficaResult.total_pods_o,
         pods_with_data: historyResult.pods_with_data,
-        pods_without_data: anagraficaResult.total_pods - historyResult.pods_with_data,
+        pods_without_data: anagraficaResult.total_pods_o - historyResult.pods_with_data,
         quality_score: qaResult.quality_score,
         metadata: { ...exportResult, zone: zoneCode }
       });
@@ -240,12 +231,12 @@ async function orchestrateAgents(
   }
 }
 
-// Processing step functions
+// Processing step functions - Only O type PODs (no LP)
 async function processAnagraficaStep(supabase: any, userId: string, files: any[], ipDetailFiles: any[], zoneCode: string) {
-  // In real implementation, would parse files and deduct IP PODs
+  // In real implementation, would parse files and count only O (hourly) PODs
+  // LP PODs are excluded from processing
   return {
-    total_pods: files.length > 0 ? 150 : 0,
-    pods_by_type: { O: 50, LP: 100 },
+    total_pods_o: files.length > 0 ? 50 : 0, // Only O type PODs
     zone: zoneCode,
     ip_pods_deducted: ipDetailFiles.length > 0 ? 20 : 0,
     warnings: []
@@ -281,39 +272,21 @@ async function processHistoryStep(supabase: any, userId: string, files: any[], d
   };
 }
 
-async function processLpStep(supabase: any, userId: string, dispatchMonth: string, zoneCode: string) {
-  const lp_curve = Array.from({ length: 96 }, (_, i) => {
-    const hour = Math.floor(i / 4);
-    return (hour >= 7 && hour <= 9) || (hour >= 18 && hour <= 22) 
-      ? Math.random() * 300 + 150 
-      : Math.random() * 100 + 30;
-  });
-  
-  return {
-    pod_curves: lp_curve,
-    pods_processed: 100,
-    zone: zoneCode,
-    warnings: []
-  };
-}
-
-async function processAggStep(supabase: any, ipResult: any, historyResult: any, lpResult: any) {
+// AGG.SCHEDULER - Only IP + O (no LP)
+async function processAggStep(supabase: any, ipResult: any, historyResult: any) {
   const dispatch_curve = Array.from({ length: 96 }, (_, i) => {
     const ip = ipResult.typical_day_curve[i] || 0;
     const o = historyResult.pod_curves[i] || 0;
-    const lp = lpResult.pod_curves[i] || 0;
-    return ip + o + lp;
+    return ip + o; // Only IP + O, no LP
   });
   
   return {
     dispatch_curve,
     ip_curve: ipResult.typical_day_curve,
     o_curve: historyResult.pod_curves,
-    lp_curve: lpResult.pod_curves,
     breakdown: {
       ip_total: ipResult.typical_day_curve.reduce((a: number, b: number) => a + b, 0),
-      o_total: historyResult.pod_curves.reduce((a: number, b: number) => a + b, 0),
-      lp_total: lpResult.pod_curves.reduce((a: number, b: number) => a + b, 0)
+      o_total: historyResult.pod_curves.reduce((a: number, b: number) => a + b, 0)
     }
   };
 }

@@ -30,11 +30,10 @@ export function ResultsDashboard() {
         curva_96_valori: result.curve_96_values,
         breakdown: {
           ip: result.ip_curve,
-          orari: result.o_curve,
-          load_profile: result.lp_curve
+          orari: result.o_curve
         },
         statistiche: {
-          totale_pod: result.total_pods,
+          totale_pod_o: result.total_pods,
           pod_con_dati: result.pods_with_data,
           pod_senza_dati: result.pods_without_data,
           quality_score: result.quality_score
@@ -118,17 +117,15 @@ export function ResultsDashboard() {
       const curve = result.curve_96_values;
       const ipCurve = result.ip_curve || [];
       const oCurve = result.o_curve || [];
-      const lpCurve = result.lp_curve || [];
 
-      // Create main data sheet
+      // Create main data sheet - IP + O only (no LP)
       const mainData = [];
       for (let i = 0; i < 96; i++) {
         mainData.push({
           'Quarto Ora': i + 1,
-          'Valore Totale': curve[i] || 0,
+          'Valore Totale (IP + O)': curve[i] || 0,
           'IP': ipCurve[i] || 0,
-          'Orari (O)': oCurve[i] || 0,
-          'Load Profile (LP)': lpCurve[i] || 0
+          'Orari (O)': oCurve[i] || 0
         });
       }
 
@@ -137,7 +134,7 @@ export function ResultsDashboard() {
         { Campo: 'Zona', Valore: result.zone_code },
         { Campo: 'Mese Dispacciamento', Valore: result.dispatch_month },
         { Campo: 'Data Elaborazione', Valore: new Date(result.created_at).toLocaleString('it-IT') },
-        { Campo: 'Totale POD', Valore: result.total_pods },
+        { Campo: 'Totale POD (O)', Valore: result.total_pods },
         { Campo: 'POD con Dati', Valore: result.pods_with_data },
         { Campo: 'POD senza Dati', Valore: result.pods_without_data },
         { Campo: 'Quality Score', Valore: result.quality_score },
@@ -180,7 +177,7 @@ export function ResultsDashboard() {
         <CardHeader>
           <CardTitle>Risultati Elaborazioni</CardTitle>
           <CardDescription>
-            Scarica i risultati delle elaborazioni completate in diversi formati
+            Scarica i risultati delle elaborazioni completate in diversi formati (IP + O)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -209,7 +206,7 @@ export function ResultsDashboard() {
 
                   <div className="grid grid-cols-4 gap-4 text-sm">
                     <div>
-                      <p className="text-muted-foreground">Totale POD</p>
+                      <p className="text-muted-foreground">Totale POD (O)</p>
                       <p className="font-medium">{result.total_pods}</p>
                     </div>
                     <div>
