@@ -16,29 +16,29 @@ export default function Connection() {
         return;
       }
 
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/instagram-oauth?action=start&user_id=${session.user.id}`;
-      
-      const response = await fetch(functionUrl, {
-        method: 'GET',
+      const { data, error } = await supabase.functions.invoke("instagram-oauth", {
+        body: {
+          action: "start",
+          user_id: session.user.id,
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to start OAuth');
+      if (error) {
+        console.error("Error starting OAuth:", error);
+        toast.error("Failed to connect Instagram");
+        return;
       }
 
-      const data = await response.json();
-
-      if (data.authUrl) {
-        // Redirect to Instagram OAuth
-        window.location.href = data.authUrl;
+      if (data && (data as any).authUrl) {
+        window.location.href = (data as any).authUrl as string;
+      } else {
+        toast.error("Invalid response from Instagram OAuth");
       }
     } catch (error) {
       console.error("Error starting OAuth:", error);
       toast.error("Failed to connect Instagram");
     }
   };
-
   useEffect(() => {
     // Check if redirected back from OAuth
     const params = new URLSearchParams(window.location.search);
