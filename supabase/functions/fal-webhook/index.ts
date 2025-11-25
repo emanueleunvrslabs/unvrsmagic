@@ -42,6 +42,13 @@ serve(async (req) => {
       const imageUrl = resultPayload?.images?.[0]?.url;
       const mediaUrl = videoUrl || imageUrl;
 
+      // Extract cost/metrics from Fal response
+      const metrics = payload.metrics || resultPayload?.metrics || {};
+      const inferenceTime = metrics.inference_time || null;
+      const cost = payload.cost || resultPayload?.cost || null;
+      
+      console.log("Fal metrics:", { inferenceTime, cost, metrics });
+
       if (!mediaUrl) {
         console.error("No media URL in webhook payload:", resultPayload);
         await supabase
@@ -59,13 +66,28 @@ serve(async (req) => {
 
       console.log(`Media generated: ${mediaUrl}`);
 
-      // Update content record
+      // Get current metadata to preserve existing fields
+      const { data: currentContent } = await supabase
+        .from("ai_social_content")
+        .select("metadata")
+        .eq("id", contentId)
+        .single();
+
+      const existingMetadata = currentContent?.metadata || {};
+
+      // Update content record with cost in metadata
       await supabase
         .from("ai_social_content")
         .update({ 
           status: "completed",
           media_url: mediaUrl,
-          thumbnail_url: mediaUrl
+          thumbnail_url: mediaUrl,
+          metadata: {
+            ...existingMetadata,
+            fal_cost: cost,
+            fal_inference_time: inferenceTime,
+            fal_metrics: metrics
+          }
         })
         .eq("id", contentId);
 
