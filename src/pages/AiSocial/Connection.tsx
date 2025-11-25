@@ -11,13 +11,29 @@ import { toast } from "sonner";
 
 export default function Connection() {
   const connectInstagram = async () => {
-    
     try {
-      const { data, error } = await supabase.functions.invoke('instagram-oauth', {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in first");
+        return;
+      }
+
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/instagram-oauth?action=start`;
+      
+      const response = await fetch(functionUrl, {
         method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to start OAuth');
+      }
+
+      const data = await response.json();
 
       if (data.authUrl) {
         // Redirect to Instagram OAuth
