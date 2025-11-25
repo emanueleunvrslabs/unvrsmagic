@@ -113,6 +113,9 @@ serve(async (req) => {
         requestBody.resolution = resolution || "720p";
         requestBody.duration = "8s";
         
+        // Add generate_audio parameter (defaults to true if not specified)
+        requestBody.generate_audio = generateAudio !== undefined ? generateAudio : true;
+        
         // Add image_urls for reference-to-video mode (multiple images)
         if (inputImages && inputImages.length > 0) {
           requestBody.image_urls = inputImages;
