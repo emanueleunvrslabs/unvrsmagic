@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.dispatch-orchestrator]
 verify_jwt = true
+
+[functions.dispatch-file-downloader]
+verify_jwt = false
+
+[functions.dispatch-zip-extractor]
+verify_jwt = false
