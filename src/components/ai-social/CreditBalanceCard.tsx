@@ -16,9 +16,11 @@ import { useState } from "react";
 
 const CREDIT_PACKAGES = [
   { id: "credits_10", amount: 10, price: "€10", description: "10 images or 1 video" },
-  { id: "credits_25", amount: 25, price: "€25", description: "25 images or 2 videos" },
   { id: "credits_50", amount: 50, price: "€50", description: "50 images or 5 videos" },
   { id: "credits_100", amount: 100, price: "€100", description: "100 images or 10 videos" },
+  { id: "credits_250", amount: 250, price: "€250", description: "250 images or 25 videos" },
+  { id: "credits_500", amount: 500, price: "€500", description: "500 images or 50 videos" },
+  { id: "credits_1000", amount: 1000, price: "€1000", description: "1000 images or 100 videos" },
 ];
 
 export function CreditBalanceCard() {
