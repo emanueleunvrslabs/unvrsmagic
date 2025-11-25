@@ -50,12 +50,6 @@ export function ProjectCard({ project, isAdded, onViewDetails }: ProjectCardProp
           </Badge>
         </div>
 
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center justify-between">
-            <span>Route:</span>
-            <code className="text-xs bg-muted px-2 py-1 rounded">{project.route}</code>
-          </div>
-        </div>
       </CardContent>
 
       <CardFooter className="flex items-center justify-between border-t p-4">
