@@ -67,7 +67,7 @@ serve(async (req) => {
     const FAL_KEY = falKeyData.api_key;
 
     // Create content record
-    const contentTitle = `${workflow.name} - ${new Date().toLocaleString("it-IT")}`;
+    const contentTitle = workflow.name;
     const { data: content, error: contentError } = await supabase
       .from("ai_social_content")
       .insert({
