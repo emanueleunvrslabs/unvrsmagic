@@ -250,13 +250,21 @@ export function FileUploadSection() {
           <CardContent className="space-y-4">
             <div className="border-2 border-dashed border-border rounded-lg p-8">
               <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <Input
-                type="file"
-                accept=".zip"
-                multiple
-                onChange={(e) => setLettureFiles(Array.from(e.target.files || []))}
-                className="max-w-md mx-auto"
-              />
+              <div className="flex justify-center">
+                <label htmlFor="letture-input" className="cursor-pointer">
+                  <div className="px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors">
+                    Seleziona File ZIP
+                  </div>
+                  <input
+                    id="letture-input"
+                    type="file"
+                    accept=".zip"
+                    multiple
+                    onChange={(e) => setLettureFiles(Array.from(e.target.files || []))}
+                    className="hidden"
+                  />
+                </label>
+              </div>
               {lettureFiles.length > 0 && (
                 <div className="mt-4 space-y-1">
                   {lettureFiles.map((file, idx) => (
@@ -301,13 +309,21 @@ export function FileUploadSection() {
           <CardContent className="space-y-4">
             <div className="border-2 border-dashed border-border rounded-lg p-8">
               <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <Input
-                type="file"
-                accept=".csv,.xml,.xlsx,.zip"
-                multiple
-                onChange={(e) => setIpFiles(Array.from(e.target.files || []))}
-                className="max-w-md mx-auto"
-              />
+              <div className="flex justify-center">
+                <label htmlFor="ip-input" className="cursor-pointer">
+                  <div className="px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors">
+                    Seleziona File Illuminazione
+                  </div>
+                  <input
+                    id="ip-input"
+                    type="file"
+                    accept=".csv,.xml,.xlsx,.zip"
+                    multiple
+                    onChange={(e) => setIpFiles(Array.from(e.target.files || []))}
+                    className="hidden"
+                  />
+                </label>
+              </div>
               {ipFiles.length > 0 && (
                 <div className="mt-4 space-y-1">
                   {ipFiles.map((file, idx) => (
@@ -361,13 +377,21 @@ export function FileUploadSection() {
           <CardContent className="space-y-4">
             <div className="border-2 border-dashed border-border rounded-lg p-8">
               <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <Input
-                type="file"
-                accept=".csv,.xml,.xlsx,.zip"
-                multiple
-                onChange={(e) => setAnagraficaFiles(Array.from(e.target.files || []))}
-                className="max-w-md mx-auto"
-              />
+              <div className="flex justify-center">
+                <label htmlFor="anagrafica-input" className="cursor-pointer">
+                  <div className="px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors">
+                    Seleziona File Anagrafica
+                  </div>
+                  <input
+                    id="anagrafica-input"
+                    type="file"
+                    accept=".csv,.xml,.xlsx,.zip"
+                    multiple
+                    onChange={(e) => setAnagraficaFiles(Array.from(e.target.files || []))}
+                    className="hidden"
+                  />
+                </label>
+              </div>
               {anagraficaFiles.length > 0 && (
                 <div className="mt-4 space-y-1">
                   {anagraficaFiles.map((file, idx) => (
