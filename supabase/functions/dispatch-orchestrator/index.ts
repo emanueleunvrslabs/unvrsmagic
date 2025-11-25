@@ -203,6 +203,127 @@ async function callAgentAI(
   }
 }
 
+// Configuration for file processing
+const LARGE_FILE_THRESHOLD_MB = 20; // Files larger than this will be processed via separate edge function
+
+// Process a single file via the dispatch-file-processor edge function
+async function processFileViaEdgeFunction(
+  supabase: any,
+  fileId: string,
+  jobId: string,
+  userId: string
+): Promise<any> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+  try {
+    console.log(`Calling dispatch-file-processor for file ${fileId}`);
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/dispatch-file-processor`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${serviceRoleKey}`
+      },
+      body: JSON.stringify({
+        fileId,
+        jobId,
+        userId,
+        action: 'process'
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('dispatch-file-processor error:', response.status, errorText);
+      throw new Error(`File processor error: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(`File ${fileId} processed:`, result.success ? 'success' : 'failed');
+    return result;
+  } catch (error) {
+    console.error(`Error processing file ${fileId} via edge function:`, error);
+    throw error;
+  }
+}
+
+// Process files with automatic routing (direct for small, edge function for large)
+async function processFilesWithMultiPhase(
+  supabase: any,
+  files: any[],
+  jobId: string,
+  userId: string,
+  processDirectFn: (files: any[]) => Promise<any>
+): Promise<{ result: any; processedViaEdge: boolean; warnings: string[] }> {
+  const warnings: string[] = [];
+  
+  // Separate files by size
+  const smallFiles = files.filter(f => {
+    const sizeMB = (f.file_size || 0) / (1024 * 1024);
+    return sizeMB <= LARGE_FILE_THRESHOLD_MB;
+  });
+  
+  const largeFiles = files.filter(f => {
+    const sizeMB = (f.file_size || 0) / (1024 * 1024);
+    return sizeMB > LARGE_FILE_THRESHOLD_MB;
+  });
+
+  console.log(`Processing ${smallFiles.length} small files directly, ${largeFiles.length} large files via edge function`);
+
+  // Process large files via edge function
+  const largeFileResults: any[] = [];
+  for (const file of largeFiles) {
+    try {
+      const result = await processFileViaEdgeFunction(supabase, file.id, jobId, userId);
+      if (result.success && result.result) {
+        largeFileResults.push(result.result);
+      } else {
+        warnings.push(`File ${file.file_name}: ${result.error || 'elaborazione fallita'}`);
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      warnings.push(`File ${file.file_name}: ${errorMsg}`);
+    }
+  }
+
+  // Process small files directly
+  let directResult: any = null;
+  if (smallFiles.length > 0) {
+    directResult = await processDirectFn(smallFiles);
+  }
+
+  // Merge results
+  const processedViaEdge = largeFiles.length > 0;
+
+  return {
+    result: { directResult, largeFileResults, warnings },
+    processedViaEdge,
+    warnings
+  };
+}
+
+// Aggregate intermediate results from the database
+async function aggregateIntermediateResults(
+  supabase: any,
+  jobId: string,
+  resultType: string
+): Promise<any[]> {
+  const { data, error } = await supabase
+    .from('dispatch_intermediate_results')
+    .select('data')
+    .eq('job_id', jobId)
+    .eq('result_type', resultType)
+    .eq('status', 'completed');
+
+  if (error) {
+    console.error(`Error fetching intermediate results for ${resultType}:`, error);
+    return [];
+  }
+
+  return data?.map((r: any) => r.data) || [];
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
