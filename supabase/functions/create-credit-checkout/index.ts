@@ -10,9 +10,11 @@ const corsHeaders = {
 // Credit packages available for purchase (in EUR)
 const CREDIT_PACKAGES = [
   { id: "credits_10", amount: 10, price: 1000, label: "€10 Credits" },
-  { id: "credits_25", amount: 25, price: 2500, label: "€25 Credits" },
   { id: "credits_50", amount: 50, price: 5000, label: "€50 Credits" },
   { id: "credits_100", amount: 100, price: 10000, label: "€100 Credits" },
+  { id: "credits_250", amount: 250, price: 25000, label: "€250 Credits" },
+  { id: "credits_500", amount: 500, price: 50000, label: "€500 Credits" },
+  { id: "credits_1000", amount: 1000, price: 100000, label: "€1000 Credits" },
 ];
 
 serve(async (req) => {
