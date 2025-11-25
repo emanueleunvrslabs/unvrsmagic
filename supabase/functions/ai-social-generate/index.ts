@@ -47,8 +47,37 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Check and deduct credits before generation
     const creditCost = type === "video" ? 10 : 1;
+
+    // FIRST: Check if Fal API key exists BEFORE checking/deducting credits
+    console.log("Looking up Fal API key for user:", user.id);
+    const { data: apiKeyData, error: apiKeyError } = await supabase
+      .from("api_keys")
+      .select("api_key")
+      .eq("user_id", user.id)
+      .eq("provider", "fal")
+      .maybeSingle();
+
+    console.log("API key lookup result:", { found: !!apiKeyData, error: apiKeyError });
+
+    if (apiKeyError) {
+      console.error("Database error looking up Fal API key:", apiKeyError);
+      return new Response(
+        JSON.stringify({ error: `Database error: ${apiKeyError.message}` }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!apiKeyData) {
+      return new Response(
+        JSON.stringify({ error: "Fal API key not found. Please configure it in Settings -> Security -> API Access." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const FAL_KEY = apiKeyData.api_key;
+
+    // SECOND: Check credits (but don't deduct yet)
     const { data: credits } = await supabase
       .from("user_credits")
       .select("balance")
@@ -63,47 +92,7 @@ serve(async (req) => {
       );
     }
 
-    // Deduct credits
-    const { data: deductResult, error: deductError } = await supabase.rpc("deduct_credits", {
-      p_user_id: user.id,
-      p_amount: creditCost,
-      p_description: `${type === "video" ? "Video" : "Image"} generation`,
-      p_content_id: contentId
-    });
-
-    if (deductError || !deductResult) {
-      console.error("Failed to deduct credits:", deductError);
-      return new Response(
-        JSON.stringify({ error: "Impossibile dedurre i crediti" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    console.log(`Deducted ${creditCost} credits for ${type} generation`);
-
-    // Get Fal API key from database
-    console.log("Looking up Fal API key for user:", user.id);
-    const { data: apiKeyData, error: apiKeyError } = await supabase
-      .from("api_keys")
-      .select("api_key")
-      .eq("user_id", user.id)
-      .eq("provider", "fal")
-      .maybeSingle();
-
-    console.log("API key lookup result:", { found: !!apiKeyData, error: apiKeyError });
-
-    if (apiKeyError) {
-      console.error("Database error looking up Fal API key:", apiKeyError);
-      throw new Error(`Database error: ${apiKeyError.message}`);
-    }
-
-    if (!apiKeyData) {
-      throw new Error("Fal API key not found. Please configure it in AI Models API settings.");
-    }
-
-    const FAL_KEY = apiKeyData.api_key;
-
-    // Update status to generating
+    // Update status to generating (no credits deducted yet)
     await supabase
       .from("ai_social_content")
       .update({ status: "generating" })
@@ -111,29 +100,27 @@ serve(async (req) => {
 
     // Determine the endpoint based on type and mode
     let endpoint: string;
-    let pollingEndpoint: string; // Endpoint to use for polling status
+    let pollingEndpoint: string;
     
     if (type === "video") {
-      // Video generation with Veo3.1
       if (mode === "image-to-video") {
         endpoint = "fal-ai/veo3.1/image-to-video";
-        pollingEndpoint = "fal-ai/veo3.1"; // Always use base endpoint for polling
+        pollingEndpoint = "fal-ai/veo3.1";
       } else if (mode === "reference-to-video") {
         endpoint = "fal-ai/veo3.1/reference-to-video";
-        pollingEndpoint = "fal-ai/veo3.1"; // Always use base endpoint for polling
+        pollingEndpoint = "fal-ai/veo3.1";
       } else if (mode === "first-last-frame") {
         endpoint = "fal-ai/veo3.1/first-last-frame-to-video";
-        pollingEndpoint = "fal-ai/veo3.1"; // Always use base endpoint for polling
+        pollingEndpoint = "fal-ai/veo3.1";
       } else {
         endpoint = "fal-ai/veo3.1";
         pollingEndpoint = "fal-ai/veo3.1";
       }
     } else {
-      // Image generation with Nano Banana Pro
       endpoint = mode === "image-to-image" 
         ? "fal-ai/nano-banana-pro/edit" 
         : "fal-ai/nano-banana-pro";
-      pollingEndpoint = "fal-ai/nano-banana-pro"; // Always use base endpoint for polling
+      pollingEndpoint = "fal-ai/nano-banana-pro";
     }
 
     console.log(`Generating ${type} with endpoint ${endpoint}, mode: ${mode || 'text-to-video'}`);
@@ -144,17 +131,11 @@ serve(async (req) => {
     };
 
     if (type === "video") {
-      // Veo3.1 video generation parameters
       if (mode === "first-last-frame") {
-        // First/Last frame to video parameters
         requestBody.aspect_ratio = aspectRatio || "16:9";
         requestBody.resolution = resolution || "720p";
-        requestBody.duration = duration || "6s"; // Duration must be "4s", "6s", or "8s"
-        
-        // Add generate_audio parameter (defaults to true if not specified)
+        requestBody.duration = duration || "6s";
         requestBody.generate_audio = generateAudio !== undefined ? generateAudio : true;
-        
-        // Add first and last frame images
         if (firstFrameImage) {
           requestBody.first_frame_url = firstFrameImage;
         }
@@ -162,41 +143,27 @@ serve(async (req) => {
           requestBody.last_frame_url = lastFrameImage;
         }
       } else if (mode === "reference-to-video") {
-        // Reference to video only supports duration "8s" and doesn't use aspect_ratio
         requestBody.resolution = resolution || "720p";
         requestBody.duration = "8s";
-        
-        // Add generate_audio parameter (defaults to true if not specified)
         requestBody.generate_audio = generateAudio !== undefined ? generateAudio : true;
-        
-        // Add image_urls for reference-to-video mode (multiple images)
         if (inputImages && inputImages.length > 0) {
           requestBody.image_urls = inputImages;
         }
       } else {
-        // Standard video generation parameters
         requestBody.aspect_ratio = aspectRatio || "16:9";
         requestBody.resolution = resolution || "720p";
-        // Duration must be a string in format "4s", "6s", or "8s"
         if (duration) {
-          requestBody.duration = duration; // Already in correct format from UI
+          requestBody.duration = duration;
         }
-        
-        // Add generate_audio parameter (defaults to true if not specified)
         requestBody.generate_audio = generateAudio !== undefined ? generateAudio : true;
-        
-        // Add image_url for image-to-video mode (use first image)
         if (mode === "image-to-video" && inputImages && inputImages.length > 0) {
           requestBody.image_url = inputImages[0];
         }
       }
     } else {
-      // Image generation parameters
       requestBody.num_images = 1;
       requestBody.output_format = outputFormat || "png";
       requestBody.resolution = resolution || "1K";
-
-      // Add mode-specific parameters for images
       if (mode === "image-to-image") {
         requestBody.image_urls = inputImages;
         requestBody.aspect_ratio = aspectRatio || "auto";
@@ -221,6 +188,7 @@ serve(async (req) => {
       const errorText = await response.text();
       console.error("Fal API error:", response.status, errorText);
       
+      // DON'T deduct credits - API call failed
       await supabase
         .from("ai_social_content")
         .update({ 
@@ -230,7 +198,7 @@ serve(async (req) => {
         .eq("id", contentId);
 
       return new Response(
-        JSON.stringify({ error: "Fal API generation failed" }),
+        JSON.stringify({ error: "Fal API generation failed. No credits deducted." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -240,7 +208,19 @@ serve(async (req) => {
     const requestId = queueData.request_id;
 
     if (!requestId) {
-      throw new Error("No request_id returned from Fal API");
+      // DON'T deduct credits - no request ID
+      await supabase
+        .from("ai_social_content")
+        .update({ 
+          status: "failed",
+          error_message: "No request_id returned from Fal API"
+        })
+        .eq("id", contentId);
+      
+      return new Response(
+        JSON.stringify({ error: "No request_id returned from Fal API. No credits deducted." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     console.log(`Fal request queued with ID: ${requestId}`);
@@ -249,10 +229,9 @@ serve(async (req) => {
     const pollAndUpdate = async () => {
       let resultData;
       let attempts = 0;
-      const maxAttempts = 300; // Wait up to 5 minutes (300 seconds)
+      const maxAttempts = 300;
 
       while (attempts < maxAttempts) {
-        // Poll the result endpoint directly using the polling endpoint
         const resultResponse = await fetch(`https://queue.fal.run/${pollingEndpoint}/requests/${requestId}`, {
           headers: {
             "Authorization": `Key ${FAL_KEY}`,
@@ -261,21 +240,19 @@ serve(async (req) => {
 
         console.log(`Poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
 
-        // If 200, the request is completed
         if (resultResponse.status === 200) {
           resultData = await resultResponse.json();
           console.log("Got completed result:", JSON.stringify(resultData));
           break;
         }
         
-        // If 202, still processing
         if (resultResponse.status === 202) {
           const statusInfo = await resultResponse.json();
           console.log(`Request in progress:`, JSON.stringify(statusInfo));
           
-          // Check if it failed
           if (statusInfo.status === "FAILED") {
             console.error("Generation failed:", statusInfo.error);
+            // DON'T deduct credits - generation failed
             await supabase
               .from("ai_social_content")
               .update({ 
@@ -286,18 +263,17 @@ serve(async (req) => {
             return;
           }
         } else if (resultResponse.status !== 404) {
-          // Unexpected status code (404 means not ready yet, which is normal)
           const errorText = await resultResponse.text();
           console.error(`Unexpected status ${resultResponse.status}:`, errorText);
         }
 
-        // Wait 2 seconds before next poll
         await new Promise(resolve => setTimeout(resolve, 2000));
         attempts++;
       }
 
       if (!resultData) {
         console.error("Timeout waiting for generation to complete");
+        // DON'T deduct credits - timeout
         await supabase
           .from("ai_social_content")
           .update({ 
@@ -315,13 +291,11 @@ serve(async (req) => {
       let thumbnailUrl: string | undefined;
 
       if (type === "video") {
-        // Video response structure: { video: { url: "...", thumbnail_url: "..." } }
         generatedMediaUrl = resultData.video?.url;
         thumbnailUrl = resultData.video?.thumbnail_url;
         console.log("Extracted video URL:", generatedMediaUrl);
         console.log("Extracted video thumbnail URL:", thumbnailUrl);
       } else {
-        // Image response structure: { images: [{ url: "..." }] }
         generatedMediaUrl = resultData.images?.[0]?.url;
         thumbnailUrl = generatedMediaUrl;
         console.log("Extracted image URL:", generatedMediaUrl);
@@ -329,6 +303,7 @@ serve(async (req) => {
 
       if (!generatedMediaUrl) {
         console.error("No media URL found in response:", JSON.stringify(resultData));
+        // DON'T deduct credits - no media URL
         await supabase
           .from("ai_social_content")
           .update({ 
@@ -339,13 +314,33 @@ serve(async (req) => {
         return;
       }
 
+      // SUCCESS! Now deduct credits
+      console.log(`Generation successful! Deducting ${creditCost} credits for ${type} generation`);
+      
+      const { data: deductResult, error: deductError } = await supabase.rpc("deduct_credits", {
+        p_user_id: user.id,
+        p_amount: creditCost,
+        p_description: `${type === "video" ? "Video" : "Image"} generation`,
+        p_content_id: contentId
+      });
+
+      if (deductError) {
+        console.error("Failed to deduct credits (but generation succeeded):", deductError);
+        // Still update the content as successful - just log the credit error
+      } else {
+        console.log(`Successfully deducted ${creditCost} credits`);
+      }
+
       // Format duration for display
-      let metadata = null;
+      let metadata: any = {};
       if (type === "video" && duration) {
         const seconds = parseInt(duration.replace('s', ''));
         const formattedDuration = `0:${seconds.toString().padStart(2, '0')}`;
-        metadata = { duration: formattedDuration };
+        metadata.duration = formattedDuration;
       }
+      
+      // Add cost to metadata
+      metadata.cost = creditCost;
 
       // Update content with generated media
       const { error: updateError } = await supabase
@@ -374,7 +369,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: "Generation started in background",
+        message: "Generation started. Credits will be deducted only if successful.",
         contentId
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
