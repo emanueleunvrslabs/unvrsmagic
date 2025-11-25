@@ -169,7 +169,8 @@ Deno.serve(async (req) => {
       }
 
       // Redirect back to app with success
-      const appUrl = Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || ''
+      const projectId = Deno.env.get('SUPABASE_URL')?.split('//')[1]?.split('.')[0] || ''
+      const appUrl = `https://${projectId}.lovableproject.com`
       return Response.redirect(`${appUrl}/ai-social/connection?success=true`, 302)
     }
 
