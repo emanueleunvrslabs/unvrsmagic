@@ -12,189 +12,234 @@ serve(async (req) => {
   }
 
   try {
-    const { workflowId } = await req.json();
-
-    if (!workflowId) {
-      return new Response(
-        JSON.stringify({ error: "Missing workflowId" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Create Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get user from authorization header
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header");
-    }
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const currentTime = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
+    console.log(`Checking scheduled workflows at ${currentTime} on ${currentDay}`);
 
-    if (userError || !user) {
-      throw new Error("Unauthorized");
-    }
-
-    console.log("Running workflow for user:", user.id);
-
-    // Get workflow data
-    const { data: workflow, error: workflowError } = await supabase
+    // Get all active workflows
+    const { data: workflows, error: workflowsError } = await supabase
       .from("ai_social_workflows")
       .select("*")
-      .eq("id", workflowId)
-      .eq("user_id", user.id)
-      .single();
+      .eq("active", true);
 
-    if (workflowError || !workflow) {
-      throw new Error("Workflow not found");
+    if (workflowsError) {
+      throw new Error(`Failed to fetch workflows: ${workflowsError.message}`);
     }
 
-    console.log("Workflow found:", workflow.name, "Type:", workflow.content_type);
-
-    // Get Fal API key
-    const { data: falKeyData } = await supabase
-      .from("api_keys")
-      .select("api_key")
-      .eq("user_id", user.id)
-      .eq("provider", "fal")
-      .maybeSingle();
-
-    if (!falKeyData) {
-      throw new Error("Fal API key not found. Please configure it in AI Models API settings.");
+    if (!workflows || workflows.length === 0) {
+      console.log("No active workflows found");
+      return new Response(
+        JSON.stringify({ message: "No active workflows" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    const FAL_KEY = falKeyData.api_key;
+    console.log(`Found ${workflows.length} active workflows`);
 
-    // Get Instagram credentials
-    const { data: instagramData } = await supabase
-      .from("api_keys")
-      .select("api_key, owner_id")
-      .eq("user_id", user.id)
-      .eq("provider", "instagram")
-      .maybeSingle();
+    const workflowsToRun: any[] = [];
 
-    const hasInstagram = !!instagramData && workflow.platforms?.includes("instagram");
+    for (const workflow of workflows) {
+      const scheduleConfig = workflow.schedule_config || {};
+      const frequency = scheduleConfig.frequency || "daily";
+      const times = scheduleConfig.times || ["09:00"];
+      const days = scheduleConfig.days || [];
 
-    // Create content record
-    const contentTitle = `${workflow.name} - ${new Date().toLocaleString("it-IT")}`;
-    const { data: content, error: contentError } = await supabase
-      .from("ai_social_content")
-      .insert({
-        user_id: user.id,
-        title: contentTitle,
-        prompt: workflow.prompt_template,
-        type: workflow.content_type,
-        status: "generating"
-      })
-      .select()
-      .single();
+      // Check if current time matches any scheduled time (with 5 minute tolerance)
+      const timeMatches = times.some((scheduledTime: string) => {
+        const [schedHour, schedMinute] = scheduledTime.split(':').map(Number);
+        const timeDiff = Math.abs(
+          (currentHour * 60 + currentMinute) - (schedHour * 60 + schedMinute)
+        );
+        return timeDiff <= 5; // 5 minute tolerance
+      });
 
-    if (contentError || !content) {
-      throw new Error("Failed to create content record");
-    }
+      if (!timeMatches) continue;
 
-    console.log("Content record created:", content.id);
+      // Check frequency
+      let shouldRun = false;
 
-    // Start background processing
-    const backgroundTask = async () => {
-      try {
-        const scheduleConfig = workflow.schedule_config || {};
-        const isVideo = workflow.content_type === "video";
-        
-        let generatedMediaUrl: string;
-        
-        if (isVideo) {
-          generatedMediaUrl = await generateVideo(FAL_KEY, workflow, scheduleConfig);
-        } else {
-          generatedMediaUrl = await generateImage(FAL_KEY, workflow, scheduleConfig);
-        }
+      switch (frequency) {
+        case "once":
+          // Check if never run before
+          shouldRun = !workflow.last_run_at;
+          break;
+        case "daily":
+          shouldRun = true;
+          break;
+        case "weekly":
+        case "custom":
+          shouldRun = days.includes(currentDay);
+          break;
+      }
 
-        console.log("Media generated:", generatedMediaUrl);
-
-        // Update content record with generated media
-        await supabase
-          .from("ai_social_content")
-          .update({ 
-            status: "completed",
-            media_url: generatedMediaUrl,
-            thumbnail_url: generatedMediaUrl
-          })
-          .eq("id", content.id);
-
-        // Post to Instagram if connected
-        if (hasInstagram && instagramData) {
-          console.log("Publishing to Instagram...");
-          
-          try {
-            const accessToken = instagramData.api_key;
-            const igUserId = instagramData.owner_id;
-
-            if (isVideo) {
-              await publishVideoToInstagram(
-                accessToken,
-                igUserId,
-                generatedMediaUrl,
-                workflow.description || workflow.prompt_template.substring(0, 200) + "..."
-              );
-            } else {
-              await publishImageToInstagram(
-                accessToken,
-                igUserId,
-                generatedMediaUrl,
-                workflow.description || workflow.prompt_template.substring(0, 200) + "..."
-              );
-            }
-          } catch (igError) {
-            console.error("Instagram publishing error:", igError);
+      if (shouldRun) {
+        // Check if already run today (prevent duplicate runs)
+        if (workflow.last_run_at) {
+          const lastRun = new Date(workflow.last_run_at);
+          const hoursSinceLastRun = (now.getTime() - lastRun.getTime()) / (1000 * 60 * 60);
+          if (hoursSinceLastRun < 1) {
+            console.log(`Workflow ${workflow.name} already ran recently, skipping`);
+            continue;
           }
         }
+        workflowsToRun.push(workflow);
+      }
+    }
 
-        // Update workflow last_run_at
-        await supabase
-          .from("ai_social_workflows")
-          .update({ last_run_at: new Date().toISOString() })
-          .eq("id", workflowId);
+    console.log(`${workflowsToRun.length} workflows scheduled to run now`);
 
-      } catch (error) {
-        console.error("Background task error:", error);
-        // Update content record with error
-        await supabase
-          .from("ai_social_content")
-          .update({ 
-            status: "failed",
-            error_message: error instanceof Error ? error.message : "Unknown error"
-          })
-          .eq("id", content.id);
+    // Process each workflow in background
+    const processWorkflows = async () => {
+      for (const workflow of workflowsToRun) {
+        try {
+          console.log(`Running scheduled workflow: ${workflow.name}`);
+          await runWorkflow(supabase, workflow);
+        } catch (error) {
+          console.error(`Error running workflow ${workflow.name}:`, error);
+        }
       }
     };
 
-    // Use waitUntil to run in background
-    // @ts-ignore - EdgeRuntime is available in Supabase Edge Functions
-    EdgeRuntime.waitUntil(backgroundTask());
+    // @ts-ignore
+    EdgeRuntime.waitUntil(processWorkflows());
 
-    // Return immediately with content ID for polling
     return new Response(
       JSON.stringify({ 
-        success: true,
-        contentId: content.id,
-        status: "generating"
+        message: `Processing ${workflowsToRun.length} workflows`,
+        workflows: workflowsToRun.map(w => w.name)
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
   } catch (error) {
-    console.error("Error in run-workflow:", error);
+    console.error("Error in scheduled-workflows:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
+
+async function runWorkflow(supabase: any, workflow: any) {
+  const userId = workflow.user_id;
+  const scheduleConfig = workflow.schedule_config || {};
+  const isVideo = workflow.content_type === "video";
+
+  // Get Fal API key
+  const { data: falKeyData } = await supabase
+    .from("api_keys")
+    .select("api_key")
+    .eq("user_id", userId)
+    .eq("provider", "fal")
+    .maybeSingle();
+
+  if (!falKeyData) {
+    throw new Error("Fal API key not found");
+  }
+
+  const FAL_KEY = falKeyData.api_key;
+
+  // Get Instagram credentials
+  const { data: instagramData } = await supabase
+    .from("api_keys")
+    .select("api_key, owner_id")
+    .eq("user_id", userId)
+    .eq("provider", "instagram")
+    .maybeSingle();
+
+  const hasInstagram = !!instagramData && workflow.platforms?.includes("instagram");
+
+  // Create content record
+  const contentTitle = `${workflow.name} - ${new Date().toLocaleString("it-IT")}`;
+  const { data: content, error: contentError } = await supabase
+    .from("ai_social_content")
+    .insert({
+      user_id: userId,
+      title: contentTitle,
+      prompt: workflow.prompt_template,
+      type: workflow.content_type,
+      status: "generating"
+    })
+    .select()
+    .single();
+
+  if (contentError || !content) {
+    throw new Error("Failed to create content record");
+  }
+
+  try {
+    let generatedMediaUrl: string;
+
+    if (isVideo) {
+      generatedMediaUrl = await generateVideo(FAL_KEY, workflow, scheduleConfig);
+    } else {
+      generatedMediaUrl = await generateImage(FAL_KEY, workflow, scheduleConfig);
+    }
+
+    console.log("Media generated:", generatedMediaUrl);
+
+    // Update content record
+    await supabase
+      .from("ai_social_content")
+      .update({ 
+        status: "completed",
+        media_url: generatedMediaUrl,
+        thumbnail_url: generatedMediaUrl
+      })
+      .eq("id", content.id);
+
+    // Post to Instagram
+    if (hasInstagram && instagramData) {
+      console.log("Publishing to Instagram...");
+      try {
+        const accessToken = instagramData.api_key;
+        const igUserId = instagramData.owner_id;
+
+        if (isVideo) {
+          await publishVideoToInstagram(
+            accessToken,
+            igUserId,
+            generatedMediaUrl,
+            workflow.description || workflow.prompt_template.substring(0, 200) + "..."
+          );
+        } else {
+          await publishImageToInstagram(
+            accessToken,
+            igUserId,
+            generatedMediaUrl,
+            workflow.description || workflow.prompt_template.substring(0, 200) + "..."
+          );
+        }
+      } catch (igError) {
+        console.error("Instagram publishing error:", igError);
+      }
+    }
+
+    // Update workflow last_run_at
+    await supabase
+      .from("ai_social_workflows")
+      .update({ last_run_at: new Date().toISOString() })
+      .eq("id", workflow.id);
+
+  } catch (error) {
+    console.error("Workflow processing error:", error);
+    await supabase
+      .from("ai_social_content")
+      .update({ 
+        status: "failed",
+        error_message: error instanceof Error ? error.message : "Unknown error"
+      })
+      .eq("id", content.id);
+  }
+}
 
 // Generate video using Veo3.1
 async function generateVideo(falKey: string, workflow: any, scheduleConfig: any): Promise<string> {
@@ -203,7 +248,7 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
   const duration = scheduleConfig.duration || "8s";
   const generateAudio = scheduleConfig.generate_audio ?? true;
 
-  console.log(`Generating video with mode: ${mode}, aspect_ratio: ${aspectRatio}, duration: ${duration}`);
+  console.log(`Generating video: mode=${mode}, aspect_ratio=${aspectRatio}, duration=${duration}`);
 
   let endpoint = "fal-ai/veo3";
   const requestBody: any = {
@@ -229,8 +274,6 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
     requestBody.last_frame_url = scheduleConfig.last_frame_image;
   }
 
-  console.log(`Using endpoint: ${endpoint}`);
-
   const response = await fetch(`https://queue.fal.run/${endpoint}`, {
     method: "POST",
     headers: {
@@ -252,8 +295,6 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
     throw new Error("No request_id returned from Fal API");
   }
 
-  console.log(`Fal video request queued with ID: ${requestId}`);
-
   let resultData;
   let attempts = 0;
   const maxAttempts = 300;
@@ -266,7 +307,6 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
 
     if (resultResponse.status === 200) {
       resultData = await resultResponse.json();
-      console.log("Got completed video result");
       break;
     }
     
