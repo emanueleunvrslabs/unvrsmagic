@@ -238,7 +238,7 @@ export default function GenerateVideo() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="aspectRatio">Aspect Ratio</Label>
                   <Select value={aspectRatio} onValueChange={setAspectRatio}>
@@ -264,26 +264,26 @@ export default function GenerateVideo() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration</Label>
-                <Select value={duration} onValueChange={setDuration} disabled={mode === "reference-to-video"}>
-                  <SelectTrigger id="duration">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mode === "reference-to-video" ? (
-                      <SelectItem value="8s">8 seconds</SelectItem>
-                    ) : (
-                      <>
-                        <SelectItem value="4s">4 seconds</SelectItem>
-                        <SelectItem value="6s">6 seconds</SelectItem>
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration</Label>
+                  <Select value={duration} onValueChange={setDuration} disabled={mode === "reference-to-video"}>
+                    <SelectTrigger id="duration">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mode === "reference-to-video" ? (
                         <SelectItem value="8s">8 seconds</SelectItem>
-                      </>
-                    )}
-                  </SelectContent>
-                </Select>
+                      ) : (
+                        <>
+                          <SelectItem value="4s">4 seconds</SelectItem>
+                          <SelectItem value="6s">6 seconds</SelectItem>
+                          <SelectItem value="8s">8 seconds</SelectItem>
+                        </>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {mode !== "reference-to-video" && (
