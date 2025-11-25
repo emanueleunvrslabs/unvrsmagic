@@ -43,11 +43,11 @@ export function OrderForm({ type, order, availableBalance, onOrderChange, onPerc
             <Label htmlFor={`${type}-type`}>Type</Label>
             <div className="flex items-center gap-2">
               <div
-                className={cn("cursor-pointer rounded-l-md border border-r-0 px-3 py-1 text-sm", order.type === "limit" ? "border-input bg-background" : "border-muted bg-muted text-muted-foreground")}
+                className={cn("cursor-pointer rounded-md border px-3 py-1 text-sm", order.type === "limit" ? "border-input bg-background" : "border-muted bg-muted text-muted-foreground")}
               >
                 Limit
               </div>
-              <div className={cn("cursor-pointer rounded-r-md border px-3 py-1 text-sm", order.type === "market" ? "border-input bg-background" : "border-muted bg-muted text-muted-foreground")}>
+              <div className={cn("cursor-pointer rounded-md border px-3 py-1 text-sm", order.type === "market" ? "border-input bg-background" : "border-muted bg-muted text-muted-foreground")}>
                 Market
               </div>
             </div>
