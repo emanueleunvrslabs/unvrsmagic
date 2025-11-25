@@ -489,9 +489,9 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         </button>
 
         {/* Header */}
-        <div className="flex h-16 items-center px-3 py-4">
+        <div className={cn("flex h-16 items-center py-4", collapsed ? "justify-center px-2" : "px-3")}>
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md overflow-hidden">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md overflow-hidden flex-shrink-0">
               <img src={unvrsLogo} alt="UNVRS Labs" className="h-8 w-8 object-cover" />
             </div>
             {!collapsed && (
