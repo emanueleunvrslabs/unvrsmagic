@@ -120,7 +120,10 @@ export default function Connection() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Instagram</CardTitle>
-                <Badge variant={instagramConnection ? "default" : "outline"}>
+                <Badge 
+                  variant="outline"
+                  className={instagramConnection ? "bg-green-500/10 text-green-500 border-green-500/20" : ""}
+                >
                   {instagramConnection ? "Connected" : "Not Connected"}
                 </Badge>
               </div>
