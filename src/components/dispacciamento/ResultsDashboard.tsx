@@ -62,32 +62,45 @@ export function ResultsDashboard() {
 
   const downloadCSV = (result: any) => {
     try {
-      const curve = result.curve_96_values;
-      const ipCurve = result.ip_curve || [];
-      const oCurve = result.o_curve || [];
-      const lpCurve = result.lp_curve || [];
-
-      let csv = 'Quarto_Ora,Valore_Totale,IP,Orari,Load_Profile\n';
+      const curve = result.curve_96_values || [];
+      const [year, month] = result.dispatch_month.split('-');
+      const zoneCode = result.zone_code;
       
-      for (let i = 0; i < 96; i++) {
-        const quarter = i + 1;
-        csv += `${quarter},${curve[i] || 0},${ipCurve[i] || 0},${oCurve[i] || 0},${lpCurve[i] || 0}\n`;
+      // Generate header row
+      let csv = 'ANNO;MESE;CODICE_DP;DATA;AREA;FASCIA_GEOGRAFICA;PIVA_DISTRIBUTORE;RAGIONE_SOCIALE_DISTRIBUTORE;';
+      // Add QH1-QH100 columns
+      for (let i = 1; i <= 100; i++) {
+        csv += `QH${i}`;
+        if (i < 100) csv += ';';
       }
+      csv += '\n';
 
-      // Add summary section
-      csv += '\n\nRiepilogo\n';
-      csv += `Zona,${result.zone_code}\n`;
-      csv += `Mese,${result.dispatch_month}\n`;
-      csv += `Totale POD,${result.total_pods}\n`;
-      csv += `POD con dati,${result.pods_with_data}\n`;
-      csv += `POD senza dati,${result.pods_without_data}\n`;
-      csv += `Quality Score,${result.quality_score}\n`;
+      // Get days in the month
+      const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+      
+      // Generate one row per day
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${day.toString().padStart(2, '0')}/${month}/${year}`;
+        
+        // Row data
+        csv += `${year};${month};DP_${zoneCode};${dateStr};${zoneCode};FG_OR;;;`;
+        
+        // Add 96 quarter-hour values
+        for (let i = 0; i < 96; i++) {
+          const value = curve[i] !== undefined ? Math.round(curve[i]) : '';
+          csv += `${value};`;
+        }
+        
+        // Add empty QH97-QH100
+        csv += ';;;\n';
+      }
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `dispatch_${result.zone_code}_${result.dispatch_month}.csv`;
+      const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+      link.download = `${timestamp}_AGGR_${zoneCode}_${year}${month}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
