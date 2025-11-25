@@ -281,9 +281,11 @@ serve(async (req) => {
       let thumbnailUrl: string | undefined;
 
       if (type === "video") {
-        // Video response structure: { video: { url: "..." } }
+        // Video response structure: { video: { url: "...", thumbnail_url: "..." } }
         generatedMediaUrl = resultData.video?.url;
+        thumbnailUrl = resultData.video?.thumbnail_url;
         console.log("Extracted video URL:", generatedMediaUrl);
+        console.log("Extracted video thumbnail URL:", thumbnailUrl);
       } else {
         // Image response structure: { images: [{ url: "..." }] }
         generatedMediaUrl = resultData.images?.[0]?.url;
