@@ -22,6 +22,8 @@ const AI_PROVIDERS = [
   { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresOwnerId: true },
   { id: "fal", name: "Fal", placeholder: "Enter API key", description: "Fal AI models", requiresOwnerId: false },
   { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false },
+  { id: "resend", name: "Resend", placeholder: "re_...", description: "Email API", requiresOwnerId: false },
+  { id: "webshare", name: "Webshare", placeholder: "Enter API key", description: "Proxy service", requiresOwnerId: false },
 ]
 
 // Validation schemas for each provider
@@ -40,6 +42,12 @@ const apiKeySchemas = {
   }),
   gamma: z.string().trim().min(20, {
     message: "Gamma API key must be at least 20 characters"
+  }),
+  resend: z.string().trim().regex(/^re_[A-Za-z0-9_]{20,}$/, {
+    message: "Resend API key must start with 're_' followed by at least 20 characters"
+  }),
+  webshare: z.string().trim().min(20, {
+    message: "Webshare API key must be at least 20 characters"
   })
 }
 
@@ -50,6 +58,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     qwen: "",
     fal: "",
     gamma: "",
+    resend: "",
+    webshare: "",
   })
   const [ownerIds, setOwnerIds] = useState<Record<string, string>>({
     qwen: "",
