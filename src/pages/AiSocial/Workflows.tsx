@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Clock } from "lucide-react";
+import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Clock, Play, Pause } from "lucide-react";
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -288,6 +288,22 @@ export default function Workflows() {
     }
   };
 
+  const handleToggleWorkflowActive = async (workflowId: string, currentActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('ai_social_workflows')
+        .update({ active: !currentActive })
+        .eq('id', workflowId);
+
+      if (error) throw error;
+      toast.success(currentActive ? "Workflow paused" : "Workflow activated");
+      refetchWorkflows();
+    } catch (error) {
+      console.error("Error toggling workflow:", error);
+      toast.error("Failed to update workflow status");
+    }
+  };
+
   const resetForm = () => {
     setEditingWorkflowId(null);
     setWorkflowType("image");
@@ -368,8 +384,20 @@ export default function Workflows() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className={`text-xs px-2 py-1 rounded ${workflow.active ? 'bg-green-500/20 text-green-500' : 'bg-muted text-muted-foreground'}`}>
-                            {workflow.active ? 'Active' : 'Inactive'}
+                            {workflow.active ? 'Active' : 'Paused'}
                           </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleToggleWorkflowActive(workflow.id, workflow.active)}
+                            title={workflow.active ? "Pause workflow" : "Activate workflow"}
+                          >
+                            {workflow.active ? (
+                              <Pause className="h-4 w-4" />
+                            ) : (
+                              <Play className="h-4 w-4" />
+                            )}
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
