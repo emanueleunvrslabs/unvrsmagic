@@ -1,11 +1,130 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Image, Video, Calendar, Zap } from "lucide-react";
+import { Image, Video, Calendar, Zap, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentGallerySection } from "@/components/ai-social/ContentGallerySection";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+
+const WorkflowsList = () => {
+  const { data: workflows } = useQuery({
+    queryKey: ['active-workflows'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const { data, error } = await supabase
+        .from('ai_social_workflows')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const navigate = useNavigate();
+
+  const getPlatformEmoji = (platform: string) => {
+    const map: Record<string, string> = {
+      instagram: "📷",
+      facebook: "👍",
+      twitter: "🐦",
+      linkedin: "💼"
+    };
+    return map[platform] || "🌐";
+  };
+
+  const formatSchedule = (scheduleConfig: any) => {
+    if (!scheduleConfig) return "";
+    const { frequency, times, days } = scheduleConfig;
+    
+    if (frequency === "daily") {
+      return `Daily at ${times.join(", ")}`;
+    } else if (frequency === "weekly") {
+      const dayNames = days.map((d: string) => d.charAt(0).toUpperCase() + d.slice(1, 3)).join(", ");
+      return `${dayNames} at ${times.join(", ")}`;
+    }
+    return frequency;
+  };
+
+  if (!workflows || workflows.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Automated Workflows</CardTitle>
+          <CardDescription>
+            Configure automations to generate and publish content
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-12 text-muted-foreground">
+            No active workflows
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {workflows.map((workflow) => {
+        const scheduleConfig = workflow.schedule_config as any;
+        const mode = scheduleConfig?.mode || "text-to-image";
+        const modeLabel = mode
+          .split("-")
+          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+
+        return (
+          <Card key={workflow.id} className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate('/ai-social/workflows')}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1 flex-1">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Play className="h-4 w-4 text-primary" />
+                    {workflow.name}
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    {formatSchedule(scheduleConfig)}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary" className="bg-background/30 text-foreground/80 border-border/30">
+                  {workflow.content_type === "image" ? "🖼️ Image" : "🎥 Video"}
+                </Badge>
+                <Badge variant="secondary" className="bg-background/30 text-foreground/80 border-border/30">
+                  {workflow.content_type === "image" ? "Nano 🍌" : "Veo3"}
+                </Badge>
+                <Badge variant="secondary" className="bg-background/30 text-foreground/80 border-border/30">
+                  {modeLabel}
+                </Badge>
+              </div>
+              
+              {workflow.platforms && workflow.platforms.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {workflow.platforms.map((platform: string) => (
+                    <Badge key={platform} variant="outline" className="bg-background/20 text-foreground/70 border-border/30">
+                      {getPlatformEmoji(platform)} {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+};
 
 export default function AiSocialDashboard() {
   const navigate = useNavigate();
@@ -71,6 +190,7 @@ export default function AiSocialDashboard() {
       console.error("Error loading stats:", error);
     }
   };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -241,19 +361,7 @@ export default function AiSocialDashboard() {
           </TabsContent>
 
           <TabsContent value="workflows">
-            <Card>
-              <CardHeader>
-                <CardTitle>Automated Workflows</CardTitle>
-                <CardDescription>
-                  Configure automations to generate and publish content
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  No workflows configured
-                </div>
-              </CardContent>
-            </Card>
+            <WorkflowsList />
           </TabsContent>
         </Tabs>
       </div>
