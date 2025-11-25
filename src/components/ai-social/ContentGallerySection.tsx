@@ -308,8 +308,8 @@ export function ContentGallerySection() {
                       </span>
                     )}
                     
-                    {/* Execution type badge */}
-                    {item.workflow ? (
+                    {/* Execution type badge - check metadata.execution_type */}
+                    {(item.metadata as any)?.execution_type === "scheduled" ? (
                       <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
                         ⏰ Schedule
                       </span>
