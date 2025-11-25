@@ -9,10 +9,17 @@ import { Switch } from "@/components/ui/switch";
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { VideoGallerySection } from "@/components/ai-social/VideoGallerySection";
+import { useUserCredits } from "@/hooks/useUserCredits";
+import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+const VIDEO_COST = 10; // €10 per video
 
 export default function GenerateVideo() {
+  const navigate = useNavigate();
+  const { credits, isLoading: creditsLoading } = useUserCredits();
   const [prompt, setPrompt] = useState("");
   const [mode, setMode] = useState("text-to-video");
   const [aspectRatio, setAspectRatio] = useState("16:9");
@@ -28,6 +35,8 @@ export default function GenerateVideo() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const firstFrameInputRef = useRef<HTMLInputElement>(null);
   const lastFrameInputRef = useRef<HTMLInputElement>(null);
+
+  const hasInsufficientCredits = !creditsLoading && (credits?.balance || 0) < VIDEO_COST;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -89,6 +98,12 @@ export default function GenerateVideo() {
   };
 
   const handleGenerate = async () => {
+    // Check credits first
+    if (hasInsufficientCredits) {
+      toast.error("Crediti insufficienti. Vai al Wallet per acquistare crediti.");
+      return;
+    }
+
     if (!prompt) {
       toast.error("Please enter a prompt");
       return;
@@ -190,6 +205,19 @@ export default function GenerateVideo() {
             Create videos with AI using Veo3
           </p>
         </div>
+
+        {hasInsufficientCredits && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Crediti insufficienti</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>Hai bisogno di almeno €{VIDEO_COST} per generare un video.</span>
+              <Button variant="outline" size="sm" onClick={() => navigate("/wallet")}>
+                Vai al Wallet
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
@@ -435,7 +463,7 @@ export default function GenerateVideo() {
 
               <Button 
                 onClick={handleGenerate} 
-                disabled={loading}
+                disabled={loading || hasInsufficientCredits}
                 className="w-full"
               >
                 {loading ? (
@@ -443,8 +471,10 @@ export default function GenerateVideo() {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
                   </>
+                ) : hasInsufficientCredits ? (
+                  "Crediti insufficienti"
                 ) : (
-                  "Generate Video"
+                  `Generate Video (€${VIDEO_COST})`
                 )}
               </Button>
             </CardContent>

@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Clock, Play, Pause, Rocket } from "lucide-react";
+import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Clock, Play, Pause, Rocket, AlertCircle } from "lucide-react";
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -14,6 +14,12 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { useUserCredits } from "@/hooks/useUserCredits";
+import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+const IMAGE_COST = 1;
+const VIDEO_COST = 10;
 
 const DAYS_OF_WEEK = [
   { id: 'monday', label: 'Mon' },
@@ -26,6 +32,8 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function Workflows() {
+  const navigate = useNavigate();
+  const { credits, isLoading: creditsLoading } = useUserCredits();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
   const [deleteWorkflowId, setDeleteWorkflowId] = useState<string | null>(null);
@@ -59,6 +67,10 @@ export default function Workflows() {
   const [scheduleFrequency, setScheduleFrequency] = useState<string>("daily");
   const [scheduleTimes, setScheduleTimes] = useState<string[]>(["09:00"]);
   const [scheduleDays, setScheduleDays] = useState<string[]>(["monday", "wednesday", "friday"]);
+
+  // Credit check helpers
+  const getRequiredCredits = (type: "image" | "video") => type === "image" ? IMAGE_COST : VIDEO_COST;
+  const hasInsufficientCredits = (type: "image" | "video") => !creditsLoading && (credits?.balance || 0) < getRequiredCredits(type);
 
   // Fetch connected social accounts
   const { data: connectedAccounts } = useQuery({
@@ -364,6 +376,13 @@ export default function Workflows() {
   };
 
   const handleSaveWorkflow = async () => {
+    // Check credits first
+    if (hasInsufficientCredits(workflowType)) {
+      const requiredCredits = getRequiredCredits(workflowType);
+      toast.error(`Crediti insufficienti. Hai bisogno di almeno €${requiredCredits} per creare un workflow ${workflowType === 'image' ? 'immagine' : 'video'}.`);
+      return;
+    }
+
     if (!workflowName.trim()) {
       toast.error("Please enter a workflow name");
       return;
@@ -580,8 +599,16 @@ export default function Workflows() {
   };
 
   const handleRunNow = async (workflow: any) => {
-    setRunningWorkflowId(workflow.id);
     const isVideo = workflow.content_type === "video";
+    const requiredCredits = isVideo ? VIDEO_COST : IMAGE_COST;
+    
+    // Check credits first
+    if (hasInsufficientCredits(workflow.content_type)) {
+      toast.error(`Crediti insufficienti. Hai bisogno di almeno €${requiredCredits} per eseguire questo workflow.`);
+      return;
+    }
+
+    setRunningWorkflowId(workflow.id);
     
     const startTime = Date.now();
     const formatElapsed = () => {
