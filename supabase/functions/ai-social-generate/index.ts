@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contentId, type, prompt, mode, inputImages, aspectRatio, resolution, outputFormat, duration } = await req.json();
+    const { contentId, type, prompt, mode, inputImages, aspectRatio, resolution, outputFormat, duration, generateAudio } = await req.json();
 
     if (!contentId || !type || !prompt) {
       return new Response(
@@ -111,6 +111,9 @@ serve(async (req) => {
       if (duration) {
         requestBody.duration = duration; // Already in correct format from UI
       }
+      
+      // Add generate_audio parameter (defaults to true if not specified)
+      requestBody.generate_audio = generateAudio !== undefined ? generateAudio : true;
       
       // Add image_url for image-to-video mode (use first image)
       if (mode === "image-to-video" && inputImages && inputImages.length > 0) {

@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ export default function GenerateVideo() {
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
   const [inputImages, setInputImages] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState("");
+  const [generateAudio, setGenerateAudio] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +93,8 @@ export default function GenerateVideo() {
           inputImages: mode === "image-to-video" ? inputImages : undefined,
           aspectRatio,
           resolution,
-          duration
+          duration,
+          generateAudio
         }
       });
 
@@ -264,6 +267,20 @@ export default function GenerateVideo() {
                     <SelectItem value="8s">8 seconds</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex items-center justify-between space-x-2">
+                <div className="space-y-0.5">
+                  <Label htmlFor="generate-audio">Generate Audio</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Disable to save 50% credits
+                  </p>
+                </div>
+                <Switch
+                  id="generate-audio"
+                  checked={generateAudio}
+                  onCheckedChange={setGenerateAudio}
+                />
               </div>
 
               <Button 
