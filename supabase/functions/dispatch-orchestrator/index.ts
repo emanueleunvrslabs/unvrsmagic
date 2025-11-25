@@ -130,7 +130,7 @@ async function orchestrateAgents(
     await updateAgentState(supabase, jobId, userId, 'ANAGRAFICA.INTAKE', 'running');
     await logAgentActivity(supabase, userId, 'ANAGRAFICA.INTAKE', 'info', `Elaborazione anagrafica POD zona ${zoneCode} (solo tipo O)`, { files: anagraficaFiles.length, zone: zoneCode });
     
-    const anagraficaResult = await processAnagraficaStep(supabase, userId, anagraficaFiles, ipDetailFiles, zoneCode);
+    const anagraficaResult = await processAnagraficaStep(supabase, userId, anagraficaFiles, ipDetailFiles, zoneCode, dispatchMonth);
     await updateAgentState(supabase, jobId, userId, 'ANAGRAFICA.INTAKE', 'completed', anagraficaResult);
     await logAgentActivity(supabase, userId, 'ANAGRAFICA.INTAKE', 'info', `Anagrafica completata: ${anagraficaResult.total_pods_o} POD orari trovati`, anagraficaResult);
 
@@ -272,8 +272,8 @@ async function downloadFileContent(supabase: any, fileUrl: string): Promise<Arra
   }
 }
 
-// Parse CSV content to extract POD data
-function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: string[], podCodesLP: string[], allPods: any[] } {
+// Parse CSV content to extract POD data using trattamento_XX column for the specific month
+function parseAnagraficaCSV(content: string, zoneCode: string, dispatchMonth?: string): { podCodesO: string[], podCodesLP: string[], allPods: any[] } {
   const lines = content.split('\n').filter(line => line.trim());
   if (lines.length === 0) return { podCodesO: [], podCodesLP: [], allPods: [] };
   
@@ -281,13 +281,11 @@ function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: str
   const separator = headerLine.includes(';') ? ';' : ',';
   const headers = headerLine.split(separator).map(h => h.trim().toUpperCase());
   
-  console.log('CSV Headers found:', headers);
+  console.log('CSV Headers found:', headers.slice(0, 20), '...');
   
+  // Find POD column
   const podColNames = ['POD', 'CODICE_POD', 'COD_POD', 'CODICE POD', 'PUNTO_PRELIEVO'];
-  const typeColNames = ['TRATTAMENTO', 'TIPO_TRATTAMENTO', 'TIPO_MISURATORE', 'TIPO', 'TIPOLOGIA', 'TIPO_CONTATORE', 'TIPO TRATTAMENTO'];
-  
   let podColIndex = -1;
-  let typeColIndex = -1;
   
   for (const name of podColNames) {
     const idx = headers.indexOf(name);
@@ -297,30 +295,74 @@ function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: str
     }
   }
   
-  for (const name of typeColNames) {
-    const idx = headers.indexOf(name);
-    if (idx !== -1) {
-      typeColIndex = idx;
-      break;
+  // Find trattamento column based on dispatch month
+  // e.g., November -> TRATTAMENTO_11, December -> TRATTAMENTO_12
+  let trattamentoColIndex = -1;
+  let trattamentoColName = '';
+  
+  if (dispatchMonth) {
+    const monthNum = parseInt(dispatchMonth.split('-')[1], 10);
+    const monthStr = monthNum.toString().padStart(2, '0');
+    
+    // Try different variations of the column name
+    const trattamentoColNames = [
+      `TRATTAMENTO_${monthStr}`,
+      `TRATTAMENTO_${monthNum}`,
+      `TRATTAMENTO${monthStr}`,
+      `TRATTAMENTO${monthNum}`,
+      `TIPO_TRATTAMENTO_${monthStr}`,
+      `TIPO_TRATTAMENTO_${monthNum}`
+    ];
+    
+    for (const colName of trattamentoColNames) {
+      const idx = headers.indexOf(colName);
+      if (idx !== -1) {
+        trattamentoColIndex = idx;
+        trattamentoColName = colName;
+        break;
+      }
+    }
+    
+    console.log(`Looking for trattamento column for month ${monthNum}: found ${trattamentoColName} at index ${trattamentoColIndex}`);
+  }
+  
+  // Fallback to generic type columns if month-specific not found
+  if (trattamentoColIndex === -1) {
+    const fallbackColNames = ['TRATTAMENTO', 'TIPO_TRATTAMENTO', 'TIPO_MISURATORE', 'TIPO', 'TIPOLOGIA', 'TIPO_CONTATORE', 'TIPO TRATTAMENTO'];
+    for (const name of fallbackColNames) {
+      const idx = headers.indexOf(name);
+      if (idx !== -1) {
+        trattamentoColIndex = idx;
+        trattamentoColName = name;
+        console.log(`Using fallback column: ${name}`);
+        break;
+      }
     }
   }
   
-  console.log(`POD column index: ${podColIndex}, Type column index: ${typeColIndex}`);
+  console.log(`POD column index: ${podColIndex}, Trattamento column: ${trattamentoColName} at index: ${trattamentoColIndex}`);
   
   const podCodesO: string[] = [];
   const podCodesLP: string[] = [];
   const allPods: any[] = [];
   
+  // If POD column not found by name, try to find by content
   if (podColIndex === -1) {
     for (let i = 0; i < headers.length; i++) {
       if (lines.length > 1) {
         const firstDataRow = lines[1].split(separator);
         if (firstDataRow[i]?.trim().startsWith('IT')) {
           podColIndex = i;
+          console.log(`Found POD column by content at index ${i}`);
           break;
         }
       }
     }
+  }
+  
+  if (podColIndex === -1) {
+    console.log('Could not find POD column in anagrafica');
+    return { podCodesO: [], podCodesLP: [], allPods: [] };
   }
   
   for (let i = 1; i < lines.length; i++) {
@@ -329,28 +371,35 @@ function parseAnagraficaCSV(content: string, zoneCode: string): { podCodesO: str
     if (values.length <= podColIndex) continue;
     
     const podCode = values[podColIndex] || '';
-    const meterType = typeColIndex !== -1 ? (values[typeColIndex] || '').toUpperCase() : '';
+    const trattamento = trattamentoColIndex !== -1 ? (values[trattamentoColIndex] || '').toUpperCase().trim() : '';
     
     if (!podCode || podCode.length < 5) continue;
     
     const pod = {
       pod_code: podCode,
-      meter_type: meterType,
+      trattamento: trattamento,
       raw_data: values
     };
     
     allPods.push(pod);
     
-    if (meterType === 'O' || meterType === 'ORARIO' || meterType === '1' || meterType === 'TM') {
+    // Check if POD is hourly (O) based on trattamento value
+    // Common values: "O", "ORARIO", "1", "TM", or empty (default to O if no column found)
+    const isHourly = trattamento === 'O' || 
+                     trattamento === 'ORARIO' || 
+                     trattamento === '1' || 
+                     trattamento === 'TM' ||
+                     trattamento === 'TMO' ||
+                     (trattamentoColIndex === -1 && podCode.startsWith('IT')); // If no column found, include all PODs starting with IT
+    
+    if (isHourly) {
       podCodesO.push(podCode);
-    } else if (meterType) {
+    } else if (trattamento) {
       podCodesLP.push(podCode);
-    } else {
-      podCodesO.push(podCode);
     }
   }
   
-  console.log(`Parsed ${allPods.length} total PODs: ${podCodesO.length} type O, ${podCodesLP.length} type LP`);
+  console.log(`Parsed ${allPods.length} total PODs: ${podCodesO.length} type O (hourly), ${podCodesLP.length} type LP (non-hourly)`);
   
   return { podCodesO, podCodesLP, allPods };
 }
@@ -652,8 +701,8 @@ async function parseIPDetailFile(supabase: any, fileUrl: string): Promise<string
 }
 
 // Processing step functions
-async function processAnagraficaStep(supabase: any, userId: string, files: any[], ipDetailFiles: any[], zoneCode: string) {
-  console.log(`Processing anagrafica for zone ${zoneCode}, files: ${files.length}, ipDetailFiles: ${ipDetailFiles.length}`);
+async function processAnagraficaStep(supabase: any, userId: string, files: any[], ipDetailFiles: any[], zoneCode: string, dispatchMonth: string) {
+  console.log(`Processing anagrafica for zone ${zoneCode}, month ${dispatchMonth}, files: ${files.length}, ipDetailFiles: ${ipDetailFiles.length}`);
   
   let allPodCodesO: string[] = [];
   let allPodCodesLP: string[] = [];
@@ -684,7 +733,7 @@ async function processAnagraficaStep(supabase: any, userId: string, files: any[]
           
           for (const csvName of csvFiles) {
             const csvContent = await zip.files[csvName].async('string');
-            const parsed = parseAnagraficaCSV(csvContent, zoneCode);
+            const parsed = parseAnagraficaCSV(csvContent, zoneCode, dispatchMonth);
             allPodCodesO = allPodCodesO.concat(parsed.podCodesO);
             allPodCodesLP = allPodCodesLP.concat(parsed.podCodesLP);
             totalPodsProcessed += parsed.allPods.length;
@@ -695,7 +744,7 @@ async function processAnagraficaStep(supabase: any, userId: string, files: any[]
         }
       } else if (fileName.endsWith('.csv')) {
         const textContent = new TextDecoder().decode(content);
-        const parsed = parseAnagraficaCSV(textContent, zoneCode);
+        const parsed = parseAnagraficaCSV(textContent, zoneCode, dispatchMonth);
         allPodCodesO = allPodCodesO.concat(parsed.podCodesO);
         allPodCodesLP = allPodCodesLP.concat(parsed.podCodesLP);
         totalPodsProcessed += parsed.allPods.length;
