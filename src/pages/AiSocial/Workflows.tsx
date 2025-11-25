@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 export default function Workflows() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [workflowType, setWorkflowType] = useState<"image" | "video">("image");
+  const [generationMode, setGenerationMode] = useState<string>("text-to-image");
   const [description, setDescription] = useState("");
   const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState("1:1");
@@ -97,6 +98,12 @@ export default function Workflows() {
     );
   };
 
+  const handleWorkflowTypeChange = (type: "image" | "video") => {
+    setWorkflowType(type);
+    // Reset generation mode based on type
+    setGenerationMode(type === "image" ? "text-to-image" : "text-to-video");
+  };
+
   const handleSaveWorkflow = async () => {
     const finalPrompt = enhancedPrompt || description;
     
@@ -119,12 +126,13 @@ export default function Workflows() {
         .from('ai_social_workflows')
         .insert({
           user_id: session.user.id,
-          name: `${workflowType === 'image' ? 'Image' : 'Video'} Workflow`,
+          name: `${workflowType === 'image' ? 'Image' : 'Video'} Workflow - ${generationMode}`,
           description: description,
           content_type: workflowType,
           prompt_template: finalPrompt,
           platforms: selectedPlatforms,
           schedule_config: {
+            generation_mode: generationMode,
             aspect_ratio: aspectRatio,
             resolution: resolution,
             output_format: outputFormat
@@ -148,6 +156,7 @@ export default function Workflows() {
 
   const resetForm = () => {
     setWorkflowType("image");
+    setGenerationMode("text-to-image");
     setDescription("");
     setEnhancedPrompt("");
     setAspectRatio("1:1");
@@ -235,7 +244,7 @@ export default function Workflows() {
             {/* Workflow Type */}
             <div className="space-y-2">
               <Label>Content Type</Label>
-              <Select value={workflowType} onValueChange={(v) => setWorkflowType(v as "image" | "video")}>
+              <Select value={workflowType} onValueChange={(v) => handleWorkflowTypeChange(v as "image" | "video")}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -244,6 +253,34 @@ export default function Workflows() {
                   <SelectItem value="video">Video</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Generation Mode */}
+            <div className="space-y-2">
+              <Label>Generation Mode</Label>
+              {workflowType === "image" ? (
+                <Select value={generationMode} onValueChange={setGenerationMode}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text-to-image">Text to Image</SelectItem>
+                    <SelectItem value="image-to-image">Image to Image</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Select value={generationMode} onValueChange={setGenerationMode}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text-to-video">Text to Video</SelectItem>
+                    <SelectItem value="image-to-video">Image to Video</SelectItem>
+                    <SelectItem value="reference-to-video">Reference to Video</SelectItem>
+                    <SelectItem value="first-last-frame">First/Last Frame to Video</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             {/* Description with AI Enhancement */}
