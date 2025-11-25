@@ -331,14 +331,12 @@ export function ContentGallerySection() {
                     ))}
                   </div>
                   
-                  <div className="flex items-end justify-between gap-2">
-                    <p className="text-xs text-muted-foreground line-clamp-2 flex-1">
-                      {item.prompt}
-                    </p>
-                    <p className="text-xs text-muted-foreground whitespace-nowrap">
-                      {format(new Date(item.created_at), "MMM d, yyyy HH:mm")}
-                    </p>
-                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {item.prompt}
+                  </p>
+                  <p className="text-xs text-muted-foreground text-right">
+                    {format(new Date(item.created_at), "MMM d, yyyy HH:mm")}
+                  </p>
                 </div>
               </CardContent>
             </Card>
