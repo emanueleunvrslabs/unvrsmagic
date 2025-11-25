@@ -125,47 +125,6 @@ export default function Connection() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {isOwner && (
-            <Card className="md:col-span-2 mb-4">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  <CardTitle>Instagram App Configuration</CardTitle>
-                </div>
-                <CardDescription>Configure Meta App credentials for Instagram OAuth</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="instagram-app-id">App ID</Label>
-                  <Input
-                    id="instagram-app-id"
-                    type="text"
-                    placeholder="Enter your Meta App ID"
-                    value={instagramAppId}
-                    onChange={(e) => setInstagramAppId(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="instagram-secret">App Secret</Label>
-                  <Input
-                    id="instagram-secret"
-                    type="password"
-                    placeholder="Enter your Meta App Secret"
-                    value={instagramSecret}
-                    onChange={(e) => setInstagramSecret(e.target.value)}
-                  />
-                </div>
-                <Button 
-                  className="w-full" 
-                  onClick={saveCredentials}
-                  disabled={isConnecting}
-                >
-                  {isConnecting ? "Saving..." : "Save Configuration"}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -183,7 +142,7 @@ export default function Connection() {
                 <Link className="mr-2 h-4 w-4" />
                 Connect Instagram
               </Button>
-              {!hasCredentials && !isOwner && (
+              {!hasCredentials && (
                 <p className="text-sm text-muted-foreground mt-2">
                   Instagram connection not available. Contact administrator.
                 </p>
