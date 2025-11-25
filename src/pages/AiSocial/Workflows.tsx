@@ -432,7 +432,27 @@ export default function Workflows() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h3 className="font-medium">{workflow.name}</h3>
-                          <div className="flex flex-wrap gap-2 mt-2">
+                          <div className="flex flex-wrap gap-2 mt-2 items-center">
+                            {/* Run Now Button */}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRunNow(workflow)}
+                              disabled={runningWorkflowId === workflow.id}
+                              className="bg-primary/10 border-primary/20 hover:bg-primary/20 text-primary h-7 text-xs"
+                            >
+                              {runningWorkflowId === workflow.id ? (
+                                <>
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  Running...
+                                </>
+                              ) : (
+                                <>
+                                  <Rocket className="h-3 w-3 mr-1" />
+                                  Run Now
+                                </>
+                              )}
+                            </Button>
                             {/* OpenAI Badge */}
                             <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 backdrop-blur-sm">
                               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
@@ -460,28 +480,6 @@ export default function Workflows() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleRunNow(workflow)}
-                            disabled={runningWorkflowId === workflow.id}
-                            className="bg-primary/10 border-primary/20 hover:bg-primary/20 text-primary"
-                          >
-                            {runningWorkflowId === workflow.id ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                                Running...
-                              </>
-                            ) : (
-                              <>
-                                <Rocket className="h-4 w-4 mr-1" />
-                                Run Now
-                              </>
-                            )}
-                          </Button>
-                          <span className={`text-xs px-2 py-1 rounded ${workflow.active ? 'bg-green-500/20 text-green-500' : 'bg-muted text-muted-foreground'}`}>
-                            {workflow.active ? 'Active' : 'Paused'}
-                          </span>
                           <Button
                             variant="ghost"
                             size="icon"
