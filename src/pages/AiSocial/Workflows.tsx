@@ -137,6 +137,14 @@ export default function Workflows() {
     setWorkflowType(type);
     // Reset generation mode based on type
     setGenerationMode(type === "image" ? "text-to-image" : "text-to-video");
+    // Reset aspect ratio and resolution to type-compatible defaults
+    if (type === "video") {
+      setAspectRatio("16:9");
+      setResolution("720p");
+    } else {
+      setAspectRatio("1:1");
+      setResolution("1K");
+    }
     // Clear uploaded images when changing type
     setUploadedImages([]);
   };
