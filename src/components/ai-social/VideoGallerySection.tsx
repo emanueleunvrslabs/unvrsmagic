@@ -240,7 +240,7 @@ export function VideoGallerySection() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="aspect-video bg-muted rounded-lg overflow-hidden relative group">
+                <div className="aspect-video bg-muted rounded-lg overflow-hidden relative group cursor-pointer" onClick={() => item.status === "completed" && item.media_url && setPreviewItem(item)}>
                   {item.status === "completed" && item.media_url ? (
                     <>
                       {item.thumbnail_url ? (
@@ -254,14 +254,14 @@ export function VideoGallerySection() {
                           <Video className="h-12 w-12 text-muted-foreground opacity-50" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => setPreviewItem(item)}
-                        >
-                          <Play className="h-4 w-4" />
-                        </Button>
+                      {/* Always visible play button */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="bg-black/40 backdrop-blur-sm rounded-full p-4 group-hover:bg-black/60 transition-colors">
+                          <Play className="h-8 w-8 text-white fill-white" />
+                        </div>
+                      </div>
+                      {/* Hover action buttons */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Button
                           size="sm"
                           variant="secondary"
@@ -342,6 +342,7 @@ export function VideoGallerySection() {
               <video
                 src={previewItem.media_url}
                 controls
+                autoPlay
                 className="w-full rounded-lg"
               />
             )}
