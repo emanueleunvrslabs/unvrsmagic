@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 
@@ -10,24 +10,46 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  const checkSession = useCallback(async () => {
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    setSession(currentSession);
+    setLoading(false);
+    
+    if (!currentSession) {
+      console.log("Session expired or user logged out");
+    }
+  }, []);
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+    checkSession();
 
-    // Listen for auth changes
+    // Listen for auth changes - this catches logout, token refresh failures, etc.
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log("Auth state changed:", event);
+      setSession(newSession);
       setLoading(false);
+      
+      // Immediately handle sign out or token expiration
+      if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !newSession)) {
+        setSession(null);
+      }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Periodic session check every 30 seconds to catch edge cases
+    const intervalId = setInterval(() => {
+      checkSession();
+    }, 30000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(intervalId);
+    };
+  }, [checkSession]);
 
   if (loading) {
     return (
@@ -38,7 +60,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!session) {
-    return <Navigate to="/auth" replace />;
+    // Redirect to auth with the current location to return after login
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
