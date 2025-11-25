@@ -30,22 +30,16 @@ Deno.serve(async (req) => {
     const url = new URL(req.url)
     const action = url.searchParams.get('action')
 
-    // Get Instagram app credentials
-    const { data: credentials, error: credError } = await supabaseClient
-      .from('api_keys')
-      .select('*')
-      .eq('provider', 'instagram_app_credentials')
-      .single()
+    // Get Instagram app credentials from environment
+    const appId = Deno.env.get('INSTAGRAM_APP_ID')
+    const appSecret = Deno.env.get('INSTAGRAM_APP_SECRET')
 
-    if (credError || !credentials) {
+    if (!appId || !appSecret) {
       return new Response(
         JSON.stringify({ error: 'Instagram app not configured' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    const appId = credentials.api_key
-    const appSecret = credentials.owner_id
     const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/instagram-oauth?action=callback`
 
     // Start OAuth flow
