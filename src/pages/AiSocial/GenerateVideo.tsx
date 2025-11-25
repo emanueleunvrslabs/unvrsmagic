@@ -5,12 +5,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { VideoGallerySection } from "@/components/ai-social/VideoGallerySection";
-import { ImageSelector } from "@/components/ai-social/ImageSelector";
 
 export default function GenerateVideo() {
   const [prompt, setPrompt] = useState("");
@@ -21,7 +20,23 @@ export default function GenerateVideo() {
   const [loading, setLoading] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState("");
-  const [showImageSelector, setShowImageSelector] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Reset file input after reading
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleGenerate = async () => {
     if (!prompt) {
@@ -112,25 +127,51 @@ export default function GenerateVideo() {
               </div>
 
               {mode === "image-to-video" && (
-                <div className="space-y-2">
-                  <Label>Input Image</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowImageSelector(true)}
-                    className="w-full"
-                  >
-                    {imageUrl ? "Change Image" : "Select Image"}
-                  </Button>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="input-image">Upload Image</Label>
+                    <Input
+                      id="input-image"
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="image-url">Or Add Image from URL</Label>
+                    <Input
+                      id="image-url"
+                      type="url"
+                      placeholder="https://example.com/image.jpg"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                    />
+                  </div>
+
                   {imageUrl && (
                     <div className="space-y-2">
-                      <img
-                        src={imageUrl}
-                        alt="Selected"
-                        className="w-full max-h-48 object-contain rounded-lg border"
-                      />
+                      <Label>Selected Image</Label>
+                      <div className="relative">
+                        <img 
+                          src={imageUrl} 
+                          alt="Input"
+                          className="w-full rounded-lg aspect-video object-cover"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-2 right-2"
+                          onClick={() => setImageUrl("")}
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     </div>
                   )}
+
                   <p className="text-xs text-muted-foreground">
                     Image should be 720p or higher in 16:9 or 9:16 aspect ratio
                   </p>
@@ -230,12 +271,6 @@ export default function GenerateVideo() {
 
         <VideoGallerySection />
       </div>
-
-      <ImageSelector
-        open={showImageSelector}
-        onOpenChange={setShowImageSelector}
-        onSelect={setImageUrl}
-      />
     </DashboardLayout>
   );
 }
