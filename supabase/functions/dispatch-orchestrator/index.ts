@@ -439,13 +439,26 @@ function parseLettureXML(content: string): string[] {
   return podCodes;
 }
 
-// Extract POD codes from letture files (ZIP containing CSV/XML)
-async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise<{ allPods: string[], filesProcessed: number, warnings: string[] }> {
+// Configuration for chunked processing
+const MAX_FILES_PER_ZIP = 300; // Maximum files to process from a single ZIP
+const MAX_NESTED_ZIPS = 50; // Maximum nested ZIPs to process
+const PROCESSING_TIMEOUT_MS = 20000; // 20 seconds max per ZIP file
+
+// Extract POD codes from letture files (ZIP containing CSV/XML) with chunked processing
+async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise<{ allPods: string[], filesProcessed: number, warnings: string[], skippedFiles: number }> {
   const allPods: string[] = [];
   let filesProcessed = 0;
+  let skippedFiles = 0;
   const warnings: string[] = [];
+  const startTime = Date.now();
   
   for (const file of files) {
+    // Check if we're running low on time
+    if (Date.now() - startTime > 25000) {
+      warnings.push('Timeout raggiunto, alcuni file non elaborati');
+      break;
+    }
+    
     try {
       const content = await downloadFileContent(supabase, file.file_url);
       if (!content) {
@@ -456,38 +469,98 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
       const fileName = file.file_name.toLowerCase();
       
       if (fileName.endsWith('.zip')) {
-        // Process ZIP file
+        // Process ZIP file with chunking
         try {
+          const zipStartTime = Date.now();
           const zip = await JSZip.loadAsync(content);
-          const innerFiles = Object.keys(zip.files).filter(name => !zip.files[name].dir);
+          const allInnerFiles = Object.keys(zip.files).filter(name => !zip.files[name].dir);
           
-          console.log(`Processing ZIP ${file.file_name} with ${innerFiles.length} files`);
+          console.log(`ZIP ${file.file_name} contains ${allInnerFiles.length} files`);
           
-          for (const innerFileName of innerFiles) {
-            const innerContent = await zip.files[innerFileName].async('string');
-            const lowerName = innerFileName.toLowerCase();
-            
-            let pods: string[] = [];
-            if (lowerName.endsWith('.csv')) {
-              pods = parseLettureCSV(innerContent);
-            } else if (lowerName.endsWith('.xml')) {
-              pods = parseLettureXML(innerContent);
+          // Separate files by type for smarter processing
+          const csvFiles = allInnerFiles.filter(f => f.toLowerCase().endsWith('.csv'));
+          const xmlFiles = allInnerFiles.filter(f => f.toLowerCase().endsWith('.xml'));
+          const nestedZips = allInnerFiles.filter(f => f.toLowerCase().endsWith('.zip'));
+          
+          console.log(`Found: ${csvFiles.length} CSV, ${xmlFiles.length} XML, ${nestedZips.length} nested ZIPs`);
+          
+          // Process CSV files (limited)
+          const csvToProcess = csvFiles.slice(0, MAX_FILES_PER_ZIP);
+          if (csvFiles.length > MAX_FILES_PER_ZIP) {
+            warnings.push(`ZIP ${file.file_name}: elaborati ${MAX_FILES_PER_ZIP}/${csvFiles.length} CSV (sampling)`);
+            skippedFiles += csvFiles.length - MAX_FILES_PER_ZIP;
+          }
+          
+          for (const innerFileName of csvToProcess) {
+            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) {
+              warnings.push(`Timeout ZIP ${file.file_name}, file rimanenti saltati`);
+              break;
             }
             
-            if (pods.length > 0) {
-              console.log(`Found ${pods.length} PODs in ${innerFileName}`);
-              allPods.push(...pods);
-              filesProcessed++;
+            try {
+              const innerContent = await zip.files[innerFileName].async('string');
+              const pods = parseLettureCSV(innerContent);
+              
+              if (pods.length > 0) {
+                allPods.push(...pods);
+                filesProcessed++;
+              }
+            } catch (innerErr) {
+              console.error(`Error processing ${innerFileName}:`, innerErr);
+            }
+          }
+          
+          // Process XML files (limited)
+          const xmlToProcess = xmlFiles.slice(0, MAX_FILES_PER_ZIP);
+          if (xmlFiles.length > MAX_FILES_PER_ZIP) {
+            warnings.push(`ZIP ${file.file_name}: elaborati ${MAX_FILES_PER_ZIP}/${xmlFiles.length} XML (sampling)`);
+            skippedFiles += xmlFiles.length - MAX_FILES_PER_ZIP;
+          }
+          
+          for (const innerFileName of xmlToProcess) {
+            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) {
+              warnings.push(`Timeout ZIP ${file.file_name}, XML rimanenti saltati`);
+              break;
             }
             
-            // Handle nested ZIPs
-            if (lowerName.endsWith('.zip')) {
-              try {
-                const nestedZipData = await zip.files[innerFileName].async('arraybuffer');
-                const nestedZip = await JSZip.loadAsync(nestedZipData);
-                const nestedFiles = Object.keys(nestedZip.files).filter(name => !nestedZip.files[name].dir);
-                
-                for (const nestedFileName of nestedFiles) {
+            try {
+              const innerContent = await zip.files[innerFileName].async('string');
+              const pods = parseLettureXML(innerContent);
+              
+              if (pods.length > 0) {
+                allPods.push(...pods);
+                filesProcessed++;
+              }
+            } catch (innerErr) {
+              console.error(`Error processing XML ${innerFileName}:`, innerErr);
+            }
+          }
+          
+          // Process nested ZIPs (limited)
+          const nestedToProcess = nestedZips.slice(0, MAX_NESTED_ZIPS);
+          if (nestedZips.length > MAX_NESTED_ZIPS) {
+            warnings.push(`ZIP ${file.file_name}: elaborati ${MAX_NESTED_ZIPS}/${nestedZips.length} ZIP annidati`);
+            skippedFiles += nestedZips.length - MAX_NESTED_ZIPS;
+          }
+          
+          for (const nestedZipName of nestedToProcess) {
+            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) {
+              warnings.push(`Timeout nested ZIPs, rimanenti saltati`);
+              break;
+            }
+            
+            try {
+              const nestedZipData = await zip.files[nestedZipName].async('arraybuffer');
+              const nestedZip = await JSZip.loadAsync(nestedZipData);
+              const nestedFiles = Object.keys(nestedZip.files)
+                .filter(name => !nestedZip.files[name].dir)
+                .filter(name => name.toLowerCase().endsWith('.csv') || name.toLowerCase().endsWith('.xml'));
+              
+              // Limit nested file processing too
+              const nestedToProcessInner = nestedFiles.slice(0, 100);
+              
+              for (const nestedFileName of nestedToProcessInner) {
+                try {
                   const nestedContent = await nestedZip.files[nestedFileName].async('string');
                   const nestedLowerName = nestedFileName.toLowerCase();
                   
@@ -499,16 +572,24 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
                   }
                   
                   if (nestedPods.length > 0) {
-                    console.log(`Found ${nestedPods.length} PODs in nested ${nestedFileName}`);
                     allPods.push(...nestedPods);
                     filesProcessed++;
                   }
+                } catch (nestedErr) {
+                  // Silent fail for nested files
                 }
-              } catch (nestedErr) {
-                console.error(`Error processing nested ZIP ${innerFileName}:`, nestedErr);
               }
+              
+              if (nestedFiles.length > 100) {
+                skippedFiles += nestedFiles.length - 100;
+              }
+            } catch (nestedErr) {
+              console.error(`Error processing nested ZIP ${nestedZipName}:`, nestedErr);
             }
           }
+          
+          console.log(`ZIP processing complete: ${filesProcessed} files processed, ${skippedFiles} skipped`);
+          
         } catch (zipError) {
           console.error('Error processing ZIP:', zipError);
           warnings.push(`Errore estrazione ZIP: ${file.file_name}`);
@@ -530,7 +611,11 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
     }
   }
   
-  return { allPods, filesProcessed, warnings };
+  // Deduplicate PODs
+  const uniquePods = [...new Set(allPods)];
+  console.log(`Total PODs extracted: ${uniquePods.length} unique (from ${allPods.length} total)`);
+  
+  return { allPods: uniquePods, filesProcessed, warnings, skippedFiles };
 }
 
 // Parse IP Detail file to get IP POD codes
@@ -834,10 +919,10 @@ async function processHistoryStep(
   // Extract POD codes from letture files
   const lettureResult = await extractPodsFromLettureFiles(supabase, files);
   
-  // Deduplicate POD codes from letture
-  const uniquePodsInLetture = [...new Set(lettureResult.allPods)];
+  // PODs are already deduplicated in extractPodsFromLettureFiles
+  const uniquePodsInLetture = lettureResult.allPods;
   
-  console.log(`Found ${uniquePodsInLetture.length} unique POD codes in letture files`);
+  console.log(`Found ${uniquePodsInLetture.length} unique POD codes in letture files (${lettureResult.skippedFiles} files skipped)`);
   
   // Cross-reference: Find PODs that are in BOTH anagrafica (O) AND letture
   const podsWithData = podCodesO.filter(pod => uniquePodsInLetture.includes(pod));
@@ -859,6 +944,7 @@ async function processHistoryStep(
     pods_missing: podsWithoutData.slice(0, 100), // Store first 100 for reference
     unique_pods_in_letture: uniquePodsInLetture.length,
     files_processed: lettureResult.filesProcessed,
+    files_skipped: lettureResult.skippedFiles,
     zone: zoneCode,
     total_pod_o_from_anagrafica: podCodesO.length,
     warnings: lettureResult.warnings
