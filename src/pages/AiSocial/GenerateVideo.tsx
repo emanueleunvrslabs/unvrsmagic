@@ -65,6 +65,11 @@ export default function GenerateVideo() {
       return;
     }
 
+    if (mode === "reference-to-video" && inputImages.length === 0) {
+      toast.error("Please upload at least one reference image for reference-to-video mode");
+      return;
+    }
+
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -91,11 +96,11 @@ export default function GenerateVideo() {
           type: "video",
           prompt,
           mode,
-          inputImages: mode === "image-to-video" ? inputImages : undefined,
+          inputImages: (mode === "image-to-video" || mode === "reference-to-video") ? inputImages : undefined,
           aspectRatio,
           resolution,
-          duration,
-          generateAudio
+          duration: mode === "reference-to-video" ? "8s" : duration,
+          generateAudio: mode === "reference-to-video" ? undefined : generateAudio
         }
       }).then(({ error }) => {
         if (error) {
@@ -139,16 +144,18 @@ export default function GenerateVideo() {
                   <SelectContent>
                     <SelectItem value="text-to-video">Text to Video</SelectItem>
                     <SelectItem value="image-to-video">Image to Video</SelectItem>
-                    <SelectItem value="first-last-frame">First/Last Frame to Video</SelectItem>
                     <SelectItem value="reference-to-video">Reference to Video</SelectItem>
+                    <SelectItem value="first-last-frame">First/Last Frame to Video</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {mode === "image-to-video" && (
+              {(mode === "image-to-video" || mode === "reference-to-video") && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="input-image">Upload Images</Label>
+                    <Label htmlFor="input-image">
+                      {mode === "reference-to-video" ? "Upload Reference Images" : "Upload Images"}
+                    </Label>
                     <Input
                       id="input-image"
                       ref={fileInputRef}
@@ -213,7 +220,9 @@ export default function GenerateVideo() {
                   )}
 
                   <p className="text-xs text-muted-foreground">
-                    Image should be 720p or higher in 16:9 or 9:16 aspect ratio
+                    {mode === "reference-to-video" 
+                      ? "Upload images that show the subject you want to appear consistently in the video"
+                      : "Image should be 720p or higher in 16:9 or 9:16 aspect ratio"}
                   </p>
                 </div>
               )}
@@ -264,26 +273,34 @@ export default function GenerateVideo() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="4s">4 seconds</SelectItem>
-                    <SelectItem value="6s">6 seconds</SelectItem>
-                    <SelectItem value="8s">8 seconds</SelectItem>
+                    {mode === "reference-to-video" ? (
+                      <SelectItem value="8s">8 seconds</SelectItem>
+                    ) : (
+                      <>
+                        <SelectItem value="4s">4 seconds</SelectItem>
+                        <SelectItem value="6s">6 seconds</SelectItem>
+                        <SelectItem value="8s">8 seconds</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="flex items-center justify-between space-x-2">
-                <div className="space-y-0.5">
-                  <Label htmlFor="generate-audio">Generate Audio</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Disable to save 50% credits
-                  </p>
+              {mode !== "reference-to-video" && (
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="generate-audio">Generate Audio</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Disable to save 50% credits
+                    </p>
+                  </div>
+                  <Switch
+                    id="generate-audio"
+                    checked={generateAudio}
+                    onCheckedChange={setGenerateAudio}
+                  />
                 </div>
-                <Switch
-                  id="generate-audio"
-                  checked={generateAudio}
-                  onCheckedChange={setGenerateAudio}
-                />
-              </div>
+              )}
 
               <Button 
                 onClick={handleGenerate} 

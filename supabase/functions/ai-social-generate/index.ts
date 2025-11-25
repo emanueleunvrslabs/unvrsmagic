@@ -84,6 +84,9 @@ serve(async (req) => {
       if (mode === "image-to-video") {
         endpoint = "fal-ai/veo3.1/image-to-video";
         pollingEndpoint = "fal-ai/veo3.1"; // Always use base endpoint for polling
+      } else if (mode === "reference-to-video") {
+        endpoint = "fal-ai/veo3.1/reference-to-video";
+        pollingEndpoint = "fal-ai/veo3.1"; // Always use base endpoint for polling
       } else {
         endpoint = "fal-ai/veo3.1";
         pollingEndpoint = "fal-ai/veo3.1";
@@ -105,19 +108,31 @@ serve(async (req) => {
 
     if (type === "video") {
       // Veo3.1 video generation parameters
-      requestBody.aspect_ratio = aspectRatio || "16:9";
-      requestBody.resolution = resolution || "720p";
-      // Duration must be a string in format "4s", "6s", or "8s"
-      if (duration) {
-        requestBody.duration = duration; // Already in correct format from UI
-      }
-      
-      // Add generate_audio parameter (defaults to true if not specified)
-      requestBody.generate_audio = generateAudio !== undefined ? generateAudio : true;
-      
-      // Add image_url for image-to-video mode (use first image)
-      if (mode === "image-to-video" && inputImages && inputImages.length > 0) {
-        requestBody.image_url = inputImages[0];
+      if (mode === "reference-to-video") {
+        // Reference to video only supports duration "8s" and doesn't use aspect_ratio
+        requestBody.resolution = resolution || "720p";
+        requestBody.duration = "8s";
+        
+        // Add image_urls for reference-to-video mode (multiple images)
+        if (inputImages && inputImages.length > 0) {
+          requestBody.image_urls = inputImages;
+        }
+      } else {
+        // Standard video generation parameters
+        requestBody.aspect_ratio = aspectRatio || "16:9";
+        requestBody.resolution = resolution || "720p";
+        // Duration must be a string in format "4s", "6s", or "8s"
+        if (duration) {
+          requestBody.duration = duration; // Already in correct format from UI
+        }
+        
+        // Add generate_audio parameter (defaults to true if not specified)
+        requestBody.generate_audio = generateAudio !== undefined ? generateAudio : true;
+        
+        // Add image_url for image-to-video mode (use first image)
+        if (mode === "image-to-video" && inputImages && inputImages.length > 0) {
+          requestBody.image_url = inputImages[0];
+        }
       }
     } else {
       // Image generation parameters
