@@ -9,7 +9,7 @@ import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { GallerySection } from "@/components/ai-social/GallerySection";
+import { ImageGallerySection } from "@/components/ai-social/ImageGallerySection";
 
 export default function GenerateImage() {
   const [prompt, setPrompt] = useState("");
@@ -320,7 +320,7 @@ export default function GenerateImage() {
           </Card>
         </div>
 
-        <GallerySection />
+        <ImageGallerySection />
       </div>
     </DashboardLayout>
   );
