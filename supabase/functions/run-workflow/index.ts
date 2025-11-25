@@ -57,7 +57,7 @@ serve(async (req) => {
     console.log("Workflow found:", workflow.name, "Type:", workflow.content_type);
 
     // Get Fal API key
-    const { data: falKeyData, error: falKeyError } = await supabase
+    const { data: falKeyData } = await supabase
       .from("api_keys")
       .select("api_key")
       .eq("user_id", user.id)
@@ -71,7 +71,7 @@ serve(async (req) => {
     const FAL_KEY = falKeyData.api_key;
 
     // Get Instagram credentials
-    const { data: instagramData, error: instagramError } = await supabase
+    const { data: instagramData } = await supabase
       .from("api_keys")
       .select("api_key, owner_id")
       .eq("user_id", user.id)
@@ -79,8 +79,6 @@ serve(async (req) => {
       .maybeSingle();
 
     const hasInstagram = !!instagramData && workflow.platforms?.includes("instagram");
-
-    console.log("Has Instagram:", hasInstagram);
 
     // Create content record
     const contentTitle = `${workflow.name} - ${new Date().toLocaleString("it-IT")}`;
@@ -102,76 +100,89 @@ serve(async (req) => {
 
     console.log("Content record created:", content.id);
 
-    // Determine generation parameters
-    const scheduleConfig = workflow.schedule_config || {};
-    const isVideo = workflow.content_type === "video";
-    
-    let generatedMediaUrl: string;
-    
-    if (isVideo) {
-      // VIDEO GENERATION using Veo3.1
-      generatedMediaUrl = await generateVideo(FAL_KEY, workflow, scheduleConfig);
-    } else {
-      // IMAGE GENERATION using Nano Banana
-      generatedMediaUrl = await generateImage(FAL_KEY, workflow, scheduleConfig);
-    }
-
-    console.log("Media generated:", generatedMediaUrl);
-
-    // Update content record with generated media
-    await supabase
-      .from("ai_social_content")
-      .update({ 
-        status: "completed",
-        media_url: generatedMediaUrl,
-        thumbnail_url: generatedMediaUrl
-      })
-      .eq("id", content.id);
-
-    // Post to Instagram if connected
-    let instagramPostResult = null;
-    if (hasInstagram && instagramData) {
-      console.log("Publishing to Instagram...");
-      
+    // Start background processing
+    const backgroundTask = async () => {
       try {
-        const accessToken = instagramData.api_key;
-        const igUserId = instagramData.owner_id;
-
+        const scheduleConfig = workflow.schedule_config || {};
+        const isVideo = workflow.content_type === "video";
+        
+        let generatedMediaUrl: string;
+        
         if (isVideo) {
-          // Video publishing to Instagram
-          instagramPostResult = await publishVideoToInstagram(
-            accessToken,
-            igUserId,
-            generatedMediaUrl,
-            workflow.description || workflow.prompt_template.substring(0, 200) + "..."
-          );
+          generatedMediaUrl = await generateVideo(FAL_KEY, workflow, scheduleConfig);
         } else {
-          // Image publishing to Instagram
-          instagramPostResult = await publishImageToInstagram(
-            accessToken,
-            igUserId,
-            generatedMediaUrl,
-            workflow.description || workflow.prompt_template.substring(0, 200) + "..."
-          );
+          generatedMediaUrl = await generateImage(FAL_KEY, workflow, scheduleConfig);
         }
-      } catch (igError) {
-        console.error("Instagram publishing error:", igError);
-        instagramPostResult = { error: igError instanceof Error ? igError.message : "Unknown error" };
+
+        console.log("Media generated:", generatedMediaUrl);
+
+        // Update content record with generated media
+        await supabase
+          .from("ai_social_content")
+          .update({ 
+            status: "completed",
+            media_url: generatedMediaUrl,
+            thumbnail_url: generatedMediaUrl
+          })
+          .eq("id", content.id);
+
+        // Post to Instagram if connected
+        if (hasInstagram && instagramData) {
+          console.log("Publishing to Instagram...");
+          
+          try {
+            const accessToken = instagramData.api_key;
+            const igUserId = instagramData.owner_id;
+
+            if (isVideo) {
+              await publishVideoToInstagram(
+                accessToken,
+                igUserId,
+                generatedMediaUrl,
+                workflow.description || workflow.prompt_template.substring(0, 200) + "..."
+              );
+            } else {
+              await publishImageToInstagram(
+                accessToken,
+                igUserId,
+                generatedMediaUrl,
+                workflow.description || workflow.prompt_template.substring(0, 200) + "..."
+              );
+            }
+          } catch (igError) {
+            console.error("Instagram publishing error:", igError);
+          }
+        }
+
+        // Update workflow last_run_at
+        await supabase
+          .from("ai_social_workflows")
+          .update({ last_run_at: new Date().toISOString() })
+          .eq("id", workflowId);
+
+      } catch (error) {
+        console.error("Background task error:", error);
+        // Update content record with error
+        await supabase
+          .from("ai_social_content")
+          .update({ 
+            status: "failed",
+            error_message: error instanceof Error ? error.message : "Unknown error"
+          })
+          .eq("id", content.id);
       }
-    }
+    };
 
-    // Update workflow last_run_at
-    await supabase
-      .from("ai_social_workflows")
-      .update({ last_run_at: new Date().toISOString() })
-      .eq("id", workflowId);
+    // Use waitUntil to run in background
+    // @ts-ignore - EdgeRuntime is available in Supabase Edge Functions
+    EdgeRuntime.waitUntil(backgroundTask());
 
+    // Return immediately with content ID for polling
     return new Response(
       JSON.stringify({ 
         success: true,
         contentId: content.id,
-        mediaUrl: generatedMediaUrl,
-        instagram: instagramPostResult
+        status: "generating"
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -189,13 +200,11 @@ serve(async (req) => {
 async function generateVideo(falKey: string, workflow: any, scheduleConfig: any): Promise<string> {
   const mode = scheduleConfig.generation_mode || "text-to-video";
   const aspectRatio = scheduleConfig.aspect_ratio || "16:9";
-  const resolution = scheduleConfig.resolution || "720p";
   const duration = scheduleConfig.duration || "8s";
   const generateAudio = scheduleConfig.generate_audio ?? true;
 
-  console.log(`Generating video with mode: ${mode}, aspect_ratio: ${aspectRatio}, resolution: ${resolution}, duration: ${duration}`);
+  console.log(`Generating video with mode: ${mode}, aspect_ratio: ${aspectRatio}, duration: ${duration}`);
 
-  // Determine endpoint based on mode
   let endpoint = "fal-ai/veo3";
   const requestBody: any = {
     prompt: workflow.prompt_template,
@@ -203,19 +212,17 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
     duration: duration,
   };
 
-  // Add generate_audio if supported
   if (mode !== "image-to-video") {
     requestBody.generate_audio = generateAudio;
   }
 
-  // Handle different video modes
   if (mode === "image-to-video" && scheduleConfig.image_urls?.length > 0) {
     endpoint = "fal-ai/veo3/image-to-video";
     requestBody.image_url = scheduleConfig.image_urls[0];
   } else if (mode === "reference-to-video" && scheduleConfig.image_urls?.length > 0) {
     endpoint = "fal-ai/veo3/reference-to-video";
     requestBody.reference_image_url = scheduleConfig.image_urls[0];
-    requestBody.duration = "8s"; // Reference mode is always 8s
+    requestBody.duration = "8s";
   } else if (mode === "first-last-frame-to-video" && scheduleConfig.first_frame_url && scheduleConfig.last_frame_url) {
     endpoint = "fal-ai/veo3/first-last-frame-to-video";
     requestBody.first_frame_url = scheduleConfig.first_frame_url;
@@ -223,9 +230,7 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
   }
 
   console.log(`Using endpoint: ${endpoint}`);
-  console.log("Request body:", JSON.stringify(requestBody));
 
-  // Call Fal API
   const response = await fetch(`https://queue.fal.run/${endpoint}`, {
     method: "POST",
     headers: {
@@ -237,7 +242,6 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("Fal API error:", response.status, errorText);
     throw new Error(`Fal API video generation failed: ${errorText}`);
   }
 
@@ -250,22 +254,15 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
 
   console.log(`Fal video request queued with ID: ${requestId}`);
 
-  // Poll for result - videos take longer
   let resultData;
   let attempts = 0;
-  const maxAttempts = 300; // Wait up to 10 minutes for video
-
-  // Use base endpoint for polling
-  const baseEndpoint = endpoint.split('/').slice(0, 2).join('/'); // fal-ai/veo3
+  const maxAttempts = 300;
+  const baseEndpoint = endpoint.split('/').slice(0, 2).join('/');
 
   while (attempts < maxAttempts) {
     const resultResponse = await fetch(`https://queue.fal.run/${baseEndpoint}/requests/${requestId}`, {
-      headers: {
-        "Authorization": `Key ${falKey}`,
-      },
+      headers: { "Authorization": `Key ${falKey}` },
     });
-
-    console.log(`Video poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
 
     if (resultResponse.status === 200) {
       resultData = await resultResponse.json();
@@ -275,7 +272,6 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
     
     if (resultResponse.status === 202) {
       const statusInfo = await resultResponse.json();
-      console.log("Video status:", statusInfo.status);
       if (statusInfo.status === "FAILED") {
         throw new Error(`Video generation failed: ${JSON.stringify(statusInfo.error)}`);
       }
@@ -286,14 +282,11 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
   }
 
   if (!resultData) {
-    throw new Error("Timeout waiting for video generation to complete");
+    throw new Error("Timeout waiting for video generation");
   }
 
-  // Extract video URL
   const videoUrl = resultData.video?.url;
-
   if (!videoUrl) {
-    console.error("Unexpected result structure:", JSON.stringify(resultData));
     throw new Error("No video URL returned from AI");
   }
 
@@ -307,15 +300,11 @@ async function generateImage(falKey: string, workflow: any, scheduleConfig: any)
   const resolution = scheduleConfig.resolution || "1K";
   const outputFormat = scheduleConfig.output_format || "jpeg";
 
-  // Set endpoint based on mode
   const endpoint = mode === "image-to-image" 
     ? "fal-ai/nano-banana-pro/edit" 
     : "fal-ai/nano-banana-pro";
   const pollingEndpoint = "fal-ai/nano-banana-pro";
 
-  console.log(`Generating image with endpoint ${endpoint}, mode: ${mode}`);
-
-  // Prepare request body
   const requestBody: any = {
     prompt: workflow.prompt_template,
     num_images: 1,
@@ -330,9 +319,6 @@ async function generateImage(falKey: string, workflow: any, scheduleConfig: any)
     requestBody.aspect_ratio = aspectRatio;
   }
 
-  console.log("Request body:", JSON.stringify(requestBody));
-
-  // Call Fal API
   const response = await fetch(`https://queue.fal.run/${endpoint}`, {
     method: "POST",
     headers: {
@@ -344,7 +330,6 @@ async function generateImage(falKey: string, workflow: any, scheduleConfig: any)
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("Fal API error:", response.status, errorText);
     throw new Error(`Fal API image generation failed: ${errorText}`);
   }
 
@@ -355,25 +340,17 @@ async function generateImage(falKey: string, workflow: any, scheduleConfig: any)
     throw new Error("No request_id returned from Fal API");
   }
 
-  console.log(`Fal image request queued with ID: ${requestId}`);
-
-  // Poll for result
   let resultData;
   let attempts = 0;
-  const maxAttempts = 150; // Wait up to 5 minutes
+  const maxAttempts = 150;
 
   while (attempts < maxAttempts) {
     const resultResponse = await fetch(`https://queue.fal.run/${pollingEndpoint}/requests/${requestId}`, {
-      headers: {
-        "Authorization": `Key ${falKey}`,
-      },
+      headers: { "Authorization": `Key ${falKey}` },
     });
-
-    console.log(`Image poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
 
     if (resultResponse.status === 200) {
       resultData = await resultResponse.json();
-      console.log("Got completed image result");
       break;
     }
     
@@ -389,12 +366,10 @@ async function generateImage(falKey: string, workflow: any, scheduleConfig: any)
   }
 
   if (!resultData) {
-    throw new Error("Timeout waiting for image generation to complete");
+    throw new Error("Timeout waiting for image generation");
   }
 
-  // Extract image URL
   const imageUrl = resultData.images?.[0]?.url;
-
   if (!imageUrl) {
     throw new Error("No image URL returned from AI");
   }
@@ -404,14 +379,11 @@ async function generateImage(falKey: string, workflow: any, scheduleConfig: any)
 
 // Publish image to Instagram
 async function publishImageToInstagram(accessToken: string, igUserId: string, imageUrl: string, caption: string) {
-  // Step 1: Create media container
   const containerResponse = await fetch(
     `https://graph.facebook.com/v19.0/${igUserId}/media`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         image_url: imageUrl,
         caption: caption,
@@ -423,23 +395,17 @@ async function publishImageToInstagram(accessToken: string, igUserId: string, im
   if (!containerResponse.ok) {
     const errorText = await containerResponse.text();
     console.error("Instagram container creation failed:", errorText);
-    return { error: errorText };
+    return;
   }
 
   const containerData = await containerResponse.json();
-  console.log("Media container created:", containerData.id);
-
-  // Wait a moment for Instagram to process the image
   await new Promise(resolve => setTimeout(resolve, 5000));
 
-  // Step 2: Publish the media
   const publishResponse = await fetch(
     `https://graph.facebook.com/v19.0/${igUserId}/media_publish`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         creation_id: containerData.id,
         access_token: accessToken,
@@ -447,29 +413,21 @@ async function publishImageToInstagram(accessToken: string, igUserId: string, im
     }
   );
 
-  if (!publishResponse.ok) {
-    const errorText = await publishResponse.text();
-    console.error("Instagram publish failed:", errorText);
-    return { error: errorText };
+  if (publishResponse.ok) {
+    const publishData = await publishResponse.json();
+    console.log("Instagram post published:", publishData.id);
   }
-
-  const publishData = await publishResponse.json();
-  console.log("Instagram post published:", publishData.id);
-  return { success: true, postId: publishData.id };
 }
 
 // Publish video to Instagram (Reels)
 async function publishVideoToInstagram(accessToken: string, igUserId: string, videoUrl: string, caption: string) {
   console.log("Creating video container for Instagram Reels...");
   
-  // Step 1: Create video container for Reels
   const containerResponse = await fetch(
     `https://graph.facebook.com/v19.0/${igUserId}/media`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         video_url: videoUrl,
         caption: caption,
@@ -482,21 +440,16 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
   if (!containerResponse.ok) {
     const errorText = await containerResponse.text();
     console.error("Instagram video container creation failed:", errorText);
-    return { error: errorText };
+    return;
   }
 
   const containerData = await containerResponse.json();
   console.log("Video container created:", containerData.id);
 
-  // Wait longer for Instagram to process the video
-  console.log("Waiting for video processing...");
-  
-  // Poll for container status
   let containerReady = false;
   let pollAttempts = 0;
-  const maxPollAttempts = 60; // Up to 5 minutes
 
-  while (!containerReady && pollAttempts < maxPollAttempts) {
+  while (!containerReady && pollAttempts < 60) {
     await new Promise(resolve => setTimeout(resolve, 5000));
     
     const statusResponse = await fetch(
@@ -510,25 +463,20 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
       if (statusData.status_code === "FINISHED") {
         containerReady = true;
       } else if (statusData.status_code === "ERROR") {
-        return { error: "Video processing failed on Instagram" };
+        console.error("Video processing failed on Instagram");
+        return;
       }
     }
-    
     pollAttempts++;
   }
 
-  if (!containerReady) {
-    return { error: "Timeout waiting for video processing" };
-  }
+  if (!containerReady) return;
 
-  // Step 2: Publish the video
   const publishResponse = await fetch(
     `https://graph.facebook.com/v19.0/${igUserId}/media_publish`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         creation_id: containerData.id,
         access_token: accessToken,
@@ -536,13 +484,8 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
     }
   );
 
-  if (!publishResponse.ok) {
-    const errorText = await publishResponse.text();
-    console.error("Instagram video publish failed:", errorText);
-    return { error: errorText };
+  if (publishResponse.ok) {
+    const publishData = await publishResponse.json();
+    console.log("Instagram Reel published:", publishData.id);
   }
-
-  const publishData = await publishResponse.json();
-  console.log("Instagram Reel published:", publishData.id);
-  return { success: true, postId: publishData.id };
 }
