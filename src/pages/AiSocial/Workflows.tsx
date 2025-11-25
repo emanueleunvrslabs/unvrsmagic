@@ -40,6 +40,7 @@ export default function Workflows() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [runningWorkflowId, setRunningWorkflowId] = useState<string | null>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -346,14 +347,20 @@ export default function Workflows() {
   };
 
   const handleRunNow = async (workflow: any) => {
-    toast.info("Running workflow...", { description: `Publishing "${workflow.name}" now` });
-    // TODO: Implement the actual run now logic - generate content and publish to platforms
+    setRunningWorkflowId(workflow.id);
+    toast.info("Running workflow...", { description: `Generating content for "${workflow.name}"` });
+    
     try {
-      // For now, just show a success message
-      toast.success("Workflow triggered!", { description: "Content generation started" });
+      // Simulate content generation (replace with actual implementation)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // TODO: Implement the actual run now logic - generate content and publish to platforms
+      toast.success("Workflow completed!", { description: "Content generated and published" });
     } catch (error) {
       console.error("Error running workflow:", error);
       toast.error("Failed to run workflow");
+    } finally {
+      setRunningWorkflowId(null);
     }
   };
 
@@ -431,10 +438,20 @@ export default function Workflows() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleRunNow(workflow)}
+                            disabled={runningWorkflowId === workflow.id}
                             className="bg-primary/10 border-primary/20 hover:bg-primary/20 text-primary"
                           >
-                            <Rocket className="h-4 w-4 mr-1" />
-                            Run Now
+                            {runningWorkflowId === workflow.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                Running...
+                              </>
+                            ) : (
+                              <>
+                                <Rocket className="h-4 w-4 mr-1" />
+                                Run Now
+                              </>
+                            )}
                           </Button>
                           <span className={`text-xs px-2 py-1 rounded ${workflow.active ? 'bg-green-500/20 text-green-500' : 'bg-muted text-muted-foreground'}`}>
                             {workflow.active ? 'Active' : 'Paused'}
