@@ -686,12 +686,13 @@ export default function Workflows() {
     setIsDialogOpen(true);
   };
 
+  // Only show connected social platforms
   const socialPlatforms = [
-    { id: 'instagram', name: 'Instagram', connected: connectedAccounts?.some(a => a.provider === 'instagram') },
-    { id: 'facebook', name: 'Facebook', connected: connectedAccounts?.some(a => a.provider === 'facebook') },
-    { id: 'twitter', name: 'Twitter', connected: connectedAccounts?.some(a => a.provider === 'twitter') },
-    { id: 'linkedin', name: 'LinkedIn', connected: connectedAccounts?.some(a => a.provider === 'linkedin') },
-  ];
+    { id: 'instagram', name: 'Instagram' },
+    { id: 'facebook', name: 'Facebook' },
+    { id: 'twitter', name: 'Twitter' },
+    { id: 'linkedin', name: 'LinkedIn' },
+  ].filter(platform => connectedAccounts?.some(a => a.provider === platform.id));
 
   return (
     <DashboardLayout>
@@ -1352,39 +1353,33 @@ export default function Workflows() {
             {/* Social Platforms Selection */}
             <div className="space-y-3">
               <Label>Publish to Social Platforms</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {socialPlatforms.map((platform) => (
-                  <div
-                    key={platform.id}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border ${
-                      platform.connected 
-                        ? 'border-border hover:bg-muted/50 cursor-pointer' 
-                        : 'border-border/50 opacity-50'
-                    }`}
-                    onClick={() => platform.connected && handlePlatformToggle(platform.id)}
-                  >
-                    <Checkbox
-                      id={platform.id}
-                      checked={selectedPlatforms.includes(platform.id)}
-                      disabled={!platform.connected}
-                      onCheckedChange={() => handlePlatformToggle(platform.id)}
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={platform.id}
-                        className="text-sm font-medium cursor-pointer"
-                      >
-                        {platform.name}
-                      </label>
-                      <p className="text-xs text-muted-foreground">
-                        {platform.connected ? 'Connected' : 'Not connected'}
-                      </p>
+              {socialPlatforms.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {socialPlatforms.map((platform) => (
+                    <div
+                      key={platform.id}
+                      className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer"
+                      onClick={() => handlePlatformToggle(platform.id)}
+                    >
+                      <Checkbox
+                        id={`platform-${platform.id}`}
+                        checked={selectedPlatforms.includes(platform.id)}
+                        onCheckedChange={() => handlePlatformToggle(platform.id)}
+                      />
+                      <div className="flex-1">
+                        <label
+                          htmlFor={`platform-${platform.id}`}
+                          className="text-sm font-medium cursor-pointer"
+                        >
+                          {platform.name}
+                        </label>
+                        <p className="text-xs text-green-500">Connected</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              {socialPlatforms.every(p => !p.connected) && (
-                <p className="text-sm text-muted-foreground">
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground py-4 text-center border border-dashed border-border rounded-lg">
                   No social accounts connected. Go to Connections to link your accounts.
                 </p>
               )}
