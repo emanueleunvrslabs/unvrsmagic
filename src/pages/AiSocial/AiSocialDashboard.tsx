@@ -5,8 +5,7 @@ import { Image, Video, Calendar, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageGallerySection } from "@/components/ai-social/ImageGallerySection";
-import { VideoGallerySection } from "@/components/ai-social/VideoGallerySection";
+import { ContentGallerySection } from "@/components/ai-social/ContentGallerySection";
 
 export default function AiSocialDashboard() {
   const navigate = useNavigate();
@@ -221,9 +220,8 @@ export default function AiSocialDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="content" className="space-y-8">
-            <ImageGallerySection />
-            <VideoGallerySection />
+          <TabsContent value="content">
+            <ContentGallerySection />
           </TabsContent>
 
           <TabsContent value="scheduled">
