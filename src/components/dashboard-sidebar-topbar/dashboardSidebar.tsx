@@ -29,7 +29,6 @@ import {
   LayoutDashboard,
   LineChart,
   Menu,
-  Package,
   PieChart,
   Repeat,
   Settings,
@@ -456,7 +455,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           ],
         },
         { id: "strategies-marketplace", label: "Strategies Marketplace", icon: Store, href: "/strategies-marketplace" },
-        { id: "bot-templates", label: "Bot Templates", icon: Package, href: "/bot-templates" },
       ],
     });
   }
