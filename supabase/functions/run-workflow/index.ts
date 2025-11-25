@@ -180,6 +180,7 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
     endpoint = "fal-ai/veo3.1/first-last-frame-to-video";
     requestBody.first_frame_url = scheduleConfig.first_frame_url || scheduleConfig.first_frame_image;
     requestBody.last_frame_url = scheduleConfig.last_frame_url || scheduleConfig.last_frame_image;
+    requestBody.duration = "8s"; // First-last-frame only supports 8s duration
   }
 
   console.log(`Using endpoint: ${endpoint}`);
