@@ -163,17 +163,20 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
     requestBody.generate_audio = generateAudio;
   }
 
+  // Get reference image from either reference_image_url or image_urls (for backwards compatibility)
+  const referenceImageUrl = scheduleConfig.reference_image_url || (scheduleConfig.image_urls?.length > 0 ? scheduleConfig.image_urls[0] : null);
+
   if (mode === "image-to-video" && scheduleConfig.image_urls?.length > 0) {
     endpoint = "fal-ai/veo3.1/image-to-video";
     requestBody.image_url = scheduleConfig.image_urls[0];
-  } else if (mode === "reference-to-video" && scheduleConfig.reference_image_url) {
+  } else if (mode === "reference-to-video" && referenceImageUrl) {
     endpoint = "fal-ai/veo3.1/reference-to-video";
-    requestBody.reference_image_url = scheduleConfig.reference_image_url;
+    requestBody.reference_image_url = referenceImageUrl;
     requestBody.duration = "8s";
-  } else if (mode === "first-last-frame" && scheduleConfig.first_frame_url && scheduleConfig.last_frame_url) {
+  } else if (mode === "first-last-frame" && (scheduleConfig.first_frame_url || scheduleConfig.first_frame_image) && (scheduleConfig.last_frame_url || scheduleConfig.last_frame_image)) {
     endpoint = "fal-ai/veo3.1/first-last-frame-to-video";
-    requestBody.first_frame_url = scheduleConfig.first_frame_url;
-    requestBody.last_frame_url = scheduleConfig.last_frame_url;
+    requestBody.first_frame_url = scheduleConfig.first_frame_url || scheduleConfig.first_frame_image;
+    requestBody.last_frame_url = scheduleConfig.last_frame_url || scheduleConfig.last_frame_image;
   }
 
   console.log(`Using endpoint: ${endpoint}`);
