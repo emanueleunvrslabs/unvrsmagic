@@ -243,11 +243,17 @@ export function VideoGallerySection() {
                 <div className="aspect-video bg-muted rounded-lg overflow-hidden relative group">
                   {item.status === "completed" && item.media_url ? (
                     <>
-                      <video
-                        src={item.media_url}
-                        className="w-full h-full object-cover"
-                        preload="metadata"
-                      />
+                      {item.thumbnail_url ? (
+                        <img
+                          src={item.thumbnail_url}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted">
+                          <Video className="h-12 w-12 text-muted-foreground opacity-50" />
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Button
                           size="sm"
