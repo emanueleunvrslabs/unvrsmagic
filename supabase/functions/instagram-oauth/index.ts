@@ -52,6 +52,25 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Fallback: try to derive user_id from Authorization header (JWT)
+    if (!userId) {
+      const authHeader = req.headers.get('Authorization') || ''
+      if (authHeader.startsWith('Bearer ')) {
+        const token = authHeader.replace('Bearer ', '')
+        try {
+          const { data, error } = await supabaseClient.auth.getUser(token)
+          if (error) {
+            console.error('Error getting user from token:', error)
+          } else if (data.user) {
+            userId = data.user.id
+            console.log('Derived user_id from JWT')
+          }
+        } catch (error) {
+          console.error('Exception while getting user from token:', error)
+        }
+      }
+    }
+
     console.log('OAuth flow:', { action, hasUserId: !!userId })
 
     // Start OAuth flow
