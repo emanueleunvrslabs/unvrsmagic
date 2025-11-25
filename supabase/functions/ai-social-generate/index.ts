@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contentId, type, prompt, mode, inputImages, aspectRatio, resolution, outputFormat, duration } = await req.json();
+    const { contentId, type, prompt, mode, inputImages, imageUrl, aspectRatio, resolution, outputFormat, duration } = await req.json();
 
     if (!contentId || !type || !prompt) {
       return new Response(
@@ -81,8 +81,13 @@ serve(async (req) => {
     
     if (type === "video") {
       // Video generation with Veo3.1
-      endpoint = "fal-ai/veo3.1";
-      baseEndpoint = "fal-ai/veo3.1";
+      if (mode === "image-to-video") {
+        endpoint = "fal-ai/veo3.1/image-to-video";
+        baseEndpoint = "fal-ai/veo3.1/image-to-video";
+      } else {
+        endpoint = "fal-ai/veo3.1";
+        baseEndpoint = "fal-ai/veo3.1";
+      }
     } else {
       // Image generation with Nano Banana Pro
       endpoint = mode === "image-to-image" 
@@ -105,6 +110,11 @@ serve(async (req) => {
       // Duration must be a string in format "4s", "6s", or "8s"
       if (duration) {
         requestBody.duration = duration; // Already in correct format from UI
+      }
+      
+      // Add image_url for image-to-video mode
+      if (mode === "image-to-video" && imageUrl) {
+        requestBody.image_url = imageUrl;
       }
     } else {
       // Image generation parameters
