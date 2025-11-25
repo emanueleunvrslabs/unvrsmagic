@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileUploadSection } from "@/components/dispacciamento/FileUploadSection";
 import { JobLauncher } from "@/components/dispacciamento/JobLauncher";
 import { JobMonitor } from "@/components/dispacciamento/JobMonitor";
 import { ResultsDashboard } from "@/components/dispacciamento/ResultsDashboard";
+import { useDispatchJobNotifications } from "@/hooks/useDispatchJobNotifications";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function DispacciamentoPage() {
   const [activeTab, setActiveTab] = useState("upload");
+  const [userId, setUserId] = useState<string>();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        setUserId(data.user.id);
+      }
+    });
+  }, []);
+
+  useDispatchJobNotifications(userId);
 
   return (
     <DashboardLayout>
