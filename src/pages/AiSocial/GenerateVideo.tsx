@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 
 export default function GenerateVideo() {
   const [prompt, setPrompt] = useState("");
-  const [title, setTitle] = useState("");
+  const [mode, setMode] = useState("text-to-video");
   const [aspectRatio, setAspectRatio] = useState("16:9");
   const [resolution, setResolution] = useState("720p");
   const [duration, setDuration] = useState(5);
@@ -20,8 +20,8 @@ export default function GenerateVideo() {
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
 
   const handleGenerate = async () => {
-    if (!prompt || !title) {
-      toast.error("Please fill in all fields");
+    if (!prompt) {
+      toast.error("Please enter a prompt");
       return;
     }
 
@@ -37,7 +37,7 @@ export default function GenerateVideo() {
           type: "video",
           prompt,
           status: "pending",
-          title
+          title: `${mode} - ${new Date().toLocaleString()}`
         } as any)
         .select()
         .single();
@@ -86,13 +86,18 @@ export default function GenerateVideo() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  placeholder="My awesome video"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
+                <Label htmlFor="mode">Generation Mode</Label>
+                <Select value={mode} onValueChange={setMode}>
+                  <SelectTrigger id="mode">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text-to-video">Text to Video</SelectItem>
+                    <SelectItem value="first-last-frame">First/Last Frame to Video</SelectItem>
+                    <SelectItem value="image-to-video">Image to Video</SelectItem>
+                    <SelectItem value="reference-to-video">Reference to Video</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
