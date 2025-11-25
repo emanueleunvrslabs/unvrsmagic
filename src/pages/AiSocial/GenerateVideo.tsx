@@ -100,7 +100,7 @@ export default function GenerateVideo() {
           aspectRatio,
           resolution,
           duration: mode === "reference-to-video" ? "8s" : duration,
-          generateAudio: mode === "reference-to-video" ? undefined : generateAudio
+          generateAudio
         }
       }).then(({ error }) => {
         if (error) {
@@ -286,21 +286,19 @@ export default function GenerateVideo() {
                 </div>
               </div>
 
-              {mode !== "reference-to-video" && (
-                <div className="flex items-center justify-between space-x-2">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="generate-audio">Generate Audio</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Disable to save 50% credits
-                    </p>
-                  </div>
-                  <Switch
-                    id="generate-audio"
-                    checked={generateAudio}
-                    onCheckedChange={setGenerateAudio}
-                  />
+              <div className="flex items-center justify-between space-x-2">
+                <div className="space-y-0.5">
+                  <Label htmlFor="generate-audio">Generate Audio</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Disable to save 50% credits
+                  </p>
                 </div>
-              )}
+                <Switch
+                  id="generate-audio"
+                  checked={generateAudio}
+                  onCheckedChange={setGenerateAudio}
+                />
+              </div>
 
               <Button 
                 onClick={handleGenerate} 
