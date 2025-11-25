@@ -6,6 +6,25 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Fal.ai pricing (USD per unit) - based on fal.ai pricing page
+const FAL_PRICING: Record<string, number> = {
+  "fal-ai/nano-banana-pro": 0.01,      // per image
+  "fal-ai/nano-banana-pro/edit": 0.01,  // per image (edit mode)
+  "fal-ai/veo3": 0.50,                  // per video (estimated)
+  "fal-ai/veo3.1": 0.50,                // per video
+};
+
+function estimateCost(contentType: string, modelId?: string): number {
+  if (contentType === "video") {
+    return FAL_PRICING["fal-ai/veo3.1"] || 0.50;
+  }
+  // Image
+  if (modelId && FAL_PRICING[modelId]) {
+    return FAL_PRICING[modelId];
+  }
+  return FAL_PRICING["fal-ai/nano-banana-pro"] || 0.01;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -42,12 +61,23 @@ serve(async (req) => {
       const imageUrl = resultPayload?.images?.[0]?.url;
       const mediaUrl = videoUrl || imageUrl;
 
-      // Extract cost/metrics from Fal response
+      // Extract cost/metrics from Fal response (if available)
       const metrics = payload.metrics || resultPayload?.metrics || {};
       const inferenceTime = metrics.inference_time || null;
-      const cost = payload.cost || resultPayload?.cost || null;
       
-      console.log("Fal metrics:", { inferenceTime, cost, metrics });
+      // Get content type to estimate cost
+      const { data: contentData } = await supabase
+        .from("ai_social_content")
+        .select("type, metadata")
+        .eq("id", contentId)
+        .single();
+      
+      const contentType = contentData?.type || (videoUrl ? "video" : "image");
+      const modelId = contentData?.metadata?.model_id;
+      
+      // Calculate estimated cost based on content type
+      const estimatedCost = estimateCost(contentType, modelId);
+      console.log("Estimated cost:", { contentType, modelId, estimatedCost });
 
       if (!mediaUrl) {
         console.error("No media URL in webhook payload:", resultPayload);
@@ -67,15 +97,9 @@ serve(async (req) => {
       console.log(`Media generated: ${mediaUrl}`);
 
       // Get current metadata to preserve existing fields
-      const { data: currentContent } = await supabase
-        .from("ai_social_content")
-        .select("metadata")
-        .eq("id", contentId)
-        .single();
+      const existingMetadata = contentData?.metadata || {};
 
-      const existingMetadata = currentContent?.metadata || {};
-
-      // Update content record with cost in metadata
+      // Update content record with estimated cost in metadata
       await supabase
         .from("ai_social_content")
         .update({ 
@@ -84,7 +108,7 @@ serve(async (req) => {
           thumbnail_url: mediaUrl,
           metadata: {
             ...existingMetadata,
-            fal_cost: cost,
+            fal_cost: estimatedCost,
             fal_inference_time: inferenceTime,
             fal_metrics: metrics
           }
