@@ -142,7 +142,7 @@ serve(async (req) => {
   }
 });
 
-// Queue video generation with webhook
+// Queue video generation with webhook as query parameter
 async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfig: any, webhookUrl: string): Promise<void> {
   const mode = scheduleConfig.generation_mode || "text-to-video";
   const aspectRatio = scheduleConfig.aspect_ratio || "16:9";
@@ -156,7 +156,6 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
     prompt: workflow.prompt_template,
     aspect_ratio: aspectRatio,
     duration: duration,
-    webhook_url: webhookUrl,
   };
 
   if (mode !== "image-to-video") {
@@ -178,7 +177,11 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
 
   console.log(`Using endpoint: ${endpoint}`);
 
-  const response = await fetch(`https://queue.fal.run/${endpoint}`, {
+  // Pass webhook as query parameter fal_webhook
+  const url = `https://queue.fal.run/${endpoint}?fal_webhook=${encodeURIComponent(webhookUrl)}`;
+  console.log("Fal queue URL with webhook:", url);
+
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Authorization": `Key ${falKey}`,
@@ -196,7 +199,7 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
   console.log(`Fal video request queued with ID: ${queueData.request_id}`);
 }
 
-// Queue image generation with webhook
+// Queue image generation with webhook as query parameter
 async function queueImageGeneration(falKey: string, workflow: any, scheduleConfig: any, webhookUrl: string): Promise<void> {
   const mode = scheduleConfig.generation_mode || "text-to-image";
   const aspectRatio = scheduleConfig.aspect_ratio || "1:1";
@@ -212,7 +215,6 @@ async function queueImageGeneration(falKey: string, workflow: any, scheduleConfi
     num_images: 1,
     output_format: outputFormat,
     resolution: resolution,
-    webhook_url: webhookUrl,
   };
 
   if (mode === "image-to-image" && scheduleConfig.image_urls?.length > 0) {
@@ -224,7 +226,11 @@ async function queueImageGeneration(falKey: string, workflow: any, scheduleConfi
 
   console.log(`Queueing image generation with endpoint: ${endpoint}`);
 
-  const response = await fetch(`https://queue.fal.run/${endpoint}`, {
+  // Pass webhook as query parameter fal_webhook
+  const url = `https://queue.fal.run/${endpoint}?fal_webhook=${encodeURIComponent(webhookUrl)}`;
+  console.log("Fal queue URL with webhook:", url);
+
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Authorization": `Key ${falKey}`,
@@ -241,4 +247,3 @@ async function queueImageGeneration(falKey: string, workflow: any, scheduleConfi
   const queueData = await response.json();
   console.log(`Fal image request queued with ID: ${queueData.request_id}`);
 }
-
