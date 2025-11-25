@@ -38,10 +38,8 @@ export function FileUploadSection() {
       if (authError || !data?.user) throw new Error("User not authenticated");
       const user = data.user;
 
-      let totalExtracted = 0;
-
       for (const file of lettureFiles) {
-        // Upload ZIP file to storage first
+        // Upload ZIP file to storage
         const filePath = `${user.id}/letture/${Date.now()}_${file.name}`;
         const { error: uploadError } = await supabase.storage
           .from("dispatch-files")
@@ -49,25 +47,32 @@ export function FileUploadSection() {
 
         if (uploadError) throw uploadError;
 
-        // Call edge function to extract ZIP recursively
-        const { data: extractResult, error: extractError } = await supabase.functions.invoke(
-          "dispatch-zip-extractor",
-          {
-            body: { storageFilePath: filePath },
-          }
-        );
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from("dispatch-files")
+          .getPublicUrl(filePath);
 
-        if (extractError) {
-          console.error("Extraction error:", extractError);
-          toast.error(`Errore nell'estrazione di ${file.name}`);
-          continue;
-        }
+        // Register file in database
+        const { error: dbError } = await supabase
+          .from("dispatch_files")
+          .insert({
+            user_id: user.id,
+            file_type: "LETTURE",
+            file_name: file.name,
+            file_url: publicUrl,
+            file_size: file.size,
+            upload_source: "direct",
+            status: "uploaded",
+            metadata: { 
+              original_path: filePath,
+              is_zip: file.name.toLowerCase().endsWith('.zip')
+            },
+          });
 
-        totalExtracted += extractResult.totalFiles || 0;
-        console.log(`Extracted ${extractResult.totalFiles} files from ${file.name}`);
+        if (dbError) throw dbError;
       }
 
-      toast.success(`Estratti ${totalExtracted} file dalle letture ZIP`);
+      toast.success(`${lettureFiles.length} file delle letture caricati`);
       setLettureUploaded(true);
       setStep(2);
     } catch (error) {
