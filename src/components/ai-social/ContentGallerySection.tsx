@@ -295,7 +295,7 @@ export function ContentGallerySection() {
                       <Badge className={getStatusColor(item.status)} variant="outline">
                         {item.status}
                       </Badge>
-                      {item.status === "completed" && (item.metadata as any)?.fal_cost !== undefined && (
+                      {item.status === "completed" && (item.metadata as any)?.fal_cost !== undefined && (item.metadata as any)?.fal_cost !== null && (
                         <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                           ${typeof (item.metadata as any).fal_cost === 'number' 
                             ? (item.metadata as any).fal_cost.toFixed(4) 
