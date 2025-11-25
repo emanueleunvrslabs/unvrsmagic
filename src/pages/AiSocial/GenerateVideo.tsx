@@ -23,7 +23,11 @@ export default function GenerateVideo() {
   const [inputImages, setInputImages] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState("");
   const [generateAudio, setGenerateAudio] = useState(true);
+  const [firstFrameImage, setFirstFrameImage] = useState<string>("");
+  const [lastFrameImage, setLastFrameImage] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const firstFrameInputRef = useRef<HTMLInputElement>(null);
+  const lastFrameInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -54,6 +58,36 @@ export default function GenerateVideo() {
     setInputImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleFirstFrameUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFirstFrameImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    if (firstFrameInputRef.current) {
+      firstFrameInputRef.current.value = "";
+    }
+  };
+
+  const handleLastFrameUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLastFrameImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    if (lastFrameInputRef.current) {
+      lastFrameInputRef.current.value = "";
+    }
+  };
+
   const handleGenerate = async () => {
     if (!prompt) {
       toast.error("Please enter a prompt");
@@ -67,6 +101,11 @@ export default function GenerateVideo() {
 
     if (mode === "reference-to-video" && inputImages.length === 0) {
       toast.error("Please upload at least one reference image for reference-to-video mode");
+      return;
+    }
+
+    if (mode === "first-last-frame" && (!firstFrameImage || !lastFrameImage)) {
+      toast.error("Please upload both first and last frame images for first/last frame mode");
       return;
     }
 
@@ -97,6 +136,8 @@ export default function GenerateVideo() {
           prompt,
           mode,
           inputImages: (mode === "image-to-video" || mode === "reference-to-video") ? inputImages : undefined,
+          firstFrameImage: mode === "first-last-frame" ? firstFrameImage : undefined,
+          lastFrameImage: mode === "first-last-frame" ? lastFrameImage : undefined,
           aspectRatio,
           resolution,
           duration: mode === "reference-to-video" ? "8s" : duration,
@@ -149,6 +190,74 @@ export default function GenerateVideo() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {mode === "first-last-frame" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first-frame">First Frame</Label>
+                      <Input
+                        id="first-frame"
+                        ref={firstFrameInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFirstFrameUpload}
+                      />
+                      {firstFrameImage && (
+                        <div className="relative group">
+                          <img 
+                            src={firstFrameImage} 
+                            alt="First frame"
+                            className="w-full rounded-lg aspect-video object-cover"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => setFirstFrameImage("")}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="last-frame">Last Frame</Label>
+                      <Input
+                        id="last-frame"
+                        ref={lastFrameInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLastFrameUpload}
+                      />
+                      {lastFrameImage && (
+                        <div className="relative group">
+                          <img 
+                            src={lastFrameImage} 
+                            alt="Last frame"
+                            className="w-full rounded-lg aspect-video object-cover"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => setLastFrameImage("")}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    Upload two images: the first and last frame of your desired video. AI will generate the content in between.
+                  </p>
+                </div>
+              )}
 
               {(mode === "image-to-video" || mode === "reference-to-video") && (
                 <div className="space-y-4">
@@ -239,18 +348,20 @@ export default function GenerateVideo() {
               </div>
 
               <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="aspectRatio">Aspect Ratio</Label>
-                  <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                    <SelectTrigger id="aspectRatio">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-                      <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {mode !== "reference-to-video" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="aspectRatio">Aspect Ratio</Label>
+                    <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                      <SelectTrigger id="aspectRatio">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                        <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="resolution">Resolution</Label>
