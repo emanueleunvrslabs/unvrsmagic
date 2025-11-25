@@ -271,6 +271,98 @@ export default function Workflows() {
     setUploadedImages(prev => prev.filter((_, index) => index !== indexToRemove));
   };
 
+  // Calculate next scheduled times based on schedule config
+  const calculateNextScheduledTimes = (
+    frequency: string,
+    times: string[],
+    days: string[],
+    daysToSchedule: number = 7
+  ): Date[] => {
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const scheduledDates: Date[] = [];
+    const now = new Date();
+    const sortedTimes = [...times].sort();
+
+    for (let dayOffset = 0; dayOffset < daysToSchedule; dayOffset++) {
+      const checkDate = new Date(now);
+      checkDate.setDate(checkDate.getDate() + dayOffset);
+      const dayName = dayNames[checkDate.getDay()];
+
+      // Check if this day is valid for the frequency
+      let isDayValid = false;
+      if (frequency === "daily") {
+        isDayValid = true;
+      } else if (frequency === "weekly" || frequency === "custom") {
+        isDayValid = days.includes(dayName);
+      } else if (frequency === "once") {
+        isDayValid = dayOffset === 0; // Only today for "once"
+      }
+
+      if (!isDayValid) continue;
+
+      // Add each time slot for this day
+      for (const timeStr of sortedTimes) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const candidateTime = new Date(checkDate);
+        candidateTime.setHours(hours, minutes, 0, 0);
+
+        // Only add future times (at least 1 minute from now)
+        if (candidateTime.getTime() > now.getTime() + 60000) {
+          scheduledDates.push(candidateTime);
+        }
+      }
+    }
+
+    return scheduledDates;
+  };
+
+  // Create scheduled posts for a workflow
+  const createScheduledPosts = async (workflowId: string, userId: string, scheduleConfig: any, platforms: string[]) => {
+    const { frequency, times, days } = scheduleConfig;
+    
+    // Calculate next 7 days of scheduled times
+    const scheduledTimes = calculateNextScheduledTimes(frequency, times, days, 7);
+    
+    if (scheduledTimes.length === 0) {
+      console.log("No scheduled times calculated");
+      return;
+    }
+
+    console.log(`Creating ${scheduledTimes.length} scheduled posts`);
+
+    // Insert scheduled posts
+    const postsToInsert = scheduledTimes.map(scheduledAt => ({
+      workflow_id: workflowId,
+      user_id: userId,
+      scheduled_at: scheduledAt.toISOString(),
+      status: 'scheduled',
+      platforms: platforms,
+      metadata: { schedule_config: scheduleConfig }
+    }));
+
+    const { error } = await supabase
+      .from('ai_social_scheduled_posts')
+      .insert(postsToInsert);
+
+    if (error) {
+      console.error("Error creating scheduled posts:", error);
+      throw error;
+    }
+  };
+
+  // Delete all scheduled posts for a workflow
+  const deleteScheduledPosts = async (workflowId: string) => {
+    const { error } = await supabase
+      .from('ai_social_scheduled_posts')
+      .delete()
+      .eq('workflow_id', workflowId)
+      .eq('status', 'scheduled');
+
+    if (error) {
+      console.error("Error deleting scheduled posts:", error);
+    }
+  };
+
   const handleSaveWorkflow = async () => {
     if (!workflowName.trim()) {
       toast.error("Please enter a workflow name");
@@ -294,28 +386,32 @@ export default function Workflows() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
+      const scheduleConfigData = {
+        generation_mode: generationMode,
+        aspect_ratio: aspectRatio,
+        resolution: resolution,
+        output_format: outputFormat,
+        image_urls: uploadedImages,
+        first_frame_image: firstFrameImage,
+        last_frame_image: lastFrameImage,
+        duration: duration,
+        generate_audio: generateAudio,
+        frequency: scheduleFrequency,
+        times: scheduleTimes,
+        days: scheduleDays
+      };
+
       const workflowData = {
         name: workflowName.trim(),
         description: description,
         content_type: workflowType,
         prompt_template: finalPrompt,
         platforms: selectedPlatforms,
-        schedule_config: {
-          generation_mode: generationMode,
-          aspect_ratio: aspectRatio,
-          resolution: resolution,
-          output_format: outputFormat,
-          image_urls: uploadedImages,
-          first_frame_image: firstFrameImage,
-          last_frame_image: lastFrameImage,
-          duration: duration,
-          generate_audio: generateAudio,
-          frequency: scheduleFrequency,
-          times: scheduleTimes,
-          days: scheduleDays
-        },
+        schedule_config: scheduleConfigData,
         active: true
       };
+
+      let workflowId: string;
 
       if (editingWorkflowId) {
         // Update existing workflow
@@ -325,17 +421,30 @@ export default function Workflows() {
           .eq('id', editingWorkflowId);
 
         if (error) throw error;
+        workflowId = editingWorkflowId;
+
+        // Delete existing scheduled posts and recreate
+        await deleteScheduledPosts(workflowId);
+        await createScheduledPosts(workflowId, session.user.id, scheduleConfigData, selectedPlatforms);
+        
         toast.success("Workflow updated successfully!");
       } else {
         // Create new workflow
-        const { error } = await supabase
+        const { data: newWorkflow, error } = await supabase
           .from('ai_social_workflows')
           .insert({
             user_id: session.user.id,
             ...workflowData
-          });
+          })
+          .select()
+          .single();
 
         if (error) throw error;
+        workflowId = newWorkflow.id;
+
+        // Create scheduled posts for the new workflow
+        await createScheduledPosts(workflowId, session.user.id, scheduleConfigData, selectedPlatforms);
+        
         toast.success("Workflow created successfully!");
       }
 
@@ -378,6 +487,9 @@ export default function Workflows() {
 
     setIsDeleting(true);
     try {
+      // Delete scheduled posts first
+      await deleteScheduledPosts(deleteWorkflowId);
+
       const { error } = await supabase
         .from('ai_social_workflows')
         .delete()
@@ -397,13 +509,40 @@ export default function Workflows() {
 
   const handleToggleWorkflowActive = async (workflowId: string, currentActive: boolean) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      // Update workflow active status
       const { error } = await supabase
         .from('ai_social_workflows')
         .update({ active: !currentActive })
         .eq('id', workflowId);
 
       if (error) throw error;
-      toast.success(currentActive ? "Workflow paused" : "Workflow activated");
+
+      if (currentActive) {
+        // Deactivating: Delete all scheduled posts
+        await deleteScheduledPosts(workflowId);
+        toast.success("Workflow paused - scheduled posts removed");
+      } else {
+        // Activating: Get workflow and create scheduled posts
+        const { data: workflow } = await supabase
+          .from('ai_social_workflows')
+          .select('*')
+          .eq('id', workflowId)
+          .single();
+
+        if (workflow) {
+          await createScheduledPosts(
+            workflowId, 
+            session.user.id, 
+            workflow.schedule_config, 
+            workflow.platforms
+          );
+          toast.success("Workflow activated - scheduled posts created");
+        }
+      }
+
       refetchWorkflows();
     } catch (error) {
       console.error("Error toggling workflow:", error);
