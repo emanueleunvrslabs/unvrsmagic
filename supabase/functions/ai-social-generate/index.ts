@@ -102,8 +102,9 @@ serve(async (req) => {
       // Veo3.1 video generation parameters
       requestBody.aspect_ratio = aspectRatio || "16:9";
       requestBody.resolution = resolution || "720p";
+      // Duration must be a string in format "4s", "6s", or "8s"
       if (duration) {
-        requestBody.duration = duration;
+        requestBody.duration = duration; // Already in correct format from UI
       }
     } else {
       // Image generation parameters

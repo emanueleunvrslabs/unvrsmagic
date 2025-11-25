@@ -15,7 +15,7 @@ export default function GenerateVideo() {
   const [mode, setMode] = useState("text-to-video");
   const [aspectRatio, setAspectRatio] = useState("16:9");
   const [resolution, setResolution] = useState("720p");
-  const [duration, setDuration] = useState(5);
+  const [duration, setDuration] = useState("6s");
   const [loading, setLoading] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
 
@@ -140,16 +140,15 @@ export default function GenerateVideo() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration (seconds)</Label>
-                <Select value={String(duration)} onValueChange={(v) => setDuration(Number(v))}>
+                <Label htmlFor="duration">Duration</Label>
+                <Select value={duration} onValueChange={setDuration}>
                   <SelectTrigger id="duration">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="5">5 seconds</SelectItem>
-                    <SelectItem value="6">6 seconds</SelectItem>
-                    <SelectItem value="7">7 seconds</SelectItem>
-                    <SelectItem value="8">8 seconds</SelectItem>
+                    <SelectItem value="4s">4 seconds</SelectItem>
+                    <SelectItem value="6s">6 seconds</SelectItem>
+                    <SelectItem value="8s">8 seconds</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
