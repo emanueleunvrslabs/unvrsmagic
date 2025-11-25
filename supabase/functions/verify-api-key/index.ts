@@ -281,6 +281,35 @@ serve(async (req) => {
         }
         break;
 
+      case "resend":
+        try {
+          // Resend API - verify with domains endpoint
+          const response = await fetch("https://api.resend.com/domains", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Resend response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("Resend API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid Resend API key";
+            console.error("Resend verification failed:", response.status);
+          } else {
+            errorMessage = "Failed to verify Resend API key";
+            console.error("Resend unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Resend API key";
+          console.error("Resend verification error:", error);
+        }
+        break;
+
       default:
         return new Response(
           JSON.stringify({ error: "Unsupported provider" }),
