@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Check, Loader2, ExternalLink } from "lucide-react";
+import { Plus, Check, Loader2, ExternalLink, Image, Video, Sparkles, Calendar, Share2, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Project {
@@ -32,6 +32,44 @@ interface ProjectDetailsModalProps {
   isLoading: boolean;
 }
 
+// Project-specific configurations
+const projectConfigs: Record<string, {
+  features: { icon: React.ElementType; text: string }[];
+  pricing: { type: string; price: string; unit: string; description: string }[];
+  category: string;
+  description: string;
+}> = {
+  "ai-social": {
+    features: [
+      { icon: Image, text: "AI Image Generation with Nano Banana Pro" },
+      { icon: Video, text: "AI Video Generation with Veo 3.1" },
+      { icon: Sparkles, text: "Text-to-Image & Image-to-Image modes" },
+      { icon: Bot, text: "Automated Workflow System" },
+      { icon: Calendar, text: "Scheduled Content Publishing" },
+      { icon: Share2, text: "Direct Instagram Publishing" },
+    ],
+    pricing: [
+      { type: "Image", price: "€1.00", unit: "per image", description: "AI-generated images with Nano Banana Pro" },
+      { type: "Video", price: "€10.00", unit: "per video", description: "AI-generated videos with Veo 3.1 (8s)" },
+    ],
+    category: "AI Content Creation",
+    description: "Create stunning AI-generated images and videos, schedule posts, and publish directly to social media with automated workflows.",
+  },
+  "dispacciamento": {
+    features: [
+      { icon: Bot, text: "7 AI Agents for Data Processing" },
+      { icon: Sparkles, text: "Automated POD Analysis" },
+      { icon: Calendar, text: "Monthly Dispatch Planning" },
+      { icon: Share2, text: "Multi-Zone Support (7 Italian zones)" },
+    ],
+    pricing: [
+      { type: "Processing", price: "Free", unit: "included", description: "All processing included in subscription" },
+    ],
+    category: "Energy Dispatch",
+    description: "Italian energy dispatch system with AI-powered POD analysis and monthly profile generation for 7 Italian zones.",
+  },
+};
+
 export function ProjectDetailsModal({
   project,
   isOpen,
@@ -43,6 +81,21 @@ export function ProjectDetailsModal({
 }: ProjectDetailsModalProps) {
   if (!project) return null;
 
+  // Get project-specific config or use defaults
+  const routeKey = project.route.replace("/", "");
+  const config = projectConfigs[routeKey] || {
+    features: [
+      { icon: Check, text: "Full access to project features" },
+      { icon: Check, text: "Integration with your dashboard" },
+      { icon: Check, text: "Real-time updates" },
+    ],
+    pricing: [
+      { type: "Access", price: "Free", unit: "included", description: "Full access at no cost" },
+    ],
+    category: "Application",
+    description: project.description || "No description available",
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] max-w-5xl overflow-auto">
@@ -52,7 +105,7 @@ export function ProjectDetailsModal({
             {project.name}
           </DialogTitle>
           <DialogDescription>
-            {project.description || "No description available"}
+            {config.description}
           </DialogDescription>
         </DialogHeader>
 
@@ -79,17 +132,15 @@ export function ProjectDetailsModal({
                 <Separator />
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Route Path</span>
-                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
-                    {project.route}
-                  </code>
+                  <span className="text-sm text-muted-foreground">Category</span>
+                  <Badge variant="outline">{config.category}</Badge>
                 </div>
                 
                 <Separator />
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Project Type</span>
-                  <Badge variant="outline">Marketplace Project</Badge>
+                  <span className="text-sm text-muted-foreground">Version</span>
+                  <span className="text-sm font-medium">Latest</span>
                 </div>
               </div>
             </div>
@@ -97,23 +148,18 @@ export function ProjectDetailsModal({
             {/* Project Features */}
             <div className="rounded-lg border p-4">
               <h3 className="mb-4 text-lg font-semibold">What's Included</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span>Full access to project features and functionality</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span>Integration with your dashboard</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span>Real-time updates and synchronization</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span>Manage directly from your sidebar menu</span>
-                </li>
+              <ul className="space-y-3 text-sm">
+                {config.features.map((feature, index) => {
+                  const IconComponent = feature.icon;
+                  return (
+                    <li key={index} className="flex items-start gap-3">
+                      <div className="rounded-md bg-primary/10 p-1.5">
+                        <IconComponent className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="pt-0.5">{feature.text}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -128,86 +174,71 @@ export function ProjectDetailsModal({
             </div>
           </div>
 
-          {/* Right column - Purchase Options */}
+          {/* Right column - Pricing */}
           <div className="space-y-4">
             <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">Purchase Options</h3>
+              <h3 className="mb-4 text-lg font-semibold">Pricing</h3>
               <div className="space-y-4">
-                {/* Free Access Option - Recommended */}
-                <div className="rounded-md border-2 border-primary bg-primary/5 p-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge>Recommended</Badge>
-                      <span className="font-medium">Free Access</span>
+                {config.pricing.map((item, index) => (
+                  <div 
+                    key={index} 
+                    className={cn(
+                      "rounded-md border p-3",
+                      index === 0 && "border-2 border-primary bg-primary/5"
+                    )}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {item.type === "Image" && <Image className="h-4 w-4 text-primary" />}
+                        {item.type === "Video" && <Video className="h-4 w-4 text-primary" />}
+                        <span className="font-medium">{item.type}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xl font-bold">{item.price}</div>
+                        <div className="text-xs text-muted-foreground">{item.unit}</div>
+                      </div>
                     </div>
-                    <div className="text-xl font-bold">
-                      $0.00
-                    </div>
+                    <p className="text-xs text-muted-foreground">{item.description}</p>
                   </div>
-                  <div className="mb-3 text-sm text-muted-foreground">
-                    Full access at no cost
-                  </div>
-                  {!isAdded ? (
-                    <Button 
-                      className="w-full gap-2" 
-                      onClick={onAddProject}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                      <span>Add Now</span>
-                    </Button>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      className="w-full gap-2"
-                      asChild
-                    >
-                      <a href={project.route} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4" />
-                        <span>Open Project</span>
-                      </a>
-                    </Button>
-                  )}
-                </div>
+                ))}
 
-                {/* Features List */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span>Free updates</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span>Technical support</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span>Use on multiple exchanges</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span>Customizable parameters</span>
-                  </div>
-                </div>
+                <Separator />
+
+                {/* Add Project Button */}
+                {!isAdded ? (
+                  <Button 
+                    className="w-full gap-2" 
+                    onClick={onAddProject}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                    <span>Add to Dashboard</span>
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="w-full gap-2"
+                    asChild
+                  >
+                    <a href={project.route} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4" />
+                      <span>Open Project</span>
+                    </a>
+                  </Button>
+                )}
               </div>
             </div>
 
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">Project Details</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Category</span>
-                  <Badge variant="secondary">Application</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Version</span>
-                  <span className="text-sm font-medium">Latest</span>
-                </div>
-              </div>
+            {/* Usage Note */}
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+              <h4 className="mb-2 text-sm font-semibold text-amber-400">Usage-Based Billing</h4>
+              <p className="text-xs text-muted-foreground">
+                You only pay for what you generate. Costs are calculated based on actual content created through the AI models.
+              </p>
             </div>
           </div>
         </div>
@@ -248,7 +279,7 @@ export function ProjectDetailsModal({
               ) : (
                 <Plus className="h-4 w-4" />
               )}
-              <span>Add Now</span>
+              <span>Add to Dashboard</span>
             </Button>
           )}
         </DialogFooter>
