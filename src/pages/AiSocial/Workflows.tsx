@@ -30,6 +30,7 @@ export default function Workflows() {
   const [deleteWorkflowId, setDeleteWorkflowId] = useState<string | null>(null);
   const [workflowType, setWorkflowType] = useState<"image" | "video">("image");
   const [generationMode, setGenerationMode] = useState<string>("text-to-image");
+  const [workflowName, setWorkflowName] = useState("");
   const [description, setDescription] = useState("");
   
   const [aspectRatio, setAspectRatio] = useState("1:1");
@@ -189,6 +190,11 @@ export default function Workflows() {
   };
 
   const handleSaveWorkflow = async () => {
+    if (!workflowName.trim()) {
+      toast.error("Please enter a workflow name");
+      return;
+    }
+
     const finalPrompt = description;
     
     if (!finalPrompt.trim()) {
@@ -207,7 +213,7 @@ export default function Workflows() {
       if (!session) throw new Error("Not authenticated");
 
       const workflowData = {
-        name: `${workflowType === 'image' ? 'Image' : 'Video'} Workflow - ${generationMode}`,
+        name: workflowName.trim(),
         description: description,
         content_type: workflowType,
         prompt_template: finalPrompt,
@@ -260,6 +266,7 @@ export default function Workflows() {
 
   const handleEditWorkflow = (workflow: any) => {
     setEditingWorkflowId(workflow.id);
+    setWorkflowName(workflow.name || '');
     setWorkflowType(workflow.content_type);
     setGenerationMode(workflow.schedule_config?.generation_mode || (workflow.content_type === 'image' ? 'text-to-image' : 'text-to-video'));
     setDescription(workflow.prompt_template || workflow.description || '');
@@ -316,6 +323,7 @@ export default function Workflows() {
 
   const resetForm = () => {
     setEditingWorkflowId(null);
+    setWorkflowName("");
     setWorkflowType("image");
     setGenerationMode("text-to-image");
     setDescription("");
@@ -447,6 +455,16 @@ export default function Workflows() {
           </DialogHeader>
 
           <div className="space-y-6 py-4">
+            {/* Workflow Name */}
+            <div className="space-y-2">
+              <Label>Workflow Name</Label>
+              <Input
+                placeholder="Enter workflow name..."
+                value={workflowName}
+                onChange={(e) => setWorkflowName(e.target.value)}
+              />
+            </div>
+
             {/* Workflow Type */}
             <div className="space-y-2">
               <Label>Content Type</Label>
