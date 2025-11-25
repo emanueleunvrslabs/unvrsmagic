@@ -151,6 +151,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     "nkmt": false,
     "projects": false,
     "dispacciamento": false,
+    "ai-social": false,
   });
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -232,6 +233,22 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         setActiveItem("dispacciamento-export-hub");
       }
       setOpenSubmenus((prev) => ({ ...prev, "dispacciamento": true }));
+    } else if (pathname.startsWith("/ai-social")) {
+      // Handle Ai Social routes
+      if (pathname === "/ai-social") {
+        setActiveItem("ai-social-dashboard");
+      } else if (pathname === "/ai-social/generate-image") {
+        setActiveItem("ai-social-generate-image");
+      } else if (pathname === "/ai-social/generate-video") {
+        setActiveItem("ai-social-generate-video");
+      } else if (pathname === "/ai-social/schedule") {
+        setActiveItem("ai-social-schedule");
+      } else if (pathname === "/ai-social/workflows") {
+        setActiveItem("ai-social-workflows");
+      } else if (pathname === "/ai-social/connection") {
+        setActiveItem("ai-social-connection");
+      }
+      setOpenSubmenus((prev) => ({ ...prev, "ai-social": true }));
     } else if (pathname === "/notifications") {
       setActiveItem("notifications");
     } else {
@@ -374,6 +391,24 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "nkmt-risk", label: "Risk.mgr", icon: CreditCard, href: "/nkmt/risk-mgr" },
             { id: "nkmt-executor", label: "Trade.executor", icon: Bot, href: "/nkmt/trade-executor" },
             { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
+          ],
+        };
+      }
+      
+      // Special handling for Ai Social project
+      if (up.project.route === '/ai-social') {
+        return {
+          id: `user-project-${up.project_id}`,
+          label: up.project.name,
+          icon: CircleDollarSign,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "ai-social-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/ai-social" },
+            { id: "ai-social-generate-image", label: "Generate Images", icon: Image, href: "/ai-social/generate-image" },
+            { id: "ai-social-generate-video", label: "Generate Videos", icon: Gauge, href: "/ai-social/generate-video" },
+            { id: "ai-social-schedule", label: "Schedule Posts", icon: Gauge, href: "/ai-social/schedule" },
+            { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
+            { id: "ai-social-connection", label: "Connection", icon: Layers, href: "/ai-social/connection" },
           ],
         };
       }
