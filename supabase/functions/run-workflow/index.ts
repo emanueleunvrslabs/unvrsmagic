@@ -151,7 +151,8 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
 
   console.log(`Queueing video with mode: ${mode}, aspect_ratio: ${aspectRatio}, duration: ${duration}`);
 
-  let endpoint = "fal-ai/veo3";
+  // Use veo3.1 endpoints (not veo3)
+  let endpoint = "fal-ai/veo3.1";
   const requestBody: any = {
     prompt: workflow.prompt_template,
     aspect_ratio: aspectRatio,
@@ -163,14 +164,14 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
   }
 
   if (mode === "image-to-video" && scheduleConfig.image_urls?.length > 0) {
-    endpoint = "fal-ai/veo3/image-to-video";
+    endpoint = "fal-ai/veo3.1/image-to-video";
     requestBody.image_url = scheduleConfig.image_urls[0];
   } else if (mode === "reference-to-video" && scheduleConfig.image_urls?.length > 0) {
-    endpoint = "fal-ai/veo3/reference-to-video";
+    endpoint = "fal-ai/veo3.1/reference-to-video";
     requestBody.reference_image_url = scheduleConfig.image_urls[0];
     requestBody.duration = "8s";
   } else if (mode === "first-last-frame" && scheduleConfig.first_frame_image && scheduleConfig.last_frame_image) {
-    endpoint = "fal-ai/veo3/first-last-frame-to-video";
+    endpoint = "fal-ai/veo3.1/first-last-frame-to-video";
     requestBody.first_frame_url = scheduleConfig.first_frame_image;
     requestBody.last_frame_url = scheduleConfig.last_frame_image;
   }
