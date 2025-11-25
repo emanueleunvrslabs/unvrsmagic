@@ -351,14 +351,40 @@ export default function Workflows() {
     toast.info("Running workflow...", { description: `Generating content for "${workflow.name}"` });
     
     try {
-      // Simulate content generation (replace with actual implementation)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // TODO: Implement the actual run now logic - generate content and publish to platforms
-      toast.success("Workflow completed!", { description: "Content generated and published" });
+      const { data, error } = await supabase.functions.invoke('run-workflow', {
+        body: { workflowId: workflow.id }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      // Show success message
+      if (data?.instagram?.success) {
+        toast.success("Workflow completed!", { 
+          description: "Content generated and published to Instagram!" 
+        });
+      } else if (data?.instagram?.error) {
+        toast.success("Image generated!", { 
+          description: `Image created but Instagram failed: ${data.instagram.error}` 
+        });
+      } else {
+        toast.success("Workflow completed!", { 
+          description: "Content generated successfully!" 
+        });
+      }
+
+      // Refresh workflows to update last_run_at
+      refetchWorkflows();
     } catch (error) {
       console.error("Error running workflow:", error);
-      toast.error("Failed to run workflow");
+      toast.error("Failed to run workflow", {
+        description: error instanceof Error ? error.message : "Unknown error"
+      });
     } finally {
       setRunningWorkflowId(null);
     }

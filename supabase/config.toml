@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.dispatch-zip-extractor]
 verify_jwt = false
+
+[functions.run-workflow]
+verify_jwt = true
