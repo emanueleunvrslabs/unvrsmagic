@@ -1,8 +1,85 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutDashboard, Users, Package, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
 
 const AdminDashboard = () => {
+  // Fetch total projects count
+  const { data: projectsData, isLoading: loadingProjects } = useQuery({
+    queryKey: ['admin-projects-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('marketplace_projects')
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) throw error;
+      return count || 0;
+    }
+  });
+
+  // Fetch active users count
+  const { data: usersData, isLoading: loadingUsers } = useQuery({
+    queryKey: ['admin-users-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) throw error;
+      return count || 0;
+    }
+  });
+
+  // Fetch content generated stats
+  const { data: contentStats, isLoading: loadingContent } = useQuery({
+    queryKey: ['admin-content-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ai_social_content')
+        .select('type, status, created_at');
+      
+      if (error) throw error;
+      
+      const images = data?.filter(c => c.type === 'image' && c.status === 'completed').length || 0;
+      const videos = data?.filter(c => c.type === 'video' && c.status === 'completed').length || 0;
+      const total = images + videos;
+      
+      return { images, videos, total };
+    }
+  });
+
+  // Fetch recent activity
+  const { data: recentActivity, isLoading: loadingActivity } = useQuery({
+    queryKey: ['admin-recent-activity'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ai_social_content')
+        .select('id, type, title, status, created_at')
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch workflows count
+  const { data: workflowsCount, isLoading: loadingWorkflows } = useQuery({
+    queryKey: ['admin-workflows-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('ai_social_workflows')
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) throw error;
+      return count || 0;
+    }
+  });
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -22,55 +99,79 @@ const AdminDashboard = () => {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">
-                +2 from last month
-              </p>
+              {loadingProjects ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{projectsData}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Projects in marketplace
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Active Users
+                Registered Users
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2,350</div>
-              <p className="text-xs text-muted-foreground">
-                +180 from last month
-              </p>
+              {loadingUsers ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{usersData}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Total platform users
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Platform Activity
+                Content Generated
               </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+12.5%</div>
-              <p className="text-xs text-muted-foreground">
-                +4.5% from last month
-              </p>
+              {loadingContent ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{contentStats?.total || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {contentStats?.images || 0} images, {contentStats?.videos || 0} videos
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                System Status
+                Active Workflows
               </CardTitle>
               <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-500">Online</div>
-              <p className="text-xs text-muted-foreground">
-                All systems operational
-              </p>
+              {loadingWorkflows ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{workflowsCount}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Automated workflows
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -78,33 +179,39 @@ const AdminDashboard = () => {
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest platform updates and changes</CardDescription>
+              <CardTitle>Recent Content</CardTitle>
+              <CardDescription>Latest generated images and videos</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="h-2 w-2 rounded-full bg-primary mt-2" />
-                  <div>
-                    <p className="text-sm font-medium">New project added</p>
-                    <p className="text-xs text-muted-foreground">Ai Social project was created</p>
-                  </div>
+              {loadingActivity ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="h-2 w-2 rounded-full bg-primary mt-2" />
-                  <div>
-                    <p className="text-sm font-medium">User milestone reached</p>
-                    <p className="text-xs text-muted-foreground">2,000+ active users</p>
-                  </div>
+              ) : recentActivity && recentActivity.length > 0 ? (
+                <div className="space-y-4">
+                  {recentActivity.map((item) => (
+                    <div key={item.id} className="flex items-start gap-4">
+                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        {item.type === 'image' ? (
+                          <Image className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Video className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.type === 'image' ? 'Image' : 'Video'} • {format(new Date(item.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="h-2 w-2 rounded-full bg-primary mt-2" />
-                  <div>
-                    <p className="text-sm font-medium">System update deployed</p>
-                    <p className="text-xs text-muted-foreground">Version 2.1.0 is live</p>
-                  </div>
-                </div>
-              </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No content generated yet
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -123,9 +230,9 @@ const AdminDashboard = () => {
                   <p className="text-sm font-medium">View Marketplace</p>
                   <p className="text-xs text-muted-foreground">Check available projects</p>
                 </a>
-                <a href="/notifications" className="block p-3 rounded-lg hover:bg-muted transition-colors">
-                  <p className="text-sm font-medium">System Notifications</p>
-                  <p className="text-xs text-muted-foreground">View alerts and messages</p>
+                <a href="/settings" className="block p-3 rounded-lg hover:bg-muted transition-colors">
+                  <p className="text-sm font-medium">Platform Settings</p>
+                  <p className="text-xs text-muted-foreground">Configure API keys and security</p>
                 </a>
               </div>
             </CardContent>
