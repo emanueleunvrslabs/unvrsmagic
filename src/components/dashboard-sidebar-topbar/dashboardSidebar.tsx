@@ -99,7 +99,7 @@ function FloatingSubmenu({ item, isVisible, position, activeItem, setActiveItem 
             <Button
               key={subItem.id}
               variant="ghost"
-              className={cn("w-full justify-start px-3 py-2 h-auto rounded-none text-sm hover:bg-accent hover:text-accent-foreground", isSubActive && "bg-accent text-accent-foreground font-medium")}
+              className={cn("w-full justify-start px-3 py-2 h-auto rounded-lg text-sm hover:bg-accent hover:text-accent-foreground", isSubActive && "bg-accent text-accent-foreground font-medium")}
               onClick={() => setActiveItem(subItem.id)}
               asChild={!!subItem.href}
             >
