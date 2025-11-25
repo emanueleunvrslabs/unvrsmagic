@@ -6,23 +6,28 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Fal.ai pricing (USD per unit) - based on fal.ai pricing page
+// Fal.ai pricing (USD per unit) - based on fal.ai/pricing (Nov 2025)
 const FAL_PRICING: Record<string, number> = {
-  "fal-ai/nano-banana-pro": 0.01,      // per image
-  "fal-ai/nano-banana-pro/edit": 0.01,  // per image (edit mode)
-  "fal-ai/veo3": 0.50,                  // per video (estimated)
-  "fal-ai/veo3.1": 0.50,                // per video
+  "fal-ai/nano-banana-pro": 0.04,       // $0.0398 per image
+  "fal-ai/nano-banana-pro/edit": 0.04,  // $0.0398 per image (edit mode)
+  "fal-ai/veo3": 0.40,                  // $0.40 per second
+  "fal-ai/veo3.1": 0.40,                // $0.40 per second
 };
 
-function estimateCost(contentType: string, modelId?: string): number {
+// Video duration default (seconds) - used to calculate video cost
+const DEFAULT_VIDEO_DURATION = 8;
+
+function estimateCost(contentType: string, modelId?: string, durationSeconds?: number): number {
   if (contentType === "video") {
-    return FAL_PRICING["fal-ai/veo3.1"] || 0.50;
+    const pricePerSecond = FAL_PRICING["fal-ai/veo3.1"] || 0.40;
+    const duration = durationSeconds || DEFAULT_VIDEO_DURATION;
+    return pricePerSecond * duration;
   }
   // Image
   if (modelId && FAL_PRICING[modelId]) {
     return FAL_PRICING[modelId];
   }
-  return FAL_PRICING["fal-ai/nano-banana-pro"] || 0.01;
+  return FAL_PRICING["fal-ai/nano-banana-pro"] || 0.04;
 }
 
 serve(async (req) => {
@@ -74,10 +79,12 @@ serve(async (req) => {
       
       const contentType = contentData?.type || (videoUrl ? "video" : "image");
       const modelId = contentData?.metadata?.model_id;
+      const durationStr = contentData?.metadata?.duration; // e.g., "8s"
+      const durationSeconds = durationStr ? parseInt(durationStr.replace('s', '')) : undefined;
       
-      // Calculate estimated cost based on content type
-      const estimatedCost = estimateCost(contentType, modelId);
-      console.log("Estimated cost:", { contentType, modelId, estimatedCost });
+      // Calculate estimated cost based on content type and duration
+      const estimatedCost = estimateCost(contentType, modelId, durationSeconds);
+      console.log("Estimated cost:", { contentType, modelId, durationSeconds, estimatedCost });
 
       if (!mediaUrl) {
         console.error("No media URL in webhook payload:", resultPayload);
