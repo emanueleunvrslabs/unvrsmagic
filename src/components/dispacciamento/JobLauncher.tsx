@@ -52,7 +52,7 @@ export function JobLauncher() {
     try {
       const { data, error } = await supabase.functions.invoke('dispatch-orchestrator', {
         body: {
-          zoneCode: selectedZone,
+          zones: [selectedZone],
           dispatchMonth: selectedMonth
         }
       });
