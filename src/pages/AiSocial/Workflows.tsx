@@ -1,8 +1,8 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Loader2, X, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Image } from "lucide-react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,9 @@ export default function Workflows() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch connected social accounts
   const { data: connectedAccounts } = useQuery({
@@ -106,6 +109,58 @@ export default function Workflows() {
     setWorkflowType(type);
     // Reset generation mode based on type
     setGenerationMode(type === "image" ? "text-to-image" : "text-to-video");
+    // Clear uploaded images when changing type
+    setUploadedImages([]);
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const newImageUrls: string[] = [];
+
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/')) {
+          toast.error(`${file.name} is not an image`);
+          continue;
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('ai-social-uploads')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('ai-social-uploads')
+          .getPublicUrl(fileName);
+
+        newImageUrls.push(publicUrl);
+      }
+
+      setUploadedImages(prev => [...prev, ...newImageUrls]);
+      toast.success(`${newImageUrls.length} image(s) uploaded`);
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      toast.error("Failed to upload images");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setUploadedImages(prev => prev.filter((_, index) => index !== indexToRemove));
   };
 
   const handleSaveWorkflow = async () => {
@@ -136,7 +191,8 @@ export default function Workflows() {
           generation_mode: generationMode,
           aspect_ratio: aspectRatio,
           resolution: resolution,
-          output_format: outputFormat
+          output_format: outputFormat,
+          image_urls: uploadedImages
         },
         active: true
       };
@@ -184,6 +240,7 @@ export default function Workflows() {
     setResolution(workflow.schedule_config?.resolution || '1K');
     setOutputFormat(workflow.schedule_config?.output_format || 'png');
     setSelectedPlatforms(workflow.platforms || []);
+    setUploadedImages(workflow.schedule_config?.image_urls || []);
     setIsDialogOpen(true);
   };
 
@@ -219,6 +276,7 @@ export default function Workflows() {
     setResolution("1K");
     setOutputFormat("png");
     setSelectedPlatforms([]);
+    setUploadedImages([]);
   };
 
   const openNewWorkflowDialog = () => {
@@ -360,6 +418,85 @@ export default function Workflows() {
                 </Select>
               )}
             </div>
+
+            {/* Image Upload for Image-to-Image mode */}
+            {generationMode === "image-to-image" && (
+              <div className="space-y-3">
+                <Label>Source Images</Label>
+                <div className="border border-dashed border-border rounded-lg p-4">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                  />
+                  
+                  {uploadedImages.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-3">
+                        {uploadedImages.map((url, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={url}
+                              alt={`Uploaded ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add More Images
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      className="flex flex-col items-center justify-center py-6 cursor-pointer hover:bg-muted/50 rounded-lg transition-colors"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-8 w-8 text-muted-foreground animate-spin mb-2" />
+                          <p className="text-sm text-muted-foreground">Uploading...</p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">Click to upload images</p>
+                          <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP supported</p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Description with AI Enhancement */}
             <div className="space-y-2">
