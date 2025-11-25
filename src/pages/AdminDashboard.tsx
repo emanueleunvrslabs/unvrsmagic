@@ -1,6 +1,6 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2 } from "lucide-react";
+import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -77,6 +77,24 @@ const AdminDashboard = () => {
       
       if (error) throw error;
       return count || 0;
+    }
+  });
+
+  // Fetch credit statistics
+  const { data: creditStats, isLoading: loadingCredits } = useQuery({
+    queryKey: ['admin-credit-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_credits')
+        .select('balance, total_purchased, total_spent');
+      
+      if (error) throw error;
+      
+      const totalBalance = data?.reduce((sum, u) => sum + Number(u.balance || 0), 0) || 0;
+      const totalPurchased = data?.reduce((sum, u) => sum + Number(u.total_purchased || 0), 0) || 0;
+      const totalSpent = data?.reduce((sum, u) => sum + Number(u.total_spent || 0), 0) || 0;
+      
+      return { totalBalance, totalPurchased, totalSpent };
     }
   });
 
@@ -169,6 +187,72 @@ const AdminDashboard = () => {
                   <div className="text-2xl font-bold">{workflowsCount}</div>
                   <p className="text-xs text-muted-foreground">
                     Automated workflows
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Credit Statistics */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Credits Purchased
+              </CardTitle>
+              <Coins className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loadingCredits ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">€{creditStats?.totalPurchased?.toFixed(2) || '0.00'}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Total revenue from credits
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Credits Spent
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loadingCredits ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">€{creditStats?.totalSpent?.toFixed(2) || '0.00'}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Used for content generation
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Available Balance
+              </CardTitle>
+              <Wallet className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loadingCredits ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold text-green-500">€{creditStats?.totalBalance?.toFixed(2) || '0.00'}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Total unused credits
                   </p>
                 </>
               )}
