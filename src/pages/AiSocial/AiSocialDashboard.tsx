@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Image, Video, Calendar, Zap, Play } from "lucide-react";
+import { Image, Video, Zap, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,7 +137,6 @@ export default function AiSocialDashboard() {
     totalContent: 0,
     generatedImages: 0,
     generatedVideos: 0,
-    scheduledPosts: 0,
     activeWorkflows: 0
   });
 
@@ -170,13 +169,6 @@ export default function AiSocialDashboard() {
         .eq("user_id", user.id)
         .eq("type", "video");
 
-      // Get scheduled posts count
-      const { count: scheduledCount } = await supabase
-        .from("ai_social_scheduled_posts")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("status", "scheduled");
-
       // Get active workflows count
       const { count: workflowsCount } = await supabase
         .from("ai_social_workflows")
@@ -188,7 +180,6 @@ export default function AiSocialDashboard() {
         totalContent: totalCount || 0,
         generatedImages: imagesCount || 0,
         generatedVideos: videosCount || 0,
-        scheduledPosts: scheduledCount || 0,
         activeWorkflows: workflowsCount || 0
       });
     } catch (error) {
@@ -202,7 +193,7 @@ export default function AiSocialDashboard() {
         <div>
           <h1 className="text-3xl font-bold">Ai Social</h1>
           <p className="text-muted-foreground mt-2">
-            Create and schedule AI-powered visual content for your social media
+            Create AI-powered visual content for your social media
           </p>
         </div>
 
@@ -210,12 +201,11 @@ export default function AiSocialDashboard() {
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
             <TabsTrigger value="workflows">Workflows</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Content</CardTitle>
@@ -251,17 +241,6 @@ export default function AiSocialDashboard() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Scheduled Posts</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.scheduledPosts}</div>
-                  <p className="text-xs text-muted-foreground">Next 7 days</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Active Workflows</CardTitle>
                   <Zap className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
@@ -276,11 +255,11 @@ export default function AiSocialDashboard() {
               <CardHeader>
                 <CardTitle>Get Started</CardTitle>
                 <CardDescription>
-                  Generate AI visual content and schedule social media posts
+                  Generate AI visual content for your social media
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-3">
                   <Card 
                     className="cursor-pointer hover:bg-accent transition-colors"
                     onClick={() => navigate('/ai-social/generate-image')}
@@ -313,21 +292,6 @@ export default function AiSocialDashboard() {
 
                   <Card 
                     className="cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => navigate('/ai-social/schedule-post')}
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Calendar className="h-5 w-5" />
-                        Schedule Post
-                      </CardTitle>
-                      <CardDescription>
-                        Schedule content for social media
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-
-                  <Card 
-                    className="cursor-pointer hover:bg-accent transition-colors"
                     onClick={() => navigate('/ai-social/workflows')}
                   >
                     <CardHeader>
@@ -347,22 +311,6 @@ export default function AiSocialDashboard() {
 
           <TabsContent value="content">
             <ContentGallerySection />
-          </TabsContent>
-
-          <TabsContent value="scheduled">
-            <Card>
-              <CardHeader>
-                <CardTitle>Scheduled Posts</CardTitle>
-                <CardDescription>
-                  View and manage scheduled posts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  No scheduled posts
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="workflows">
