@@ -252,10 +252,13 @@ export function FileUploadSection() {
           <CardContent className="space-y-4">
             <div className="border-2 border-dashed border-border rounded-lg p-8">
               <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Trascina i file qui o clicca per selezionare
+              </p>
               <div className="flex justify-center">
                 <label htmlFor="letture-input" className="cursor-pointer">
                   <div className="px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors">
-                    Seleziona File ZIP
+                    Seleziona uno o più File ZIP
                   </div>
                   <input
                     id="letture-input"
@@ -267,8 +270,12 @@ export function FileUploadSection() {
                   />
                 </label>
               </div>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Puoi selezionare più file contemporaneamente (Ctrl+Click o Shift+Click)
+              </p>
               {lettureFiles.length > 0 && (
-                <div className="mt-4 space-y-1">
+                <div className="mt-4 space-y-1 p-3 bg-muted rounded-lg">
+                  <p className="text-sm font-medium text-center mb-2">{lettureFiles.length} file selezionati:</p>
                   {lettureFiles.map((file, idx) => (
                     <p key={idx} className="text-sm text-muted-foreground text-center">
                       {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
@@ -311,10 +318,13 @@ export function FileUploadSection() {
           <CardContent className="space-y-4">
             <div className="border-2 border-dashed border-border rounded-lg p-8">
               <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Trascina i file qui o clicca per selezionare
+              </p>
               <div className="flex justify-center">
                 <label htmlFor="ip-input" className="cursor-pointer">
                   <div className="px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors">
-                    Seleziona File Illuminazione
+                    Seleziona uno o più File
                   </div>
                   <input
                     id="ip-input"
@@ -326,8 +336,12 @@ export function FileUploadSection() {
                   />
                 </label>
               </div>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Puoi selezionare più file contemporaneamente (Ctrl+Click o Shift+Click)
+              </p>
               {ipFiles.length > 0 && (
-                <div className="mt-4 space-y-1">
+                <div className="mt-4 space-y-1 p-3 bg-muted rounded-lg">
+                  <p className="text-sm font-medium text-center mb-2">{ipFiles.length} file selezionati:</p>
                   {ipFiles.map((file, idx) => (
                     <p key={idx} className="text-sm text-muted-foreground text-center">
                       {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
@@ -379,10 +393,13 @@ export function FileUploadSection() {
           <CardContent className="space-y-4">
             <div className="border-2 border-dashed border-border rounded-lg p-8">
               <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Trascina i file qui o clicca per selezionare
+              </p>
               <div className="flex justify-center">
                 <label htmlFor="anagrafica-input" className="cursor-pointer">
                   <div className="px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors">
-                    Seleziona File Anagrafica
+                    Seleziona uno o più File
                   </div>
                   <input
                     id="anagrafica-input"
@@ -394,8 +411,12 @@ export function FileUploadSection() {
                   />
                 </label>
               </div>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Puoi selezionare più file contemporaneamente (Ctrl+Click o Shift+Click)
+              </p>
               {anagraficaFiles.length > 0 && (
-                <div className="mt-4 space-y-1">
+                <div className="mt-4 space-y-1 p-3 bg-muted rounded-lg">
+                  <p className="text-sm font-medium text-center mb-2">{anagraficaFiles.length} file selezionati:</p>
                   {anagraficaFiles.map((file, idx) => (
                     <p key={idx} className="text-sm text-muted-foreground text-center">
                       {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
