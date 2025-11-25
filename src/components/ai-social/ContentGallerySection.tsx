@@ -297,13 +297,20 @@ export function ContentGallerySection() {
                   </div>
                   
                   <div className="flex flex-wrap gap-1.5">
-                    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
-                      {item.type === "image" ? "🖼️" : "🎥"}
-                    </span>
+                    {/* Model badge */}
+                    {item.type === "image" ? (
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+                        Nano 🍌
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
+                        Veo3 🎬
+                      </span>
+                    )}
                     
                     {/* Execution type badge */}
                     {item.workflow ? (
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
                         ⏰ Schedule
                       </span>
                     ) : (
@@ -315,11 +322,11 @@ export function ContentGallerySection() {
                     {/* Social platforms badges */}
                     {item.workflow?.platforms?.map((platform: string) => (
                       <span key={platform} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm capitalize bg-pink-500/10 text-pink-400 border-pink-500/20">
-                        {platform === "instagram" && "📷"}
-                        {platform === "facebook" && "👍"}
-                        {platform === "twitter" && "🐦"}
-                        {platform === "linkedin" && "💼"}
-                        {" "}{platform}
+                        {platform === "instagram" && "📷 "}
+                        {platform === "facebook" && "👍 "}
+                        {platform === "twitter" && "🐦 "}
+                        {platform === "linkedin" && "💼 "}
+                        {platform}
                       </span>
                     ))}
                   </div>
