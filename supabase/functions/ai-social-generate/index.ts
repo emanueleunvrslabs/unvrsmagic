@@ -77,23 +77,23 @@ serve(async (req) => {
 
     // Determine the endpoint based on type and mode
     let endpoint: string;
-    let baseEndpoint: string;
+    let pollingEndpoint: string; // Endpoint to use for polling status
     
     if (type === "video") {
       // Video generation with Veo3.1
       if (mode === "image-to-video") {
         endpoint = "fal-ai/veo3.1/image-to-video";
-        baseEndpoint = "fal-ai/veo3.1/image-to-video";
+        pollingEndpoint = "fal-ai/veo3.1"; // Always use base endpoint for polling
       } else {
         endpoint = "fal-ai/veo3.1";
-        baseEndpoint = "fal-ai/veo3.1";
+        pollingEndpoint = "fal-ai/veo3.1";
       }
     } else {
       // Image generation with Nano Banana Pro
       endpoint = mode === "image-to-image" 
         ? "fal-ai/nano-banana-pro/edit" 
         : "fal-ai/nano-banana-pro";
-      baseEndpoint = "fal-ai/nano-banana-pro";
+      pollingEndpoint = "fal-ai/nano-banana-pro"; // Always use base endpoint for polling
     }
 
     console.log(`Generating ${type} with endpoint ${endpoint}, mode: ${mode || 'text-to-video'}`);
@@ -178,8 +178,8 @@ serve(async (req) => {
     const maxAttempts = 60; // Wait up to 60 seconds
 
     while (attempts < maxAttempts) {
-      // Poll the result endpoint directly
-      const resultResponse = await fetch(`https://queue.fal.run/${baseEndpoint}/requests/${requestId}`, {
+      // Poll the result endpoint directly using the polling endpoint
+      const resultResponse = await fetch(`https://queue.fal.run/${pollingEndpoint}/requests/${requestId}`, {
         headers: {
           "Authorization": `Key ${FAL_KEY}`,
         },
