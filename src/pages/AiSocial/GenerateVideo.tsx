@@ -114,6 +114,13 @@ export default function GenerateVideo() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      const modeNames: Record<string, string> = {
+        "text-to-video": "Text to Video",
+        "image-to-video": "Image to Video",
+        "reference-to-video": "Reference to Video",
+        "first-last-frame": "First/Last Frame to Video"
+      };
+
       const { data: content, error: createError } = await supabase
         .from("ai_social_content")
         .insert({
@@ -121,7 +128,7 @@ export default function GenerateVideo() {
           type: "video",
           prompt,
           status: "pending",
-          title: `${mode} - ${new Date().toLocaleString()}`
+          title: `${modeNames[mode] || mode} ${new Date().toLocaleString()}`
         } as any)
         .select()
         .single();
