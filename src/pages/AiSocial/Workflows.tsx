@@ -45,7 +45,7 @@ export default function Workflows() {
   
   // Scheduling state
   const [scheduleFrequency, setScheduleFrequency] = useState<string>("daily");
-  const [scheduleTime, setScheduleTime] = useState("09:00");
+  const [scheduleTimes, setScheduleTimes] = useState<string[]>(["09:00"]);
   const [scheduleDays, setScheduleDays] = useState<string[]>(["monday", "wednesday", "friday"]);
 
   // Fetch connected social accounts
@@ -210,7 +210,7 @@ export default function Workflows() {
           output_format: outputFormat,
           image_urls: uploadedImages,
           frequency: scheduleFrequency,
-          time: scheduleTime,
+          times: scheduleTimes,
           days: scheduleDays
         },
         active: true
@@ -261,7 +261,9 @@ export default function Workflows() {
     setSelectedPlatforms(workflow.platforms || []);
     setUploadedImages(workflow.schedule_config?.image_urls || []);
     setScheduleFrequency(workflow.schedule_config?.frequency || 'daily');
-    setScheduleTime(workflow.schedule_config?.time || '09:00');
+    // Support both old single time and new multiple times format
+    const times = workflow.schedule_config?.times || (workflow.schedule_config?.time ? [workflow.schedule_config.time] : ['09:00']);
+    setScheduleTimes(times);
     setScheduleDays(workflow.schedule_config?.days || ['monday', 'wednesday', 'friday']);
     setIsDialogOpen(true);
   };
@@ -316,7 +318,7 @@ export default function Workflows() {
     setSelectedPlatforms([]);
     setUploadedImages([]);
     setScheduleFrequency("daily");
-    setScheduleTime("09:00");
+    setScheduleTimes(["09:00"]);
     setScheduleDays(["monday", "wednesday", "friday"]);
   };
 
@@ -758,12 +760,46 @@ export default function Workflows() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Time</Label>
-                  <Input
-                    type="time"
-                    value={scheduleTime}
-                    onChange={(e) => setScheduleTime(e.target.value)}
-                  />
+                  <div className="flex items-center justify-between">
+                    <Label>Times</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setScheduleTimes([...scheduleTimes, "12:00"])}
+                      className="h-7 text-xs"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Time
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {scheduleTimes.map((time, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          type="time"
+                          value={time}
+                          onChange={(e) => {
+                            const newTimes = [...scheduleTimes];
+                            newTimes[index] = e.target.value;
+                            setScheduleTimes(newTimes);
+                          }}
+                          className="flex-1"
+                        />
+                        {scheduleTimes.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setScheduleTimes(scheduleTimes.filter((_, i) => i !== index))}
+                            className="h-9 w-9 shrink-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -788,10 +824,10 @@ export default function Workflows() {
               )}
 
               <p className="text-xs text-muted-foreground">
-                {scheduleFrequency === "once" && "Content will be generated and published once at the specified time."}
-                {scheduleFrequency === "daily" && `Content will be generated and published daily at ${scheduleTime}.`}
-                {scheduleFrequency === "weekly" && `Content will be generated and published weekly on selected days at ${scheduleTime}.`}
-                {scheduleFrequency === "custom" && `Content will be generated and published on ${scheduleDays.length} selected days at ${scheduleTime}.`}
+                {scheduleFrequency === "once" && `Content will be generated and published once at ${scheduleTimes.join(', ')}.`}
+                {scheduleFrequency === "daily" && `Content will be generated and published daily at ${scheduleTimes.join(', ')}.`}
+                {scheduleFrequency === "weekly" && `Content will be generated and published weekly on selected days at ${scheduleTimes.join(', ')}.`}
+                {scheduleFrequency === "custom" && `Content will be generated and published on ${scheduleDays.length} selected days at ${scheduleTimes.join(', ')}.`}
               </p>
             </div>
 
