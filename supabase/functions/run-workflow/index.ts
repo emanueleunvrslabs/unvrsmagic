@@ -6,6 +6,53 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Generate professional prompt using OpenAI
+async function generateProfessionalPrompt(openaiKey: string, description: string, contentType: string): Promise<string> {
+  const systemPrompt = contentType === "video" 
+    ? `You are an expert video prompt engineer. Transform the user's description into a professional, detailed prompt for AI video generation. Include:
+- Cinematic camera movements and angles
+- Lighting atmosphere and mood
+- Visual style and color grading
+- Scene composition and framing
+- Motion dynamics and pacing
+- Audio/sound design suggestions if relevant
+Keep the prompt concise but comprehensive. Output ONLY the enhanced prompt, no explanations.`
+    : `You are an expert image prompt engineer. Transform the user's description into a professional, detailed prompt for AI image generation. Include:
+- Professional lighting setup (natural, studio, dramatic, etc.)
+- Camera angle and lens perspective
+- Composition and framing
+- Color palette and mood
+- Texture and material details
+- Style reference (photorealistic, cinematic, editorial, etc.)
+Keep the prompt concise but comprehensive. Output ONLY the enhanced prompt, no explanations.`;
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${openaiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: description }
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("OpenAI API error:", errorText);
+    throw new Error(`OpenAI API failed: ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -66,17 +113,42 @@ serve(async (req) => {
 
     const FAL_KEY = falKeyData.api_key;
 
-    // Create content record
+    // Get OpenAI API key for prompt generation
+    const { data: openaiKeyData } = await supabase
+      .from("api_keys")
+      .select("api_key")
+      .eq("user_id", user.id)
+      .eq("provider", "openai")
+      .maybeSingle();
+
+    if (!openaiKeyData) {
+      throw new Error("OpenAI API key not found. Please configure it in AI Models API settings.");
+    }
+
+    // Generate professional prompt using OpenAI
+    console.log("Generating professional prompt via OpenAI...");
+    const professionalPrompt = await generateProfessionalPrompt(
+      openaiKeyData.api_key,
+      workflow.prompt_template,
+      workflow.content_type
+    );
+    console.log("Professional prompt generated:", professionalPrompt.substring(0, 100) + "...");
+
+    // Create content record with the professional prompt
     const contentTitle = workflow.name;
     const { data: content, error: contentError } = await supabase
       .from("ai_social_content")
       .insert({
         user_id: user.id,
         title: contentTitle,
-        prompt: workflow.prompt_template,
+        prompt: professionalPrompt,
         type: workflow.content_type,
         status: "generating",
-        metadata: { workflow_id: workflowId, execution_type: "run_now" }
+        metadata: { 
+          workflow_id: workflowId, 
+          execution_type: "run_now",
+          original_description: workflow.prompt_template
+        }
       })
       .select()
       .single();
@@ -97,9 +169,9 @@ serve(async (req) => {
       
       // Queue the generation with webhook - returns immediately
       if (isVideo) {
-        await queueVideoGeneration(FAL_KEY, workflow, scheduleConfig, webhookUrl);
+        await queueVideoGeneration(FAL_KEY, professionalPrompt, scheduleConfig, webhookUrl);
       } else {
-        await queueImageGeneration(FAL_KEY, workflow, scheduleConfig, webhookUrl);
+        await queueImageGeneration(FAL_KEY, professionalPrompt, scheduleConfig, webhookUrl);
       }
 
       // Return immediately - webhook will handle completion
@@ -144,7 +216,7 @@ serve(async (req) => {
 });
 
 // Queue video generation with webhook as query parameter
-async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfig: any, webhookUrl: string): Promise<void> {
+async function queueVideoGeneration(falKey: string, prompt: string, scheduleConfig: any, webhookUrl: string): Promise<void> {
   const mode = scheduleConfig.generation_mode || "text-to-video";
   const aspectRatio = scheduleConfig.aspect_ratio || "16:9";
   const duration = scheduleConfig.duration || "8s";
@@ -155,7 +227,7 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
   // Use veo3.1 endpoints (not veo3)
   let endpoint = "fal-ai/veo3.1";
   const requestBody: any = {
-    prompt: workflow.prompt_template,
+    prompt: prompt,
     aspect_ratio: aspectRatio,
     duration: duration,
   };
@@ -209,7 +281,7 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
 }
 
 // Queue image generation with webhook as query parameter
-async function queueImageGeneration(falKey: string, workflow: any, scheduleConfig: any, webhookUrl: string): Promise<void> {
+async function queueImageGeneration(falKey: string, prompt: string, scheduleConfig: any, webhookUrl: string): Promise<void> {
   const mode = scheduleConfig.generation_mode || "text-to-image";
   const aspectRatio = scheduleConfig.aspect_ratio || "1:1";
   const resolution = scheduleConfig.resolution || "1K";
@@ -220,7 +292,7 @@ async function queueImageGeneration(falKey: string, workflow: any, scheduleConfi
     : "fal-ai/nano-banana-pro";
 
   const requestBody: any = {
-    prompt: workflow.prompt_template,
+    prompt: prompt,
     num_images: 1,
     output_format: outputFormat,
     resolution: resolution,

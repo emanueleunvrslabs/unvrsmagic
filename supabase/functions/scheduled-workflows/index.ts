@@ -6,6 +6,53 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Generate professional prompt using OpenAI
+async function generateProfessionalPrompt(openaiKey: string, description: string, contentType: string): Promise<string> {
+  const systemPrompt = contentType === "video" 
+    ? `You are an expert video prompt engineer. Transform the user's description into a professional, detailed prompt for AI video generation. Include:
+- Cinematic camera movements and angles
+- Lighting atmosphere and mood
+- Visual style and color grading
+- Scene composition and framing
+- Motion dynamics and pacing
+- Audio/sound design suggestions if relevant
+Keep the prompt concise but comprehensive. Output ONLY the enhanced prompt, no explanations.`
+    : `You are an expert image prompt engineer. Transform the user's description into a professional, detailed prompt for AI image generation. Include:
+- Professional lighting setup (natural, studio, dramatic, etc.)
+- Camera angle and lens perspective
+- Composition and framing
+- Color palette and mood
+- Texture and material details
+- Style reference (photorealistic, cinematic, editorial, etc.)
+Keep the prompt concise but comprehensive. Output ONLY the enhanced prompt, no explanations.`;
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${openaiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: description }
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("OpenAI API error:", errorText);
+    throw new Error(`OpenAI API failed: ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -259,6 +306,18 @@ async function runWorkflow(supabase: any, workflow: any, scheduledPostId: string
 
   const FAL_KEY = falKeyData.api_key;
 
+  // Get OpenAI API key for prompt generation
+  const { data: openaiKeyData } = await supabase
+    .from("api_keys")
+    .select("api_key")
+    .eq("user_id", userId)
+    .eq("provider", "openai")
+    .maybeSingle();
+
+  if (!openaiKeyData) {
+    throw new Error("OpenAI API key not found");
+  }
+
   // Get Instagram credentials
   const { data: instagramData } = await supabase
     .from("api_keys")
@@ -269,17 +328,30 @@ async function runWorkflow(supabase: any, workflow: any, scheduledPostId: string
 
   const hasInstagram = !!instagramData && workflow.platforms?.includes("instagram");
 
-  // Create content record
+  // Generate professional prompt using OpenAI
+  console.log("Generating professional prompt via OpenAI...");
+  const professionalPrompt = await generateProfessionalPrompt(
+    openaiKeyData.api_key,
+    workflow.prompt_template,
+    workflow.content_type
+  );
+  console.log("Professional prompt generated:", professionalPrompt.substring(0, 100) + "...");
+
+  // Create content record with the professional prompt
   const contentTitle = workflow.name;
   const { data: content, error: contentError } = await supabase
     .from("ai_social_content")
     .insert({
       user_id: userId,
       title: contentTitle,
-      prompt: workflow.prompt_template,
+      prompt: professionalPrompt,
       type: workflow.content_type,
       status: "generating",
-      metadata: { workflow_id: workflow.id, execution_type: "scheduled" }
+      metadata: { 
+        workflow_id: workflow.id, 
+        execution_type: "scheduled",
+        original_description: workflow.prompt_template
+      }
     })
     .select()
     .single();
@@ -298,9 +370,9 @@ async function runWorkflow(supabase: any, workflow: any, scheduledPostId: string
     let generatedMediaUrl: string;
 
     if (isVideo) {
-      generatedMediaUrl = await generateVideo(FAL_KEY, workflow, scheduleConfig);
+      generatedMediaUrl = await generateVideo(FAL_KEY, professionalPrompt, scheduleConfig);
     } else {
-      generatedMediaUrl = await generateImage(FAL_KEY, workflow, scheduleConfig);
+      generatedMediaUrl = await generateImage(FAL_KEY, professionalPrompt, scheduleConfig);
     }
 
     console.log("Media generated:", generatedMediaUrl);
@@ -356,7 +428,7 @@ async function runWorkflow(supabase: any, workflow: any, scheduledPostId: string
 }
 
 // Generate video using Veo3.1
-async function generateVideo(falKey: string, workflow: any, scheduleConfig: any): Promise<string> {
+async function generateVideo(falKey: string, prompt: string, scheduleConfig: any): Promise<string> {
   const mode = scheduleConfig.generation_mode || "text-to-video";
   const aspectRatio = scheduleConfig.aspect_ratio || "16:9";
   const duration = scheduleConfig.duration || "8s";
@@ -366,7 +438,7 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
 
   let endpoint = "fal-ai/veo3";
   const requestBody: any = {
-    prompt: workflow.prompt_template,
+    prompt: prompt,
     aspect_ratio: aspectRatio,
     duration: duration,
   };
@@ -448,7 +520,7 @@ async function generateVideo(falKey: string, workflow: any, scheduleConfig: any)
 }
 
 // Generate image using Nano Banana
-async function generateImage(falKey: string, workflow: any, scheduleConfig: any): Promise<string> {
+async function generateImage(falKey: string, prompt: string, scheduleConfig: any): Promise<string> {
   const mode = scheduleConfig.generation_mode || "text-to-image";
   const aspectRatio = scheduleConfig.aspect_ratio || "1:1";
   const resolution = scheduleConfig.resolution || "1K";
@@ -460,7 +532,7 @@ async function generateImage(falKey: string, workflow: any, scheduleConfig: any)
   const pollingEndpoint = "fal-ai/nano-banana-pro";
 
   const requestBody: any = {
-    prompt: workflow.prompt_template,
+    prompt: prompt,
     num_images: 1,
     output_format: outputFormat,
     resolution: resolution,
