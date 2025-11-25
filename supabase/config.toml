@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.run-workflow]
 verify_jwt = true
+
+[functions.scheduled-workflows]
+verify_jwt = false
