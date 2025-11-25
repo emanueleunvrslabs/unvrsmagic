@@ -165,6 +165,9 @@ async function queueVideoGeneration(falKey: string, workflow: any, scheduleConfi
 
   // Get reference image from either reference_image_url or image_urls (for backwards compatibility)
   const referenceImageUrl = scheduleConfig.reference_image_url || (scheduleConfig.image_urls?.length > 0 ? scheduleConfig.image_urls[0] : null);
+  
+  console.log(`Reference image URL exists: ${!!referenceImageUrl}, mode: ${mode}`);
+  console.log(`image_urls length: ${scheduleConfig.image_urls?.length || 0}`);
 
   if (mode === "image-to-video" && scheduleConfig.image_urls?.length > 0) {
     endpoint = "fal-ai/veo3.1/image-to-video";
