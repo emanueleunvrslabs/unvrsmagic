@@ -492,6 +492,7 @@ function parseLettureXML(content: string): string[] {
 const MAX_FILES_PER_ZIP = 300; // Maximum files to process from a single ZIP
 const MAX_NESTED_ZIPS = 50; // Maximum nested ZIPs to process
 const PROCESSING_TIMEOUT_MS = 20000; // 20 seconds max per ZIP file
+const MAX_FILE_SIZE_MB = 30; // Maximum file size in MB to process (to avoid memory issues)
 
 // Extract POD codes from letture files (ZIP containing CSV/XML) with chunked processing
 async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise<{ allPods: string[], filesProcessed: number, warnings: string[], skippedFiles: number }> {
@@ -508,10 +509,28 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
       break;
     }
     
+    // Check file size before downloading to avoid memory issues
+    const fileSizeMB = file.file_size ? file.file_size / (1024 * 1024) : 0;
+    if (fileSizeMB > MAX_FILE_SIZE_MB) {
+      console.log(`Skipping large file ${file.file_name}: ${fileSizeMB.toFixed(2)} MB > ${MAX_FILE_SIZE_MB} MB limit`);
+      warnings.push(`File ${file.file_name} troppo grande (${fileSizeMB.toFixed(1)} MB). Max: ${MAX_FILE_SIZE_MB} MB. Dividere in file più piccoli.`);
+      skippedFiles++;
+      continue;
+    }
+    
     try {
       const content = await downloadFileContent(supabase, file.file_url);
       if (!content) {
         warnings.push(`Impossibile scaricare: ${file.file_name}`);
+        continue;
+      }
+      
+      // Double-check actual content size
+      const actualSizeMB = content.byteLength / (1024 * 1024);
+      if (actualSizeMB > MAX_FILE_SIZE_MB) {
+        console.log(`Skipping file ${file.file_name} after download: ${actualSizeMB.toFixed(2)} MB exceeds limit`);
+        warnings.push(`File ${file.file_name} troppo grande (${actualSizeMB.toFixed(1)} MB). Max: ${MAX_FILE_SIZE_MB} MB.`);
+        skippedFiles++;
         continue;
       }
       
