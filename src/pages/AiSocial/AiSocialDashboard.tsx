@@ -3,9 +3,73 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Video, Calendar, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AiSocialDashboard() {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalContent: 0,
+    generatedImages: 0,
+    generatedVideos: 0,
+    scheduledPosts: 0,
+    activeWorkflows: 0
+  });
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get total content count
+      const { count: totalCount } = await supabase
+        .from("ai_social_content")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      // Get images count
+      const { count: imagesCount } = await supabase
+        .from("ai_social_content")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("type", "image");
+
+      // Get videos count
+      const { count: videosCount } = await supabase
+        .from("ai_social_content")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("type", "video");
+
+      // Get scheduled posts count
+      const { count: scheduledCount } = await supabase
+        .from("ai_social_scheduled_posts")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "scheduled");
+
+      // Get active workflows count
+      const { count: workflowsCount } = await supabase
+        .from("ai_social_workflows")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("active", true);
+
+      setStats({
+        totalContent: totalCount || 0,
+        generatedImages: imagesCount || 0,
+        generatedVideos: videosCount || 0,
+        scheduledPosts: scheduledCount || 0,
+        activeWorkflows: workflowsCount || 0
+      });
+    } catch (error) {
+      console.error("Error loading stats:", error);
+    }
+  };
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -32,8 +96,8 @@ export default function AiSocialDashboard() {
                   <Image className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">+0 this month</p>
+                  <div className="text-2xl font-bold">{stats.totalContent}</div>
+                  <p className="text-xs text-muted-foreground">Images & Videos</p>
                 </CardContent>
               </Card>
 
@@ -43,8 +107,8 @@ export default function AiSocialDashboard() {
                   <Image className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">+0 this month</p>
+                  <div className="text-2xl font-bold">{stats.generatedImages}</div>
+                  <p className="text-xs text-muted-foreground">Total images</p>
                 </CardContent>
               </Card>
 
@@ -54,8 +118,8 @@ export default function AiSocialDashboard() {
                   <Video className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">+0 this month</p>
+                  <div className="text-2xl font-bold">{stats.generatedVideos}</div>
+                  <p className="text-xs text-muted-foreground">Total videos</p>
                 </CardContent>
               </Card>
 
@@ -65,7 +129,7 @@ export default function AiSocialDashboard() {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">0</div>
+                  <div className="text-2xl font-bold">{stats.scheduledPosts}</div>
                   <p className="text-xs text-muted-foreground">Next 7 days</p>
                 </CardContent>
               </Card>
@@ -76,7 +140,7 @@ export default function AiSocialDashboard() {
                   <Zap className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">0</div>
+                  <div className="text-2xl font-bold">{stats.activeWorkflows}</div>
                   <p className="text-xs text-muted-foreground">Active automations</p>
                 </CardContent>
               </Card>
