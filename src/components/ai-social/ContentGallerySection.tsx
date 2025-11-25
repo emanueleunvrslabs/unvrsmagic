@@ -291,9 +291,18 @@ export function ContentGallerySection() {
                 <div className="p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-sm line-clamp-1">{item.title}</h3>
-                    <Badge className={getStatusColor(item.status)} variant="outline">
-                      {item.status}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge className={getStatusColor(item.status)} variant="outline">
+                        {item.status}
+                      </Badge>
+                      {item.status === "completed" && (item.metadata as any)?.fal_cost !== undefined && (
+                        <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                          ${typeof (item.metadata as any).fal_cost === 'number' 
+                            ? (item.metadata as any).fal_cost.toFixed(4) 
+                            : (item.metadata as any).fal_cost}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="flex flex-wrap gap-1.5">

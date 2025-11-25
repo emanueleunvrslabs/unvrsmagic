@@ -368,22 +368,34 @@ async function runWorkflow(supabase: any, workflow: any, scheduledPostId: string
 
   try {
     let generatedMediaUrl: string;
+    let falCost: number | null = null;
 
     if (isVideo) {
-      generatedMediaUrl = await generateVideo(FAL_KEY, professionalPrompt, scheduleConfig);
+      const result = await generateVideo(FAL_KEY, professionalPrompt, scheduleConfig);
+      generatedMediaUrl = result.url;
+      falCost = result.cost;
     } else {
-      generatedMediaUrl = await generateImage(FAL_KEY, professionalPrompt, scheduleConfig);
+      const result = await generateImage(FAL_KEY, professionalPrompt, scheduleConfig);
+      generatedMediaUrl = result.url;
+      falCost = result.cost;
     }
 
-    console.log("Media generated:", generatedMediaUrl);
+    console.log("Media generated:", generatedMediaUrl, "Cost:", falCost);
 
-    // Update content record
+    // Get existing metadata
+    const existingMetadata = content.metadata || {};
+
+    // Update content record with cost
     await supabase
       .from("ai_social_content")
       .update({ 
         status: "completed",
         media_url: generatedMediaUrl,
-        thumbnail_url: generatedMediaUrl
+        thumbnail_url: generatedMediaUrl,
+        metadata: {
+          ...existingMetadata,
+          fal_cost: falCost
+        }
       })
       .eq("id", content.id);
 
@@ -428,7 +440,7 @@ async function runWorkflow(supabase: any, workflow: any, scheduledPostId: string
 }
 
 // Generate video using Veo3.1
-async function generateVideo(falKey: string, prompt: string, scheduleConfig: any): Promise<string> {
+async function generateVideo(falKey: string, prompt: string, scheduleConfig: any): Promise<{ url: string; cost: number | null }> {
   const mode = scheduleConfig.generation_mode || "text-to-video";
   const aspectRatio = scheduleConfig.aspect_ratio || "16:9";
   const duration = scheduleConfig.duration || "8s";
@@ -516,11 +528,14 @@ async function generateVideo(falKey: string, prompt: string, scheduleConfig: any
     throw new Error("No video URL returned from AI");
   }
 
-  return videoUrl;
+  const cost = resultData.cost ?? resultData.metrics?.cost ?? null;
+  console.log("Fal video result cost:", cost, "metrics:", resultData.metrics);
+
+  return { url: videoUrl, cost };
 }
 
 // Generate image using Nano Banana
-async function generateImage(falKey: string, prompt: string, scheduleConfig: any): Promise<string> {
+async function generateImage(falKey: string, prompt: string, scheduleConfig: any): Promise<{ url: string; cost: number | null }> {
   const mode = scheduleConfig.generation_mode || "text-to-image";
   const aspectRatio = scheduleConfig.aspect_ratio || "1:1";
   const resolution = scheduleConfig.resolution || "1K";
@@ -600,7 +615,10 @@ async function generateImage(falKey: string, prompt: string, scheduleConfig: any
     throw new Error("No image URL returned from AI");
   }
 
-  return imageUrl;
+  const cost = resultData.cost ?? resultData.metrics?.cost ?? null;
+  console.log("Fal image result cost:", cost, "metrics:", resultData.metrics);
+
+  return { url: imageUrl, cost };
 }
 
 // Publish image to Instagram
