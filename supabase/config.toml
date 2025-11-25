@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.instagram-oauth]
 verify_jwt = false
+
+[functions.dispatch-orchestrator]
+verify_jwt = true
