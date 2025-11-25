@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import unvrsLogo from "@/assets/unvrs-logo.jpeg";
 import {
   Activity,
   Bell,
@@ -490,8 +491,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         {/* Header */}
         <div className="flex h-16 items-center px-3 py-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-              <Bot className="h-5 w-5 text-primary-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-md overflow-hidden">
+              <img src={unvrsLogo} alt="UNVRS Labs" className="h-8 w-8 object-cover" />
             </div>
             {!collapsed && (
               <div className="flex flex-col">
