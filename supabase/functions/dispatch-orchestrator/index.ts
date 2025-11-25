@@ -738,15 +738,37 @@ async function downloadFileContent(supabase: any, fileUrl: string): Promise<Arra
 }
 
 // Parse CSV content to extract POD data using trattamento_XX column for the specific month
+// File format: Line 1 = metadata, Line 2 = headers, Line 3+ = data
 function parseAnagraficaCSV(content: string, zoneCode: string, dispatchMonth?: string): { podCodesO: string[], podCodesLP: string[], allPods: any[] } {
   const lines = content.split('\n').filter(line => line.trim());
-  if (lines.length === 0) return { podCodesO: [], podCodesLP: [], allPods: [] };
+  if (lines.length < 2) return { podCodesO: [], podCodesLP: [], allPods: [] };
   
-  const headerLine = lines[0];
-  const separator = headerLine.includes(';') ? ';' : ',';
+  // Detect separator from first line
+  const firstLine = lines[0];
+  const separator = firstLine.includes(';') ? ';' : ',';
+  
+  // Check if first line is metadata (doesn't contain typical header names)
+  const firstLineUpper = firstLine.toUpperCase();
+  const isFirstLineMetadata = !firstLineUpper.includes('POD') && 
+                               !firstLineUpper.includes('TRATTAMENTO') &&
+                               !firstLineUpper.includes('CF') &&
+                               !firstLineUpper.includes('PIVA');
+  
+  // Determine which line contains headers
+  const headerLineIndex = isFirstLineMetadata ? 1 : 0;
+  const dataStartIndex = headerLineIndex + 1;
+  
+  if (lines.length <= headerLineIndex) {
+    console.log('Not enough lines in anagrafica file');
+    return { podCodesO: [], podCodesLP: [], allPods: [] };
+  }
+  
+  console.log(`Anagrafica format: metadata line ${isFirstLineMetadata ? 'detected' : 'not detected'}, headers at line ${headerLineIndex + 1}, data starts at line ${dataStartIndex + 1}`);
+  
+  const headerLine = lines[headerLineIndex];
   const headers = headerLine.split(separator).map(h => h.trim().toUpperCase());
   
-  console.log('CSV Headers found:', headers.slice(0, 20), '...');
+  console.log('CSV Headers found:', headers.slice(0, 15), '...');
   
   // Find POD column
   const podColNames = ['POD', 'CODICE_POD', 'COD_POD', 'CODICE POD', 'PUNTO_PRELIEVO'];
@@ -769,7 +791,7 @@ function parseAnagraficaCSV(content: string, zoneCode: string, dispatchMonth?: s
     const monthNum = parseInt(dispatchMonth.split('-')[1], 10);
     const monthStr = monthNum.toString().padStart(2, '0');
     
-    // Try different variations of the column name
+    // Try different variations of the column name (case-insensitive search)
     const trattamentoColNames = [
       `TRATTAMENTO_${monthStr}`,
       `TRATTAMENTO_${monthNum}`,
@@ -788,7 +810,7 @@ function parseAnagraficaCSV(content: string, zoneCode: string, dispatchMonth?: s
       }
     }
     
-    console.log(`Looking for trattamento column for month ${monthNum}: found ${trattamentoColName} at index ${trattamentoColIndex}`);
+    console.log(`Looking for trattamento column for month ${monthNum}: found '${trattamentoColName}' at index ${trattamentoColIndex}`);
   }
   
   // Fallback to generic type columns if month-specific not found
@@ -805,22 +827,20 @@ function parseAnagraficaCSV(content: string, zoneCode: string, dispatchMonth?: s
     }
   }
   
-  console.log(`POD column index: ${podColIndex}, Trattamento column: ${trattamentoColName} at index: ${trattamentoColIndex}`);
+  console.log(`POD column index: ${podColIndex}, Trattamento column: '${trattamentoColName}' at index: ${trattamentoColIndex}`);
   
   const podCodesO: string[] = [];
   const podCodesLP: string[] = [];
   const allPods: any[] = [];
   
-  // If POD column not found by name, try to find by content
-  if (podColIndex === -1) {
-    for (let i = 0; i < headers.length; i++) {
-      if (lines.length > 1) {
-        const firstDataRow = lines[1].split(separator);
-        if (firstDataRow[i]?.trim().startsWith('IT')) {
-          podColIndex = i;
-          console.log(`Found POD column by content at index ${i}`);
-          break;
-        }
+  // If POD column not found by name, try to find by content in first data row
+  if (podColIndex === -1 && lines.length > dataStartIndex) {
+    const firstDataRow = lines[dataStartIndex].split(separator);
+    for (let i = 0; i < firstDataRow.length; i++) {
+      if (firstDataRow[i]?.trim().startsWith('IT')) {
+        podColIndex = i;
+        console.log(`Found POD column by content at index ${i}`);
+        break;
       }
     }
   }
@@ -830,7 +850,8 @@ function parseAnagraficaCSV(content: string, zoneCode: string, dispatchMonth?: s
     return { podCodesO: [], podCodesLP: [], allPods: [] };
   }
   
-  for (let i = 1; i < lines.length; i++) {
+  // Parse data rows (starting from dataStartIndex)
+  for (let i = dataStartIndex; i < lines.length; i++) {
     const values = lines[i].split(separator).map(v => v.trim().replace(/"/g, ''));
     
     if (values.length <= podColIndex) continue;
