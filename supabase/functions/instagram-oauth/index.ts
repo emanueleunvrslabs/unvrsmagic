@@ -75,34 +75,22 @@ Deno.serve(async (req) => {
 
     // Start OAuth flow
     if (action === 'start') {
-      // Derive user_id from current auth context instead of requiring it from client
-      try {
-        const { data, error: authError } = await supabaseClient.auth.getUser()
-        if (authError || !data.user) {
-          console.error('Unable to get authenticated user for Instagram OAuth start:', authError)
-          return new Response(
-            JSON.stringify({ error: 'Unauthorized: missing or invalid user session' }),
-            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
-        }
-
-        const userIdStr = data.user.id
-        console.log('Starting Instagram OAuth for user:', userIdStr)
-
-        const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${userIdStr}`
-        
+      const userIdStr = userId
+      if (!userIdStr) {
         return new Response(
-          JSON.stringify({ authUrl }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      } catch (error) {
-        console.error('Error during Instagram OAuth start:', error)
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        return new Response(
-          JSON.stringify({ error: errorMessage }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Missing user_id' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+
+      console.log('Starting Instagram OAuth for user (from client):', userIdStr)
+
+      const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${userIdStr}`
+      
+      return new Response(
+        JSON.stringify({ authUrl }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     // Handle OAuth callback
