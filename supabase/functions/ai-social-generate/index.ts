@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contentId, type, prompt, mode, inputImages, aspectRatio, resolution, outputFormat, duration, generateAudio } = await req.json();
+    const { contentId, type, prompt, mode, inputImages, firstFrameImage, lastFrameImage, aspectRatio, resolution, outputFormat, duration, generateAudio } = await req.json();
 
     if (!contentId || !type || !prompt) {
       return new Response(
@@ -87,6 +87,9 @@ serve(async (req) => {
       } else if (mode === "reference-to-video") {
         endpoint = "fal-ai/veo3.1/reference-to-video";
         pollingEndpoint = "fal-ai/veo3.1"; // Always use base endpoint for polling
+      } else if (mode === "first-last-frame") {
+        endpoint = "fal-ai/veo3.1/first-last-frame-to-video";
+        pollingEndpoint = "fal-ai/veo3.1"; // Always use base endpoint for polling
       } else {
         endpoint = "fal-ai/veo3.1";
         pollingEndpoint = "fal-ai/veo3.1";
@@ -108,7 +111,23 @@ serve(async (req) => {
 
     if (type === "video") {
       // Veo3.1 video generation parameters
-      if (mode === "reference-to-video") {
+      if (mode === "first-last-frame") {
+        // First/Last frame to video parameters
+        requestBody.aspect_ratio = aspectRatio || "16:9";
+        requestBody.resolution = resolution || "720p";
+        requestBody.duration = duration || "6s"; // Duration must be "4s", "6s", or "8s"
+        
+        // Add generate_audio parameter (defaults to true if not specified)
+        requestBody.generate_audio = generateAudio !== undefined ? generateAudio : true;
+        
+        // Add first and last frame images
+        if (firstFrameImage) {
+          requestBody.first_frame_image_url = firstFrameImage;
+        }
+        if (lastFrameImage) {
+          requestBody.last_frame_image_url = lastFrameImage;
+        }
+      } else if (mode === "reference-to-video") {
         // Reference to video only supports duration "8s" and doesn't use aspect_ratio
         requestBody.resolution = resolution || "720p";
         requestBody.duration = "8s";
