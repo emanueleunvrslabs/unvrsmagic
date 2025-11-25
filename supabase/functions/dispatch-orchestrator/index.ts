@@ -204,7 +204,7 @@ async function callAgentAI(
 }
 
 // Configuration for file processing
-const LARGE_FILE_THRESHOLD_MB = 20; // Files larger than this will be processed via separate edge function
+// LARGE_FILE_THRESHOLD_MB is defined below in chunked processing section
 
 // Process a single file via the dispatch-file-processor edge function
 async function processFileViaEdgeFunction(
@@ -978,30 +978,150 @@ function parseLettureXML(content: string): string[] {
 const MAX_FILES_PER_ZIP = 300; // Maximum files to process from a single ZIP
 const MAX_NESTED_ZIPS = 50; // Maximum nested ZIPs to process
 const PROCESSING_TIMEOUT_MS = 20000; // 20 seconds max per ZIP file
-const MAX_FILE_SIZE_MB = 30; // Maximum file size in MB to process (to avoid memory issues)
+const MAX_FILE_SIZE_MB_DIRECT = 30; // Files smaller than this are processed directly
+const LARGE_FILE_THRESHOLD_MB = 30; // Files larger than this use chunked processor
 
-// Extract POD codes from letture files (ZIP containing CSV/XML) with chunked processing
-async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise<{ allPods: string[], filesProcessed: number, warnings: string[], skippedFiles: number }> {
+// Call the dispatch-file-processor edge function for large file processing
+async function processLargeFileViaProcessor(
+  supabase: any,
+  file: any,
+  jobId: string,
+  userId: string,
+  chunkIndex: number = 0
+): Promise<any> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+  console.log(`Calling dispatch-file-processor for large file ${file.file_name}, chunk ${chunkIndex}`);
+  
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/dispatch-file-processor`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${serviceRoleKey}`
+      },
+      body: JSON.stringify({
+        fileId: file.id,
+        jobId,
+        userId,
+        action: 'process',
+        chunkIndex
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('dispatch-file-processor error:', response.status, errorText);
+      return { success: false, error: `Processor error: ${response.status}` };
+    }
+
+    const result = await response.json();
+    console.log(`File processor result for chunk ${chunkIndex}:`, result.success ? 'success' : 'failed');
+    return result;
+  } catch (error) {
+    console.error('Error calling file processor:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Extract POD codes from letture files with support for large files via chunked processor
+async function extractPodsFromLettureFiles(
+  supabase: any, 
+  files: any[],
+  jobId?: string,
+  userId?: string
+): Promise<{ allPods: string[], filesProcessed: number, warnings: string[], skippedFiles: number }> {
   const allPods: string[] = [];
   let filesProcessed = 0;
   let skippedFiles = 0;
   const warnings: string[] = [];
   const startTime = Date.now();
   
+  // Separate files by size
+  const smallFiles: any[] = [];
+  const largeFiles: any[] = [];
+  
   for (const file of files) {
-    // Check if we're running low on time
-    if (Date.now() - startTime > 25000) {
-      warnings.push('Timeout raggiunto, alcuni file non elaborati');
-      break;
-    }
-    
-    // Check file size before downloading to avoid memory issues
     const fileSizeMB = file.file_size ? file.file_size / (1024 * 1024) : 0;
-    if (fileSizeMB > MAX_FILE_SIZE_MB) {
-      console.log(`Skipping large file ${file.file_name}: ${fileSizeMB.toFixed(2)} MB > ${MAX_FILE_SIZE_MB} MB limit`);
-      warnings.push(`File ${file.file_name} troppo grande (${fileSizeMB.toFixed(1)} MB). Max: ${MAX_FILE_SIZE_MB} MB. Dividere in file più piccoli.`);
+    if (fileSizeMB > LARGE_FILE_THRESHOLD_MB) {
+      largeFiles.push(file);
+    } else {
+      smallFiles.push(file);
+    }
+  }
+  
+  console.log(`Processing ${smallFiles.length} small files directly, ${largeFiles.length} large files via processor`);
+  
+  // Process large files via chunked processor
+  for (const file of largeFiles) {
+    if (!jobId || !userId) {
+      warnings.push(`File grande ${file.file_name} richiede jobId e userId per elaborazione chunked`);
       skippedFiles++;
       continue;
+    }
+    
+    const fileSizeMB = (file.file_size || 0) / (1024 * 1024);
+    console.log(`Processing large file ${file.file_name} (${fileSizeMB.toFixed(2)} MB) via chunked processor`);
+    
+    try {
+      let chunkIndex = 0;
+      let moreChunksNeeded = true;
+      let totalChunksProcessed = 0;
+      const maxChunks = 20; // Safety limit
+      
+      while (moreChunksNeeded && chunkIndex < maxChunks) {
+        const result = await processLargeFileViaProcessor(supabase, file, jobId, userId, chunkIndex);
+        
+        if (result.success && result.result) {
+          const chunkResult = result.result;
+          
+          // Collect PODs from this chunk
+          if (chunkResult.pod_codes && Array.isArray(chunkResult.pod_codes)) {
+            allPods.push(...chunkResult.pod_codes);
+          }
+          
+          filesProcessed += chunkResult.files_processed || 0;
+          skippedFiles += chunkResult.files_skipped || 0;
+          
+          if (chunkResult.warnings) {
+            warnings.push(...chunkResult.warnings);
+          }
+          
+          // Check if more chunks needed
+          moreChunksNeeded = chunkResult.more_chunks_needed === true;
+          chunkIndex = chunkResult.next_chunk_index || (chunkIndex + 1);
+          totalChunksProcessed++;
+          
+          console.log(`Chunk ${totalChunksProcessed} complete. PODs so far: ${allPods.length}, more chunks: ${moreChunksNeeded}`);
+        } else {
+          warnings.push(`Errore elaborazione chunk ${chunkIndex} di ${file.file_name}: ${result.error || 'unknown'}`);
+          break;
+        }
+        
+        // Check overall time limit
+        if (Date.now() - startTime > 45000) {
+          warnings.push(`Timeout generale raggiunto durante elaborazione ${file.file_name}`);
+          break;
+        }
+      }
+      
+      if (chunkIndex >= maxChunks) {
+        warnings.push(`Raggiunto limite massimo chunk (${maxChunks}) per ${file.file_name}`);
+      }
+      
+    } catch (error) {
+      console.error(`Error processing large file ${file.file_name}:`, error);
+      warnings.push(`Errore file grande ${file.file_name}: ${error instanceof Error ? error.message : 'unknown'}`);
+      skippedFiles++;
+    }
+  }
+  
+  // Process small files directly (existing logic)
+  for (const file of smallFiles) {
+    if (Date.now() - startTime > 50000) {
+      warnings.push('Timeout raggiunto, alcuni file non elaborati');
+      break;
     }
     
     try {
@@ -1011,19 +1131,9 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
         continue;
       }
       
-      // Double-check actual content size
-      const actualSizeMB = content.byteLength / (1024 * 1024);
-      if (actualSizeMB > MAX_FILE_SIZE_MB) {
-        console.log(`Skipping file ${file.file_name} after download: ${actualSizeMB.toFixed(2)} MB exceeds limit`);
-        warnings.push(`File ${file.file_name} troppo grande (${actualSizeMB.toFixed(1)} MB). Max: ${MAX_FILE_SIZE_MB} MB.`);
-        skippedFiles++;
-        continue;
-      }
-      
       const fileName = file.file_name.toLowerCase();
       
       if (fileName.endsWith('.zip')) {
-        // Process ZIP file with chunking
         try {
           const zipStartTime = Date.now();
           const zip = await JSZip.loadAsync(content);
@@ -1031,30 +1141,19 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
           
           console.log(`ZIP ${file.file_name} contains ${allInnerFiles.length} files`);
           
-          // Separate files by type for smarter processing
           const csvFiles = allInnerFiles.filter(f => f.toLowerCase().endsWith('.csv'));
           const xmlFiles = allInnerFiles.filter(f => f.toLowerCase().endsWith('.xml'));
           const nestedZips = allInnerFiles.filter(f => f.toLowerCase().endsWith('.zip'));
           
           console.log(`Found: ${csvFiles.length} CSV, ${xmlFiles.length} XML, ${nestedZips.length} nested ZIPs`);
           
-          // Process CSV files (limited)
+          // Process CSV files
           const csvToProcess = csvFiles.slice(0, MAX_FILES_PER_ZIP);
-          if (csvFiles.length > MAX_FILES_PER_ZIP) {
-            warnings.push(`ZIP ${file.file_name}: elaborati ${MAX_FILES_PER_ZIP}/${csvFiles.length} CSV (sampling)`);
-            skippedFiles += csvFiles.length - MAX_FILES_PER_ZIP;
-          }
-          
           for (const innerFileName of csvToProcess) {
-            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) {
-              warnings.push(`Timeout ZIP ${file.file_name}, file rimanenti saltati`);
-              break;
-            }
-            
+            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) break;
             try {
               const innerContent = await zip.files[innerFileName].async('string');
               const pods = parseLettureCSV(innerContent);
-              
               if (pods.length > 0) {
                 allPods.push(...pods);
                 filesProcessed++;
@@ -1064,23 +1163,13 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
             }
           }
           
-          // Process XML files (limited)
+          // Process XML files
           const xmlToProcess = xmlFiles.slice(0, MAX_FILES_PER_ZIP);
-          if (xmlFiles.length > MAX_FILES_PER_ZIP) {
-            warnings.push(`ZIP ${file.file_name}: elaborati ${MAX_FILES_PER_ZIP}/${xmlFiles.length} XML (sampling)`);
-            skippedFiles += xmlFiles.length - MAX_FILES_PER_ZIP;
-          }
-          
           for (const innerFileName of xmlToProcess) {
-            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) {
-              warnings.push(`Timeout ZIP ${file.file_name}, XML rimanenti saltati`);
-              break;
-            }
-            
+            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) break;
             try {
               const innerContent = await zip.files[innerFileName].async('string');
               const pods = parseLettureXML(innerContent);
-              
               if (pods.length > 0) {
                 allPods.push(...pods);
                 filesProcessed++;
@@ -1090,19 +1179,10 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
             }
           }
           
-          // Process nested ZIPs (limited)
+          // Process nested ZIPs
           const nestedToProcess = nestedZips.slice(0, MAX_NESTED_ZIPS);
-          if (nestedZips.length > MAX_NESTED_ZIPS) {
-            warnings.push(`ZIP ${file.file_name}: elaborati ${MAX_NESTED_ZIPS}/${nestedZips.length} ZIP annidati`);
-            skippedFiles += nestedZips.length - MAX_NESTED_ZIPS;
-          }
-          
           for (const nestedZipName of nestedToProcess) {
-            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) {
-              warnings.push(`Timeout nested ZIPs, rimanenti saltati`);
-              break;
-            }
-            
+            if (Date.now() - zipStartTime > PROCESSING_TIMEOUT_MS) break;
             try {
               const nestedZipData = await zip.files[nestedZipName].async('arraybuffer');
               const nestedZip = await JSZip.loadAsync(nestedZipData);
@@ -1110,39 +1190,28 @@ async function extractPodsFromLettureFiles(supabase: any, files: any[]): Promise
                 .filter(name => !nestedZip.files[name].dir)
                 .filter(name => name.toLowerCase().endsWith('.csv') || name.toLowerCase().endsWith('.xml'));
               
-              // Limit nested file processing too
-              const nestedToProcessInner = nestedFiles.slice(0, 100);
-              
-              for (const nestedFileName of nestedToProcessInner) {
+              for (const nestedFileName of nestedFiles.slice(0, 100)) {
                 try {
                   const nestedContent = await nestedZip.files[nestedFileName].async('string');
                   const nestedLowerName = nestedFileName.toLowerCase();
-                  
                   let nestedPods: string[] = [];
                   if (nestedLowerName.endsWith('.csv')) {
                     nestedPods = parseLettureCSV(nestedContent);
                   } else if (nestedLowerName.endsWith('.xml')) {
                     nestedPods = parseLettureXML(nestedContent);
                   }
-                  
                   if (nestedPods.length > 0) {
                     allPods.push(...nestedPods);
                     filesProcessed++;
                   }
                 } catch (nestedErr) {
-                  // Silent fail for nested files
+                  // Silent fail
                 }
-              }
-              
-              if (nestedFiles.length > 100) {
-                skippedFiles += nestedFiles.length - 100;
               }
             } catch (nestedErr) {
               console.error(`Error processing nested ZIP ${nestedZipName}:`, nestedErr);
             }
           }
-          
-          console.log(`ZIP processing complete: ${filesProcessed} files processed, ${skippedFiles} skipped`);
           
         } catch (zipError) {
           console.error('Error processing ZIP:', zipError);
