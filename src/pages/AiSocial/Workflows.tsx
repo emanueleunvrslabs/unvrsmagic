@@ -387,7 +387,6 @@ export default function Workflows() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h3 className="font-medium">{workflow.name}</h3>
-                          <p className="text-sm text-muted-foreground">{workflow.description}</p>
                           <div className="flex gap-2 mt-2">
                             <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
                               {workflow.content_type}
