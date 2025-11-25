@@ -22,7 +22,8 @@ Deno.serve(async (req) => {
     )
 
     const url = new URL(req.url)
-    const action = url.searchParams.get('action')
+    let action = url.searchParams.get('action')
+    let userId = url.searchParams.get('user_id')
 
     // Get Instagram app credentials from environment
     const appId = Deno.env.get('INSTAGRAM_APP_ID')
@@ -36,17 +37,28 @@ Deno.serve(async (req) => {
     }
     const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/instagram-oauth?action=callback`
 
+    // Support both query params (GET) and JSON body (POST via supabase.functions.invoke)
+    if (!action || !userId) {
+      try {
+        const body = await req.json()
+        action = action || body.action
+        userId = userId || body.user_id
+      } catch (_) {
+        // Ignore JSON parse errors for non-JSON requests
+      }
+    }
+
     // Start OAuth flow
     if (action === 'start') {
-      const userId = url.searchParams.get('user_id')
-      if (!userId) {
+      const userIdStr = userId
+      if (!userIdStr) {
         return new Response(
           JSON.stringify({ error: 'Missing user_id' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
-      const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${userId}`
+      const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${userIdStr}`
       
       return new Response(
         JSON.stringify({ authUrl }),
