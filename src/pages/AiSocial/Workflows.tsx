@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Image } from "lucide-react";
+import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Clock } from "lucide-react";
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -9,9 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+
+const DAYS_OF_WEEK = [
+  { id: 'monday', label: 'Mon' },
+  { id: 'tuesday', label: 'Tue' },
+  { id: 'wednesday', label: 'Wed' },
+  { id: 'thursday', label: 'Thu' },
+  { id: 'friday', label: 'Fri' },
+  { id: 'saturday', label: 'Sat' },
+  { id: 'sunday', label: 'Sun' },
+];
 
 export default function Workflows() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -31,6 +42,11 @@ export default function Workflows() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Scheduling state
+  const [scheduleFrequency, setScheduleFrequency] = useState<string>("daily");
+  const [scheduleTime, setScheduleTime] = useState("09:00");
+  const [scheduleDays, setScheduleDays] = useState<string[]>(["monday", "wednesday", "friday"]);
 
   // Fetch connected social accounts
   const { data: connectedAccounts } = useQuery({
@@ -192,7 +208,10 @@ export default function Workflows() {
           aspect_ratio: aspectRatio,
           resolution: resolution,
           output_format: outputFormat,
-          image_urls: uploadedImages
+          image_urls: uploadedImages,
+          frequency: scheduleFrequency,
+          time: scheduleTime,
+          days: scheduleDays
         },
         active: true
       };
@@ -241,6 +260,9 @@ export default function Workflows() {
     setOutputFormat(workflow.schedule_config?.output_format || 'png');
     setSelectedPlatforms(workflow.platforms || []);
     setUploadedImages(workflow.schedule_config?.image_urls || []);
+    setScheduleFrequency(workflow.schedule_config?.frequency || 'daily');
+    setScheduleTime(workflow.schedule_config?.time || '09:00');
+    setScheduleDays(workflow.schedule_config?.days || ['monday', 'wednesday', 'friday']);
     setIsDialogOpen(true);
   };
 
@@ -277,6 +299,17 @@ export default function Workflows() {
     setOutputFormat("png");
     setSelectedPlatforms([]);
     setUploadedImages([]);
+    setScheduleFrequency("daily");
+    setScheduleTime("09:00");
+    setScheduleDays(["monday", "wednesday", "friday"]);
+  };
+
+  const handleDayToggle = (day: string) => {
+    setScheduleDays(prev => 
+      prev.includes(day) 
+        ? prev.filter(d => d !== day)
+        : [...prev, day]
+    );
   };
 
   const openNewWorkflowDialog = () => {
@@ -671,6 +704,67 @@ export default function Workflows() {
                   No social accounts connected. Go to Connections to link your accounts.
                 </p>
               )}
+            </div>
+
+            {/* Schedule Configuration */}
+            <div className="space-y-4 border-t border-border pt-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-base font-medium">Schedule</Label>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Frequency</Label>
+                  <Select value={scheduleFrequency} onValueChange={setScheduleFrequency}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="once">Once</SelectItem>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="custom">Custom Days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Time</Label>
+                  <Input
+                    type="time"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {(scheduleFrequency === "weekly" || scheduleFrequency === "custom") && (
+                <div className="space-y-2">
+                  <Label>Days of Week</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {DAYS_OF_WEEK.map((day) => (
+                      <Button
+                        key={day.id}
+                        type="button"
+                        variant={scheduleDays.includes(day.id) ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleDayToggle(day.id)}
+                        className="w-12"
+                      >
+                        {day.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <p className="text-xs text-muted-foreground">
+                {scheduleFrequency === "once" && "Content will be generated and published once at the specified time."}
+                {scheduleFrequency === "daily" && `Content will be generated and published daily at ${scheduleTime}.`}
+                {scheduleFrequency === "weekly" && `Content will be generated and published weekly on selected days at ${scheduleTime}.`}
+                {scheduleFrequency === "custom" && `Content will be generated and published on ${scheduleDays.length} selected days at ${scheduleTime}.`}
+              </p>
             </div>
 
             {/* Action Buttons */}
