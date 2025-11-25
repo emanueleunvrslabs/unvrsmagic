@@ -141,6 +141,10 @@ async function orchestrateAgents(
     
     const ipResult = await processIpStep(supabase, userId, ipFiles, historicalMonth, zoneCode);
     await updateAgentState(supabase, jobId, userId, 'IP.ASSIMILATOR', 'completed', ipResult);
+    await logAgentActivity(supabase, userId, 'IP.ASSIMILATOR', 'info', 
+      `IP completato: ${ipResult.days_processed || 0} giorni elaborati, consumo totale: ${(ipResult.total_ip_consumption || 0).toFixed(2)}`, 
+      { days: ipResult.days_processed, total: ipResult.total_ip_consumption }
+    );
 
     // Step 3: HISTORY.RESOLVER (50%)
     await updateJobProgress(supabase, jobId, 'HISTORY.RESOLVER', 50);
@@ -647,17 +651,172 @@ async function processAnagraficaStep(supabase: any, userId: string, files: any[]
   };
 }
 
+// Parse AGGR_IP CSV file to extract 96 quarter-hour values
+function parseAggrIpCSV(content: string): { dailyCurves: number[][], daysProcessed: number, warnings: string[] } {
+  const dailyCurves: number[][] = [];
+  const warnings: string[] = [];
+  
+  const lines = content.split('\n').filter(line => line.trim());
+  if (lines.length === 0) return { dailyCurves, daysProcessed: 0, warnings };
+  
+  const headerLine = lines[0];
+  const separator = headerLine.includes(';') ? ';' : ',';
+  const headers = headerLine.split(separator).map(h => h.trim().toUpperCase());
+  
+  console.log('AGGR_IP Headers:', headers.slice(0, 15), '...');
+  
+  // Find QH1-QH96 column indices
+  const qhIndices: number[] = [];
+  for (let i = 1; i <= 96; i++) {
+    const colName = `QH${i}`;
+    const idx = headers.indexOf(colName);
+    if (idx !== -1) {
+      qhIndices.push(idx);
+    }
+  }
+  
+  console.log(`Found ${qhIndices.length} QH columns`);
+  
+  if (qhIndices.length !== 96) {
+    // Try alternative: find columns by position after standard headers
+    // Standard headers: ANNO;MESE;CODICE_DP;DATA;AREA;FASCIA_GEOGRAFICA;PIVA_DISTRIBUTORE;RAGIONE_SOCIALE_DISTRIBUTORE;QH1...
+    const startIdx = 8; // After the 8 standard header columns
+    if (headers.length >= startIdx + 96) {
+      qhIndices.length = 0;
+      for (let i = 0; i < 96; i++) {
+        qhIndices.push(startIdx + i);
+      }
+      console.log('Using positional QH columns starting at index', startIdx);
+    } else {
+      warnings.push('Formato file AGGR_IP non riconosciuto: colonne QH non trovate');
+      return { dailyCurves, daysProcessed: 0, warnings };
+    }
+  }
+  
+  // Parse data rows (each row = one day)
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(separator).map(v => v.trim().replace(/"/g, ''));
+    
+    if (values.length < qhIndices[qhIndices.length - 1]) {
+      continue; // Skip incomplete rows
+    }
+    
+    const dayCurve: number[] = [];
+    let hasValidData = false;
+    
+    for (const idx of qhIndices) {
+      const rawValue = values[idx] || '0';
+      // Handle both comma and dot as decimal separator
+      const normalizedValue = rawValue.replace(',', '.');
+      const numValue = parseFloat(normalizedValue) || 0;
+      dayCurve.push(numValue);
+      if (numValue > 0) hasValidData = true;
+    }
+    
+    if (hasValidData && dayCurve.length === 96) {
+      dailyCurves.push(dayCurve);
+    }
+  }
+  
+  console.log(`Parsed ${dailyCurves.length} days of IP data`);
+  
+  return { dailyCurves, daysProcessed: dailyCurves.length, warnings };
+}
+
+// Calculate average daily profile from multiple days
+function calculateAverageCurve(dailyCurves: number[][]): number[] {
+  if (dailyCurves.length === 0) {
+    return Array(96).fill(0);
+  }
+  
+  const avgCurve: number[] = [];
+  
+  for (let qh = 0; qh < 96; qh++) {
+    let sum = 0;
+    let count = 0;
+    
+    for (const dayCurve of dailyCurves) {
+      if (dayCurve[qh] !== undefined) {
+        sum += dayCurve[qh];
+        count++;
+      }
+    }
+    
+    avgCurve.push(count > 0 ? sum / count : 0);
+  }
+  
+  return avgCurve;
+}
+
 async function processIpStep(supabase: any, userId: string, files: any[], historicalMonth: string, zoneCode: string) {
-  const ip_curve = Array.from({ length: 96 }, (_, i) => {
-    const hour = Math.floor(i / 4);
-    return hour >= 18 || hour <= 6 ? Math.random() * 100 + 50 : Math.random() * 20;
-  });
+  console.log(`Processing IP step for zone ${zoneCode}, files: ${files.length}`);
+  
+  const allDailyCurves: number[][] = [];
+  const warnings: string[] = [];
+  let filesProcessed = 0;
+  
+  for (const file of files) {
+    try {
+      const content = await downloadFileContent(supabase, file.file_url);
+      if (!content) {
+        warnings.push(`Impossibile scaricare: ${file.file_name}`);
+        continue;
+      }
+      
+      const fileName = file.file_name.toLowerCase();
+      
+      if (fileName.endsWith('.zip')) {
+        // Process ZIP file
+        try {
+          const zip = await JSZip.loadAsync(content);
+          const csvFiles = Object.keys(zip.files).filter(name => 
+            name.toLowerCase().endsWith('.csv') && !zip.files[name].dir
+          );
+          
+          console.log(`Found ${csvFiles.length} CSV files in AGGR_IP ZIP`);
+          
+          for (const csvName of csvFiles) {
+            const csvContent = await zip.files[csvName].async('string');
+            const parsed = parseAggrIpCSV(csvContent);
+            allDailyCurves.push(...parsed.dailyCurves);
+            warnings.push(...parsed.warnings);
+            if (parsed.daysProcessed > 0) filesProcessed++;
+          }
+        } catch (zipError) {
+          console.error('Error processing AGGR_IP ZIP:', zipError);
+          warnings.push(`Errore estrazione ZIP: ${file.file_name}`);
+        }
+      } else if (fileName.endsWith('.csv')) {
+        const textContent = new TextDecoder().decode(content);
+        const parsed = parseAggrIpCSV(textContent);
+        allDailyCurves.push(...parsed.dailyCurves);
+        warnings.push(...parsed.warnings);
+        if (parsed.daysProcessed > 0) filesProcessed++;
+      }
+    } catch (error) {
+      console.error(`Error processing AGGR_IP file ${file.file_name}:`, error);
+      warnings.push(`Errore elaborazione: ${file.file_name}`);
+    }
+  }
+  
+  // Calculate average daily IP curve
+  const ip_curve = calculateAverageCurve(allDailyCurves);
+  
+  const totalIpConsumption = ip_curve.reduce((a, b) => a + b, 0);
+  console.log(`IP processing complete: ${allDailyCurves.length} days, total consumption: ${totalIpConsumption.toFixed(2)}`);
+  
+  // If no data found, return zeros with warning
+  if (allDailyCurves.length === 0) {
+    warnings.push('Nessun dato IP trovato nei file caricati');
+  }
   
   return {
     typical_day_curve: ip_curve,
-    files_processed: files.length,
+    files_processed: filesProcessed,
+    days_processed: allDailyCurves.length,
+    total_ip_consumption: totalIpConsumption,
     zone: zoneCode,
-    warnings: []
+    warnings
   };
 }
 
