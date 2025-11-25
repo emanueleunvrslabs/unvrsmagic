@@ -29,9 +29,12 @@ Deno.serve(async (req) => {
     const appId = Deno.env.get('INSTAGRAM_APP_ID')
     const appSecret = Deno.env.get('INSTAGRAM_APP_SECRET')
 
+    console.log('Instagram credentials check:', { hasAppId: !!appId, hasAppSecret: !!appSecret })
+
     if (!appId || !appSecret) {
+      console.error('Instagram app not configured')
       return new Response(
-        JSON.stringify({ error: 'Instagram app not configured' }),
+        JSON.stringify({ error: 'Instagram app not configured. Please add INSTAGRAM_APP_ID and INSTAGRAM_APP_SECRET to secrets.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -43,10 +46,13 @@ Deno.serve(async (req) => {
         const body = await req.json()
         action = action || body.action
         userId = userId || body.user_id
-      } catch (_) {
-        // Ignore JSON parse errors for non-JSON requests
+        console.log('Parsed body:', { action, userId: userId ? 'present' : 'missing' })
+      } catch (error) {
+        console.log('No JSON body or parse error:', error)
       }
     }
+
+    console.log('OAuth flow:', { action, hasUserId: !!userId })
 
     // Start OAuth flow
     if (action === 'start') {
