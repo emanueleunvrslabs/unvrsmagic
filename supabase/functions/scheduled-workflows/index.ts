@@ -17,104 +17,103 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-    const currentTime = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+    console.log(`Checking scheduled posts at ${now.toISOString()}`);
 
-    console.log(`Checking scheduled workflows at ${currentTime} on ${currentDay}`);
+    // Query scheduled posts that are due (scheduled_at <= now AND status = 'scheduled')
+    const { data: scheduledPosts, error: postsError } = await supabase
+      .from("ai_social_scheduled_posts")
+      .select("*, ai_social_workflows(*)")
+      .eq("status", "scheduled")
+      .lte("scheduled_at", now.toISOString())
+      .order("scheduled_at", { ascending: true });
 
-    // Get all active workflows
-    const { data: workflows, error: workflowsError } = await supabase
-      .from("ai_social_workflows")
-      .select("*")
-      .eq("active", true);
-
-    if (workflowsError) {
-      throw new Error(`Failed to fetch workflows: ${workflowsError.message}`);
+    if (postsError) {
+      throw new Error(`Failed to fetch scheduled posts: ${postsError.message}`);
     }
 
-    if (!workflows || workflows.length === 0) {
-      console.log("No active workflows found");
+    if (!scheduledPosts || scheduledPosts.length === 0) {
+      console.log("No scheduled posts due for execution");
       return new Response(
-        JSON.stringify({ message: "No active workflows" }),
+        JSON.stringify({ message: "No scheduled posts due" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Found ${workflows.length} active workflows`);
+    console.log(`Found ${scheduledPosts.length} scheduled posts to execute`);
 
-    const workflowsToRun: any[] = [];
-
-    for (const workflow of workflows) {
-      const scheduleConfig = workflow.schedule_config || {};
-      const frequency = scheduleConfig.frequency || "daily";
-      const times = scheduleConfig.times || ["09:00"];
-      const days = scheduleConfig.days || [];
-
-      // Check if current time matches any scheduled time (with 5 minute tolerance)
-      const timeMatches = times.some((scheduledTime: string) => {
-        const [schedHour, schedMinute] = scheduledTime.split(':').map(Number);
-        const timeDiff = Math.abs(
-          (currentHour * 60 + currentMinute) - (schedHour * 60 + schedMinute)
-        );
-        return timeDiff <= 5; // 5 minute tolerance
-      });
-
-      if (!timeMatches) continue;
-
-      // Check frequency
-      let shouldRun = false;
-
-      switch (frequency) {
-        case "once":
-          // Check if never run before
-          shouldRun = !workflow.last_run_at;
-          break;
-        case "daily":
-          shouldRun = true;
-          break;
-        case "weekly":
-        case "custom":
-          shouldRun = days.includes(currentDay);
-          break;
-      }
-
-      if (shouldRun) {
-        // Check if already run today (prevent duplicate runs)
-        if (workflow.last_run_at) {
-          const lastRun = new Date(workflow.last_run_at);
-          const hoursSinceLastRun = (now.getTime() - lastRun.getTime()) / (1000 * 60 * 60);
-          if (hoursSinceLastRun < 1) {
-            console.log(`Workflow ${workflow.name} already ran recently, skipping`);
+    // Process each scheduled post in background
+    const processScheduledPosts = async () => {
+      for (const post of scheduledPosts) {
+        try {
+          const workflow = post.ai_social_workflows;
+          if (!workflow) {
+            console.error(`No workflow found for scheduled post ${post.id}`);
+            await supabase
+              .from("ai_social_scheduled_posts")
+              .update({ status: "failed", error_message: "Workflow not found" })
+              .eq("id", post.id);
             continue;
           }
-        }
-        workflowsToRun.push(workflow);
-      }
-    }
 
-    console.log(`${workflowsToRun.length} workflows scheduled to run now`);
+          // Check if workflow is still active
+          if (!workflow.active) {
+            console.log(`Workflow ${workflow.name} is paused, skipping post ${post.id}`);
+            await supabase
+              .from("ai_social_scheduled_posts")
+              .delete()
+              .eq("id", post.id);
+            continue;
+          }
 
-    // Process each workflow in background
-    const processWorkflows = async () => {
-      for (const workflow of workflowsToRun) {
-        try {
-          console.log(`Running scheduled workflow: ${workflow.name}`);
-          await runWorkflow(supabase, workflow);
+          console.log(`Processing scheduled post ${post.id} for workflow: ${workflow.name}`);
+
+          // Mark as processing
+          await supabase
+            .from("ai_social_scheduled_posts")
+            .update({ status: "processing" })
+            .eq("id", post.id);
+
+          // Run the workflow
+          await runWorkflow(supabase, workflow, post.id);
+
+          // Mark as published
+          await supabase
+            .from("ai_social_scheduled_posts")
+            .update({ 
+              status: "published", 
+              published_at: new Date().toISOString() 
+            })
+            .eq("id", post.id);
+
+          // Update workflow last_run_at
+          await supabase
+            .from("ai_social_workflows")
+            .update({ last_run_at: new Date().toISOString() })
+            .eq("id", workflow.id);
+
+          // Calculate and insert next scheduled time
+          await insertNextScheduledPost(supabase, workflow);
+
         } catch (error) {
-          console.error(`Error running workflow ${workflow.name}:`, error);
+          console.error(`Error processing scheduled post ${post.id}:`, error);
+          await supabase
+            .from("ai_social_scheduled_posts")
+            .update({ 
+              status: "failed", 
+              error_message: error instanceof Error ? error.message : "Unknown error"
+            })
+            .eq("id", post.id);
         }
       }
     };
 
     // @ts-ignore
-    EdgeRuntime.waitUntil(processWorkflows());
+    EdgeRuntime.waitUntil(processScheduledPosts());
 
     return new Response(
       JSON.stringify({ 
-        message: `Processing ${workflowsToRun.length} workflows`,
-        workflows: workflowsToRun.map(w => w.name)
+        message: `Processing ${scheduledPosts.length} scheduled posts`,
+        posts: scheduledPosts.map(p => ({ id: p.id, workflow: p.ai_social_workflows?.name }))
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -128,7 +127,106 @@ serve(async (req) => {
   }
 });
 
-async function runWorkflow(supabase: any, workflow: any) {
+// Calculate and insert the next scheduled time for a workflow
+async function insertNextScheduledPost(supabase: any, workflow: any) {
+  const scheduleConfig = workflow.schedule_config || {};
+  const frequency = scheduleConfig.frequency || "daily";
+  const times = scheduleConfig.times || ["09:00"];
+  const days = scheduleConfig.days || [];
+
+  // Don't schedule more for "once" frequency
+  if (frequency === "once") {
+    console.log(`Workflow ${workflow.name} is one-time, not scheduling next run`);
+    return;
+  }
+
+  const now = new Date();
+  const nextTime = calculateNextScheduledTime(frequency, times, days, now);
+
+  if (!nextTime) {
+    console.log(`Could not calculate next scheduled time for workflow ${workflow.name}`);
+    return;
+  }
+
+  // Check if this time slot already exists
+  const { data: existing } = await supabase
+    .from("ai_social_scheduled_posts")
+    .select("id")
+    .eq("workflow_id", workflow.id)
+    .eq("scheduled_at", nextTime.toISOString())
+    .eq("status", "scheduled")
+    .maybeSingle();
+
+  if (existing) {
+    console.log(`Scheduled post for ${nextTime.toISOString()} already exists`);
+    return;
+  }
+
+  // Insert the next scheduled post
+  const { error } = await supabase
+    .from("ai_social_scheduled_posts")
+    .insert({
+      workflow_id: workflow.id,
+      user_id: workflow.user_id,
+      scheduled_at: nextTime.toISOString(),
+      status: "scheduled",
+      platforms: workflow.platforms,
+      caption: workflow.description || workflow.prompt_template?.substring(0, 200),
+      metadata: { schedule_config: scheduleConfig }
+    });
+
+  if (error) {
+    console.error(`Failed to insert next scheduled post: ${error.message}`);
+  } else {
+    console.log(`Scheduled next run for workflow ${workflow.name} at ${nextTime.toISOString()}`);
+  }
+}
+
+// Calculate the next scheduled time based on frequency and configuration
+function calculateNextScheduledTime(
+  frequency: string, 
+  times: string[], 
+  days: string[], 
+  fromDate: Date
+): Date | null {
+  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  
+  // Sort times
+  const sortedTimes = [...times].sort();
+  
+  // Start checking from today
+  for (let dayOffset = 0; dayOffset < 8; dayOffset++) {
+    const checkDate = new Date(fromDate);
+    checkDate.setDate(checkDate.getDate() + dayOffset);
+    const dayName = dayNames[checkDate.getDay()];
+
+    // Check if this day is valid for the frequency
+    let isDayValid = false;
+    if (frequency === "daily") {
+      isDayValid = true;
+    } else if (frequency === "weekly" || frequency === "custom") {
+      isDayValid = days.includes(dayName);
+    }
+
+    if (!isDayValid) continue;
+
+    // Check each time slot for this day
+    for (const timeStr of sortedTimes) {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      const candidateTime = new Date(checkDate);
+      candidateTime.setHours(hours, minutes, 0, 0);
+
+      // Must be in the future (at least 1 minute from now)
+      if (candidateTime.getTime() > fromDate.getTime() + 60000) {
+        return candidateTime;
+      }
+    }
+  }
+
+  return null;
+}
+
+async function runWorkflow(supabase: any, workflow: any, scheduledPostId: string) {
   const userId = workflow.user_id;
   const scheduleConfig = workflow.schedule_config || {};
   const isVideo = workflow.content_type === "video";
@@ -174,6 +272,12 @@ async function runWorkflow(supabase: any, workflow: any) {
   if (contentError || !content) {
     throw new Error("Failed to create content record");
   }
+
+  // Link content to scheduled post
+  await supabase
+    .from("ai_social_scheduled_posts")
+    .update({ content_id: content.id })
+    .eq("id", scheduledPostId);
 
   try {
     let generatedMediaUrl: string;
@@ -223,12 +327,6 @@ async function runWorkflow(supabase: any, workflow: any) {
       }
     }
 
-    // Update workflow last_run_at
-    await supabase
-      .from("ai_social_workflows")
-      .update({ last_run_at: new Date().toISOString() })
-      .eq("id", workflow.id);
-
   } catch (error) {
     console.error("Workflow processing error:", error);
     await supabase
@@ -238,6 +336,7 @@ async function runWorkflow(supabase: any, workflow: any) {
         error_message: error instanceof Error ? error.message : "Unknown error"
       })
       .eq("id", content.id);
+    throw error;
   }
 }
 
@@ -503,14 +602,18 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
       if (statusData.status_code === "FINISHED") {
         containerReady = true;
       } else if (statusData.status_code === "ERROR") {
-        console.error("Video processing failed on Instagram");
+        console.error("Video container processing failed");
         return;
       }
     }
+    
     pollAttempts++;
   }
 
-  if (!containerReady) return;
+  if (!containerReady) {
+    console.error("Timeout waiting for video container to be ready");
+    return;
+  }
 
   const publishResponse = await fetch(
     `https://graph.facebook.com/v19.0/${igUserId}/media_publish`,
