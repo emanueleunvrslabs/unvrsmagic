@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { VideoGallerySection } from "@/components/ai-social/VideoGallerySection";
+import { ImageSelector } from "@/components/ai-social/ImageSelector";
 
 export default function GenerateVideo() {
   const [prompt, setPrompt] = useState("");
@@ -20,6 +21,7 @@ export default function GenerateVideo() {
   const [loading, setLoading] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState("");
+  const [showImageSelector, setShowImageSelector] = useState(false);
 
   const handleGenerate = async () => {
     if (!prompt) {
@@ -111,14 +113,24 @@ export default function GenerateVideo() {
 
               {mode === "image-to-video" && (
                 <div className="space-y-2">
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    type="url"
-                    placeholder="https://example.com/image.jpg"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                  />
+                  <Label>Input Image</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowImageSelector(true)}
+                    className="w-full"
+                  >
+                    {imageUrl ? "Change Image" : "Select Image"}
+                  </Button>
+                  {imageUrl && (
+                    <div className="space-y-2">
+                      <img
+                        src={imageUrl}
+                        alt="Selected"
+                        className="w-full max-h-48 object-contain rounded-lg border"
+                      />
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     Image should be 720p or higher in 16:9 or 9:16 aspect ratio
                   </p>
@@ -218,6 +230,12 @@ export default function GenerateVideo() {
 
         <VideoGallerySection />
       </div>
+
+      <ImageSelector
+        open={showImageSelector}
+        onOpenChange={setShowImageSelector}
+        onSelect={setImageUrl}
+      />
     </DashboardLayout>
   );
 }
