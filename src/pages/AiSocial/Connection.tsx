@@ -23,15 +23,26 @@ export default function Connection() {
         },
       });
 
+      console.log('Instagram OAuth response:', { data, error });
+
       if (error) {
         console.error("Error starting OAuth:", error);
-        toast.error("Failed to connect Instagram");
+        const errorMessage = (error as any).message || "Failed to connect Instagram";
+        toast.error(errorMessage);
+        return;
+      }
+
+      if (data && (data as any).error) {
+        console.error("Instagram OAuth error:", (data as any).error);
+        toast.error((data as any).error);
         return;
       }
 
       if (data && (data as any).authUrl) {
+        console.log('Redirecting to Instagram:', (data as any).authUrl);
         window.location.href = (data as any).authUrl as string;
       } else {
+        console.error("Invalid response:", data);
         toast.error("Invalid response from Instagram OAuth");
       }
     } catch (error) {
