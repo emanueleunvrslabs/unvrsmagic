@@ -226,14 +226,14 @@ export function ContentGallerySection() {
                             setPreviewDialogOpen(true);
                           }}
                         >
-                          {item.type === "image" ? <Maximize2 className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                          {item.type === "image" ? <Maximize2 className="h-4 w-4" /> : <Play className="h-5 w-5" />}
                         </Button>
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => handleDownload(item.media_url!, item.title)}
                         >
-                          <Download className="h-4 w-4" />
+                          <Download className="h-5 w-5" />
                         </Button>
                         <Button
                           size="icon"
@@ -243,7 +243,7 @@ export function ContentGallerySection() {
                             setDeleteDialogOpen(true);
                           }}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-5 w-5" />
                         </Button>
                       </div>
                     </>
