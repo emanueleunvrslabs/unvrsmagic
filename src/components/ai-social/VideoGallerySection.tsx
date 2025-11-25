@@ -350,14 +350,9 @@ export function VideoGallerySection() {
                 <strong>Prompt:</strong> {previewItem?.prompt}
               </p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={getStatusColor(previewItem?.status || "")}>
-                    {previewItem?.status}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {previewItem?.created_at && new Date(previewItem.created_at).toLocaleString()}
-                  </span>
-                </div>
+                <Badge variant="outline" className={getStatusColor(previewItem?.status || "")}>
+                  {previewItem?.status}
+                </Badge>
                 {previewItem?.media_url && (
                   <Button
                     variant="outline"
