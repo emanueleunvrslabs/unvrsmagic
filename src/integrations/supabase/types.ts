@@ -514,6 +514,66 @@ export type Database = {
           },
         ]
       }
+      dispatch_intermediate_results: {
+        Row: {
+          created_at: string | null
+          data: Json
+          error_message: string | null
+          file_id: string | null
+          id: string
+          job_id: string | null
+          processing_time_ms: number | null
+          result_type: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          zone_code: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data?: Json
+          error_message?: string | null
+          file_id?: string | null
+          id?: string
+          job_id?: string | null
+          processing_time_ms?: number | null
+          result_type: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          zone_code?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data?: Json
+          error_message?: string | null
+          file_id?: string | null
+          id?: string
+          job_id?: string | null
+          processing_time_ms?: number | null
+          result_type?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          zone_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispatch_intermediate_results_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "dispatch_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_intermediate_results_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "dispatch_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dispatch_jobs: {
         Row: {
           agents_state: Json | null
