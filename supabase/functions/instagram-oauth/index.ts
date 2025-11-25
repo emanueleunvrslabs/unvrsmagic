@@ -23,13 +23,10 @@ Deno.serve(async (req) => {
 
     const url = new URL(req.url)
     let action = url.searchParams.get('action')
-    let userId = url.searchParams.get('user_id')
 
     // Get Instagram app credentials from environment
     const appId = Deno.env.get('INSTAGRAM_APP_ID')
     const appSecret = Deno.env.get('INSTAGRAM_APP_SECRET')
-
-    console.log('Instagram credentials check:', { hasAppId: !!appId, hasAppSecret: !!appSecret })
 
     if (!appId || !appSecret) {
       console.error('Instagram app not configured')
@@ -38,55 +35,45 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
     const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/instagram-oauth?action=callback`
 
-    // Support both query params (GET) and JSON body (POST via supabase.functions.invoke)
-    if (!action || !userId) {
+    // Try to read JSON body (for calls via supabase.functions.invoke)
+    let body: any = null
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
       try {
-        const body = await req.json()
-        action = action || body.action
-        userId = userId || body.user_id
-        console.log('Parsed body:', { action, userId: userId ? 'present' : 'missing' })
-      } catch (error) {
-        console.log('No JSON body or parse error:', error)
+        body = await req.json()
+      } catch (_) {
+        // ignore if no JSON body
       }
     }
 
-    // Fallback: try to derive user_id from Authorization header (JWT)
-    if (!userId) {
-      const authHeader = req.headers.get('Authorization') || ''
-      if (authHeader.startsWith('Bearer ')) {
-        const token = authHeader.replace('Bearer ', '')
-        try {
-          const { data, error } = await supabaseClient.auth.getUser(token)
-          if (error) {
-            console.error('Error getting user from token:', error)
-          } else if (data.user) {
-            userId = data.user.id
-            console.log('Derived user_id from JWT')
-          }
-        } catch (error) {
-          console.error('Exception while getting user from token:', error)
-        }
-      }
+    if (!action && body && typeof body.action === 'string') {
+      action = body.action
     }
 
-    console.log('OAuth flow:', { action, hasUserId: !!userId })
+    console.log('Instagram OAuth request:', { method: req.method, action })
 
     // Start OAuth flow
     if (action === 'start') {
-      const userIdStr = userId
-      if (!userIdStr) {
+      // user_id must come from the client (body or query string)
+      let userId = url.searchParams.get('user_id') as string | null
+      if (!userId && body && typeof body.user_id === 'string') {
+        userId = body.user_id
+      }
+
+      console.log('Instagram OAuth start - userId from client:', { hasUserId: !!userId })
+
+      if (!userId) {
         return new Response(
           JSON.stringify({ error: 'Missing user_id' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
-      console.log('Starting Instagram OAuth for user (from client):', userIdStr)
+      const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${userId}`
+      console.log('Redirecting to Instagram auth URL')
 
-      const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${userIdStr}`
-      
       return new Response(
         JSON.stringify({ authUrl }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -121,7 +108,8 @@ Deno.serve(async (req) => {
       })
 
       if (!tokenResponse.ok) {
-        console.error('Token exchange failed:', await tokenResponse.text())
+        const text = await tokenResponse.text()
+        console.error('Token exchange failed:', text)
         return new Response(
           JSON.stringify({ error: 'Failed to get access token' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -129,7 +117,7 @@ Deno.serve(async (req) => {
       }
 
       const tokenData = await tokenResponse.json()
-      console.log('Instagram token received for user:', state)
+      console.log('Instagram token received for user (state):', state)
 
       // Save user's Instagram access token
       const { error: saveError } = await supabaseClient
