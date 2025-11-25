@@ -394,6 +394,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       section: "User",
       items: [
         { id: "marketplace", label: "Marketplace", icon: Store, href: "/marketplace" },
+        { id: "wallet", label: "Wallet", icon: Wallet, href: "/wallet" },
         ...userProjectItems,
       ],
     });

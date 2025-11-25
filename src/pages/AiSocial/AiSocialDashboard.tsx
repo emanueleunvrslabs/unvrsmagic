@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentGallerySection } from "@/components/ai-social/ContentGallerySection";
-import { CreditBalanceCard } from "@/components/ai-social/CreditBalanceCard";
 import { useQuery } from "@tanstack/react-query";
 
 const WorkflowsList = () => {
@@ -272,9 +271,6 @@ export default function AiSocialDashboard() {
                 </CardContent>
               </Card>
             </div>
-
-            {/* Credit Balance Card */}
-            <CreditBalanceCard />
 
             <Card>
               <CardHeader>
