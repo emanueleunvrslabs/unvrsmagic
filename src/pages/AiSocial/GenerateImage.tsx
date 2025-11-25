@@ -93,8 +93,8 @@ export default function GenerateImage() {
 
       if (createError) throw createError;
 
-      // Call edge function to generate image
-      const { data, error } = await supabase.functions.invoke("ai-social-generate", {
+      // Call edge function to start generation (non-blocking)
+      supabase.functions.invoke("ai-social-generate", {
         body: {
           contentId: content.id,
           type: "image",
@@ -105,16 +105,17 @@ export default function GenerateImage() {
           resolution,
           outputFormat
         }
+      }).then(({ error }) => {
+        if (error) {
+          console.error("Error starting image generation:", error);
+        }
       });
 
-      if (error) throw error;
-
-      setGeneratedImage(data.mediaUrl);
-      toast.success("Image generated successfully!");
+      toast.success("Image generation started! You can navigate away, it will continue in background.");
       
     } catch (error) {
       console.error("Error generating image:", error);
-      toast.error("Failed to generate image");
+      toast.error("Failed to start image generation");
     } finally {
       setLoading(false);
     }

@@ -174,106 +174,126 @@ serve(async (req) => {
 
     console.log(`Fal request queued with ID: ${requestId}`);
 
-    // Poll for the result by directly checking the result endpoint
-    // The /status endpoint returns 405 for this model, so we poll the result endpoint instead
-    let resultData;
-    let attempts = 0;
-    const maxAttempts = 60; // Wait up to 60 seconds
+    // Poll for the result in background
+    const pollAndUpdate = async () => {
+      let resultData;
+      let attempts = 0;
+      const maxAttempts = 300; // Wait up to 5 minutes (300 seconds)
 
-    while (attempts < maxAttempts) {
-      // Poll the result endpoint directly using the polling endpoint
-      const resultResponse = await fetch(`https://queue.fal.run/${pollingEndpoint}/requests/${requestId}`, {
-        headers: {
-          "Authorization": `Key ${FAL_KEY}`,
-        },
-      });
+      while (attempts < maxAttempts) {
+        // Poll the result endpoint directly using the polling endpoint
+        const resultResponse = await fetch(`https://queue.fal.run/${pollingEndpoint}/requests/${requestId}`, {
+          headers: {
+            "Authorization": `Key ${FAL_KEY}`,
+          },
+        });
 
-      console.log(`Poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
+        console.log(`Poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
 
-      // If 200, the request is completed
-      if (resultResponse.status === 200) {
-        resultData = await resultResponse.json();
-        console.log("Got completed result:", JSON.stringify(resultData));
-        break;
-      }
-      
-      // If 202, still processing
-      if (resultResponse.status === 202) {
-        const statusInfo = await resultResponse.json();
-        console.log(`Request in progress:`, JSON.stringify(statusInfo));
-        
-        // Check if it failed
-        if (statusInfo.status === "FAILED") {
-          console.error("Generation failed:", statusInfo.error);
-          throw new Error(`Generation failed: ${JSON.stringify(statusInfo.error)}`);
+        // If 200, the request is completed
+        if (resultResponse.status === 200) {
+          resultData = await resultResponse.json();
+          console.log("Got completed result:", JSON.stringify(resultData));
+          break;
         }
-      } else if (resultResponse.status !== 404) {
-        // Unexpected status code (404 means not ready yet, which is normal)
-        const errorText = await resultResponse.text();
-        console.error(`Unexpected status ${resultResponse.status}:`, errorText);
+        
+        // If 202, still processing
+        if (resultResponse.status === 202) {
+          const statusInfo = await resultResponse.json();
+          console.log(`Request in progress:`, JSON.stringify(statusInfo));
+          
+          // Check if it failed
+          if (statusInfo.status === "FAILED") {
+            console.error("Generation failed:", statusInfo.error);
+            await supabase
+              .from("ai_social_content")
+              .update({ 
+                status: "failed",
+                error_message: `Generation failed: ${JSON.stringify(statusInfo.error)}`
+              })
+              .eq("id", contentId);
+            return;
+          }
+        } else if (resultResponse.status !== 404) {
+          // Unexpected status code (404 means not ready yet, which is normal)
+          const errorText = await resultResponse.text();
+          console.error(`Unexpected status ${resultResponse.status}:`, errorText);
+        }
+
+        // Wait 2 seconds before next poll
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        attempts++;
       }
 
-      // Wait 1 second before next poll
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      attempts++;
-    }
+      if (!resultData) {
+        console.error("Timeout waiting for generation to complete");
+        await supabase
+          .from("ai_social_content")
+          .update({ 
+            status: "failed",
+            error_message: "Timeout waiting for generation to complete"
+          })
+          .eq("id", contentId);
+        return;
+      }
 
-    if (!resultData) {
-      throw new Error("Timeout waiting for generation to complete");
-    }
+      // Extract media URL from the result
+      console.log("Result data:", JSON.stringify(resultData));
+      
+      let generatedMediaUrl: string;
+      let thumbnailUrl: string | undefined;
 
-    // Extract media URL from the result
-    console.log("Result data:", JSON.stringify(resultData));
-    
-    let generatedMediaUrl: string;
-    let thumbnailUrl: string | undefined;
+      if (type === "video") {
+        // Video response structure: { video: { url: "..." } }
+        generatedMediaUrl = resultData.video?.url;
+        console.log("Extracted video URL:", generatedMediaUrl);
+      } else {
+        // Image response structure: { images: [{ url: "..." }] }
+        generatedMediaUrl = resultData.images?.[0]?.url;
+        thumbnailUrl = generatedMediaUrl;
+        console.log("Extracted image URL:", generatedMediaUrl);
+      }
 
-    if (type === "video") {
-      // Video response structure: { video: { url: "..." } }
-      generatedMediaUrl = resultData.video?.url;
-      console.log("Extracted video URL:", generatedMediaUrl);
-    } else {
-      // Image response structure: { images: [{ url: "..." }] }
-      generatedMediaUrl = resultData.images?.[0]?.url;
-      thumbnailUrl = generatedMediaUrl;
-      console.log("Extracted image URL:", generatedMediaUrl);
-    }
+      if (!generatedMediaUrl) {
+        console.error("No media URL found in response:", JSON.stringify(resultData));
+        await supabase
+          .from("ai_social_content")
+          .update({ 
+            status: "failed",
+            error_message: `No ${type} URL returned from AI`
+          })
+          .eq("id", contentId);
+        return;
+      }
 
-    if (!generatedMediaUrl) {
-      console.error("No media URL found in response:", JSON.stringify(resultData));
-      await supabase
+      // Update content with generated media
+      const { error: updateError } = await supabase
         .from("ai_social_content")
         .update({ 
-          status: "failed",
-          error_message: `No ${type} URL returned from AI`
+          status: "completed",
+          media_url: generatedMediaUrl,
+          thumbnail_url: thumbnailUrl || generatedMediaUrl
         })
         .eq("id", contentId);
 
-      return new Response(
-        JSON.stringify({ error: "No content generated" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+      if (updateError) {
+        console.error("Database update error:", updateError);
+      } else {
+        console.log("Successfully updated content with media URL");
+      }
+    };
 
-    // Update content with generated media
-    const { error: updateError } = await supabase
-      .from("ai_social_content")
-      .update({ 
-        status: "completed",
-        media_url: generatedMediaUrl,
-        thumbnail_url: thumbnailUrl || generatedMediaUrl
-      })
-      .eq("id", contentId);
+    // Start background polling (non-blocking)
+    pollAndUpdate().catch(err => {
+      console.error("Background polling error:", err);
+    });
 
-    if (updateError) {
-      console.error("Database update error:", updateError);
-      throw updateError;
-    }
-
+    // Return immediately to allow user to navigate away
     return new Response(
       JSON.stringify({ 
         success: true,
-        mediaUrl: generatedMediaUrl
+        message: "Generation started in background",
+        contentId
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
