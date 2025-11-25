@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
         )
       }
 
-       // For Instagram Graph API (publishing capability), use different endpoint and scopes
-       const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_content_publish,pages_read_engagement&response_type=code&state=${userId}`
+       // For Instagram Graph API (publishing capability), use Facebook Login endpoint
+       const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement&response_type=code&state=${userId}`
       console.log('Redirecting to Instagram auth URL')
 
       return new Response(
@@ -93,20 +93,8 @@ Deno.serve(async (req) => {
         )
       }
 
-      // Exchange code for access token
-      const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          client_id: appId,
-          client_secret: appSecret,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUri,
-          code: code,
-        }),
-      })
+      // Exchange code for Facebook access token
+      const tokenResponse = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`)
 
       if (!tokenResponse.ok) {
         const text = await tokenResponse.text()
@@ -118,23 +106,69 @@ Deno.serve(async (req) => {
       }
 
       const tokenData = await tokenResponse.json()
-      console.log('Instagram token received for user (state):', state)
+      console.log('Facebook token received for user (state):', state)
 
-      // Save user's Instagram access token
-      const { error: saveError } = await supabaseClient
-        .from('api_keys')
-        .upsert({
-          user_id: state,
-          provider: 'instagram',
-          api_key: tokenData.access_token,
-          owner_id: tokenData.user_id?.toString() || '',
-        }, { onConflict: 'user_id,provider' })
-
-      if (saveError) {
-        console.error('Error saving token:', saveError)
+      // Get user's Facebook pages
+      const pagesResponse = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${tokenData.access_token}`)
+      
+      if (!pagesResponse.ok) {
+        console.error('Failed to get Facebook pages')
         return new Response(
-          JSON.stringify({ error: 'Failed to save token' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Failed to get Facebook pages' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      const pagesData = await pagesResponse.json()
+      
+      // Get Instagram Business Account from the first page
+      if (pagesData.data && pagesData.data.length > 0) {
+        const pageId = pagesData.data[0].id
+        const pageAccessToken = pagesData.data[0].access_token
+        
+        const igAccountResponse = await fetch(`https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${pageAccessToken}`)
+        
+        if (!igAccountResponse.ok) {
+          console.error('Failed to get Instagram account')
+          return new Response(
+            JSON.stringify({ error: 'No Instagram Business Account linked' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        const igAccountData = await igAccountResponse.json()
+        const instagramAccountId = igAccountData.instagram_business_account?.id
+
+        if (!instagramAccountId) {
+          return new Response(
+            JSON.stringify({ error: 'No Instagram Business Account found' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        // Save user's Instagram access token and account ID
+        const { error: saveError } = await supabaseClient
+          .from('api_keys')
+          .upsert({
+            user_id: state,
+            provider: 'instagram',
+            api_key: pageAccessToken,
+            owner_id: instagramAccountId,
+          }, { onConflict: 'user_id,provider' })
+
+        if (saveError) {
+          console.error('Error saving token:', saveError)
+          return new Response(
+            JSON.stringify({ error: 'Failed to save token' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log('Instagram Business Account connected:', instagramAccountId)
+      } else {
+        return new Response(
+          JSON.stringify({ error: 'No Facebook pages found' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
