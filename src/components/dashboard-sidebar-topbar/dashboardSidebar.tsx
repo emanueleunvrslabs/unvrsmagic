@@ -375,6 +375,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           icon: Layers,
           hasSubmenu: true,
           submenuItems: [
+            { id: "settings-exchanges", label: "Exchange Connection", icon: Store, href: "/settings?tab=exchanges" },
             { id: "nkmt-dashboard", label: "NKMT", icon: Cpu, href: "/nkmt/dashboard" },
             ...exchanges.map((ex) => ({
               id: `nkmt-${ex.exchange}`,
@@ -479,6 +480,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           icon: Layers,
           hasSubmenu: true,
           submenuItems: [
+            { id: "settings-exchanges", label: "Exchange Connection", icon: Store, href: "/settings?tab=exchanges" },
             { id: "nkmt-dashboard", label: "NKMT", icon: Cpu, href: "/nkmt/dashboard" },
             ...exchanges.map((ex) => ({
               id: `nkmt-${ex.exchange}`,
