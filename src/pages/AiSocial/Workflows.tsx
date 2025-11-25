@@ -350,27 +350,66 @@ export default function Workflows() {
   const handleRunNow = async (workflow: any) => {
     setRunningWorkflowId(workflow.id);
     setRunningStage("openai");
-    toast.info("Running workflow...", { description: `Enhancing prompt with OpenAI...` });
+    toast.info("Starting workflow...", { description: `Preparing prompt...` });
+    
+    const startTime = Date.now();
+    let contentId: string | null = null;
+    let pollingInterval: NodeJS.Timeout | null = null;
     
     try {
-      // Simulate stage progression while edge function runs
-      const stagePromise = (async () => {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        setRunningStage("nano");
-        toast.info("Generating image...", { description: "Nano Banana is creating your image..." });
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        if (workflow.platforms?.includes("instagram")) {
-          setRunningStage("instagram");
-          toast.info("Publishing...", { description: "Posting to Instagram..." });
-        }
-      })();
+      // Brief OpenAI stage (prompt preparation - quick)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Move to Nano stage when starting image generation
+      setRunningStage("nano");
+      toast.info("Generating image...", { description: "Nano Banana is creating your image (30-60s)..." });
 
+      // Start polling for content status to track real progress
+      const pollForContent = async (): Promise<void> => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        // Look for recent content from this workflow
+        const { data: contents } = await supabase
+          .from('ai_social_content')
+          .select('id, status, media_url')
+          .eq('user_id', session.user.id)
+          .gte('created_at', new Date(startTime - 5000).toISOString())
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (contents && contents.length > 0) {
+          const content = contents[0];
+          contentId = content.id;
+          
+          // When content is completed, move to Instagram stage
+          if (content.status === 'completed' && content.media_url) {
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              pollingInterval = null;
+            }
+            
+            if (workflow.platforms?.includes("instagram")) {
+              setRunningStage("instagram");
+              toast.info("Publishing to Instagram...", { description: "Uploading to Instagram..." });
+            }
+          }
+        }
+      };
+
+      // Poll every 3 seconds to detect when image generation completes
+      pollingInterval = setInterval(pollForContent, 3000);
+
+      // Call the edge function and wait for it to complete
       const { data, error } = await supabase.functions.invoke('run-workflow', {
         body: { workflowId: workflow.id }
       });
 
-      // Wait for stage animation to complete
-      await stagePromise;
+      // Clean up polling
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+      }
 
       if (error) {
         throw error;
@@ -403,6 +442,9 @@ export default function Workflows() {
         description: error instanceof Error ? error.message : "Unknown error"
       });
     } finally {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
       setRunningWorkflowId(null);
       setRunningStage(null);
     }
