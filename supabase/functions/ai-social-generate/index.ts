@@ -305,13 +305,22 @@ serve(async (req) => {
         return;
       }
 
+      // Format duration for display
+      let metadata = null;
+      if (type === "video" && duration) {
+        const seconds = parseInt(duration.replace('s', ''));
+        const formattedDuration = `0:${seconds.toString().padStart(2, '0')}`;
+        metadata = { duration: formattedDuration };
+      }
+
       // Update content with generated media
       const { error: updateError } = await supabase
         .from("ai_social_content")
         .update({ 
           status: "completed",
           media_url: generatedMediaUrl,
-          thumbnail_url: thumbnailUrl || generatedMediaUrl
+          thumbnail_url: thumbnailUrl || generatedMediaUrl,
+          metadata: metadata
         })
         .eq("id", contentId);
 
