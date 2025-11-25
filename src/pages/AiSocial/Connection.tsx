@@ -133,8 +133,8 @@ export default function Connection() {
             <CardContent>
               {instagramConnection ? (
                 <Button 
-                  className="w-full"
-                  variant="outline"
+                  className="w-full bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:border-destructive/30"
+                  variant="ghost"
                   onClick={disconnectInstagram}
                 >
                   <Unlink className="mr-2 h-4 w-4" />
