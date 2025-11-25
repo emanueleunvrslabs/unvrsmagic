@@ -167,8 +167,8 @@ export default function Workflows() {
     setUploadedImages([]);
     setFirstFrameImage("");
     setLastFrameImage("");
-    // Set default duration for reference-to-video
-    if (mode === "reference-to-video") {
+    // Set default duration to 8s for reference-to-video and first-last-frame
+    if (mode === "reference-to-video" || mode === "first-last-frame") {
       setDuration("8s");
     }
   };
@@ -928,7 +928,7 @@ export default function Workflows() {
             <div className="space-y-2">
               <Label>Generation Mode</Label>
               {workflowType === "image" ? (
-                <Select value={generationMode} onValueChange={setGenerationMode}>
+                <Select value={generationMode} onValueChange={handleGenerationModeChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -1335,29 +1335,24 @@ export default function Workflows() {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Duration</Label>
-                    <Select 
-                      value={duration} 
-                      onValueChange={setDuration} 
-                      disabled={generationMode === "reference-to-video"}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {generationMode === "reference-to-video" ? (
+                  {generationMode !== "reference-to-video" && generationMode !== "first-last-frame" && (
+                    <div className="space-y-2">
+                      <Label>Duration</Label>
+                      <Select 
+                        value={duration} 
+                        onValueChange={setDuration}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="4s">4 seconds</SelectItem>
+                          <SelectItem value="6s">6 seconds</SelectItem>
                           <SelectItem value="8s">8 seconds</SelectItem>
-                        ) : (
-                          <>
-                            <SelectItem value="4s">4 seconds</SelectItem>
-                            <SelectItem value="6s">6 seconds</SelectItem>
-                            <SelectItem value="8s">8 seconds</SelectItem>
-                          </>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between space-x-2 py-2">
