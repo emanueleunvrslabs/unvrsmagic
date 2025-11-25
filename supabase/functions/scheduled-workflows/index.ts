@@ -278,7 +278,8 @@ async function runWorkflow(supabase: any, workflow: any, scheduledPostId: string
       title: contentTitle,
       prompt: workflow.prompt_template,
       type: workflow.content_type,
-      status: "generating"
+      status: "generating",
+      metadata: { workflow_id: workflow.id }
     })
     .select()
     .single();

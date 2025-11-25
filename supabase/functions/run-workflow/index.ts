@@ -75,7 +75,8 @@ serve(async (req) => {
         title: contentTitle,
         prompt: workflow.prompt_template,
         type: workflow.content_type,
-        status: "generating"
+        status: "generating",
+        metadata: { workflow_id: workflowId }
       })
       .select()
       .single();
