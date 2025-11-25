@@ -2,12 +2,33 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "lucide-react";
-import { useEffect } from "react";
+import { Link, Unlink } from "lucide-react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function Connection() {
+  const queryClient = useQueryClient();
+
+  const { data: instagramConnection, isLoading } = useQuery({
+    queryKey: ['instagram-connection'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('provider', 'instagram')
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const connectInstagram = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -50,14 +71,40 @@ export default function Connection() {
       toast.error("Failed to connect Instagram");
     }
   };
+
+  const disconnectInstagram = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in first");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('api_keys')
+        .delete()
+        .eq('user_id', session.user.id)
+        .eq('provider', 'instagram');
+
+      if (error) throw error;
+
+      toast.success("Instagram disconnected successfully!");
+      queryClient.invalidateQueries({ queryKey: ['instagram-connection'] });
+    } catch (error) {
+      console.error("Error disconnecting Instagram:", error);
+      toast.error("Failed to disconnect Instagram");
+    }
+  };
+
   useEffect(() => {
     // Check if redirected back from OAuth
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
       toast.success("Instagram connected successfully!");
+      queryClient.invalidateQueries({ queryKey: ['instagram-connection'] });
       window.history.replaceState({}, '', '/ai-social/connection');
     }
-  }, []);
+  }, [queryClient]);
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -73,18 +120,36 @@ export default function Connection() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Instagram</CardTitle>
-                <Badge variant="outline">Not Connected</Badge>
+                <Badge variant={instagramConnection ? "default" : "outline"}>
+                  {instagramConnection ? "Connected" : "Not Connected"}
+                </Badge>
               </div>
-              <CardDescription>Connect your Instagram account</CardDescription>
+              <CardDescription>
+                {instagramConnection 
+                  ? `Connected to Instagram Business Account` 
+                  : "Connect your Instagram account"}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button 
-                className="w-full"
-                onClick={connectInstagram}
-              >
-                <Link className="mr-2 h-4 w-4" />
-                Connect Instagram
-              </Button>
+              {instagramConnection ? (
+                <Button 
+                  className="w-full"
+                  variant="outline"
+                  onClick={disconnectInstagram}
+                >
+                  <Unlink className="mr-2 h-4 w-4" />
+                  Disconnect Instagram
+                </Button>
+              ) : (
+                <Button 
+                  className="w-full"
+                  onClick={connectInstagram}
+                  disabled={isLoading}
+                >
+                  <Link className="mr-2 h-4 w-4" />
+                  Connect Instagram
+                </Button>
+              )}
             </CardContent>
           </Card>
 
