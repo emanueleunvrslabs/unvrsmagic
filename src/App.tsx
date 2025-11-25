@@ -24,7 +24,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AiSocialDashboard from "./pages/AiSocial/AiSocialDashboard";
 import GenerateImage from "./pages/AiSocial/GenerateImage";
 import GenerateVideo from "./pages/AiSocial/GenerateVideo";
-import SchedulePost from "./pages/AiSocial/SchedulePost";
+
 import Workflows from "./pages/AiSocial/Workflows";
 import Connection from "./pages/AiSocial/Connection";
 import Wallet from "./pages/Wallet";
@@ -55,7 +55,7 @@ const App = () => (
           <Route path="/ai-social" element={<ProtectedRoute><AiSocialDashboard /></ProtectedRoute>} />
           <Route path="/ai-social/generate-image" element={<ProtectedRoute><GenerateImage /></ProtectedRoute>} />
           <Route path="/ai-social/generate-video" element={<ProtectedRoute><GenerateVideo /></ProtectedRoute>} />
-          <Route path="/ai-social/schedule" element={<ProtectedRoute><SchedulePost /></ProtectedRoute>} />
+          <Route path="/ai-social/schedule" element={<HomeRedirect />} />
           <Route path="/ai-social/workflows" element={<ProtectedRoute><Workflows /></ProtectedRoute>} />
           <Route path="/ai-social/connection" element={<ProtectedRoute><Connection /></ProtectedRoute>} />
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
