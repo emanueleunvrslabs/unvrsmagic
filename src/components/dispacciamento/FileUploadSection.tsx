@@ -680,7 +680,7 @@ export function FileUploadSection() {
                   <input
                     id="anagrafica-input"
                     type="file"
-                    accept=".csv,.xml,.xlsx"
+                    accept=".csv,.xml,.xlsx,.zip"
                     multiple
                     onChange={(e) => {
                       const files = Array.from(e.target.files || []);
