@@ -3,9 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface AgentConfig {
   id: string;
@@ -23,6 +31,7 @@ export function SingleAgentConfig({ agent }: SingleAgentConfigProps) {
   const [prompt, setPrompt] = useState(agent.defaultPrompt);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     loadPrompt();
@@ -77,6 +86,7 @@ export function SingleAgentConfig({ agent }: SingleAgentConfigProps) {
       if (error) throw error;
 
       toast.success("Prompt salvato con successo");
+      setIsDialogOpen(false);
     } catch (error) {
       console.error("Errore salvataggio prompt:", error);
       toast.error("Errore nel salvataggio del prompt");
@@ -96,43 +106,74 @@ export function SingleAgentConfig({ agent }: SingleAgentConfigProps) {
   const IconComponent = agent.icon;
 
   return (
-    <Card>
-      <CardHeader>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <IconComponent className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <CardTitle>{agent.name}</CardTitle>
-            <CardDescription>{agent.description}</CardDescription>
+            <h2 className="text-2xl font-semibold tracking-tight">{agent.name}</h2>
+            <p className="text-muted-foreground">{agent.description}</p>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor={`prompt-${agent.id}`}>Prompt Agente</Label>
-          <Textarea
-            id={`prompt-${agent.id}`}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Inserisci il prompt per questo agente..."
-            className="min-h-[300px] font-mono text-sm"
-          />
-        </div>
-        <Button onClick={handleSave} disabled={saving} className="w-full">
-          {saving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Salvataggio...
-            </>
-          ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Salva Prompt
-            </>
-          )}
-        </Button>
-      </CardContent>
-    </Card>
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">
+              <FileText className="mr-2 h-4 w-4" />
+              Prompt
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Configura Prompt - {agent.name}</DialogTitle>
+              <DialogDescription>
+                Modifica il prompt per personalizzare il comportamento dell'agente
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 overflow-y-auto pr-2">
+              <div className="space-y-2">
+                <Label htmlFor={`prompt-${agent.id}`}>Prompt Agente</Label>
+                <Textarea
+                  id={`prompt-${agent.id}`}
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Inserisci il prompt per questo agente..."
+                  className="min-h-[400px] font-mono text-sm"
+                />
+              </div>
+              <Button onClick={handleSave} disabled={saving} className="w-full">
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvataggio...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Salva Prompt
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Dashboard Agente</CardTitle>
+          <CardDescription>
+            Informazioni e metriche relative alle attività dell'agente
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Questa sezione mostrerà le informazioni specifiche del compito svolto dall'agente.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
