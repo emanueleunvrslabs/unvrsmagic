@@ -2,7 +2,8 @@ import { useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileUploadSection } from "@/components/dispacciamento/FileUploadSection";
-import { JobsMonitor } from "@/components/dispacciamento/JobsMonitor";
+import { JobLauncher } from "@/components/dispacciamento/JobLauncher";
+import { JobMonitor } from "@/components/dispacciamento/JobMonitor";
 import { ResultsDashboard } from "@/components/dispacciamento/ResultsDashboard";
 
 export default function DispacciamentoPage() {
@@ -30,7 +31,8 @@ export default function DispacciamentoPage() {
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-6 mt-6">
-            <JobsMonitor />
+            <JobLauncher />
+            <JobMonitor />
           </TabsContent>
 
           <TabsContent value="results" className="space-y-6 mt-6">
