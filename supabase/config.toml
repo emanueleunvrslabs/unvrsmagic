@@ -2,3 +2,6 @@ project_id = "amvbkkbqkzklrcynpwwm"
 
 [functions.ai-social-generate]
 verify_jwt = true
+
+[functions.instagram-oauth]
+verify_jwt = false
