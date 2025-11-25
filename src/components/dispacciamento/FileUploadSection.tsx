@@ -189,8 +189,36 @@ export function FileUploadSection() {
       return;
     }
 
-    toast.success("Processamento avviato per " + selectedMonth);
-    // TODO: Call edge function to start processing
+    setIsUploading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('dispatch-orchestrator', {
+        body: {
+          dispatchMonth: selectedMonth
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success("Elaborazione avviata in background", {
+        description: "Puoi chiudere questa pagina, il processo continuerà automaticamente"
+      });
+      
+      // Reset form
+      setStep(1);
+      setLettureFiles([]);
+      setLettureUploaded(false);
+      setIpFiles([]);
+      setIpUploaded(false);
+      setAnagraficaFiles([]);
+      setAnagraficaUploaded(false);
+      setSelectedMonth("");
+      
+    } catch (error) {
+      console.error("Error starting processing:", error);
+      toast.error("Errore nell'avvio dell'elaborazione");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -494,10 +522,17 @@ export function FileUploadSection() {
               </Button>
               <Button
                 onClick={handleStartProcessing}
-                disabled={!selectedMonth}
+                disabled={isUploading || !selectedMonth}
                 className="flex-1"
               >
-                Avvia Processamento
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Avvio in corso...
+                  </>
+                ) : (
+                  "Avvia Processamento"
+                )}
               </Button>
             </div>
           </CardContent>
