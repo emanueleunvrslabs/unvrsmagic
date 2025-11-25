@@ -54,7 +54,7 @@ serve(async (req) => {
       throw new Error("Workflow not found");
     }
 
-    console.log("Workflow found:", workflow.name);
+    console.log("Workflow found:", workflow.name, "Type:", workflow.content_type);
 
     // Get Fal API key
     const { data: falKeyData, error: falKeyError } = await supabase
@@ -104,122 +104,27 @@ serve(async (req) => {
 
     // Determine generation parameters
     const scheduleConfig = workflow.schedule_config || {};
-    const mode = scheduleConfig.generation_mode || "text-to-image";
-    const aspectRatio = scheduleConfig.aspect_ratio || "1:1";
-    const resolution = scheduleConfig.resolution || "1K";
-    const outputFormat = scheduleConfig.output_format || "jpeg";
-
-    // Set endpoint based on mode
-    const endpoint = mode === "image-to-image" 
-      ? "fal-ai/nano-banana-pro/edit" 
-      : "fal-ai/nano-banana-pro";
-    const pollingEndpoint = "fal-ai/nano-banana-pro";
-
-    console.log(`Generating image with endpoint ${endpoint}, mode: ${mode}`);
-
-    // Prepare request body
-    const requestBody: any = {
-      prompt: workflow.prompt_template,
-      num_images: 1,
-      output_format: outputFormat,
-      resolution: resolution,
-    };
-
-    if (mode === "image-to-image" && scheduleConfig.image_urls?.length > 0) {
-      requestBody.image_urls = scheduleConfig.image_urls;
-      requestBody.aspect_ratio = aspectRatio || "auto";
+    const isVideo = workflow.content_type === "video";
+    
+    let generatedMediaUrl: string;
+    
+    if (isVideo) {
+      // VIDEO GENERATION using Veo3.1
+      generatedMediaUrl = await generateVideo(FAL_KEY, workflow, scheduleConfig);
     } else {
-      requestBody.aspect_ratio = aspectRatio;
+      // IMAGE GENERATION using Nano Banana
+      generatedMediaUrl = await generateImage(FAL_KEY, workflow, scheduleConfig);
     }
 
-    console.log("Request body:", JSON.stringify(requestBody));
+    console.log("Media generated:", generatedMediaUrl);
 
-    // Call Fal API
-    const response = await fetch(`https://queue.fal.run/${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Key ${FAL_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Fal API error:", response.status, errorText);
-      
-      await supabase
-        .from("ai_social_content")
-        .update({ 
-          status: "failed",
-          error_message: `Fal API generation failed: ${errorText}`
-        })
-        .eq("id", content.id);
-
-      throw new Error(`Fal API generation failed: ${errorText}`);
-    }
-
-    // Get the request ID from the queue response
-    const queueData = await response.json();
-    const requestId = queueData.request_id;
-
-    if (!requestId) {
-      throw new Error("No request_id returned from Fal API");
-    }
-
-    console.log(`Fal request queued with ID: ${requestId}`);
-
-    // Poll for result (in foreground since this is a user-initiated action)
-    let resultData;
-    let attempts = 0;
-    const maxAttempts = 150; // Wait up to 5 minutes
-
-    while (attempts < maxAttempts) {
-      const resultResponse = await fetch(`https://queue.fal.run/${pollingEndpoint}/requests/${requestId}`, {
-        headers: {
-          "Authorization": `Key ${FAL_KEY}`,
-        },
-      });
-
-      console.log(`Poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
-
-      if (resultResponse.status === 200) {
-        resultData = await resultResponse.json();
-        console.log("Got completed result");
-        break;
-      }
-      
-      if (resultResponse.status === 202) {
-        const statusInfo = await resultResponse.json();
-        if (statusInfo.status === "FAILED") {
-          throw new Error(`Generation failed: ${JSON.stringify(statusInfo.error)}`);
-        }
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      attempts++;
-    }
-
-    if (!resultData) {
-      throw new Error("Timeout waiting for generation to complete");
-    }
-
-    // Extract image URL
-    const generatedImageUrl = resultData.images?.[0]?.url;
-
-    if (!generatedImageUrl) {
-      throw new Error("No image URL returned from AI");
-    }
-
-    console.log("Image generated:", generatedImageUrl);
-
-    // Update content record with generated image
+    // Update content record with generated media
     await supabase
       .from("ai_social_content")
       .update({ 
         status: "completed",
-        media_url: generatedImageUrl,
-        thumbnail_url: generatedImageUrl
+        media_url: generatedMediaUrl,
+        thumbnail_url: generatedMediaUrl
       })
       .eq("id", content.id);
 
@@ -232,57 +137,22 @@ serve(async (req) => {
         const accessToken = instagramData.api_key;
         const igUserId = instagramData.owner_id;
 
-        // Step 1: Create media container
-        const containerResponse = await fetch(
-          `https://graph.facebook.com/v19.0/${igUserId}/media`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              image_url: generatedImageUrl,
-              caption: workflow.description || workflow.prompt_template.substring(0, 200) + "...",
-              access_token: accessToken,
-            }),
-          }
-        );
-
-        if (!containerResponse.ok) {
-          const errorText = await containerResponse.text();
-          console.error("Instagram container creation failed:", errorText);
-          instagramPostResult = { error: errorText };
-        } else {
-          const containerData = await containerResponse.json();
-          console.log("Media container created:", containerData.id);
-
-          // Wait a moment for Instagram to process the image
-          await new Promise(resolve => setTimeout(resolve, 5000));
-
-          // Step 2: Publish the media
-          const publishResponse = await fetch(
-            `https://graph.facebook.com/v19.0/${igUserId}/media_publish`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                creation_id: containerData.id,
-                access_token: accessToken,
-              }),
-            }
+        if (isVideo) {
+          // Video publishing to Instagram
+          instagramPostResult = await publishVideoToInstagram(
+            accessToken,
+            igUserId,
+            generatedMediaUrl,
+            workflow.description || workflow.prompt_template.substring(0, 200) + "..."
           );
-
-          if (!publishResponse.ok) {
-            const errorText = await publishResponse.text();
-            console.error("Instagram publish failed:", errorText);
-            instagramPostResult = { error: errorText };
-          } else {
-            const publishData = await publishResponse.json();
-            console.log("Instagram post published:", publishData.id);
-            instagramPostResult = { success: true, postId: publishData.id };
-          }
+        } else {
+          // Image publishing to Instagram
+          instagramPostResult = await publishImageToInstagram(
+            accessToken,
+            igUserId,
+            generatedMediaUrl,
+            workflow.description || workflow.prompt_template.substring(0, 200) + "..."
+          );
         }
       } catch (igError) {
         console.error("Instagram publishing error:", igError);
@@ -300,7 +170,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true,
         contentId: content.id,
-        imageUrl: generatedImageUrl,
+        mediaUrl: generatedMediaUrl,
         instagram: instagramPostResult
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -314,3 +184,365 @@ serve(async (req) => {
     );
   }
 });
+
+// Generate video using Veo3.1
+async function generateVideo(falKey: string, workflow: any, scheduleConfig: any): Promise<string> {
+  const mode = scheduleConfig.generation_mode || "text-to-video";
+  const aspectRatio = scheduleConfig.aspect_ratio || "16:9";
+  const resolution = scheduleConfig.resolution || "720p";
+  const duration = scheduleConfig.duration || "8s";
+  const generateAudio = scheduleConfig.generate_audio ?? true;
+
+  console.log(`Generating video with mode: ${mode}, aspect_ratio: ${aspectRatio}, resolution: ${resolution}, duration: ${duration}`);
+
+  // Determine endpoint based on mode
+  let endpoint = "fal-ai/veo3";
+  const requestBody: any = {
+    prompt: workflow.prompt_template,
+    aspect_ratio: aspectRatio,
+    duration: duration,
+  };
+
+  // Add generate_audio if supported
+  if (mode !== "image-to-video") {
+    requestBody.generate_audio = generateAudio;
+  }
+
+  // Handle different video modes
+  if (mode === "image-to-video" && scheduleConfig.image_urls?.length > 0) {
+    endpoint = "fal-ai/veo3/image-to-video";
+    requestBody.image_url = scheduleConfig.image_urls[0];
+  } else if (mode === "reference-to-video" && scheduleConfig.image_urls?.length > 0) {
+    endpoint = "fal-ai/veo3/reference-to-video";
+    requestBody.reference_image_url = scheduleConfig.image_urls[0];
+    requestBody.duration = "8s"; // Reference mode is always 8s
+  } else if (mode === "first-last-frame-to-video" && scheduleConfig.first_frame_url && scheduleConfig.last_frame_url) {
+    endpoint = "fal-ai/veo3/first-last-frame-to-video";
+    requestBody.first_frame_url = scheduleConfig.first_frame_url;
+    requestBody.last_frame_url = scheduleConfig.last_frame_url;
+  }
+
+  console.log(`Using endpoint: ${endpoint}`);
+  console.log("Request body:", JSON.stringify(requestBody));
+
+  // Call Fal API
+  const response = await fetch(`https://queue.fal.run/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Key ${falKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Fal API error:", response.status, errorText);
+    throw new Error(`Fal API video generation failed: ${errorText}`);
+  }
+
+  const queueData = await response.json();
+  const requestId = queueData.request_id;
+
+  if (!requestId) {
+    throw new Error("No request_id returned from Fal API");
+  }
+
+  console.log(`Fal video request queued with ID: ${requestId}`);
+
+  // Poll for result - videos take longer
+  let resultData;
+  let attempts = 0;
+  const maxAttempts = 300; // Wait up to 10 minutes for video
+
+  // Use base endpoint for polling
+  const baseEndpoint = endpoint.split('/').slice(0, 2).join('/'); // fal-ai/veo3
+
+  while (attempts < maxAttempts) {
+    const resultResponse = await fetch(`https://queue.fal.run/${baseEndpoint}/requests/${requestId}`, {
+      headers: {
+        "Authorization": `Key ${falKey}`,
+      },
+    });
+
+    console.log(`Video poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
+
+    if (resultResponse.status === 200) {
+      resultData = await resultResponse.json();
+      console.log("Got completed video result");
+      break;
+    }
+    
+    if (resultResponse.status === 202) {
+      const statusInfo = await resultResponse.json();
+      console.log("Video status:", statusInfo.status);
+      if (statusInfo.status === "FAILED") {
+        throw new Error(`Video generation failed: ${JSON.stringify(statusInfo.error)}`);
+      }
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    attempts++;
+  }
+
+  if (!resultData) {
+    throw new Error("Timeout waiting for video generation to complete");
+  }
+
+  // Extract video URL
+  const videoUrl = resultData.video?.url;
+
+  if (!videoUrl) {
+    console.error("Unexpected result structure:", JSON.stringify(resultData));
+    throw new Error("No video URL returned from AI");
+  }
+
+  return videoUrl;
+}
+
+// Generate image using Nano Banana
+async function generateImage(falKey: string, workflow: any, scheduleConfig: any): Promise<string> {
+  const mode = scheduleConfig.generation_mode || "text-to-image";
+  const aspectRatio = scheduleConfig.aspect_ratio || "1:1";
+  const resolution = scheduleConfig.resolution || "1K";
+  const outputFormat = scheduleConfig.output_format || "jpeg";
+
+  // Set endpoint based on mode
+  const endpoint = mode === "image-to-image" 
+    ? "fal-ai/nano-banana-pro/edit" 
+    : "fal-ai/nano-banana-pro";
+  const pollingEndpoint = "fal-ai/nano-banana-pro";
+
+  console.log(`Generating image with endpoint ${endpoint}, mode: ${mode}`);
+
+  // Prepare request body
+  const requestBody: any = {
+    prompt: workflow.prompt_template,
+    num_images: 1,
+    output_format: outputFormat,
+    resolution: resolution,
+  };
+
+  if (mode === "image-to-image" && scheduleConfig.image_urls?.length > 0) {
+    requestBody.image_urls = scheduleConfig.image_urls;
+    requestBody.aspect_ratio = aspectRatio || "auto";
+  } else {
+    requestBody.aspect_ratio = aspectRatio;
+  }
+
+  console.log("Request body:", JSON.stringify(requestBody));
+
+  // Call Fal API
+  const response = await fetch(`https://queue.fal.run/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Key ${falKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Fal API error:", response.status, errorText);
+    throw new Error(`Fal API image generation failed: ${errorText}`);
+  }
+
+  const queueData = await response.json();
+  const requestId = queueData.request_id;
+
+  if (!requestId) {
+    throw new Error("No request_id returned from Fal API");
+  }
+
+  console.log(`Fal image request queued with ID: ${requestId}`);
+
+  // Poll for result
+  let resultData;
+  let attempts = 0;
+  const maxAttempts = 150; // Wait up to 5 minutes
+
+  while (attempts < maxAttempts) {
+    const resultResponse = await fetch(`https://queue.fal.run/${pollingEndpoint}/requests/${requestId}`, {
+      headers: {
+        "Authorization": `Key ${falKey}`,
+      },
+    });
+
+    console.log(`Image poll attempt ${attempts + 1}, status: ${resultResponse.status}`);
+
+    if (resultResponse.status === 200) {
+      resultData = await resultResponse.json();
+      console.log("Got completed image result");
+      break;
+    }
+    
+    if (resultResponse.status === 202) {
+      const statusInfo = await resultResponse.json();
+      if (statusInfo.status === "FAILED") {
+        throw new Error(`Image generation failed: ${JSON.stringify(statusInfo.error)}`);
+      }
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    attempts++;
+  }
+
+  if (!resultData) {
+    throw new Error("Timeout waiting for image generation to complete");
+  }
+
+  // Extract image URL
+  const imageUrl = resultData.images?.[0]?.url;
+
+  if (!imageUrl) {
+    throw new Error("No image URL returned from AI");
+  }
+
+  return imageUrl;
+}
+
+// Publish image to Instagram
+async function publishImageToInstagram(accessToken: string, igUserId: string, imageUrl: string, caption: string) {
+  // Step 1: Create media container
+  const containerResponse = await fetch(
+    `https://graph.facebook.com/v19.0/${igUserId}/media`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        image_url: imageUrl,
+        caption: caption,
+        access_token: accessToken,
+      }),
+    }
+  );
+
+  if (!containerResponse.ok) {
+    const errorText = await containerResponse.text();
+    console.error("Instagram container creation failed:", errorText);
+    return { error: errorText };
+  }
+
+  const containerData = await containerResponse.json();
+  console.log("Media container created:", containerData.id);
+
+  // Wait a moment for Instagram to process the image
+  await new Promise(resolve => setTimeout(resolve, 5000));
+
+  // Step 2: Publish the media
+  const publishResponse = await fetch(
+    `https://graph.facebook.com/v19.0/${igUserId}/media_publish`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        creation_id: containerData.id,
+        access_token: accessToken,
+      }),
+    }
+  );
+
+  if (!publishResponse.ok) {
+    const errorText = await publishResponse.text();
+    console.error("Instagram publish failed:", errorText);
+    return { error: errorText };
+  }
+
+  const publishData = await publishResponse.json();
+  console.log("Instagram post published:", publishData.id);
+  return { success: true, postId: publishData.id };
+}
+
+// Publish video to Instagram (Reels)
+async function publishVideoToInstagram(accessToken: string, igUserId: string, videoUrl: string, caption: string) {
+  console.log("Creating video container for Instagram Reels...");
+  
+  // Step 1: Create video container for Reels
+  const containerResponse = await fetch(
+    `https://graph.facebook.com/v19.0/${igUserId}/media`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        video_url: videoUrl,
+        caption: caption,
+        media_type: "REELS",
+        access_token: accessToken,
+      }),
+    }
+  );
+
+  if (!containerResponse.ok) {
+    const errorText = await containerResponse.text();
+    console.error("Instagram video container creation failed:", errorText);
+    return { error: errorText };
+  }
+
+  const containerData = await containerResponse.json();
+  console.log("Video container created:", containerData.id);
+
+  // Wait longer for Instagram to process the video
+  console.log("Waiting for video processing...");
+  
+  // Poll for container status
+  let containerReady = false;
+  let pollAttempts = 0;
+  const maxPollAttempts = 60; // Up to 5 minutes
+
+  while (!containerReady && pollAttempts < maxPollAttempts) {
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
+    const statusResponse = await fetch(
+      `https://graph.facebook.com/v19.0/${containerData.id}?fields=status_code&access_token=${accessToken}`
+    );
+    
+    if (statusResponse.ok) {
+      const statusData = await statusResponse.json();
+      console.log("Container status:", statusData.status_code);
+      
+      if (statusData.status_code === "FINISHED") {
+        containerReady = true;
+      } else if (statusData.status_code === "ERROR") {
+        return { error: "Video processing failed on Instagram" };
+      }
+    }
+    
+    pollAttempts++;
+  }
+
+  if (!containerReady) {
+    return { error: "Timeout waiting for video processing" };
+  }
+
+  // Step 2: Publish the video
+  const publishResponse = await fetch(
+    `https://graph.facebook.com/v19.0/${igUserId}/media_publish`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        creation_id: containerData.id,
+        access_token: accessToken,
+      }),
+    }
+  );
+
+  if (!publishResponse.ok) {
+    const errorText = await publishResponse.text();
+    console.error("Instagram video publish failed:", errorText);
+    return { error: errorText };
+  }
+
+  const publishData = await publishResponse.json();
+  console.log("Instagram Reel published:", publishData.id);
+  return { success: true, postId: publishData.id };
+}
