@@ -67,8 +67,14 @@ Deno.serve(async (req) => {
         )
       }
 
+      // Get the origin from the request to redirect back to the correct app URL
+      const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || ''
+      
+      // Encode both userId and origin in state (separated by |)
+      const stateData = `${userId}|${origin}`
+
        // For Instagram Graph API (publishing capability), use Facebook Login endpoint
-       const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement&response_type=code&state=${userId}`
+       const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement&response_type=code&state=${encodeURIComponent(stateData)}`
       console.log('Redirecting to Instagram auth URL')
 
       return new Response(
@@ -89,6 +95,9 @@ Deno.serve(async (req) => {
         )
       }
 
+      // Decode state to get userId and origin
+      const [userId, appOrigin] = decodeURIComponent(state).split('|')
+
       // Exchange code for Facebook access token
       const tokenResponse = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`)
 
@@ -102,7 +111,7 @@ Deno.serve(async (req) => {
       }
 
       const tokenData = await tokenResponse.json()
-      console.log('Facebook token received for user (state):', state)
+      console.log('Facebook token received for user (state):', userId)
 
       // Get user's Facebook pages
       const pagesResponse = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${tokenData.access_token}`)
@@ -146,7 +155,7 @@ Deno.serve(async (req) => {
         const { error: saveError } = await supabaseClient
           .from('api_keys')
           .upsert({
-            user_id: state,
+            user_id: userId,
             provider: 'instagram',
             api_key: pageAccessToken,
             owner_id: instagramAccountId,
@@ -169,9 +178,8 @@ Deno.serve(async (req) => {
       }
 
       // Redirect back to app with success
-      const projectId = Deno.env.get('SUPABASE_URL')?.split('//')[1]?.split('.')[0] || ''
-      const appUrl = `https://${projectId}.lovableproject.com`
-      return Response.redirect(`${appUrl}/ai-social/connection?success=true`, 302)
+      const redirectUrl = appOrigin || 'https://amvbkkbqkzklrcynpwwm.lovableproject.com'
+      return Response.redirect(`${redirectUrl}/ai-social/connection?success=true`, 302)
     }
 
     return new Response(
