@@ -20,6 +20,7 @@ interface ContentItem {
   thumbnail_url: string | null;
   prompt: string;
   created_at: string;
+  metadata: Record<string, any> | null;
 }
 
 export function ContentGallerySection() {
@@ -72,7 +73,7 @@ export function ContentGallerySection() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setContent(data || []);
+      setContent(data as ContentItem[] || []);
     } catch (error) {
       console.error("Error loading content:", error);
       toast.error("Failed to load content");
@@ -210,12 +211,17 @@ export function ContentGallerySection() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <video
-                          src={`${item.media_url}#t=0.1`}
-                          className="w-full h-full object-cover"
-                          preload="metadata"
-                          muted
-                        />
+                        <>
+                          <video
+                            src={`${item.media_url}#t=0.1`}
+                            className="w-full h-full object-cover"
+                            preload="metadata"
+                            muted
+                          />
+                          <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm rounded text-xs font-medium text-white">
+                            {item.metadata?.duration || "0:00"}
+                          </div>
+                        </>
                       )}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Button
