@@ -28,7 +28,7 @@ async function sendInvoiceEmail(
   });
 
   const emailResponse = await resend.emails.send({
-    from: "UNVRS Magic AI <noreply@resend.dev>",
+    from: "UNVRS Magic AI <noreply@unvrslabs.dev>",
     to: [customerEmail],
     subject: `Ricevuta acquisto crediti - ${creditAmount} crediti`,
     html: `
