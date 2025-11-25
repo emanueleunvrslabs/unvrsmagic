@@ -173,29 +173,30 @@ export default function Workflows() {
     }
   };
 
+  // Helper function to read file as base64 data URL
+  const readFileAsDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFirstFrameUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
     setIsUploading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${session.user.id}/${Date.now()}-first-frame.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('ai-social-uploads')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('ai-social-uploads')
-        .getPublicUrl(fileName);
-
-      setFirstFrameImage(publicUrl);
+      // Use base64 data URL directly (like GenerateImage page)
+      const dataUrl = await readFileAsDataUrl(file);
+      setFirstFrameImage(dataUrl);
       toast.success("First frame uploaded");
     } catch (error) {
       console.error("Error uploading first frame:", error);
@@ -212,25 +213,16 @@ export default function Workflows() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
     setIsUploading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${session.user.id}/${Date.now()}-last-frame.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('ai-social-uploads')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('ai-social-uploads')
-        .getPublicUrl(fileName);
-
-      setLastFrameImage(publicUrl);
+      // Use base64 data URL directly (like GenerateImage page)
+      const dataUrl = await readFileAsDataUrl(file);
+      setLastFrameImage(dataUrl);
       toast.success("Last frame uploaded");
     } catch (error) {
       console.error("Error uploading last frame:", error);
@@ -249,9 +241,6 @@ export default function Workflows() {
 
     setIsUploading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
       const newImageUrls: string[] = [];
 
       for (const file of Array.from(files)) {
@@ -260,20 +249,9 @@ export default function Workflows() {
           continue;
         }
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('ai-social-uploads')
-          .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('ai-social-uploads')
-          .getPublicUrl(fileName);
-
-        newImageUrls.push(publicUrl);
+        // Use base64 data URL directly (like GenerateImage page)
+        const dataUrl = await readFileAsDataUrl(file);
+        newImageUrls.push(dataUrl);
       }
 
       setUploadedImages(prev => [...prev, ...newImageUrls]);
