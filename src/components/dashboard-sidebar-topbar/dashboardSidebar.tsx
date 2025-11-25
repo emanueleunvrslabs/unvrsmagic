@@ -489,7 +489,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                             <CollapsibleTrigger asChild>
                               <Button
                                 variant={isParentActive ? "secondary" : "ghost"}
-                                className="w-full justify-between px-4"
+                                className="w-full justify-between px-4 rounded-lg"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   toggleSubmenu(item.id);
@@ -510,7 +510,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                                   <Button
                                     key={subItem.id}
                                     variant={isSubActive ? "secondary" : "ghost"}
-                                    className="w-full justify-start"
+                                    className="w-full justify-start rounded-lg"
                                     onClick={() => setActiveItem(subItem.id)}
                                     asChild={!!subItem.href}
                                   >
@@ -556,7 +556,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                             <TooltipTrigger asChild>
                               <Button
                                 variant={isParentActive ? "secondary" : "ghost"}
-                                className="w-full justify-start px-2"
+                                className="w-full justify-start px-2 rounded-lg"
                                 onClick={() => setActiveItem(item.id)}
                                 onMouseEnter={(e) => handleSubmenuHover(item, e.currentTarget)}
                                 onMouseLeave={handleSubmenuLeave}
@@ -577,14 +577,14 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                       <Tooltip key={item.id}>
                         <TooltipTrigger asChild>
                           {item.href ? (
-                            <Button variant={isActive ? "secondary" : "ghost"} className={cn("w-full justify-start", collapsed ? "px-2 justify-center" : "px-4")} asChild>
+                            <Button variant={isActive ? "secondary" : "ghost"} className={cn("w-full justify-start rounded-lg", collapsed ? "px-2 justify-center" : "px-4")} asChild>
                               <Link to={item.href}>
                                 <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
                                 {!collapsed && <span>{item.label}</span>}
                               </Link>
                             </Button>
                           ) : (
-                            <Button variant={isActive ? "secondary" : "ghost"} className={cn("w-full justify-start", collapsed ? "px-2" : "px-2")} onClick={() => setActiveItem(item.id)}>
+                            <Button variant={isActive ? "secondary" : "ghost"} className={cn("w-full justify-start rounded-lg", collapsed ? "px-2" : "px-2")} onClick={() => setActiveItem(item.id)}>
                               <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
                               {!collapsed && <span>{item.label}</span>}
                             </Button>
@@ -616,14 +616,14 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                     <Tooltip key={item.id}>
                       <TooltipTrigger asChild>
                         {'href' in item && item.href ? (
-                          <Button variant="ghost" className={cn("w-full justify-start", collapsed ? "px-2" : "px-2")} asChild>
+                          <Button variant="ghost" className={cn("w-full justify-start rounded-lg", collapsed ? "px-2" : "px-2")} asChild>
                             <Link to={item.href}>
                               <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
                               {!collapsed && <span>{item.label}</span>}
                             </Link>
                           </Button>
                         ) : (
-                          <Button variant="ghost" className={cn("w-full justify-start", collapsed ? "px-2" : "px-2")} onClick={() => setActiveItem(item.id)}>
+                          <Button variant="ghost" className={cn("w-full justify-start rounded-lg", collapsed ? "px-2" : "px-2")} onClick={() => setActiveItem(item.id)}>
                             <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
                             {!collapsed && <span>{item.label}</span>}
                           </Button>
