@@ -71,7 +71,8 @@ Deno.serve(async (req) => {
         )
       }
 
-      const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${userId}`
+       // For Instagram Graph API (publishing capability), use different endpoint and scopes
+       const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_content_publish,pages_read_engagement&response_type=code&state=${userId}`
       console.log('Redirecting to Instagram auth URL')
 
       return new Response(
