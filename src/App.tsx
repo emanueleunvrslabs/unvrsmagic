@@ -11,7 +11,6 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AiBot from "./pages/AiBot";
 import StrategiesMarketplace from "./pages/StrategiesMarketplace";
-import BotTemplates from "./pages/BotTemplates";
 import Settings from "./pages/Settings";
 import Subscription from "./pages/Subscription";
 import Auth from "./pages/Auth";
@@ -62,8 +61,8 @@ const App = () => (
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
-          <Route path="/bot-templates" element={<ProtectedRoute><BotTemplates /></ProtectedRoute>} />
           {/* Redirects for removed pages */}
+          <Route path="/bot-templates" element={<HomeRedirect />} />
           <Route path="/overview" element={<HomeRedirect />} />
           <Route path="/my-assets" element={<HomeRedirect />} />
           <Route path="/my-analytics" element={<HomeRedirect />} />
