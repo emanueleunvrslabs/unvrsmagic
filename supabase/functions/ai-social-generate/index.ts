@@ -122,10 +122,10 @@ serve(async (req) => {
         
         // Add first and last frame images
         if (firstFrameImage) {
-          requestBody.first_frame_image_url = firstFrameImage;
+          requestBody.first_frame_url = firstFrameImage;
         }
         if (lastFrameImage) {
-          requestBody.last_frame_image_url = lastFrameImage;
+          requestBody.last_frame_url = lastFrameImage;
         }
       } else if (mode === "reference-to-video") {
         // Reference to video only supports duration "8s" and doesn't use aspect_ratio
