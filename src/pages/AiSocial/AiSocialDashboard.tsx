@@ -5,6 +5,8 @@ import { Image, Video, Calendar, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ImageGallerySection } from "@/components/ai-social/ImageGallerySection";
+import { VideoGallerySection } from "@/components/ai-social/VideoGallerySection";
 
 export default function AiSocialDashboard() {
   const navigate = useNavigate();
@@ -219,20 +221,9 @@ export default function AiSocialDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="content">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Content</CardTitle>
-                <CardDescription>
-                  Manage AI-generated images and videos
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  No content yet. Start creating!
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="content" className="space-y-8">
+            <ImageGallerySection />
+            <VideoGallerySection />
           </TabsContent>
 
           <TabsContent value="scheduled">
