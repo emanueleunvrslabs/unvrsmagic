@@ -140,7 +140,7 @@ async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: s
     const accessToken = instagramData.api_key;
     const igUserId = instagramData.owner_id;
     const isVideo = workflow.content_type === "video";
-    const caption = workflow.description || workflow.prompt_template.substring(0, 200) + "...";
+    const caption = ""; // No caption for Instagram posts
 
     console.log(`Publishing ${isVideo ? 'video' : 'image'} to Instagram...`);
 
