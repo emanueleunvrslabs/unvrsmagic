@@ -402,6 +402,50 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_transactions: {
+        Row: {
+          amount: number
+          content_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          stripe_payment_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          content_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          stripe_payment_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          content_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          stripe_payment_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "ai_social_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dispatch_agents_state: {
         Row: {
           agent_name: string
@@ -1013,6 +1057,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_credits: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          total_purchased: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          total_purchased?: number
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          total_purchased?: number
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_projects: {
         Row: {
           added_at: string | null
@@ -1068,7 +1142,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_credits: {
+        Args: {
+          p_amount: number
+          p_stripe_payment_id: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       cleanup_expired_otps: { Args: never; Returns: undefined }
+      deduct_credits: {
+        Args: {
+          p_amount: number
+          p_content_id?: string
+          p_description: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
