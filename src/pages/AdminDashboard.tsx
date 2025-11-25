@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { it } from "date-fns/locale";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const AdminDashboard = () => {
   // Fetch total projects count
@@ -112,6 +113,45 @@ const AdminDashboard = () => {
       
       if (error) throw error;
       return data || [];
+    }
+  });
+
+  // Fetch monthly spending data for chart
+  const { data: monthlySpending, isLoading: loadingMonthly } = useQuery({
+    queryKey: ['admin-monthly-spending'],
+    queryFn: async () => {
+      const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5));
+      
+      const { data, error } = await supabase
+        .from('credit_transactions')
+        .select('amount, created_at')
+        .lt('amount', 0)
+        .gte('created_at', sixMonthsAgo.toISOString());
+      
+      if (error) throw error;
+      
+      // Group by month
+      const monthlyData: Record<string, number> = {};
+      
+      // Initialize last 6 months
+      for (let i = 5; i >= 0; i--) {
+        const month = subMonths(new Date(), i);
+        const key = format(month, 'MMM yyyy', { locale: it });
+        monthlyData[key] = 0;
+      }
+      
+      // Sum spending per month
+      data?.forEach(tx => {
+        const month = format(new Date(tx.created_at), 'MMM yyyy', { locale: it });
+        if (monthlyData[month] !== undefined) {
+          monthlyData[month] += Math.abs(Number(tx.amount));
+        }
+      });
+      
+      return Object.entries(monthlyData).map(([month, amount]) => ({
+        month,
+        amount: Number(amount.toFixed(2))
+      }));
     }
   });
 
@@ -276,6 +316,57 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Monthly Spending Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Credits Spent per Month</CardTitle>
+            <CardDescription>Last 6 months spending overview</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingMonthly ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : monthlySpending && monthlySpending.length > 0 ? (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlySpending}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 12 }}
+                      className="text-muted-foreground"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      className="text-muted-foreground"
+                      tickFormatter={(value) => `€${value}`}
+                    />
+                    <Tooltip 
+                      formatter={(value: number) => [`€${value.toFixed(2)}`, 'Spent']}
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <Bar 
+                      dataKey="amount" 
+                      fill="hsl(var(--primary))" 
+                      radius={[4, 4, 0, 0]}
+                      fillOpacity={0.6}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No spending data available
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent Transactions Table */}
         <Card>
