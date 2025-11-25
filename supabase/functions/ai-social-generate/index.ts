@@ -47,6 +47,40 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
+    // Check and deduct credits before generation
+    const creditCost = type === "video" ? 10 : 1;
+    const { data: credits } = await supabase
+      .from("user_credits")
+      .select("balance")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const currentBalance = credits?.balance || 0;
+    if (currentBalance < creditCost) {
+      return new Response(
+        JSON.stringify({ error: `Crediti insufficienti. Necessari: €${creditCost}, Disponibili: €${currentBalance.toFixed(2)}` }),
+        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Deduct credits
+    const { data: deductResult, error: deductError } = await supabase.rpc("deduct_credits", {
+      p_user_id: user.id,
+      p_amount: creditCost,
+      p_description: `${type === "video" ? "Video" : "Image"} generation`,
+      p_content_id: contentId
+    });
+
+    if (deductError || !deductResult) {
+      console.error("Failed to deduct credits:", deductError);
+      return new Response(
+        JSON.stringify({ error: "Impossibile dedurre i crediti" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`Deducted ${creditCost} credits for ${type} generation`);
+
     // Get Fal API key from database
     console.log("Looking up Fal API key for user:", user.id);
     const { data: apiKeyData, error: apiKeyError } = await supabase

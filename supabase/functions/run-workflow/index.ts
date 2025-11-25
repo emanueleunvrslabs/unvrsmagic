@@ -100,6 +100,34 @@ serve(async (req) => {
 
     console.log("Workflow found:", workflow.name, "Type:", workflow.content_type);
 
+    // Check and deduct credits before generation
+    const creditCost = workflow.content_type === "video" ? 10 : 1;
+    const { data: credits } = await supabase
+      .from("user_credits")
+      .select("balance")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const currentBalance = credits?.balance || 0;
+    if (currentBalance < creditCost) {
+      throw new Error(`Crediti insufficienti. Necessari: €${creditCost}, Disponibili: €${currentBalance.toFixed(2)}`);
+    }
+
+    // Deduct credits
+    const { data: deductResult, error: deductError } = await supabase.rpc("deduct_credits", {
+      p_user_id: user.id,
+      p_amount: creditCost,
+      p_description: `${workflow.content_type === "video" ? "Video" : "Image"} generation - ${workflow.name}`,
+      p_content_id: null
+    });
+
+    if (deductError || !deductResult) {
+      console.error("Failed to deduct credits:", deductError);
+      throw new Error("Impossibile dedurre i crediti");
+    }
+
+    console.log(`Deducted ${creditCost} credits for ${workflow.content_type} generation`);
+
     const { data: falKeyData } = await supabase
       .from("api_keys")
       .select("api_key")

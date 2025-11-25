@@ -94,7 +94,7 @@ export default function GenerateImage() {
       if (createError) throw createError;
 
       // Call edge function to start generation (non-blocking)
-      supabase.functions.invoke("ai-social-generate", {
+      const { data: invokeData, error: invokeError } = await supabase.functions.invoke("ai-social-generate", {
         body: {
           contentId: content.id,
           type: "image",
@@ -105,13 +105,28 @@ export default function GenerateImage() {
           resolution,
           outputFormat
         }
-      }).then(({ error }) => {
-        if (error) {
-          console.error("Error starting image generation:", error);
-        }
       });
 
-      toast.success("Image generation started! You can navigate away, it will continue in background.");
+      if (invokeError) {
+        console.error("Error starting image generation:", invokeError);
+        // Check if it's a credit error
+        if (invokeError.message?.includes("Crediti insufficienti") || invokeData?.error?.includes("Crediti insufficienti")) {
+          toast.error(invokeData?.error || "Crediti insufficienti. Acquista crediti nel Wallet.");
+          // Delete the pending content record
+          await supabase.from("ai_social_content").delete().eq("id", content.id);
+          return;
+        }
+        toast.error(invokeData?.error || "Failed to start image generation");
+        return;
+      }
+
+      if (invokeData?.error) {
+        toast.error(invokeData.error);
+        await supabase.from("ai_social_content").delete().eq("id", content.id);
+        return;
+      }
+
+      toast.success("Image generation started (€1 deducted)! You can navigate away, it will continue in background.");
       
     } catch (error) {
       console.error("Error generating image:", error);
