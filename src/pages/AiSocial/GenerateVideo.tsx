@@ -19,23 +19,37 @@ export default function GenerateVideo() {
   const [duration, setDuration] = useState("6s");
   const [loading, setLoading] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
+  const [inputImages, setInputImages] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImageUrl(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setInputImages(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
     
     // Reset file input after reading
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleAddUrl = () => {
+    if (imageUrl.trim()) {
+      setInputImages(prev => [...prev, imageUrl.trim()]);
+      setImageUrl("");
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setInputImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleGenerate = async () => {
@@ -44,8 +58,8 @@ export default function GenerateVideo() {
       return;
     }
 
-    if (mode === "image-to-video" && !imageUrl) {
-      toast.error("Please provide an image URL for image-to-video mode");
+    if (mode === "image-to-video" && inputImages.length === 0) {
+      toast.error("Please upload at least one input image for image-to-video mode");
       return;
     }
 
@@ -74,7 +88,7 @@ export default function GenerateVideo() {
           type: "video",
           prompt,
           mode,
-          imageUrl: mode === "image-to-video" ? imageUrl : undefined,
+          inputImages: mode === "image-to-video" ? inputImages : undefined,
           aspectRatio,
           resolution,
           duration
@@ -129,45 +143,66 @@ export default function GenerateVideo() {
               {mode === "image-to-video" && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="input-image">Upload Image</Label>
+                    <Label htmlFor="input-image">Upload Images</Label>
                     <Input
                       id="input-image"
                       ref={fileInputRef}
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleFileUpload}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="image-url">Or Add Image from URL</Label>
-                    <Input
-                      id="image-url"
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                    />
+                    <Label htmlFor="image-url">Add Image from URL</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="image-url"
+                        type="url"
+                        placeholder="https://example.com/image.jpg"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddUrl();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddUrl}
+                        disabled={!imageUrl.trim()}
+                      >
+                        Add
+                      </Button>
+                    </div>
                   </div>
 
-                  {imageUrl && (
+                  {inputImages.length > 0 && (
                     <div className="space-y-2">
-                      <Label>Selected Image</Label>
-                      <div className="relative">
-                        <img 
-                          src={imageUrl} 
-                          alt="Input"
-                          className="w-full rounded-lg aspect-video object-cover"
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          className="absolute top-2 right-2"
-                          onClick={() => setImageUrl("")}
-                        >
-                          Remove
-                        </Button>
+                      <Label>Uploaded Images ({inputImages.length})</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {inputImages.map((img, index) => (
+                          <div key={index} className="relative group">
+                            <img 
+                              src={img} 
+                              alt={`Input ${index + 1}`}
+                              className="w-full rounded-lg aspect-video object-cover"
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}

@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contentId, type, prompt, mode, inputImages, imageUrl, aspectRatio, resolution, outputFormat, duration } = await req.json();
+    const { contentId, type, prompt, mode, inputImages, aspectRatio, resolution, outputFormat, duration } = await req.json();
 
     if (!contentId || !type || !prompt) {
       return new Response(
@@ -112,9 +112,9 @@ serve(async (req) => {
         requestBody.duration = duration; // Already in correct format from UI
       }
       
-      // Add image_url for image-to-video mode
-      if (mode === "image-to-video" && imageUrl) {
-        requestBody.image_url = imageUrl;
+      // Add image_url for image-to-video mode (use first image)
+      if (mode === "image-to-video" && inputImages && inputImages.length > 0) {
+        requestBody.image_url = inputImages[0];
       }
     } else {
       // Image generation parameters
