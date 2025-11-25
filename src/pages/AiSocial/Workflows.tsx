@@ -591,9 +591,14 @@ export default function Workflows() {
       // Brief OpenAI stage (prompt preparation - quick)
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Move to Nano stage when starting image generation
+      // Move to generation stage when starting content generation
       setRunningStage("nano");
-      toast.info("Generating image...", { description: "Nano Banana is creating your image (30-60s)..." });
+      const isVideo = workflow.content_type === "video";
+      if (isVideo) {
+        toast.info("Generating video...", { description: "Veo3 is creating your video (60-120s)..." });
+      } else {
+        toast.info("Generating image...", { description: "Nano Banana is creating your image (30-60s)..." });
+      }
 
       // Start polling for content status to track real progress
       const pollForContent = async (): Promise<void> => {
@@ -656,8 +661,8 @@ export default function Workflows() {
           description: "Content generated and published to Instagram!" 
         });
       } else if (data?.instagram?.error) {
-        toast.success("Image generated!", { 
-          description: `Image created but Instagram failed: ${data.instagram.error}` 
+        toast.success(isVideo ? "Video generated!" : "Image generated!", { 
+          description: `${isVideo ? 'Video' : 'Image'} created but Instagram failed: ${data.instagram.error}` 
         });
       } else {
         toast.success("Workflow completed!", { 
