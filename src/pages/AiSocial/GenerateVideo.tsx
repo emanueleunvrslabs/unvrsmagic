@@ -136,7 +136,7 @@ export default function GenerateVideo() {
       if (createError) throw createError;
 
       // Call edge function to start generation (non-blocking)
-      supabase.functions.invoke("ai-social-generate", {
+      const { data: invokeData, error: invokeError } = await supabase.functions.invoke("ai-social-generate", {
         body: {
           contentId: content.id,
           type: "video",
@@ -150,13 +150,28 @@ export default function GenerateVideo() {
           duration: mode === "reference-to-video" ? "8s" : duration,
           generateAudio
         }
-      }).then(({ error }) => {
-        if (error) {
-          console.error("Error starting video generation:", error);
-        }
       });
 
-      toast.success("Video generation started! You can navigate away, it will continue in background.");
+      if (invokeError) {
+        console.error("Error starting video generation:", invokeError);
+        // Check if it's a credit error
+        if (invokeError.message?.includes("Crediti insufficienti") || invokeData?.error?.includes("Crediti insufficienti")) {
+          toast.error(invokeData?.error || "Crediti insufficienti. Acquista crediti nel Wallet.");
+          // Delete the pending content record
+          await supabase.from("ai_social_content").delete().eq("id", content.id);
+          return;
+        }
+        toast.error(invokeData?.error || "Failed to start video generation");
+        return;
+      }
+
+      if (invokeData?.error) {
+        toast.error(invokeData.error);
+        await supabase.from("ai_social_content").delete().eq("id", content.id);
+        return;
+      }
+
+      toast.success("Video generation started (€10 deducted)! You can navigate away, it will continue in background.");
       
     } catch (error) {
       console.error("Error generating video:", error);
