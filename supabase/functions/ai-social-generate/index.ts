@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contentId, type, prompt, mode, inputImages, aspectRatio, resolution, outputFormat } = await req.json();
+    const { contentId, type, prompt, mode, inputImages, aspectRatio, resolution, outputFormat, duration } = await req.json();
 
     if (!contentId || !type || !prompt) {
       return new Response(
@@ -75,34 +75,49 @@ serve(async (req) => {
       .update({ status: "generating" })
       .eq("id", contentId);
 
-    // Determine the endpoint based on mode
-    const endpoint = mode === "image-to-image" 
-      ? "fal-ai/nano-banana-pro/edit" 
-      : "fal-ai/nano-banana-pro";
+    // Determine the endpoint based on type and mode
+    let endpoint: string;
+    let baseEndpoint: string;
     
-    // For status checking, use base endpoint without subpath
-    const baseEndpoint = "fal-ai/nano-banana-pro";
+    if (type === "video") {
+      // Video generation with Veo3.1
+      endpoint = "fal-ai/veo3.1";
+      baseEndpoint = "fal-ai/veo3.1";
+    } else {
+      // Image generation with Nano Banana Pro
+      endpoint = mode === "image-to-image" 
+        ? "fal-ai/nano-banana-pro/edit" 
+        : "fal-ai/nano-banana-pro";
+      baseEndpoint = "fal-ai/nano-banana-pro";
+    }
 
-    console.log(`Generating ${type} with endpoint ${endpoint}, mode: ${mode}`);
+    console.log(`Generating ${type} with endpoint ${endpoint}, mode: ${mode || 'text-to-video'}`);
 
     // Prepare request body
-    const requestBody: any = {
-      prompt: prompt,
-      num_images: 1,
-      output_format: outputFormat || "png",
-      resolution: resolution || "1K"
+    let requestBody: any = {
+      prompt: prompt
     };
 
-    // Add mode-specific parameters
-    if (mode === "image-to-image") {
-      // For image-to-image, use image_urls array (required parameter)
-      // Can accept multiple images
-      requestBody.image_urls = inputImages;
-      // Include aspect_ratio (defaults to "auto" but can be specified)
-      requestBody.aspect_ratio = aspectRatio || "auto";
+    if (type === "video") {
+      // Veo3.1 video generation parameters
+      requestBody.aspect_ratio = aspectRatio || "16:9";
+      requestBody.resolution = resolution || "720p";
+      if (duration) {
+        requestBody.duration = duration;
+      }
     } else {
-      // For text-to-image, include aspect_ratio
-      requestBody.aspect_ratio = aspectRatio || "1:1";
+      // Image generation parameters
+      requestBody.num_images = 1;
+      requestBody.output_format = outputFormat || "png";
+      requestBody.resolution = resolution || "1K";
+
+      // Add mode-specific parameters for images
+      if (mode === "image-to-image") {
+        requestBody.image_urls = inputImages;
+        requestBody.aspect_ratio = aspectRatio || "auto";
+      } else {
+        requestBody.aspect_ratio = aspectRatio || "1:1";
+      }
     }
 
     console.log("Request body:", JSON.stringify(requestBody));
@@ -193,21 +208,30 @@ serve(async (req) => {
       throw new Error("Timeout waiting for generation to complete");
     }
 
-    // Extract image URL from the result
+    // Extract media URL from the result
     console.log("Result data:", JSON.stringify(resultData));
     
-    // The response structure is { images: [{ url: "...", ... }] }
-    const generatedImageUrl = resultData.images?.[0]?.url;
+    let generatedMediaUrl: string;
+    let thumbnailUrl: string | undefined;
 
-    console.log("Extracted image URL:", generatedImageUrl);
+    if (type === "video") {
+      // Video response structure: { video: { url: "..." } }
+      generatedMediaUrl = resultData.video?.url;
+      console.log("Extracted video URL:", generatedMediaUrl);
+    } else {
+      // Image response structure: { images: [{ url: "..." }] }
+      generatedMediaUrl = resultData.images?.[0]?.url;
+      thumbnailUrl = generatedMediaUrl;
+      console.log("Extracted image URL:", generatedMediaUrl);
+    }
 
-    if (!generatedImageUrl) {
-      console.error("No image URL found in response:", JSON.stringify(resultData));
+    if (!generatedMediaUrl) {
+      console.error("No media URL found in response:", JSON.stringify(resultData));
       await supabase
         .from("ai_social_content")
         .update({ 
           status: "failed",
-          error_message: "No image URL returned from AI"
+          error_message: `No ${type} URL returned from AI`
         })
         .eq("id", contentId);
 
@@ -222,8 +246,8 @@ serve(async (req) => {
       .from("ai_social_content")
       .update({ 
         status: "completed",
-        media_url: generatedImageUrl,
-        thumbnail_url: generatedImageUrl
+        media_url: generatedMediaUrl,
+        thumbnail_url: thumbnailUrl || generatedMediaUrl
       })
       .eq("id", contentId);
 
@@ -235,7 +259,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        mediaUrl: generatedImageUrl
+        mediaUrl: generatedMediaUrl
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
