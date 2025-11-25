@@ -27,6 +27,7 @@ import {
   HelpCircle,
   Image,
   Layers,
+  Truck,
   LayoutDashboard,
   LineChart,
   Menu,
@@ -398,7 +399,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         {
           id: "dispacciamento",
           label: "Dispacciamento",
-          icon: Package,
+          icon: Truck,
           hasSubmenu: true,
           submenuItems: [
             { id: "dispacciamento-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dispacciamento" },
