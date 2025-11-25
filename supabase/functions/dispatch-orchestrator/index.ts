@@ -7,6 +7,202 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// AI Model Configuration per Agent
+const AGENT_MODELS = {
+  'DISPATCH.BRAIN': { provider: 'anthropic', model: 'claude-sonnet-4-5-20250514' },
+  'ANAGRAFICA.INTAKE': { provider: 'openai', model: 'gpt-4.1-2025-04-14' },
+  'IP.ASSIMILATOR': { provider: 'qwen', model: 'qwen-max' },
+  'HISTORY.RESOLVER': { provider: 'anthropic', model: 'claude-sonnet-4-5-20250514' },
+  'LP.PROFILER': { provider: 'qwen', model: 'qwen-max' },
+  'AGG.SCHEDULER': { provider: 'qwen', model: 'qwen-max' },
+  'QA.WATCHDOG': { provider: 'anthropic', model: 'claude-sonnet-4-5-20250514' },
+  'EXPORT.HUB': { provider: 'openai', model: 'gpt-4.1-2025-04-14' },
+} as const;
+
+// Fetch API key for a provider from the database
+async function getApiKey(supabase: any, userId: string, provider: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('api_keys')
+    .select('api_key')
+    .eq('user_id', userId)
+    .eq('provider', provider)
+    .single();
+  
+  if (error || !data) {
+    console.error(`API key not found for provider ${provider}:`, error);
+    return null;
+  }
+  
+  return data.api_key;
+}
+
+// Fetch agent prompt from the database
+async function getAgentPrompt(supabase: any, userId: string, agentId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('agent_prompts')
+    .select('prompt')
+    .eq('user_id', userId)
+    .eq('agent_id', agentId)
+    .single();
+  
+  if (error || !data) {
+    console.log(`No custom prompt found for agent ${agentId}, using default`);
+    return null;
+  }
+  
+  return data.prompt;
+}
+
+// Call Anthropic Claude API
+async function callAnthropic(apiKey: string, model: string, systemPrompt: string, userMessage: string): Promise<string> {
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [
+          { role: 'user', content: userMessage }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Anthropic API error:', response.status, errorText);
+      throw new Error(`Anthropic API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.content?.[0]?.text || '';
+  } catch (error) {
+    console.error('Error calling Anthropic:', error);
+    throw error;
+  }
+}
+
+// Call OpenAI API
+async function callOpenAI(apiKey: string, model: string, systemPrompt: string, userMessage: string): Promise<string> {
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        max_completion_tokens: 4096,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || '';
+  } catch (error) {
+    console.error('Error calling OpenAI:', error);
+    throw error;
+  }
+}
+
+// Call Qwen API (DashScope International)
+async function callQwen(apiKey: string, model: string, systemPrompt: string, userMessage: string): Promise<string> {
+  try {
+    const response = await fetch('https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 4096,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Qwen API error:', response.status, errorText);
+      throw new Error(`Qwen API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || '';
+  } catch (error) {
+    console.error('Error calling Qwen:', error);
+    throw error;
+  }
+}
+
+// Universal AI call function
+async function callAgentAI(
+  supabase: any, 
+  userId: string, 
+  agentName: string, 
+  userMessage: string,
+  defaultPrompt: string
+): Promise<{ response: string; aiUsed: boolean }> {
+  try {
+    const config = AGENT_MODELS[agentName as keyof typeof AGENT_MODELS];
+    if (!config) {
+      console.log(`No AI config for agent ${agentName}, skipping AI call`);
+      return { response: '', aiUsed: false };
+    }
+
+    const apiKey = await getApiKey(supabase, userId, config.provider);
+    if (!apiKey) {
+      console.log(`No API key found for ${config.provider}, skipping AI for ${agentName}`);
+      return { response: '', aiUsed: false };
+    }
+
+    // Get custom prompt or use default
+    const customPrompt = await getAgentPrompt(supabase, userId, agentName);
+    const systemPrompt = customPrompt || defaultPrompt;
+
+    console.log(`Calling AI for ${agentName}: provider=${config.provider}, model=${config.model}`);
+
+    let response: string;
+    switch (config.provider) {
+      case 'anthropic':
+        response = await callAnthropic(apiKey, config.model, systemPrompt, userMessage);
+        break;
+      case 'openai':
+        response = await callOpenAI(apiKey, config.model, systemPrompt, userMessage);
+        break;
+      case 'qwen':
+        response = await callQwen(apiKey, config.model, systemPrompt, userMessage);
+        break;
+      default:
+        return { response: '', aiUsed: false };
+    }
+
+    console.log(`AI response received for ${agentName}: ${response.substring(0, 200)}...`);
+    return { response, aiUsed: true };
+  } catch (error) {
+    console.error(`Error in AI call for ${agentName}:`, error);
+    return { response: '', aiUsed: false };
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -104,7 +300,21 @@ async function orchestrateAgents(
   try {
     console.log('Background orchestration started for job:', jobId, 'zone:', zoneCode);
 
-    await logAgentActivity(supabase, userId, 'DISPATCH.BRAIN', 'info', `Orchestrazione avviata per zona ${zoneCode}`, { jobId, dispatchMonth, zoneCode });
+    // DISPATCH.BRAIN - AI orchestration start
+    const brainDefaultPrompt = `Sei DISPATCH.BRAIN, l'orchestratore centrale del sistema di dispacciamento energetico italiano.
+Il tuo ruolo è coordinare gli altri agenti e gestire il workflow di elaborazione dati per il mese ${dispatchMonth}, zona ${zoneCode}.
+Analizza i dati forniti e coordina le operazioni.`;
+
+    const brainAI = await callAgentAI(
+      supabase, userId, 'DISPATCH.BRAIN',
+      `Avvio orchestrazione per zona ${zoneCode}, mese dispatch: ${dispatchMonth}, mese storico T-12: ${historicalMonth}. Coordina le operazioni.`,
+      brainDefaultPrompt
+    );
+    
+    await logAgentActivity(supabase, userId, 'DISPATCH.BRAIN', 'info', 
+      `Orchestrazione avviata per zona ${zoneCode}${brainAI.aiUsed ? ' (AI attivo)' : ''}`, 
+      { jobId, dispatchMonth, zoneCode, aiUsed: brainAI.aiUsed, aiResponse: brainAI.response?.substring(0, 500) }
+    );
 
     const { data: userFiles, error: filesError } = await supabase
       .from('dispatch_files')
@@ -125,64 +335,190 @@ async function orchestrateAgents(
     const ipDetailFiles = userFiles?.filter((f: any) => f.file_type === 'IP_DETAIL') || [];
     const lettureFiles = userFiles?.filter((f: any) => f.file_type === 'LETTURE') || [];
 
-    // Step 1: ANAGRAFICA.INTAKE (15%)
+    // Step 1: ANAGRAFICA.INTAKE (15%) - OpenAI GPT-5.1
     await updateJobProgress(supabase, jobId, 'ANAGRAFICA.INTAKE', 15);
     await updateAgentState(supabase, jobId, userId, 'ANAGRAFICA.INTAKE', 'running');
     await logAgentActivity(supabase, userId, 'ANAGRAFICA.INTAKE', 'info', `Elaborazione anagrafica POD zona ${zoneCode} (solo tipo O)`, { files: anagraficaFiles.length, zone: zoneCode });
     
     const anagraficaResult = await processAnagraficaStep(supabase, userId, anagraficaFiles, ipDetailFiles, zoneCode, dispatchMonth);
-    await updateAgentState(supabase, jobId, userId, 'ANAGRAFICA.INTAKE', 'completed', anagraficaResult);
-    await logAgentActivity(supabase, userId, 'ANAGRAFICA.INTAKE', 'info', `Anagrafica completata: ${anagraficaResult.total_pods_o} POD orari trovati`, anagraficaResult);
+    
+    // AI analysis for ANAGRAFICA.INTAKE
+    const anagraficaDefaultPrompt = `Sei ANAGRAFICA.INTAKE, agente specializzato nella normalizzazione e validazione dei dati anagrafici dei POD.
+Analizza i risultati dell'elaborazione anagrafica e fornisci insights sulla qualità dei dati.`;
+    
+    const anagraficaAI = await callAgentAI(
+      supabase, userId, 'ANAGRAFICA.INTAKE',
+      `Analisi anagrafica completata per zona ${zoneCode}:
+- POD orari (O) trovati: ${anagraficaResult.total_pods_o}
+- POD non orari (LP): ${anagraficaResult.total_pods_lp}
+- POD IP dedotti: ${anagraficaResult.ip_pods_deducted}
+- File elaborati: ${anagraficaResult.files_processed}
+${anagraficaResult.warnings?.length > 0 ? `- Warning: ${anagraficaResult.warnings.join(', ')}` : ''}
+Fornisci una valutazione della qualità dei dati e suggerimenti.`,
+      anagraficaDefaultPrompt
+    );
+    
+    const anagraficaResultWithAI = { ...anagraficaResult, ai_analysis: anagraficaAI.response, aiUsed: anagraficaAI.aiUsed };
+    await updateAgentState(supabase, jobId, userId, 'ANAGRAFICA.INTAKE', 'completed', anagraficaResultWithAI);
+    await logAgentActivity(supabase, userId, 'ANAGRAFICA.INTAKE', 'info', 
+      `Anagrafica completata: ${anagraficaResult.total_pods_o} POD orari trovati${anagraficaAI.aiUsed ? ' (AI)' : ''}`, 
+      { ...anagraficaResult, aiUsed: anagraficaAI.aiUsed }
+    );
 
-    // Step 2: IP.ASSIMILATOR (30%)
+    // Step 2: IP.ASSIMILATOR (30%) - Qwen3
     await updateJobProgress(supabase, jobId, 'IP.ASSIMILATOR', 30);
     await updateAgentState(supabase, jobId, userId, 'IP.ASSIMILATOR', 'running');
     await logAgentActivity(supabase, userId, 'IP.ASSIMILATOR', 'info', `Elaborazione illuminazione pubblica zona ${zoneCode}`, { files: ipFiles.length });
     
     const ipResult = await processIpStep(supabase, userId, ipFiles, historicalMonth, zoneCode);
-    await updateAgentState(supabase, jobId, userId, 'IP.ASSIMILATOR', 'completed', ipResult);
+    
+    // AI analysis for IP.ASSIMILATOR
+    const ipDefaultPrompt = `Sei IP.ASSIMILATOR, agente specializzato nella costruzione dei profili giornalieri dell'illuminazione pubblica.
+Analizza i dati IP e fornisci insights sulla curva tipica a 96 quarti d'ora.`;
+    
+    const ipAI = await callAgentAI(
+      supabase, userId, 'IP.ASSIMILATOR',
+      `Elaborazione IP completata per zona ${zoneCode}:
+- Giorni elaborati: ${ipResult.days_processed}
+- Consumo IP totale: ${(ipResult.total_ip_consumption || 0).toFixed(2)} kWh
+- File elaborati: ${ipResult.files_processed}
+- Curva media 96 valori (primi 10): ${ipResult.typical_day_curve?.slice(0, 10).map((v: number) => v.toFixed(2)).join(', ')}...
+${ipResult.warnings?.length > 0 ? `- Warning: ${ipResult.warnings.join(', ')}` : ''}
+Analizza la curva IP e identifica pattern o anomalie.`,
+      ipDefaultPrompt
+    );
+    
+    const ipResultWithAI = { ...ipResult, ai_analysis: ipAI.response, aiUsed: ipAI.aiUsed };
+    await updateAgentState(supabase, jobId, userId, 'IP.ASSIMILATOR', 'completed', ipResultWithAI);
     await logAgentActivity(supabase, userId, 'IP.ASSIMILATOR', 'info', 
-      `IP completato: ${ipResult.days_processed || 0} giorni elaborati, consumo totale: ${(ipResult.total_ip_consumption || 0).toFixed(2)}`, 
-      { days: ipResult.days_processed, total: ipResult.total_ip_consumption }
+      `IP completato: ${ipResult.days_processed || 0} giorni elaborati${ipAI.aiUsed ? ' (AI)' : ''}`, 
+      { days: ipResult.days_processed, total: ipResult.total_ip_consumption, aiUsed: ipAI.aiUsed }
     );
 
-    // Step 3: HISTORY.RESOLVER (50%)
+    // Step 3: HISTORY.RESOLVER (50%) - Claude Sonnet 4.5
     await updateJobProgress(supabase, jobId, 'HISTORY.RESOLVER', 50);
     await updateAgentState(supabase, jobId, userId, 'HISTORY.RESOLVER', 'running');
     await logAgentActivity(supabase, userId, 'HISTORY.RESOLVER', 'info', `Elaborazione POD orari (O) zona ${zoneCode} - Parsing letture e incrocio`, { files: lettureFiles.length });
     
     const historyResult = await processHistoryStep(supabase, userId, lettureFiles, dispatchMonth, historicalMonth, zoneCode, anagraficaResult.pod_codes_o);
-    await updateAgentState(supabase, jobId, userId, 'HISTORY.RESOLVER', 'completed', historyResult);
+    
+    // AI analysis for HISTORY.RESOLVER
+    const historyDefaultPrompt = `Sei HISTORY.RESOLVER, agente specializzato nell'applicazione della logica T-12 per POD orari usando dati storici.
+Analizza l'incrocio tra anagrafica e letture e fornisci insights sui POD con/senza dati.`;
+    
+    const historyAI = await callAgentAI(
+      supabase, userId, 'HISTORY.RESOLVER',
+      `Incrocio letture-anagrafica completato per zona ${zoneCode}:
+- POD con dati: ${historyResult.pods_with_data}
+- POD senza dati: ${historyResult.pods_without_data}
+- POD totali in anagrafica (O): ${historyResult.total_pod_o_from_anagrafica}
+- POD unici nelle letture: ${historyResult.unique_pods_in_letture}
+- File elaborati: ${historyResult.files_processed}
+- File saltati: ${historyResult.files_skipped}
+${historyResult.warnings?.length > 0 ? `- Warning: ${historyResult.warnings.slice(0, 5).join(', ')}${historyResult.warnings.length > 5 ? '...' : ''}` : ''}
+Analizza la copertura dati e suggerisci come gestire i POD senza letture.`,
+      historyDefaultPrompt
+    );
+    
+    const historyResultWithAI = { ...historyResult, ai_analysis: historyAI.response, aiUsed: historyAI.aiUsed };
+    await updateAgentState(supabase, jobId, userId, 'HISTORY.RESOLVER', 'completed', historyResultWithAI);
     await logAgentActivity(supabase, userId, 'HISTORY.RESOLVER', 'info', 
-      `Incrocio completato: ${historyResult.pods_with_data} POD con dati, ${historyResult.pods_without_data} senza dati`, 
-      { pods_with_data: historyResult.pods_with_data, pods_without_data: historyResult.pods_without_data }
+      `Incrocio completato: ${historyResult.pods_with_data} POD con dati, ${historyResult.pods_without_data} senza${historyAI.aiUsed ? ' (AI)' : ''}`, 
+      { pods_with_data: historyResult.pods_with_data, pods_without_data: historyResult.pods_without_data, aiUsed: historyAI.aiUsed }
     );
 
-    // Step 4: AGG.SCHEDULER (70%)
+    // Step 4: AGG.SCHEDULER (70%) - Qwen3
     await updateJobProgress(supabase, jobId, 'AGG.SCHEDULER', 70);
     await updateAgentState(supabase, jobId, userId, 'AGG.SCHEDULER', 'running');
     await logAgentActivity(supabase, userId, 'AGG.SCHEDULER', 'info', `Aggregazione curve IP + O zona ${zoneCode}`);
     
-    const aggResult = await processAggStep(supabase, ipResult, historyResult);
-    await updateAgentState(supabase, jobId, userId, 'AGG.SCHEDULER', 'completed', aggResult);
+    const aggResult = await processAggStep(supabase, ipResultWithAI, historyResultWithAI);
+    
+    // AI analysis for AGG.SCHEDULER
+    const aggDefaultPrompt = `Sei AGG.SCHEDULER, agente specializzato nell'aggregazione delle curve IP e O in curva totale a 96 valori.
+Analizza la curva aggregata e verifica la coerenza dei dati.`;
+    
+    const aggAI = await callAgentAI(
+      supabase, userId, 'AGG.SCHEDULER',
+      `Aggregazione completata per zona ${zoneCode}:
+- Consumo IP totale: ${aggResult.breakdown?.ip_total?.toFixed(2) || 0} kWh
+- Consumo O totale: ${aggResult.breakdown?.o_total?.toFixed(2) || 0} kWh
+- Consumo dispatch totale: ${aggResult.dispatch_curve?.reduce((a: number, b: number) => a + b, 0).toFixed(2) || 0} kWh
+- Picco curva: ${Math.max(...(aggResult.dispatch_curve || [0])).toFixed(2)} kWh
+- Minimo curva: ${Math.min(...(aggResult.dispatch_curve || [0])).toFixed(2)} kWh
+Verifica la coerenza dell'aggregazione e identifica eventuali anomalie nella curva finale.`,
+      aggDefaultPrompt
+    );
+    
+    const aggResultWithAI = { ...aggResult, ai_analysis: aggAI.response, aiUsed: aggAI.aiUsed };
+    await updateAgentState(supabase, jobId, userId, 'AGG.SCHEDULER', 'completed', aggResultWithAI);
+    await logAgentActivity(supabase, userId, 'AGG.SCHEDULER', 'info', 
+      `Aggregazione completata${aggAI.aiUsed ? ' (AI)' : ''}`, 
+      { breakdown: aggResult.breakdown, aiUsed: aggAI.aiUsed }
+    );
 
-    // Step 5: QA.WATCHDOG (85%)
+    // Step 5: QA.WATCHDOG (85%) - Claude Sonnet 4.5
     await updateJobProgress(supabase, jobId, 'QA.WATCHDOG', 85);
     await updateAgentState(supabase, jobId, userId, 'QA.WATCHDOG', 'running');
     await logAgentActivity(supabase, userId, 'QA.WATCHDOG', 'info', `Controllo qualità dati zona ${zoneCode}`);
     
-    const qaResult = await processQaStep(supabase, aggResult);
-    await updateAgentState(supabase, jobId, userId, 'QA.WATCHDOG', 'completed', qaResult);
+    const qaResult = await processQaStep(supabase, aggResultWithAI);
+    
+    // AI analysis for QA.WATCHDOG
+    const qaDefaultPrompt = `Sei QA.WATCHDOG, agente specializzato nella validazione della qualità dati e identificazione di anomalie nei profili.
+Esegui controlli approfonditi sulla curva di dispatch e fornisci un report dettagliato.`;
+    
+    const qaAI = await callAgentAI(
+      supabase, userId, 'QA.WATCHDOG',
+      `Controllo qualità per zona ${zoneCode}:
+- Quality score: ${qaResult.quality_score}%
+- Anomalie trovate: ${qaResult.anomalies_found}
+- Validazione: ${qaResult.validation_passed ? 'PASSATA' : 'FALLITA'}
+${qaResult.warnings?.length > 0 ? `- Warning: ${qaResult.warnings.slice(0, 10).join(', ')}${qaResult.warnings.length > 10 ? '...' : ''}` : ''}
+- Curva dispatch (primi 24 valori): ${aggResultWithAI.dispatch_curve?.slice(0, 24).map((v: number) => v.toFixed(1)).join(', ')}
+Esegui un'analisi approfondita della qualità e suggerisci correzioni se necessario.`,
+      qaDefaultPrompt
+    );
+    
+    const qaResultWithAI = { ...qaResult, ai_analysis: qaAI.response, aiUsed: qaAI.aiUsed };
+    await updateAgentState(supabase, jobId, userId, 'QA.WATCHDOG', 'completed', qaResultWithAI);
+    await logAgentActivity(supabase, userId, 'QA.WATCHDOG', 'info', 
+      `QA completato: score ${qaResult.quality_score}%${qaAI.aiUsed ? ' (AI)' : ''}`, 
+      { quality_score: qaResult.quality_score, anomalies: qaResult.anomalies_found, aiUsed: qaAI.aiUsed }
+    );
 
-    // Step 6: EXPORT.HUB (95%)
+    // Step 6: EXPORT.HUB (95%) - OpenAI GPT-5.1
     await updateJobProgress(supabase, jobId, 'EXPORT.HUB', 95);
     await updateAgentState(supabase, jobId, userId, 'EXPORT.HUB', 'running');
     await logAgentActivity(supabase, userId, 'EXPORT.HUB', 'info', `Generazione output zona ${zoneCode}`);
     
-    const exportResult = await processExportStep(supabase, aggResult, qaResult, zoneCode);
-    await updateAgentState(supabase, jobId, userId, 'EXPORT.HUB', 'completed', exportResult);
+    const exportResult = await processExportStep(supabase, aggResultWithAI, qaResultWithAI, zoneCode);
+    
+    // AI analysis for EXPORT.HUB
+    const exportDefaultPrompt = `Sei EXPORT.HUB, agente specializzato nella generazione dei file export JSON/CSV/XLSX e payload per UI.
+Prepara un sommario executive del dispatch e suggerisci il formato più adatto.`;
+    
+    const exportAI = await callAgentAI(
+      supabase, userId, 'EXPORT.HUB',
+      `Export preparato per zona ${zoneCode}:
+- Consumo totale: ${exportResult.curve_summary?.total_consumption?.toFixed(2)} kWh
+- Picco: ${exportResult.curve_summary?.peak_value?.toFixed(2)} kWh
+- Minimo: ${exportResult.curve_summary?.min_value?.toFixed(2)} kWh
+- Media: ${exportResult.curve_summary?.avg_value?.toFixed(2)} kWh
+- Quality score: ${qaResultWithAI.quality_score}%
+- Formati disponibili: ${exportResult.formats_available?.join(', ')}
+Genera un sommario executive per questo dispatch e suggerisci eventuali note per l'utente.`,
+      exportDefaultPrompt
+    );
+    
+    const exportResultWithAI = { ...exportResult, ai_analysis: exportAI.response, aiUsed: exportAI.aiUsed };
+    await updateAgentState(supabase, jobId, userId, 'EXPORT.HUB', 'completed', exportResultWithAI);
+    await logAgentActivity(supabase, userId, 'EXPORT.HUB', 'info', 
+      `Export completato${exportAI.aiUsed ? ' (AI)' : ''}`, 
+      { ...exportResult, aiUsed: exportAI.aiUsed }
+    );
 
-    // Save final results
+    // Save final results with AI insights
     const { error: resultError } = await supabase
       .from('dispatch_results')
       .insert({
@@ -190,19 +526,27 @@ async function orchestrateAgents(
         user_id: userId,
         zone_code: zoneCode,
         dispatch_month: dispatchMonth,
-        curve_96_values: aggResult.dispatch_curve,
-        ip_curve: aggResult.ip_curve,
-        o_curve: aggResult.o_curve,
+        curve_96_values: aggResultWithAI.dispatch_curve,
+        ip_curve: aggResultWithAI.ip_curve,
+        o_curve: aggResultWithAI.o_curve,
         total_pods: anagraficaResult.total_pods_o,
         pods_with_data: historyResult.pods_with_data,
         pods_without_data: historyResult.pods_without_data,
-        quality_score: qaResult.quality_score,
+        quality_score: qaResultWithAI.quality_score,
         metadata: { 
-          ...exportResult, 
+          ...exportResultWithAI, 
           zone: zoneCode, 
           ip_pods_deducted: anagraficaResult.ip_pods_deducted,
           pods_in_letture: historyResult.unique_pods_in_letture,
-          pods_missing: historyResult.pods_missing
+          pods_missing: historyResult.pods_missing,
+          ai_insights: {
+            anagrafica: anagraficaAI.response,
+            ip: ipAI.response,
+            history: historyAI.response,
+            agg: aggAI.response,
+            qa: qaAI.response,
+            export: exportAI.response
+          }
         }
       });
 
@@ -217,7 +561,7 @@ async function orchestrateAgents(
         progress: 100,
         current_agent: null,
         completed_at: new Date().toISOString(),
-        warnings: qaResult.warnings || []
+        warnings: qaResultWithAI.warnings || []
       })
       .eq('id', jobId);
 
