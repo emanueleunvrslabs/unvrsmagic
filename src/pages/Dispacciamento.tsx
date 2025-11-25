@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileUploadSection } from "@/components/dispacciamento/FileUploadSection";
 import { JobsMonitor } from "@/components/dispacciamento/JobsMonitor";
 import { ResultsDashboard } from "@/components/dispacciamento/ResultsDashboard";
+import { AgentsConfig } from "@/components/dispacciamento/AgentsConfig";
 
 export default function DispacciamentoPage() {
   const [activeTab, setActiveTab] = useState("upload");
@@ -19,14 +20,19 @@ export default function DispacciamentoPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="upload">Carica File</TabsTrigger>
+            <TabsTrigger value="agents">Agenti AI</TabsTrigger>
             <TabsTrigger value="jobs">Lavori in Corso</TabsTrigger>
             <TabsTrigger value="results">Risultati</TabsTrigger>
           </TabsList>
 
           <TabsContent value="upload" className="space-y-6 mt-6">
             <FileUploadSection />
+          </TabsContent>
+
+          <TabsContent value="agents" className="space-y-6 mt-6">
+            <AgentsConfig />
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-6 mt-6">
