@@ -268,7 +268,7 @@ export default function GenerateVideo() {
 
               <div className="space-y-2">
                 <Label htmlFor="duration">Duration</Label>
-                <Select value={duration} onValueChange={setDuration}>
+                <Select value={duration} onValueChange={setDuration} disabled={mode === "reference-to-video"}>
                   <SelectTrigger id="duration">
                     <SelectValue />
                   </SelectTrigger>
