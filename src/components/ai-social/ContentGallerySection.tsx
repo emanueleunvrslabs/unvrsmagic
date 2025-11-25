@@ -211,7 +211,7 @@ export function ContentGallerySection() {
                         />
                       ) : (
                         <video
-                          src={item.media_url || ""}
+                          src={`${item.media_url}#t=0.1`}
                           className="w-full h-full object-cover"
                           preload="metadata"
                           muted
