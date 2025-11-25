@@ -3,43 +3,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Link as LinkIcon, FileText, AlertCircle } from "lucide-react";
+import { Upload, FileArchive, Lightbulb, FileText, Calendar, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-const ZONES = [
-  { code: "NORD", name: "Nord" },
-  { code: "CNOR", name: "Centro Nord" },
-  { code: "CSUD", name: "Centro Sud" },
-  { code: "SUD", name: "Sud" },
-  { code: "CALA", name: "Calabria" },
-  { code: "SARD", name: "Sardegna" },
-  { code: "SICI", name: "Sicilia" },
-];
-
-const FILE_TYPES = [
-  { value: "PDO", label: "PDO - Letture POD" },
-  { value: "PDO2G", label: "PDO2G - Letture POD 2G" },
-  { value: "SOS", label: "SOS - Curve SOS" },
-  { value: "S2G", label: "S2G - Curve S2G" },
-  { value: "AGGR_IP", label: "AGGR_IP - Illuminazione Pubblica" },
-  { value: "ANAGRAFICA", label: "ANAGRAFICA - Anagrafica POD" },
-];
-
 export function FileUploadSection() {
-  const [uploadMode, setUploadMode] = useState<"direct" | "url">("direct");
-  const [selectedZone, setSelectedZone] = useState<string>("");
-  const [selectedFileType, setSelectedFileType] = useState<string>("");
-  const [monthReference, setMonthReference] = useState<string>("");
-  const [fileUrl, setFileUrl] = useState<string>("");
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  // Step 1: Letture files
+  const [lettureFiles, setLettureFiles] = useState<File[]>([]);
+  const [lettureUploaded, setLettureUploaded] = useState(false);
+  
+  // Step 2: IP files
+  const [ipFiles, setIpFiles] = useState<File[]>([]);
+  const [ipUploaded, setIpUploaded] = useState(false);
+  
+  // Step 3: Anagrafica files
+  const [anagraficaFiles, setAnagraficaFiles] = useState<File[]>([]);
+  const [anagraficaUploaded, setAnagraficaUploaded] = useState(false);
+  
+  // Step 4: Month selection
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
 
-  const handleDirectUpload = async () => {
-    if (!selectedFile || !selectedZone || !selectedFileType || !monthReference) {
-      toast.error("Compila tutti i campi richiesti");
+  const handleUploadLettureFiles = async () => {
+    if (lettureFiles.length === 0) {
+      toast.error("Seleziona almeno un file ZIP delle letture");
       return;
     }
 
@@ -48,51 +37,47 @@ export function FileUploadSection() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      // Upload file to storage
-      const filePath = `${user.id}/${selectedZone}/${selectedFileType}/${monthReference}/${selectedFile.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("dispatch-files")
-        .upload(filePath, selectedFile);
+      for (const file of lettureFiles) {
+        const filePath = `${user.id}/letture/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("dispatch-files")
+          .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("dispatch-files")
-        .getPublicUrl(filePath);
+        const { data: { publicUrl } } = supabase.storage
+          .from("dispatch-files")
+          .getPublicUrl(filePath);
 
-      // Save file metadata
-      const { error: dbError } = await supabase
-        .from("dispatch_files")
-        .insert({
-          user_id: user.id,
-          zone_code: selectedZone,
-          file_type: selectedFileType,
-          file_name: selectedFile.name,
-          file_url: publicUrl,
-          file_size: selectedFile.size,
-          upload_source: "direct",
-          month_reference: monthReference,
-          status: "uploaded",
-        });
+        const { error: dbError } = await supabase
+          .from("dispatch_files")
+          .insert({
+            user_id: user.id,
+            file_type: "LETTURE",
+            file_name: file.name,
+            file_url: publicUrl,
+            file_size: file.size,
+            upload_source: "direct",
+            status: "uploaded",
+          });
 
-      if (dbError) throw dbError;
+        if (dbError) throw dbError;
+      }
 
-      toast.success("File caricato con successo");
-      setSelectedFile(null);
-      setSelectedZone("");
-      setSelectedFileType("");
-      setMonthReference("");
+      toast.success(`${lettureFiles.length} file delle letture caricati`);
+      setLettureUploaded(true);
+      setStep(2);
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Errore durante il caricamento del file");
+      toast.error("Errore durante il caricamento");
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleUrlUpload = async () => {
-    if (!fileUrl || !selectedZone || !selectedFileType || !monthReference) {
-      toast.error("Compila tutti i campi richiesti");
+  const handleUploadIpFiles = async () => {
+    if (ipFiles.length === 0) {
+      toast.error("Seleziona almeno un file dell'illuminazione pubblica");
       return;
     }
 
@@ -101,157 +86,368 @@ export function FileUploadSection() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      // Call edge function to download from URL
-      const { data, error } = await supabase.functions.invoke("dispatch-file-downloader", {
-        body: {
-          fileUrl,
-          zoneCode: selectedZone,
-          fileType: selectedFileType,
-          monthReference,
-        },
-      });
+      for (const file of ipFiles) {
+        const filePath = `${user.id}/ip/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("dispatch-files")
+          .upload(filePath, file);
 
-      if (error) throw error;
+        if (uploadError) throw uploadError;
 
-      toast.success("File scaricato e caricato con successo");
-      setFileUrl("");
-      setSelectedZone("");
-      setSelectedFileType("");
-      setMonthReference("");
+        const { data: { publicUrl } } = supabase.storage
+          .from("dispatch-files")
+          .getPublicUrl(filePath);
+
+        const { error: dbError } = await supabase
+          .from("dispatch_files")
+          .insert({
+            user_id: user.id,
+            file_type: "AGGR_IP",
+            file_name: file.name,
+            file_url: publicUrl,
+            file_size: file.size,
+            upload_source: "direct",
+            status: "uploaded",
+          });
+
+        if (dbError) throw dbError;
+      }
+
+      toast.success(`${ipFiles.length} file illuminazione pubblica caricati`);
+      setIpUploaded(true);
+      setStep(3);
     } catch (error) {
-      console.error("URL upload error:", error);
-      toast.error("Errore durante il download del file da URL");
+      console.error("Upload error:", error);
+      toast.error("Errore durante il caricamento");
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleUploadAnagraficaFiles = async () => {
+    if (anagraficaFiles.length === 0) {
+      toast.error("Seleziona almeno un file anagrafica POD");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      for (const file of anagraficaFiles) {
+        const filePath = `${user.id}/anagrafica/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("dispatch-files")
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("dispatch-files")
+          .getPublicUrl(filePath);
+
+        const { error: dbError } = await supabase
+          .from("dispatch_files")
+          .insert({
+            user_id: user.id,
+            file_type: "ANAGRAFICA",
+            file_name: file.name,
+            file_url: publicUrl,
+            file_size: file.size,
+            upload_source: "direct",
+            status: "uploaded",
+          });
+
+        if (dbError) throw dbError;
+      }
+
+      toast.success(`${anagraficaFiles.length} file anagrafica POD caricati`);
+      setAnagraficaUploaded(true);
+      setStep(4);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Errore durante il caricamento");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleStartProcessing = async () => {
+    if (!selectedMonth) {
+      toast.error("Seleziona il mese di programmazione");
+      return;
+    }
+
+    toast.success("Processamento avviato per " + selectedMonth);
+    // TODO: Call edge function to start processing
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Carica File</CardTitle>
-        <CardDescription>
-          Carica i file di letture, curve e anagrafiche per il processamento
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label>Zona</Label>
-            <Select value={selectedZone} onValueChange={setSelectedZone}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleziona zona" />
-              </SelectTrigger>
-              <SelectContent>
-                {ZONES.map((zone) => (
-                  <SelectItem key={zone.code} value={zone.code}>
-                    {zone.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Tipo File</Label>
-            <Select value={selectedFileType} onValueChange={setSelectedFileType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleziona tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {FILE_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Mese Riferimento</Label>
-            <Input
-              type="month"
-              value={monthReference}
-              onChange={(e) => setMonthReference(e.target.value)}
-            />
+    <div className="space-y-6">
+      {/* Progress Steps */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className={`flex items-center gap-3 p-4 rounded-lg border ${step >= 1 ? 'border-primary bg-primary/5' : 'border-border'}`}>
+          {lettureUploaded ? (
+            <CheckCircle2 className="w-5 h-5 text-green-500" />
+          ) : (
+            <FileArchive className={`w-5 h-5 ${step === 1 ? 'text-primary' : 'text-muted-foreground'}`} />
+          )}
+          <div>
+            <p className="text-sm font-medium">1. Letture</p>
+            <p className="text-xs text-muted-foreground">File ZIP</p>
           </div>
         </div>
 
-        <Tabs value={uploadMode} onValueChange={(v) => setUploadMode(v as "direct" | "url")}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="direct">
-              <Upload className="w-4 h-4 mr-2" />
-              Carica File
-            </TabsTrigger>
-            <TabsTrigger value="url">
-              <LinkIcon className="w-4 h-4 mr-2" />
-              Da URL
-            </TabsTrigger>
-          </TabsList>
+        <div className={`flex items-center gap-3 p-4 rounded-lg border ${step >= 2 ? 'border-primary bg-primary/5' : 'border-border'}`}>
+          {ipUploaded ? (
+            <CheckCircle2 className="w-5 h-5 text-green-500" />
+          ) : (
+            <Lightbulb className={`w-5 h-5 ${step === 2 ? 'text-primary' : 'text-muted-foreground'}`} />
+          )}
+          <div>
+            <p className="text-sm font-medium">2. Illum. Pubblica</p>
+            <p className="text-xs text-muted-foreground">File AGGR_IP</p>
+          </div>
+        </div>
 
-          <TabsContent value="direct" className="space-y-4 mt-4">
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-              <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+        <div className={`flex items-center gap-3 p-4 rounded-lg border ${step >= 3 ? 'border-primary bg-primary/5' : 'border-border'}`}>
+          {anagraficaUploaded ? (
+            <CheckCircle2 className="w-5 h-5 text-green-500" />
+          ) : (
+            <FileText className={`w-5 h-5 ${step === 3 ? 'text-primary' : 'text-muted-foreground'}`} />
+          )}
+          <div>
+            <p className="text-sm font-medium">3. Anagrafica</p>
+            <p className="text-xs text-muted-foreground">Liste POD</p>
+          </div>
+        </div>
+
+        <div className={`flex items-center gap-3 p-4 rounded-lg border ${step >= 4 ? 'border-primary bg-primary/5' : 'border-border'}`}>
+          <Calendar className={`w-5 h-5 ${step === 4 ? 'text-primary' : 'text-muted-foreground'}`} />
+          <div>
+            <p className="text-sm font-medium">4. Mese</p>
+            <p className="text-xs text-muted-foreground">Programmazione</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 1: Letture */}
+      {step === 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileArchive className="w-5 h-5" />
+              Carica File Letture
+            </CardTitle>
+            <CardDescription>
+              Carica uno o più file ZIP contenenti le letture dei POD (PDO, PDO2G, SOS, S2G)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="border-2 border-dashed border-border rounded-lg p-8">
+              <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <Input
                 type="file"
-                accept=".csv,.xml,.xlsx,.zip"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                accept=".zip"
+                multiple
+                onChange={(e) => setLettureFiles(Array.from(e.target.files || []))}
                 className="max-w-md mx-auto"
               />
-              {selectedFile && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  File selezionato: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
+              {lettureFiles.length > 0 && (
+                <div className="mt-4 space-y-1">
+                  {lettureFiles.map((file, idx) => (
+                    <p key={idx} className="text-sm text-muted-foreground text-center">
+                      {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  ))}
+                </div>
               )}
             </div>
 
-            <div className="bg-muted/50 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-muted-foreground">
-                <p className="font-medium mb-1">Supporto per file di grandi dimensioni</p>
-                <p>Il sistema supporta file CSV, XML, XLSX e ZIP fino a 500 MB. Per file più grandi, utilizza il caricamento da URL.</p>
-              </div>
-            </div>
-
             <Button
-              onClick={handleDirectUpload}
-              disabled={isUploading || !selectedFile || !selectedZone || !selectedFileType || !monthReference}
+              onClick={handleUploadLettureFiles}
+              disabled={isUploading || lettureFiles.length === 0}
               className="w-full"
             >
-              {isUploading ? "Caricamento in corso..." : "Carica File"}
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Caricamento...
+                </>
+              ) : (
+                "Carica e Continua"
+              )}
             </Button>
-          </TabsContent>
+          </CardContent>
+        </Card>
+      )}
 
-          <TabsContent value="url" className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label>URL del File</Label>
+      {/* Step 2: Illuminazione Pubblica */}
+      {step === 2 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lightbulb className="w-5 h-5" />
+              Carica File Illuminazione Pubblica
+            </CardTitle>
+            <CardDescription>
+              Carica i file AGGR_IP con le curve aggregate dell'illuminazione pubblica
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="border-2 border-dashed border-border rounded-lg p-8">
+              <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <Input
-                type="url"
-                placeholder="https://wetransfer.com/... o altro link diretto"
-                value={fileUrl}
-                onChange={(e) => setFileUrl(e.target.value)}
+                type="file"
+                accept=".csv,.xml,.xlsx,.zip"
+                multiple
+                onChange={(e) => setIpFiles(Array.from(e.target.files || []))}
+                className="max-w-md mx-auto"
               />
+              {ipFiles.length > 0 && (
+                <div className="mt-4 space-y-1">
+                  {ipFiles.map((file, idx) => (
+                    <p key={idx} className="text-sm text-muted-foreground text-center">
+                      {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className="bg-muted/50 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-muted-foreground">
-                <p className="font-medium mb-1">Caricamento da URL</p>
-                <p>Supporta WeTransfer, Google Drive, Dropbox e altri servizi. Il file verrà scaricato automaticamente dal sistema.</p>
-              </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setStep(1)}
+                variant="outline"
+                className="flex-1"
+              >
+                Indietro
+              </Button>
+              <Button
+                onClick={handleUploadIpFiles}
+                disabled={isUploading || ipFiles.length === 0}
+                className="flex-1"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Caricamento...
+                  </>
+                ) : (
+                  "Carica e Continua"
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 3: Anagrafica */}
+      {step === 3 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Carica File Anagrafica POD
+            </CardTitle>
+            <CardDescription>
+              Carica i file contenenti le anagrafiche dei POD per ogni zona
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="border-2 border-dashed border-border rounded-lg p-8">
+              <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <Input
+                type="file"
+                accept=".csv,.xml,.xlsx,.zip"
+                multiple
+                onChange={(e) => setAnagraficaFiles(Array.from(e.target.files || []))}
+                className="max-w-md mx-auto"
+              />
+              {anagraficaFiles.length > 0 && (
+                <div className="mt-4 space-y-1">
+                  {anagraficaFiles.map((file, idx) => (
+                    <p key={idx} className="text-sm text-muted-foreground text-center">
+                      {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <Button
-              onClick={handleUrlUpload}
-              disabled={isUploading || !fileUrl || !selectedZone || !selectedFileType || !monthReference}
-              className="w-full"
-            >
-              {isUploading ? "Download in corso..." : "Scarica e Carica"}
-            </Button>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setStep(2)}
+                variant="outline"
+                className="flex-1"
+              >
+                Indietro
+              </Button>
+              <Button
+                onClick={handleUploadAnagraficaFiles}
+                disabled={isUploading || anagraficaFiles.length === 0}
+                className="flex-1"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Caricamento...
+                  </>
+                ) : (
+                  "Carica e Continua"
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 4: Selezione Mese */}
+      {step === 4 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Seleziona Mese di Programmazione
+            </CardTitle>
+            <CardDescription>
+              Scegli il mese per cui vuoi calcolare il profilo di dispacciamento
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Mese di Programmazione</Label>
+              <Input
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="max-w-md"
+              />
+              <p className="text-sm text-muted-foreground">
+                Il sistema userà automaticamente i dati storici del mese T-12
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setStep(3)}
+                variant="outline"
+                className="flex-1"
+              >
+                Indietro
+              </Button>
+              <Button
+                onClick={handleStartProcessing}
+                disabled={!selectedMonth}
+                className="flex-1"
+              >
+                Avvia Processamento
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
