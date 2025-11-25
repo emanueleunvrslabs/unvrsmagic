@@ -92,10 +92,17 @@ export default function Workflows() {
 
     setIsEnhancing(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please login first");
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("enhance-workflow-prompt", {
         body: {
           description,
-          workflowType
+          workflowType,
+          userId: session.user.id
         }
       });
 
@@ -104,6 +111,8 @@ export default function Workflows() {
       if (data?.enhancedPrompt) {
         setEnhancedPrompt(data.enhancedPrompt);
         toast.success("Prompt enhanced successfully!");
+      } else if (data?.error) {
+        toast.error(data.error);
       }
     } catch (error) {
       console.error("Error enhancing prompt:", error);

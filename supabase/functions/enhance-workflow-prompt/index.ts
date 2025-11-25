@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { description, workflowType } = await req.json();
+    const { description, workflowType, userId } = await req.json();
     
     if (!description) {
       return new Response(
@@ -20,10 +21,35 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: "User ID is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Fetch OpenAI API key from database
+    const { data: apiKeyData, error: apiKeyError } = await supabase
+      .from("api_keys")
+      .select("api_key")
+      .eq("user_id", userId)
+      .eq("provider", "openai")
+      .single();
+
+    if (apiKeyError || !apiKeyData?.api_key) {
+      console.error("OpenAI API key not found:", apiKeyError);
+      return new Response(
+        JSON.stringify({ error: "OpenAI API key not configured. Please add it in AI Models API settings." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const OPENAI_API_KEY = apiKeyData.api_key;
 
     const systemPrompt = workflowType === "image" 
       ? `Sei un AI Creative Director Senior specializzato in fotografia pubblicitaria per grandi brand (es. Apple, Dior, Nike, Louis Vuitton, Tesla). Il tuo unico compito è ricevere una descrizione semplice dall'utente e trasformarla in un prompt professionale ultra-dettagliato da utilizzare per generare immagini con il modello Nano Banana 2.
@@ -61,14 +87,16 @@ Guidelines:
 - Keep the core intent of the user's description
 - Output ONLY the enhanced prompt, no explanations`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    console.log("Calling OpenAI API for prompt enhancement...");
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Transform this description into a professional AI ${workflowType} generation prompt:\n\n"${description}"` }
@@ -77,25 +105,18 @@ Guidelines:
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded, please try again later." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Payment required, please add credits." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
+      console.error("OpenAI API error:", response.status, errorText);
+      return new Response(
+        JSON.stringify({ error: `OpenAI API error: ${response.status}` }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const data = await response.json();
     const enhancedPrompt = data.choices?.[0]?.message?.content?.trim() || description;
+
+    console.log("Prompt enhanced successfully");
 
     return new Response(
       JSON.stringify({ enhancedPrompt }),
