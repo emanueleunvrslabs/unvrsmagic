@@ -14,7 +14,6 @@ export default function Connection() {
     
     try {
       const { data, error } = await supabase.functions.invoke('instagram-oauth', {
-        body: {},
         method: 'GET',
       });
 
