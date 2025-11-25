@@ -1,15 +1,20 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet, ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { it } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
+const ITEMS_PER_PAGE = 10;
+
 const AdminDashboard = () => {
+  const [txPage, setTxPage] = useState(0);
   // Fetch total projects count
   const { data: projectsData, isLoading: loadingProjects } = useQuery({
     queryKey: ['admin-projects-count'],
@@ -101,20 +106,25 @@ const AdminDashboard = () => {
     }
   });
 
-  // Fetch recent credit transactions
-  const { data: recentTransactions, isLoading: loadingTransactions } = useQuery({
-    queryKey: ['admin-recent-transactions'],
+  // Fetch credit transactions with pagination
+  const { data: transactionsData, isLoading: loadingTransactions } = useQuery({
+    queryKey: ['admin-transactions', txPage],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const from = txPage * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+      
+      const { data, error, count } = await supabase
         .from('credit_transactions')
-        .select('id, amount, type, description, created_at')
+        .select('id, amount, type, description, created_at', { count: 'exact' })
         .order('created_at', { ascending: false })
-        .limit(10);
+        .range(from, to);
       
       if (error) throw error;
-      return data || [];
+      return { transactions: data || [], totalCount: count || 0 };
     }
   });
+
+  const totalPages = Math.ceil((transactionsData?.totalCount || 0) / ITEMS_PER_PAGE);
 
   // Fetch monthly spending data for chart
   const { data: monthlySpending, isLoading: loadingMonthly } = useQuery({
@@ -371,54 +381,83 @@ const AdminDashboard = () => {
         {/* Recent Transactions Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Latest credit purchases and usage</CardDescription>
+            <CardTitle>Transactions</CardTitle>
+            <CardDescription>Credit purchases and usage history</CardDescription>
           </CardHeader>
           <CardContent>
             {loadingTransactions ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-            ) : recentTransactions && recentTransactions.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentTransactions.map((tx) => (
-                    <TableRow key={tx.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {Number(tx.amount) > 0 ? (
-                            <ArrowUpRight className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <ArrowDownRight className="h-4 w-4 text-red-500" />
-                          )}
-                          <Badge variant={tx.type === 'purchase' ? 'default' : 'secondary'}>
-                            {tx.type === 'purchase' ? 'Purchase' : 'Usage'}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate">
-                        {tx.description || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <span className={Number(tx.amount) > 0 ? 'text-green-500' : 'text-red-500'}>
-                          {Number(tx.amount) > 0 ? '+' : ''}€{Number(tx.amount).toFixed(2)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
-                      </TableCell>
+            ) : transactionsData?.transactions && transactionsData.transactions.length > 0 ? (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Date</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {transactionsData.transactions.map((tx) => (
+                      <TableRow key={tx.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {Number(tx.amount) > 0 ? (
+                              <ArrowUpRight className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <ArrowDownRight className="h-4 w-4 text-red-500" />
+                            )}
+                            <Badge variant={tx.type === 'purchase' ? 'default' : 'secondary'}>
+                              {tx.type === 'purchase' ? 'Purchase' : 'Usage'}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {tx.description || '-'}
+                        </TableCell>
+                        <TableCell>
+                          <span className={Number(tx.amount) > 0 ? 'text-green-500' : 'text-red-500'}>
+                            {Number(tx.amount) > 0 ? '+' : ''}€{Number(tx.amount).toFixed(2)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                
+                {/* Pagination Controls */}
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/30">
+                  <p className="text-sm text-muted-foreground">
+                    Page {txPage + 1} of {totalPages} ({transactionsData.totalCount} transactions)
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTxPage(p => Math.max(0, p - 1))}
+                      disabled={txPage === 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTxPage(p => Math.min(totalPages - 1, p + 1))}
+                      disabled={txPage >= totalPages - 1}
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">
                 No transactions yet
