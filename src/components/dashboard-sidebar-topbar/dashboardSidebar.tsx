@@ -9,7 +9,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import {
   Activity,
-  BarChart,
   Bell,
   Bot,
   ChevronDown,
@@ -27,8 +26,6 @@ import {
   HelpCircle,
   Image,
   Layers,
-  Lightbulb,
-  BarChart3,
   LayoutDashboard,
   LineChart,
   Menu,
@@ -37,7 +34,6 @@ import {
   Repeat,
   Settings,
   Store,
-  TrendingUp,
   UserPlus,
   Wallet,
   XIcon,
@@ -150,7 +146,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     "settings": false,
     "nkmt": false,
     "projects": false,
-    "dispacciamento": false,
     "ai-social": false,
   });
   const { theme, setTheme } = useTheme();
@@ -211,28 +206,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         setActiveItem("nkmt-reviewer");
       }
       setOpenSubmenus((prev) => ({ ...prev, "nkmt": true }));
-    } else if (pathname.startsWith("/dispacciamento")) {
-      // Handle Dispacciamento agents
-      if (pathname === "/dispacciamento") {
-        setActiveItem("dispacciamento-dashboard");
-      } else if (pathname === "/dispacciamento/dispatch-brain") {
-        setActiveItem("dispacciamento-dispatch-brain");
-      } else if (pathname === "/dispacciamento/anagrafica-intake") {
-        setActiveItem("dispacciamento-anagrafica-intake");
-      } else if (pathname === "/dispacciamento/ip-assimilator") {
-        setActiveItem("dispacciamento-ip-assimilator");
-      } else if (pathname === "/dispacciamento/history-resolver") {
-        setActiveItem("dispacciamento-history-resolver");
-      } else if (pathname === "/dispacciamento/lp-profiler") {
-        setActiveItem("dispacciamento-lp-profiler");
-      } else if (pathname === "/dispacciamento/agg-scheduler") {
-        setActiveItem("dispacciamento-agg-scheduler");
-      } else if (pathname === "/dispacciamento/qa-watchdog") {
-        setActiveItem("dispacciamento-qa-watchdog");
-      } else if (pathname === "/dispacciamento/export-hub") {
-        setActiveItem("dispacciamento-export-hub");
-      }
-      setOpenSubmenus((prev) => ({ ...prev, "dispacciamento": true }));
     } else if (pathname.startsWith("/ai-social")) {
       // Handle Ai Social routes
       if (pathname === "/ai-social") {
@@ -455,23 +428,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "ai-social-schedule", label: "Schedule Posts", icon: Gauge, href: "/ai-social/schedule" },
             { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
             { id: "ai-social-connection", label: "Connection", icon: Layers, href: "/ai-social/connection" },
-          ],
-        },
-        {
-          id: "dispacciamento",
-          label: "Dispacciamento",
-          icon: BarChart3,
-          hasSubmenu: true,
-          submenuItems: [
-            { id: "dispacciamento-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dispacciamento" },
-            { id: "dispacciamento-dispatch-brain", label: "Dispatch.brain", icon: Bot, href: "/dispacciamento/dispatch-brain" },
-            { id: "dispacciamento-anagrafica-intake", label: "Anagrafica.intake", icon: Database, href: "/dispacciamento/anagrafica-intake" },
-            { id: "dispacciamento-ip-assimilator", label: "Ip.assimilator", icon: Lightbulb, href: "/dispacciamento/ip-assimilator" },
-            { id: "dispacciamento-history-resolver", label: "History.resolver", icon: TrendingUp, href: "/dispacciamento/history-resolver" },
-            { id: "dispacciamento-lp-profiler", label: "Lp.profiler", icon: BarChart, href: "/dispacciamento/lp-profiler" },
-            { id: "dispacciamento-agg-scheduler", label: "Agg.scheduler", icon: Gauge, href: "/dispacciamento/agg-scheduler" },
-            { id: "dispacciamento-qa-watchdog", label: "Qa.watchdog", icon: Activity, href: "/dispacciamento/qa-watchdog" },
-            { id: "dispacciamento-export-hub", label: "Export.hub", icon: FileText, href: "/dispacciamento/export-hub" },
           ],
         },
         {

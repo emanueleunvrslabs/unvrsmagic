@@ -28,15 +28,6 @@ import GenerateVideo from "./pages/AiSocial/GenerateVideo";
 import SchedulePost from "./pages/AiSocial/SchedulePost";
 import Workflows from "./pages/AiSocial/Workflows";
 import Connection from "./pages/AiSocial/Connection";
-import Dispacciamento from "./pages/Dispacciamento";
-import DispatchBrain from "./pages/dispacciamento/DispatchBrain";
-import DispatchAnagraficaIntake from "./pages/dispacciamento/DispatchAnagraficaIntake";
-import DispatchIpAssimilator from "./pages/dispacciamento/DispatchIpAssimilator";
-import DispatchHistoryResolver from "./pages/dispacciamento/DispatchHistoryResolver";
-import DispatchLpProfiler from "./pages/dispacciamento/DispatchLpProfiler";
-import DispatchAggScheduler from "./pages/dispacciamento/DispatchAggScheduler";
-import DispatchQaWatchdog from "./pages/dispacciamento/DispatchQaWatchdog";
-import DispatchExportHub from "./pages/dispacciamento/DispatchExportHub";
 import Wallet from "./pages/Wallet";
 
 const queryClient = new QueryClient();
@@ -68,15 +59,6 @@ const App = () => (
           <Route path="/ai-social/schedule" element={<ProtectedRoute><SchedulePost /></ProtectedRoute>} />
           <Route path="/ai-social/workflows" element={<ProtectedRoute><Workflows /></ProtectedRoute>} />
           <Route path="/ai-social/connection" element={<ProtectedRoute><Connection /></ProtectedRoute>} />
-          <Route path="/dispacciamento" element={<ProtectedRoute><Dispacciamento /></ProtectedRoute>} />
-          <Route path="/dispacciamento/dispatch-brain" element={<ProtectedRoute><DispatchBrain /></ProtectedRoute>} />
-          <Route path="/dispacciamento/anagrafica-intake" element={<ProtectedRoute><DispatchAnagraficaIntake /></ProtectedRoute>} />
-          <Route path="/dispacciamento/ip-assimilator" element={<ProtectedRoute><DispatchIpAssimilator /></ProtectedRoute>} />
-          <Route path="/dispacciamento/history-resolver" element={<ProtectedRoute><DispatchHistoryResolver /></ProtectedRoute>} />
-          <Route path="/dispacciamento/lp-profiler" element={<ProtectedRoute><DispatchLpProfiler /></ProtectedRoute>} />
-          <Route path="/dispacciamento/agg-scheduler" element={<ProtectedRoute><DispatchAggScheduler /></ProtectedRoute>} />
-          <Route path="/dispacciamento/qa-watchdog" element={<ProtectedRoute><DispatchQaWatchdog /></ProtectedRoute>} />
-          <Route path="/dispacciamento/export-hub" element={<ProtectedRoute><DispatchExportHub /></ProtectedRoute>} />
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
