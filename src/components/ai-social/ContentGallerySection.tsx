@@ -21,6 +21,10 @@ interface ContentItem {
   prompt: string;
   created_at: string;
   metadata: Record<string, any> | null;
+  workflow?: {
+    id: string;
+    platforms: string[];
+  } | null;
 }
 
 export function ContentGallerySection() {
@@ -66,14 +70,34 @@ export function ContentGallerySection() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      // First get content with workflow_id from metadata
+      const { data: contentData, error } = await supabase
         .from("ai_social_content")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setContent(data as ContentItem[] || []);
+
+      // For each content, fetch the workflow if it has one
+      const contentWithWorkflows = await Promise.all(
+        (contentData || []).map(async (item) => {
+          const metadata = item.metadata as Record<string, any> | null;
+          const workflowId = metadata?.workflow_id;
+          if (workflowId) {
+            const { data: workflow } = await supabase
+              .from("ai_social_workflows")
+              .select("id, platforms")
+              .eq("id", workflowId)
+              .single();
+            
+            return { ...item, workflow };
+          }
+          return { ...item, workflow: null };
+        })
+      );
+
+      setContent(contentWithWorkflows as ContentItem[]);
     } catch (error) {
       console.error("Error loading content:", error);
       toast.error("Failed to load content");
@@ -271,9 +295,35 @@ export function ContentGallerySection() {
                       {item.status}
                     </Badge>
                   </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {item.type === "image" ? "Image" : "Video"}
-                  </Badge>
+                  
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
+                      {item.type === "image" ? "🖼️" : "🎥"}
+                    </span>
+                    
+                    {/* Execution type badge */}
+                    {item.workflow ? (
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
+                        ⏰ Schedule
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
+                        ▶️ Run Now
+                      </span>
+                    )}
+                    
+                    {/* Social platforms badges */}
+                    {item.workflow?.platforms?.map((platform: string) => (
+                      <span key={platform} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm capitalize bg-pink-500/10 text-pink-400 border-pink-500/20">
+                        {platform === "instagram" && "📷"}
+                        {platform === "facebook" && "👍"}
+                        {platform === "twitter" && "🐦"}
+                        {platform === "linkedin" && "💼"}
+                        {" "}{platform}
+                      </span>
+                    ))}
+                  </div>
+                  
                   <p className="text-xs text-muted-foreground line-clamp-2">
                     {item.prompt}
                   </p>
