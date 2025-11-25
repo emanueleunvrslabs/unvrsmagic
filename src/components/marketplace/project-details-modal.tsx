@@ -46,7 +46,7 @@ const projectConfigs: Record<string, {
       { icon: Sparkles, text: "Text-to-Image & Image-to-Image modes" },
       { icon: Bot, text: "Automated Workflow System" },
       { icon: Calendar, text: "Scheduled Content Publishing" },
-      { icon: Share2, text: "Direct Instagram Publishing" },
+      { icon: Share2, text: "Direct Social Publishing" },
     ],
     pricing: [
       { type: "Image", price: "€1.00", unit: "per image", description: "AI-generated images with Nano Banana Pro" },
