@@ -138,25 +138,16 @@ export default function GenerateImage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Mode</Label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={mode === "text-to-image" ? "default" : "outline"}
-                    onClick={() => handleModeChange("text-to-image")}
-                    className={`flex-1 ${mode !== "text-to-image" ? "border-primary text-primary" : ""}`}
-                  >
-                    Text to Image
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={mode === "image-to-image" ? "default" : "outline"}
-                    onClick={() => handleModeChange("image-to-image")}
-                    className={`flex-1 ${mode !== "image-to-image" ? "border-primary text-primary" : ""}`}
-                  >
-                    Image to Image
-                  </Button>
-                </div>
+                <Label htmlFor="mode">Generation Mode</Label>
+                <Select value={mode} onValueChange={(value) => handleModeChange(value as "text-to-image" | "image-to-image")}>
+                  <SelectTrigger id="mode">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text-to-image">Text to Image</SelectItem>
+                    <SelectItem value="image-to-image">Image to Image</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {mode === "image-to-image" && (
