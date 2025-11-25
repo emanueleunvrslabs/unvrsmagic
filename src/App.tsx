@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ThemeProvider from "./components/theme-provider";
 import { NotificationProvider } from "@/components/notifications/notification-provider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { HomeRedirect } from "./components/HomeRedirect";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AiBot from "./pages/AiBot";
@@ -49,7 +50,7 @@ const App = () => (
           <Sonner />
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<ProtectedRoute><NKMTDashboard /></ProtectedRoute>} />
+          <Route path="/" element={<HomeRedirect />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
           <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
@@ -81,19 +82,19 @@ const App = () => (
           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
           <Route path="/bot-templates" element={<ProtectedRoute><BotTemplates /></ProtectedRoute>} />
           {/* Redirects for removed pages */}
-          <Route path="/overview" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/my-assets" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/my-analytics" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/trading" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/wallets" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/portfolio-tracker" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/signal-bot" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/dca-bot" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/arbitrage-bot" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/pump-screener" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/defi-protocols" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/defi-center/*" element={<Navigate to="/nkmt/dashboard" replace />} />
-          <Route path="/control-panel/*" element={<Navigate to="/nkmt/dashboard" replace />} />
+          <Route path="/overview" element={<HomeRedirect />} />
+          <Route path="/my-assets" element={<HomeRedirect />} />
+          <Route path="/my-analytics" element={<HomeRedirect />} />
+          <Route path="/trading" element={<HomeRedirect />} />
+          <Route path="/wallets" element={<HomeRedirect />} />
+          <Route path="/portfolio-tracker" element={<HomeRedirect />} />
+          <Route path="/signal-bot" element={<HomeRedirect />} />
+          <Route path="/dca-bot" element={<HomeRedirect />} />
+          <Route path="/arbitrage-bot" element={<HomeRedirect />} />
+          <Route path="/pump-screener" element={<HomeRedirect />} />
+          <Route path="/defi-protocols" element={<HomeRedirect />} />
+          <Route path="/defi-center/*" element={<HomeRedirect />} />
+          <Route path="/control-panel/*" element={<HomeRedirect />} />
           <Route path="/invite-friends" element={<Navigate to="/settings" replace />} />
           <Route path="/help-center" element={<Navigate to="/settings" replace />} />
           <Route path="*" element={<NotFound />} />
