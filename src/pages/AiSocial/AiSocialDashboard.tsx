@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentGallerySection } from "@/components/ai-social/ContentGallerySection";
-import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 
 const WorkflowsList = () => {
@@ -98,23 +97,29 @@ const WorkflowsList = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="bg-background/30 text-foreground/80 border-border/30">
+                <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
                   {workflow.content_type === "image" ? "🖼️ Image" : "🎥 Video"}
-                </Badge>
-                <Badge variant="secondary" className="bg-background/30 text-foreground/80 border-border/30">
-                  {workflow.content_type === "image" ? "Nano 🍌" : "Veo3"}
-                </Badge>
-                <Badge variant="secondary" className="bg-background/30 text-foreground/80 border-border/30">
+                </span>
+                {workflow.content_type === "image" ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+                    Nano 🍌
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
+                    Veo3 🎬
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-slate-500/10 text-slate-400 border-slate-500/20">
                   {modeLabel}
-                </Badge>
+                </span>
               </div>
               
               {workflow.platforms && workflow.platforms.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {workflow.platforms.map((platform: string) => (
-                    <Badge key={platform} variant="outline" className="bg-background/20 text-foreground/70 border-border/30">
-                      {getPlatformEmoji(platform)} {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                    </Badge>
+                    <span key={platform} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm capitalize bg-pink-500/10 text-pink-400 border-pink-500/20">
+                      {getPlatformEmoji(platform)} {platform}
+                    </span>
                   ))}
                 </div>
               )}
