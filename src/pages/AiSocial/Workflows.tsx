@@ -1,9 +1,10 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Loader2, X } from "lucide-react";
+import { Plus, Sparkles, Loader2, X, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +15,8 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function Workflows() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
+  const [deleteWorkflowId, setDeleteWorkflowId] = useState<string | null>(null);
   const [workflowType, setWorkflowType] = useState<"image" | "video">("image");
   const [generationMode, setGenerationMode] = useState<string>("text-to-image");
   const [description, setDescription] = useState("");
@@ -24,6 +27,7 @@ export default function Workflows() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch connected social accounts
   const { data: connectedAccounts } = useQuery({
@@ -122,39 +126,91 @@ export default function Workflows() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const { error } = await supabase
-        .from('ai_social_workflows')
-        .insert({
-          user_id: session.user.id,
-          name: `${workflowType === 'image' ? 'Image' : 'Video'} Workflow - ${generationMode}`,
-          description: description,
-          content_type: workflowType,
-          prompt_template: finalPrompt,
-          platforms: selectedPlatforms,
-          schedule_config: {
-            generation_mode: generationMode,
-            aspect_ratio: aspectRatio,
-            resolution: resolution,
-            output_format: outputFormat
-          },
-          active: true
-        });
+      const workflowData = {
+        name: `${workflowType === 'image' ? 'Image' : 'Video'} Workflow - ${generationMode}`,
+        description: description,
+        content_type: workflowType,
+        prompt_template: finalPrompt,
+        platforms: selectedPlatforms,
+        schedule_config: {
+          generation_mode: generationMode,
+          aspect_ratio: aspectRatio,
+          resolution: resolution,
+          output_format: outputFormat
+        },
+        active: true
+      };
 
-      if (error) throw error;
+      if (editingWorkflowId) {
+        // Update existing workflow
+        const { error } = await supabase
+          .from('ai_social_workflows')
+          .update(workflowData)
+          .eq('id', editingWorkflowId);
 
-      toast.success("Workflow created successfully!");
+        if (error) throw error;
+        toast.success("Workflow updated successfully!");
+      } else {
+        // Create new workflow
+        const { error } = await supabase
+          .from('ai_social_workflows')
+          .insert({
+            user_id: session.user.id,
+            ...workflowData
+          });
+
+        if (error) throw error;
+        toast.success("Workflow created successfully!");
+      }
+
       setIsDialogOpen(false);
       resetForm();
       refetchWorkflows();
     } catch (error) {
       console.error("Error saving workflow:", error);
-      toast.error("Failed to create workflow");
+      toast.error(editingWorkflowId ? "Failed to update workflow" : "Failed to create workflow");
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleEditWorkflow = (workflow: any) => {
+    setEditingWorkflowId(workflow.id);
+    setWorkflowType(workflow.content_type);
+    setGenerationMode(workflow.schedule_config?.generation_mode || (workflow.content_type === 'image' ? 'text-to-image' : 'text-to-video'));
+    setDescription(workflow.description || '');
+    setEnhancedPrompt(workflow.prompt_template || '');
+    setAspectRatio(workflow.schedule_config?.aspect_ratio || '1:1');
+    setResolution(workflow.schedule_config?.resolution || '1K');
+    setOutputFormat(workflow.schedule_config?.output_format || 'png');
+    setSelectedPlatforms(workflow.platforms || []);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteWorkflow = async () => {
+    if (!deleteWorkflowId) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('ai_social_workflows')
+        .delete()
+        .eq('id', deleteWorkflowId);
+
+      if (error) throw error;
+      toast.success("Workflow deleted successfully!");
+      refetchWorkflows();
+    } catch (error) {
+      console.error("Error deleting workflow:", error);
+      toast.error("Failed to delete workflow");
+    } finally {
+      setIsDeleting(false);
+      setDeleteWorkflowId(null);
+    }
+  };
+
   const resetForm = () => {
+    setEditingWorkflowId(null);
     setWorkflowType("image");
     setGenerationMode("text-to-image");
     setDescription("");
@@ -163,6 +219,11 @@ export default function Workflows() {
     setResolution("1K");
     setOutputFormat("png");
     setSelectedPlatforms([]);
+  };
+
+  const openNewWorkflowDialog = () => {
+    resetForm();
+    setIsDialogOpen(true);
   };
 
   const socialPlatforms = [
@@ -182,7 +243,7 @@ export default function Workflows() {
               Create automated content generation and publishing flows
             </p>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
+          <Button onClick={openNewWorkflowDialog}>
             <Plus className="mr-2 h-4 w-4" />
             New Workflow
           </Button>
@@ -200,7 +261,7 @@ export default function Workflows() {
                   <Card key={workflow.id} className="bg-muted/30">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div>
+                        <div className="flex-1">
                           <h3 className="font-medium">{workflow.name}</h3>
                           <p className="text-sm text-muted-foreground">{workflow.description}</p>
                           <div className="flex gap-2 mt-2">
@@ -214,9 +275,26 @@ export default function Workflows() {
                             ))}
                           </div>
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded ${workflow.active ? 'bg-green-500/20 text-green-500' : 'bg-muted text-muted-foreground'}`}>
-                          {workflow.active ? 'Active' : 'Inactive'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs px-2 py-1 rounded ${workflow.active ? 'bg-green-500/20 text-green-500' : 'bg-muted text-muted-foreground'}`}>
+                            {workflow.active ? 'Active' : 'Inactive'}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditWorkflow(workflow)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeleteWorkflowId(workflow.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -234,9 +312,9 @@ export default function Workflows() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Workflow</DialogTitle>
+            <DialogTitle>{editingWorkflowId ? 'Edit Workflow' : 'Create New Workflow'}</DialogTitle>
             <DialogDescription>
-              Set up an automated content generation workflow
+              {editingWorkflowId ? 'Modify your workflow settings' : 'Set up an automated content generation workflow'}
             </DialogDescription>
           </DialogHeader>
 
@@ -470,13 +548,41 @@ export default function Workflows() {
                     Saving...
                   </>
                 ) : (
-                  "Create Workflow"
+                  editingWorkflowId ? "Update Workflow" : "Create Workflow"
                 )}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteWorkflowId} onOpenChange={(open) => !open && setDeleteWorkflowId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Workflow</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this workflow? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteWorkflow}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
