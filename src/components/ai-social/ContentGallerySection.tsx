@@ -357,17 +357,24 @@ export function ContentGallerySection() {
                     </div>
                   </div>
                   
-                  <div className="flex flex-wrap gap-1.5">
-                    {/* Model badge */}
+                  {/* Agents involved row */}
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
+                      OpenAI
+                    </span>
+                    <span className="text-muted-foreground">+</span>
                     {item.type === "image" ? (
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
-                        Nano 🍌
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+                        Nano Banana
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
-                        Veo3 🎬
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
+                        Veo3
                       </span>
                     )}
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1.5">
                     
                     {/* Execution type badge - check metadata.execution_type */}
                     {(item.metadata as any)?.execution_type === "scheduled" ? (
