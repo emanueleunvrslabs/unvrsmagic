@@ -100,17 +100,31 @@ serve(async (req) => {
 
     console.log("Workflow found:", workflow.name, "Type:", workflow.content_type);
 
-    // Check and deduct credits before generation
-    const creditCost = workflow.content_type === "video" ? 10 : 1;
-    const { data: credits } = await supabase
-      .from("user_credits")
-      .select("balance")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    // Check if user is admin/owner (unlimited credits)
+    const { data: isOwner } = await supabase.rpc("has_role", {
+      _user_id: user.id,
+      _role: "owner"
+    });
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: user.id,
+      _role: "admin"
+    });
+    const hasUnlimitedCredits = isOwner || isAdmin;
 
-    const currentBalance = credits?.balance || 0;
-    if (currentBalance < creditCost) {
-      throw new Error(`Crediti insufficienti. Necessari: €${creditCost}, Disponibili: €${currentBalance.toFixed(2)}`);
+    // Check and deduct credits before generation (skip for admin/owner)
+    const creditCost = workflow.content_type === "video" ? 10 : 1;
+    
+    if (!hasUnlimitedCredits) {
+      const { data: credits } = await supabase
+        .from("user_credits")
+        .select("balance")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const currentBalance = credits?.balance || 0;
+      if (currentBalance < creditCost) {
+        throw new Error(`Crediti insufficienti. Necessari: €${creditCost}, Disponibili: €${currentBalance.toFixed(2)}`);
+      }
     }
 
     // Deduct credits
