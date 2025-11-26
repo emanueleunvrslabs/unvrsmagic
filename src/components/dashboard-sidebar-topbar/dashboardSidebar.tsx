@@ -345,7 +345,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   // User section - for all users
   if (isUser || isAdmin || isOwner) {
-    const userProjectItems = userProjects.map((up) => {
+    // Only show user-added projects for regular users (not owner/admin)
+    const userProjectItems = (isOwner || isAdmin) ? [] : userProjects.map((up) => {
       // Special handling for NKMT project
       if (up.project.route === '/nkmt') {
         return {
