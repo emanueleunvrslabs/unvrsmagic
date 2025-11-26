@@ -23,3 +23,12 @@ verify_jwt = true
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.verify-api-key]
+verify_jwt = true
+
+[functions.heygen-avatars]
+verify_jwt = true
+
+[functions.heygen-session]
+verify_jwt = true

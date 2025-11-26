@@ -223,6 +223,211 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_avatars: {
+        Row: {
+          closing_script: string | null
+          created_at: string
+          description: string | null
+          heygen_avatar_id: string
+          id: string
+          knowledge_base: Json | null
+          name: string
+          opening_script: string | null
+          personality: string | null
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+          voice_id: string | null
+        }
+        Insert: {
+          closing_script?: string | null
+          created_at?: string
+          description?: string | null
+          heygen_avatar_id: string
+          id?: string
+          knowledge_base?: Json | null
+          name: string
+          opening_script?: string | null
+          personality?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+          voice_id?: string | null
+        }
+        Update: {
+          closing_script?: string | null
+          created_at?: string
+          description?: string | null
+          heygen_avatar_id?: string
+          id?: string
+          knowledge_base?: Json | null
+          name?: string
+          opening_script?: string | null
+          personality?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+          voice_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_live_comments: {
+        Row: {
+          comment_text: string
+          commenter_id: string | null
+          commenter_name: string | null
+          created_at: string
+          id: string
+          platform: string
+          responded_at: string | null
+          response_audio_url: string | null
+          response_text: string | null
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          comment_text: string
+          commenter_id?: string | null
+          commenter_name?: string | null
+          created_at?: string
+          id?: string
+          platform: string
+          responded_at?: string | null
+          response_audio_url?: string | null
+          response_text?: string | null
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          comment_text?: string
+          commenter_id?: string | null
+          commenter_name?: string | null
+          created_at?: string
+          id?: string
+          platform?: string
+          responded_at?: string | null
+          response_audio_url?: string | null
+          response_text?: string | null
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_live_comments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ai_live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_live_products: {
+        Row: {
+          auto_promote: boolean | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number | null
+          product_url: string | null
+          promo_script: string | null
+          promote_interval_minutes: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_promote?: boolean | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price?: number | null
+          product_url?: string | null
+          promo_script?: string | null
+          promote_interval_minutes?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_promote?: boolean | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number | null
+          product_url?: string | null
+          promo_script?: string | null
+          promote_interval_minutes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_live_sessions: {
+        Row: {
+          avatar_id: string | null
+          created_at: string
+          ended_at: string | null
+          heygen_session_id: string | null
+          id: string
+          metadata: Json | null
+          platforms: string[] | null
+          started_at: string | null
+          status: string
+          total_comments: number | null
+          total_responses: number | null
+          updated_at: string
+          user_id: string
+          viewer_count: number | null
+        }
+        Insert: {
+          avatar_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          heygen_session_id?: string | null
+          id?: string
+          metadata?: Json | null
+          platforms?: string[] | null
+          started_at?: string | null
+          status?: string
+          total_comments?: number | null
+          total_responses?: number | null
+          updated_at?: string
+          user_id: string
+          viewer_count?: number | null
+        }
+        Update: {
+          avatar_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          heygen_session_id?: string | null
+          id?: string
+          metadata?: Json | null
+          platforms?: string[] | null
+          started_at?: string | null
+          status?: string
+          total_comments?: number | null
+          total_responses?: number | null
+          updated_at?: string
+          user_id?: string
+          viewer_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_live_sessions_avatar_id_fkey"
+            columns: ["avatar_id"]
+            isOneToOne: false
+            referencedRelation: "ai_avatars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_social_content: {
         Row: {
           created_at: string | null
