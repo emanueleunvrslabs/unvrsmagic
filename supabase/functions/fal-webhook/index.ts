@@ -122,13 +122,54 @@ serve(async (req) => {
         })
         .eq("id", contentId);
 
-      // Publish to configured platforms
+      // Publish to configured platforms and track results
+      const publishingResults: { platform: string; success: boolean; error?: string; postUrl?: string }[] = [];
+      
       if (workflowId) {
-        await publishToInstagram(supabase, workflowId, mediaUrl, contentId);
-        await publishToLinkedin(supabase, workflowId, mediaUrl, contentId);
+        const igResult = await publishToInstagram(supabase, workflowId, mediaUrl, contentId);
+        if (igResult.success === false) {
+          publishingResults.push({ platform: 'instagram', success: false, error: igResult.error });
+        } else if (igResult.postUrl) {
+          publishingResults.push({ platform: 'instagram', success: true, postUrl: igResult.postUrl });
+        }
+        
+        const liResult = await publishToLinkedin(supabase, workflowId, mediaUrl, contentId);
+        if (liResult.success === false) {
+          publishingResults.push({ platform: 'linkedin', success: false, error: liResult.error });
+        } else if (liResult.postUrl) {
+          publishingResults.push({ platform: 'linkedin', success: true, postUrl: liResult.postUrl });
+        }
       }
 
-      return new Response(JSON.stringify({ success: true }), {
+      // Check if any publishing failed
+      const failedPublishing = publishingResults.filter(r => !r.success);
+      if (failedPublishing.length > 0) {
+        // Update content with publishing failure info
+        const { data: contentData } = await supabase
+          .from("ai_social_content")
+          .select("metadata")
+          .eq("id", contentId)
+          .single();
+        
+        const existingMetadata = contentData?.metadata || {};
+        const errorMessages = failedPublishing.map(f => `${f.platform}: ${f.error}`).join("; ");
+        
+        await supabase
+          .from("ai_social_content")
+          .update({ 
+            status: "failed",
+            error_message: `Publishing failed: ${errorMessages}`,
+            metadata: {
+              ...existingMetadata,
+              publishing_errors: failedPublishing
+            }
+          })
+          .eq("id", contentId);
+        
+        console.log("Publishing failed for some platforms:", failedPublishing);
+      }
+
+      return new Response(JSON.stringify({ success: true, publishingResults }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
 
@@ -164,7 +205,7 @@ serve(async (req) => {
   }
 });
 
-async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: string, contentId: string) {
+async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: string, contentId: string): Promise<{ success: boolean; postUrl?: string; error?: string }> {
   try {
     // Get workflow to check platforms
     const { data: workflow } = await supabase
@@ -175,7 +216,7 @@ async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: s
 
     if (!workflow || !workflow.platforms?.includes("instagram")) {
       console.log("Instagram not configured for this workflow");
-      return;
+      return { success: true }; // Not configured = skip, not failure
     }
 
     // Get Instagram credentials
@@ -188,7 +229,7 @@ async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: s
 
     if (!instagramData) {
       console.log("No Instagram credentials found");
-      return;
+      return { success: false, error: "No Instagram credentials found" };
     }
 
     const accessToken = instagramData.api_key;
@@ -205,25 +246,28 @@ async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: s
       postUrl = await publishImageToInstagram(accessToken, igUserId, mediaUrl, caption);
     }
 
-    // Store post URL in content metadata
-    if (postUrl) {
-      const { data: contentData } = await supabase
-        .from("ai_social_content")
-        .select("metadata")
-        .eq("id", contentId)
-        .single();
-      
-      const existingMetadata = contentData?.metadata || {};
-      await supabase
-        .from("ai_social_content")
-        .update({
-          metadata: {
-            ...existingMetadata,
-            instagram_post_url: postUrl
-          }
-        })
-        .eq("id", contentId);
+    if (!postUrl) {
+      return { success: false, error: "Failed to publish to Instagram" };
     }
+
+    // Store post URL in content metadata
+    const { data: contentData } = await supabase
+      .from("ai_social_content")
+      .select("metadata")
+      .eq("id", contentId)
+      .single();
+    
+    const existingMetadata = contentData?.metadata || {};
+    await supabase
+      .from("ai_social_content")
+      .update({
+        metadata: {
+          ...existingMetadata,
+          instagram_post_url: postUrl,
+          instagram_published: true
+        }
+      })
+      .eq("id", contentId);
 
     // Update workflow last_run_at
     await supabase
@@ -231,10 +275,12 @@ async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: s
       .update({ last_run_at: new Date().toISOString() })
       .eq("id", workflowId);
 
-    console.log("Instagram publishing completed");
+    console.log("Instagram publishing completed successfully");
+    return { success: true, postUrl };
 
   } catch (error) {
     console.error("Instagram publishing error:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
 
@@ -358,7 +404,7 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
   return null;
 }
 
-async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: string, contentId: string) {
+async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: string, contentId: string): Promise<{ success: boolean; postUrl?: string; error?: string }> {
   try {
     // Get workflow to check platforms
     const { data: workflow } = await supabase
@@ -369,7 +415,7 @@ async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: st
 
     if (!workflow || !workflow.platforms?.includes("linkedin")) {
       console.log("LinkedIn not configured for this workflow");
-      return;
+      return { success: true }; // Not configured = skip, not failure
     }
 
     // Get LinkedIn credentials
@@ -382,7 +428,7 @@ async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: st
 
     if (!linkedinData) {
       console.log("No LinkedIn credentials found");
-      return;
+      return { success: false, error: "No LinkedIn credentials found" };
     }
 
     const credentials = JSON.parse(linkedinData.api_key);
@@ -401,30 +447,35 @@ async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: st
       postUrl = await publishImageToLinkedin(accessToken, personUrn, mediaUrl);
     }
 
-    // Store post URL in content metadata
-    if (postUrl) {
-      const { data: contentData } = await supabase
-        .from("ai_social_content")
-        .select("metadata")
-        .eq("id", contentId)
-        .single();
-      
-      const existingMetadata = contentData?.metadata || {};
-      await supabase
-        .from("ai_social_content")
-        .update({
-          metadata: {
-            ...existingMetadata,
-            linkedin_post_url: postUrl
-          }
-        })
-        .eq("id", contentId);
+    if (!postUrl) {
+      return { success: false, error: "Failed to publish to LinkedIn" };
     }
 
-    console.log("LinkedIn publishing completed");
+    // Store post URL in content metadata
+    const { data: contentData } = await supabase
+      .from("ai_social_content")
+      .select("metadata")
+      .eq("id", contentId)
+      .single();
+    
+    const existingMetadata = contentData?.metadata || {};
+    await supabase
+      .from("ai_social_content")
+      .update({
+        metadata: {
+          ...existingMetadata,
+          linkedin_post_url: postUrl,
+          linkedin_published: true
+        }
+      })
+      .eq("id", contentId);
+
+    console.log("LinkedIn publishing completed successfully");
+    return { success: true, postUrl };
 
   } catch (error) {
     console.error("LinkedIn publishing error:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
 
