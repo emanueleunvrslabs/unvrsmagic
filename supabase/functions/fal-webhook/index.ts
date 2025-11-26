@@ -578,7 +578,6 @@ async function publishImageToLinkedin(accessToken: string, personUrn: string, im
 async function publishVideoToLinkedin(accessToken: string, personUrn: string, videoUrl: string): Promise<string | null> {
   // Step 1: Download video to get size
   const videoResponse = await fetch(videoUrl);
-  const videoBlob = await videoResponse.blob();
   const videoBuffer = await videoResponse.arrayBuffer();
   const videoSize = videoBuffer.byteLength;
 
