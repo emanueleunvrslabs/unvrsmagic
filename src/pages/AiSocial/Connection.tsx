@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, Unlink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +11,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 export default function Connection() {
   const queryClient = useQueryClient();
 
-  const { data: instagramConnection, isLoading } = useQuery({
+  const { data: instagramConnection, isLoading: isLoadingInstagram } = useQuery({
     queryKey: ['instagram-connection'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -25,6 +25,34 @@ export default function Connection() {
         .maybeSingle();
 
       if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: youtubeConnection, isLoading: isLoadingYoutube } = useQuery({
+    queryKey: ['youtube-connection'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('provider', 'youtube')
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      // Parse the stored JSON to get channel info
+      if (data?.api_key) {
+        try {
+          const parsed = JSON.parse(data.api_key);
+          return { ...data, channelTitle: parsed.channel_title };
+        } catch {
+          return data;
+        }
+      }
       return data;
     },
   });
@@ -96,15 +124,101 @@ export default function Connection() {
     }
   };
 
+  const connectYoutube = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in first");
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("youtube-oauth", {
+        body: {
+          action: "start",
+          user_id: session.user.id,
+          origin: window.location.origin,
+        },
+      });
+
+      console.log('YouTube OAuth response:', { data, error });
+
+      if (error) {
+        console.error("Error starting YouTube OAuth:", error);
+        const errorMessage = (error as any).message || "Failed to connect YouTube";
+        toast.error(errorMessage);
+        return;
+      }
+
+      if (data && (data as any).error) {
+        console.error("YouTube OAuth error:", (data as any).error);
+        toast.error((data as any).error);
+        return;
+      }
+
+      if (data && (data as any).authUrl) {
+        console.log('Redirecting to YouTube:', (data as any).authUrl);
+        window.location.href = (data as any).authUrl as string;
+      } else {
+        console.error("Invalid response:", data);
+        toast.error("Invalid response from YouTube OAuth");
+      }
+    } catch (error) {
+      console.error("Error starting YouTube OAuth:", error);
+      toast.error("Failed to connect YouTube");
+    }
+  };
+
+  const disconnectYoutube = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in first");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('api_keys')
+        .delete()
+        .eq('user_id', session.user.id)
+        .eq('provider', 'youtube');
+
+      if (error) throw error;
+
+      toast.success("YouTube disconnected successfully!");
+      queryClient.invalidateQueries({ queryKey: ['youtube-connection'] });
+    } catch (error) {
+      console.error("Error disconnecting YouTube:", error);
+      toast.error("Failed to disconnect YouTube");
+    }
+  };
+
   useEffect(() => {
     // Check if redirected back from OAuth
     const params = new URLSearchParams(window.location.search);
+    
+    // Instagram callback
     if (params.get('success') === 'true') {
       toast.success("Instagram connected successfully!");
       queryClient.invalidateQueries({ queryKey: ['instagram-connection'] });
       window.history.replaceState({}, '', '/ai-social/connection');
     }
+    
+    // YouTube callback
+    if (params.get('youtube_success') === 'true') {
+      const channel = params.get('channel');
+      toast.success(`YouTube connected successfully! Channel: ${channel || 'Connected'}`);
+      queryClient.invalidateQueries({ queryKey: ['youtube-connection'] });
+      window.history.replaceState({}, '', '/ai-social/connection');
+    }
+    
+    // Error handling
+    const error = params.get('error');
+    if (error) {
+      toast.error(`Connection failed: ${decodeURIComponent(error)}`);
+      window.history.replaceState({}, '', '/ai-social/connection');
+    }
   }, [queryClient]);
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -147,10 +261,50 @@ export default function Connection() {
                 <Button 
                   className="w-full"
                   onClick={connectInstagram}
-                  disabled={isLoading}
+                  disabled={isLoadingInstagram}
                 >
                   <Link className="mr-2 h-4 w-4" />
                   Connect Instagram
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>YouTube</CardTitle>
+                <Badge 
+                  variant="outline"
+                  className={youtubeConnection ? "bg-green-500/10 text-green-500 border-green-500/20" : ""}
+                >
+                  {youtubeConnection ? "Connected" : "Not Connected"}
+                </Badge>
+              </div>
+              <CardDescription>
+                {youtubeConnection 
+                  ? `Connected to: ${(youtubeConnection as any).channelTitle || 'YouTube Channel'}` 
+                  : "Connect your YouTube channel for live streaming"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {youtubeConnection ? (
+                <Button 
+                  className="w-full bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:border-destructive/30"
+                  variant="ghost"
+                  onClick={disconnectYoutube}
+                >
+                  <Unlink className="mr-2 h-4 w-4" />
+                  Disconnect YouTube
+                </Button>
+              ) : (
+                <Button 
+                  className="w-full"
+                  onClick={connectYoutube}
+                  disabled={isLoadingYoutube}
+                >
+                  <Link className="mr-2 h-4 w-4" />
+                  Connect YouTube
                 </Button>
               )}
             </CardContent>
@@ -165,9 +319,9 @@ export default function Connection() {
               <CardDescription>Connect your Facebook page</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">
+              <Button className="w-full" disabled>
                 <Link className="mr-2 h-4 w-4" />
-                Connect Facebook
+                Coming Soon
               </Button>
             </CardContent>
           </Card>
@@ -175,31 +329,15 @@ export default function Connection() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Twitter</CardTitle>
+                <CardTitle>TikTok</CardTitle>
                 <Badge variant="outline">Not Connected</Badge>
               </div>
-              <CardDescription>Connect your Twitter account</CardDescription>
+              <CardDescription>Connect your TikTok account for live streaming</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">
+              <Button className="w-full" disabled>
                 <Link className="mr-2 h-4 w-4" />
-                Connect Twitter
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>LinkedIn</CardTitle>
-                <Badge variant="outline">Not Connected</Badge>
-              </div>
-              <CardDescription>Connect your LinkedIn profile</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full">
-                <Link className="mr-2 h-4 w-4" />
-                Connect LinkedIn
+                Coming Soon
               </Button>
             </CardContent>
           </Card>
