@@ -122,9 +122,10 @@ serve(async (req) => {
         })
         .eq("id", contentId);
 
-      // If workflow has Instagram, publish
+      // Publish to configured platforms
       if (workflowId) {
         await publishToInstagram(supabase, workflowId, mediaUrl, contentId);
+        await publishToLinkedin(supabase, workflowId, mediaUrl, contentId);
       }
 
       return new Response(JSON.stringify({ success: true }), {
@@ -328,5 +329,261 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
   if (publishResponse.ok) {
     const publishData = await publishResponse.json();
     console.log("Instagram Reel published:", publishData.id);
+  }
+}
+
+async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: string, contentId: string) {
+  try {
+    // Get workflow to check platforms
+    const { data: workflow } = await supabase
+      .from("ai_social_workflows")
+      .select("*")
+      .eq("id", workflowId)
+      .single();
+
+    if (!workflow || !workflow.platforms?.includes("linkedin")) {
+      console.log("LinkedIn not configured for this workflow");
+      return;
+    }
+
+    // Get LinkedIn credentials
+    const { data: linkedinData } = await supabase
+      .from("api_keys")
+      .select("api_key, owner_id")
+      .eq("user_id", workflow.user_id)
+      .eq("provider", "linkedin")
+      .maybeSingle();
+
+    if (!linkedinData) {
+      console.log("No LinkedIn credentials found");
+      return;
+    }
+
+    const credentials = JSON.parse(linkedinData.api_key);
+    const accessToken = credentials.access_token;
+    const personUrn = linkedinData.owner_id; // urn:li:person:xxxxx
+    const isVideo = workflow.content_type === "video";
+
+    console.log(`Publishing ${isVideo ? 'video' : 'image'} to LinkedIn...`);
+
+    if (isVideo) {
+      await publishVideoToLinkedin(accessToken, personUrn, mediaUrl);
+    } else {
+      await publishImageToLinkedin(accessToken, personUrn, mediaUrl);
+    }
+
+    console.log("LinkedIn publishing completed");
+
+  } catch (error) {
+    console.error("LinkedIn publishing error:", error);
+  }
+}
+
+async function publishImageToLinkedin(accessToken: string, personUrn: string, imageUrl: string) {
+  // Step 1: Initialize upload
+  const initResponse = await fetch("https://api.linkedin.com/v2/images?action=initializeUpload", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "X-Restli-Protocol-Version": "2.0.0"
+    },
+    body: JSON.stringify({
+      initializeUploadRequest: {
+        owner: personUrn
+      }
+    })
+  });
+
+  if (!initResponse.ok) {
+    const errorText = await initResponse.text();
+    console.error("LinkedIn image upload init failed:", errorText);
+    return;
+  }
+
+  const initData = await initResponse.json();
+  const uploadUrl = initData.value.uploadUrl;
+  const imageAsset = initData.value.image;
+
+  console.log("LinkedIn image upload URL obtained:", uploadUrl);
+
+  // Step 2: Download image and upload to LinkedIn
+  const imageResponse = await fetch(imageUrl);
+  const imageBlob = await imageResponse.blob();
+  const imageBuffer = await imageBlob.arrayBuffer();
+
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/octet-stream"
+    },
+    body: imageBuffer
+  });
+
+  if (!uploadResponse.ok) {
+    const errorText = await uploadResponse.text();
+    console.error("LinkedIn image upload failed:", errorText);
+    return;
+  }
+
+  console.log("Image uploaded to LinkedIn, creating post...");
+
+  // Step 3: Create post with the image
+  const postResponse = await fetch("https://api.linkedin.com/v2/posts", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "X-Restli-Protocol-Version": "2.0.0"
+    },
+    body: JSON.stringify({
+      author: personUrn,
+      commentary: "",
+      visibility: "PUBLIC",
+      distribution: {
+        feedDistribution: "MAIN_FEED",
+        targetEntities: [],
+        thirdPartyDistributionChannels: []
+      },
+      content: {
+        media: {
+          title: "Generated content",
+          id: imageAsset
+        }
+      },
+      lifecycleState: "PUBLISHED",
+      isReshareDisabledByAuthor: false
+    })
+  });
+
+  if (postResponse.ok) {
+    const postData = await postResponse.json();
+    console.log("LinkedIn post published:", postData);
+  } else {
+    const errorText = await postResponse.text();
+    console.error("LinkedIn post creation failed:", errorText);
+  }
+}
+
+async function publishVideoToLinkedin(accessToken: string, personUrn: string, videoUrl: string) {
+  // Step 1: Download video to get size
+  const videoResponse = await fetch(videoUrl);
+  const videoBlob = await videoResponse.blob();
+  const videoBuffer = await videoResponse.arrayBuffer();
+  const videoSize = videoBuffer.byteLength;
+
+  console.log(`LinkedIn video size: ${videoSize} bytes`);
+
+  // Step 2: Initialize video upload
+  const initResponse = await fetch("https://api.linkedin.com/v2/videos?action=initializeUpload", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "X-Restli-Protocol-Version": "2.0.0"
+    },
+    body: JSON.stringify({
+      initializeUploadRequest: {
+        owner: personUrn,
+        fileSizeBytes: videoSize,
+        uploadCaptions: false,
+        uploadThumbnail: false
+      }
+    })
+  });
+
+  if (!initResponse.ok) {
+    const errorText = await initResponse.text();
+    console.error("LinkedIn video upload init failed:", errorText);
+    return;
+  }
+
+  const initData = await initResponse.json();
+  const uploadUrl = initData.value.uploadInstructions[0]?.uploadUrl;
+  const videoAsset = initData.value.video;
+
+  if (!uploadUrl) {
+    console.error("No upload URL in LinkedIn video init response");
+    return;
+  }
+
+  console.log("LinkedIn video upload URL obtained");
+
+  // Step 3: Upload video
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/octet-stream"
+    },
+    body: videoBuffer
+  });
+
+  if (!uploadResponse.ok) {
+    const errorText = await uploadResponse.text();
+    console.error("LinkedIn video upload failed:", errorText);
+    return;
+  }
+
+  // Step 4: Finalize upload
+  const finalizeResponse = await fetch("https://api.linkedin.com/v2/videos?action=finalizeUpload", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "X-Restli-Protocol-Version": "2.0.0"
+    },
+    body: JSON.stringify({
+      finalizeUploadRequest: {
+        video: videoAsset,
+        uploadToken: "",
+        uploadedPartIds: []
+      }
+    })
+  });
+
+  if (!finalizeResponse.ok) {
+    const errorText = await finalizeResponse.text();
+    console.error("LinkedIn video finalize failed:", errorText);
+    // Continue anyway, some APIs don't require explicit finalize
+  }
+
+  console.log("Video uploaded to LinkedIn, creating post...");
+
+  // Step 5: Create post with the video
+  const postResponse = await fetch("https://api.linkedin.com/v2/posts", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "X-Restli-Protocol-Version": "2.0.0"
+    },
+    body: JSON.stringify({
+      author: personUrn,
+      commentary: "",
+      visibility: "PUBLIC",
+      distribution: {
+        feedDistribution: "MAIN_FEED",
+        targetEntities: [],
+        thirdPartyDistributionChannels: []
+      },
+      content: {
+        media: {
+          title: "Generated video",
+          id: videoAsset
+        }
+      },
+      lifecycleState: "PUBLISHED",
+      isReshareDisabledByAuthor: false
+    })
+  });
+
+  if (postResponse.ok) {
+    const postData = await postResponse.json();
+    console.log("LinkedIn video post published:", postData);
+  } else {
+    const errorText = await postResponse.text();
+    console.error("LinkedIn video post creation failed:", errorText);
   }
 }
