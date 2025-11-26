@@ -425,6 +425,7 @@ async function publishToLinkedin(
           headers: {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
+            "X-Restli-Protocol-Version": "2.0.0",
           },
           body: JSON.stringify({
             registerUploadRequest: {
@@ -442,8 +443,12 @@ async function publishToLinkedin(
       );
 
       const initData = await initResponse.json();
+      console.log("LinkedIn video registerUpload response:", JSON.stringify(initData));
+      
       if (!initData.value) {
-        return { success: false, error: "Failed to initialize video upload" };
+        const errorMsg = initData.message || initData.error || JSON.stringify(initData);
+        console.error("LinkedIn video init failed:", errorMsg);
+        return { success: false, error: `LinkedIn video init failed: ${errorMsg}` };
       }
 
       const uploadUrl = initData.value.uploadMechanism["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"].uploadUrl;
