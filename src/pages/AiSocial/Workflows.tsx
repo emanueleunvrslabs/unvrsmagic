@@ -848,15 +848,23 @@ export default function Workflows() {
                               </span>
                             )}
                             {/* Social Platform Badges */}
-                            {workflow.platforms?.map((platform: string) => (
+                            {workflow.platforms?.map((platform: string) => {
+                              const isRunning = runningWorkflowId === workflow.id && runningStage === "instagram";
+                              const getPlatformStyles = () => {
+                                if (platform === 'linkedin') {
+                                  return isRunning
+                                    ? "bg-[#0A66C2]/30 text-[#0A66C2] border-[#0A66C2]/50 shadow-[0_0_15px_rgba(10,102,194,0.5)]"
+                                    : "bg-[#0A66C2]/10 text-[#0A66C2] border-[#0A66C2]/20";
+                                }
+                                return isRunning && platform === "instagram"
+                                  ? "bg-pink-500/30 text-pink-300 border-pink-400/50 shadow-[0_0_15px_rgba(236,72,153,0.5)]"
+                                  : "bg-pink-500/10 text-pink-400 border-pink-500/20";
+                              };
+                              return (
                               <span 
                                 key={platform} 
-                                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm capitalize transition-all duration-300 ${
-                                  runningWorkflowId === workflow.id && runningStage === "instagram" && platform === "instagram"
-                                    ? "bg-pink-500/30 text-pink-300 border-pink-400/50 shadow-[0_0_15px_rgba(236,72,153,0.5)]"
-                                    : "bg-pink-500/10 text-pink-400 border-pink-500/20"
-                                }`}
-                                style={runningWorkflowId === workflow.id && runningStage === "instagram" && platform === "instagram" ? { animation: 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' } : {}}
+                                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm capitalize transition-all duration-300 ${getPlatformStyles()}`}
+                                style={isRunning && platform === "instagram" ? { animation: 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' } : {}}
                               >
                                 {platform === 'instagram' && (
                                   <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
@@ -880,7 +888,8 @@ export default function Workflows() {
                                 )}
                             {platform}
                             </span>
-                          ))}
+                              );
+                            })}
                           
                           {/* Action Buttons - on same row as badges */}
                           <div className="flex items-center gap-1 ml-auto">
