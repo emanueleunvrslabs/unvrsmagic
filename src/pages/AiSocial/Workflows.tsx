@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useUserCredits } from "@/hooks/useUserCredits";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -34,6 +35,7 @@ const DAYS_OF_WEEK = [
 export default function Workflows() {
   const navigate = useNavigate();
   const { credits, isLoading: creditsLoading } = useUserCredits();
+  const { isOwner, isAdmin } = useUserRole();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
   const [deleteWorkflowId, setDeleteWorkflowId] = useState<string | null>(null);
@@ -68,9 +70,13 @@ export default function Workflows() {
   const [scheduleTimes, setScheduleTimes] = useState<string[]>(["09:00"]);
   const [scheduleDays, setScheduleDays] = useState<string[]>(["monday", "wednesday", "friday"]);
 
-  // Credit check helpers
+  // Credit check helpers - admin and owner have unlimited credits
   const getRequiredCredits = (type: "image" | "video") => type === "image" ? IMAGE_COST : VIDEO_COST;
-  const hasInsufficientCredits = (type: "image" | "video") => !creditsLoading && (credits?.balance || 0) < getRequiredCredits(type);
+  const hasInsufficientCredits = (type: "image" | "video") => {
+    // Admin and owner have unlimited credits
+    if (isOwner || isAdmin) return false;
+    return !creditsLoading && (credits?.balance || 0) < getRequiredCredits(type);
+  };
 
   // Fetch connected social accounts
   const { data: connectedAccounts } = useQuery({
@@ -376,13 +382,6 @@ export default function Workflows() {
   };
 
   const handleSaveWorkflow = async () => {
-    // Check credits first
-    if (hasInsufficientCredits(workflowType)) {
-      const requiredCredits = getRequiredCredits(workflowType);
-      toast.error(`Crediti insufficienti. Hai bisogno di almeno €${requiredCredits} per creare un workflow ${workflowType === 'image' ? 'immagine' : 'video'}.`);
-      return;
-    }
-
     if (!workflowName.trim()) {
       toast.error("Please enter a workflow name");
       return;
@@ -545,7 +544,7 @@ export default function Workflows() {
         await deleteScheduledPosts(workflowId);
         toast.success("Workflow paused - scheduled posts removed");
       } else {
-        // Activating: Get workflow and create scheduled posts
+        // Activating: Get workflow and check credits for regular users
         const { data: workflow } = await supabase
           .from('ai_social_workflows')
           .select('*')
@@ -553,6 +552,19 @@ export default function Workflows() {
           .single();
 
         if (workflow) {
+          // Check credits only for regular users when activating
+          if (hasInsufficientCredits(workflow.content_type as "image" | "video")) {
+            const requiredCredits = getRequiredCredits(workflow.content_type as "image" | "video");
+            toast.error(`Crediti insufficienti. Hai bisogno di almeno €${requiredCredits} per attivare questo workflow.`);
+            // Revert the active status update
+            await supabase
+              .from('ai_social_workflows')
+              .update({ active: false })
+              .eq('id', workflowId);
+            refetchWorkflows();
+            return;
+          }
+
           await createScheduledPosts(
             workflowId, 
             session.user.id, 
