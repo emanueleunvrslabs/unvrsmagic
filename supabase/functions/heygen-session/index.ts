@@ -114,7 +114,7 @@ serve(async (req) => {
       const sessionToken = tokenData.data?.token;
       console.log('Session token obtained');
 
-      // Step 2: Create streaming session (returns LiveKit credentials)
+      // Step 2: Create streaming session (returns LiveKit credentials) - use V2 for LiveKit mode
       console.log('Creating streaming session with avatar:', avatarData.heygen_avatar_id);
       const sessionResponse = await fetch(`${HEYGEN_API_URL}/v1/streaming.new`, {
         method: 'POST',
@@ -129,6 +129,8 @@ serve(async (req) => {
             voice_id: avatarData.voice_id,
             rate: 1.0,
           } : undefined,
+          version: 'v2',  // Use LiveKit V2 mode
+          video_encoding: 'H264',
         }),
       });
 
@@ -175,7 +177,7 @@ serve(async (req) => {
       );
 
     } else if (action === 'start-session') {
-      // Activate the HeyGen streaming session (required before speak commands)
+      // Activate the HeyGen streaming session (required BEFORE LiveKit connect in V2 mode)
       console.log('Activating HeyGen streaming session...');
 
       const { data: sessionData } = await supabase
@@ -193,8 +195,8 @@ serve(async (req) => {
 
       const metadata = sessionData.metadata as { session_token?: string };
 
-      // Start the streaming session (required for LiveKit mode)
-      console.log('Calling streaming.start to activate session...');
+      // In LiveKit V2 mode, streaming.start just needs session_id (no SDP)
+      console.log('Calling streaming.start to activate session (V2 mode)...');
       const startResponse = await fetch(`${HEYGEN_API_URL}/v1/streaming.start`, {
         method: 'POST',
         headers: {
