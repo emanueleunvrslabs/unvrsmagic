@@ -362,7 +362,6 @@ export function ContentGallerySection() {
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
                       OpenAI
                     </span>
-                    <span className="text-muted-foreground">+</span>
                     {item.type === "image" ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
                         Nano Banana
