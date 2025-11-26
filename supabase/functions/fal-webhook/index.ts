@@ -618,11 +618,10 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
 
   console.log("LinkedIn video upload URL obtained");
 
-  // Step 3: Upload video
+  // Step 3: Upload video (upload URL is pre-signed, no Authorization header needed)
   const uploadResponse = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
-      "Authorization": `Bearer ${accessToken}`,
       "Content-Type": "application/octet-stream"
     },
     body: videoBuffer

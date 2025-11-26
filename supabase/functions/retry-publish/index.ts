@@ -364,10 +364,10 @@ async function publishToLinkedin(
       const imageResponse = await fetch(content.media_url);
       const imageBuffer = await imageResponse.arrayBuffer();
 
+      // Upload image (upload URL is pre-signed, no Authorization header needed)
       const uploadResponse = await fetch(uploadUrl, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "image/png",
         },
         body: imageBuffer,
@@ -449,11 +449,10 @@ async function publishToLinkedin(
       const uploadUrl = initData.value.uploadMechanism["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"].uploadUrl;
       const asset = initData.value.asset;
 
-      // Upload video
+      // Upload video (upload URL is pre-signed, no Authorization header needed)
       const uploadResponse = await fetch(uploadUrl, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "video/mp4",
         },
         body: videoBuffer,
