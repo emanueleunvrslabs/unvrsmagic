@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Room, RoomEvent, Track, VideoPresets } from "livekit-client"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -70,9 +69,9 @@ export default function LiveStudio() {
   const [elapsedTime, setElapsedTime] = useState(0)
   const [connectionStatus, setConnectionStatus] = useState<string>("disconnected")
 
-  // LiveKit refs
+  // WebRTC refs
   const videoRef = useRef<HTMLVideoElement>(null)
-  const roomRef = useRef<Room | null>(null)
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
 
   // Load avatars
@@ -80,8 +79,8 @@ export default function LiveStudio() {
     loadAvatars()
     return () => {
       // Cleanup on unmount
-      if (roomRef.current) {
-        roomRef.current.disconnect()
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close()
       }
     }
   }, [])
@@ -135,73 +134,69 @@ export default function LiveStudio() {
     )
   }
 
-  const connectToLiveKit = async (url: string, accessToken: string) => {
-    console.log("Connecting to LiveKit...", { url })
+  const connectToHeyGenWebRTC = async (sdpOffer: string, iceServers: RTCIceServer[]) => {
+    console.log("Connecting to HeyGen WebRTC...")
     setConnectionStatus("connecting")
 
     try {
-      // Create LiveKit Room
-      const room = new Room({
-        adaptiveStream: true,
-        dynacast: true,
-        videoCaptureDefaults: {
-          resolution: VideoPresets.h720.resolution,
-        },
+      // Create WebRTC peer connection
+      const pc = new RTCPeerConnection({
+        iceServers: iceServers || [{ urls: "stun:stun.l.google.com:19302" }],
       })
-
-      roomRef.current = room
+      peerConnectionRef.current = pc
 
       // Create MediaStream for video element
       const mediaStream = new MediaStream()
       mediaStreamRef.current = mediaStream
 
-      // Handle track subscription
-      room.on(RoomEvent.TrackSubscribed, (track) => {
-        console.log("Track subscribed:", track.kind)
-        if (track.kind === "video" || track.kind === "audio") {
-          const mediaTrack = track.mediaStreamTrack
-          if (mediaTrack) {
-            mediaStream.addTrack(mediaTrack)
-            
-            // Update video element when we have both tracks
-            if (videoRef.current && mediaStream.getTracks().length > 0) {
-              videoRef.current.srcObject = mediaStream
-              videoRef.current.play().catch(console.error)
-            }
+      // Handle incoming tracks
+      pc.ontrack = (event) => {
+        console.log("Track received:", event.track.kind)
+        if (event.track.kind === "video" || event.track.kind === "audio") {
+          mediaStream.addTrack(event.track)
+          
+          if (videoRef.current && mediaStream.getTracks().length > 0) {
+            videoRef.current.srcObject = mediaStream
+            videoRef.current.play().catch(console.error)
           }
         }
-      })
+      }
 
-      // Handle track unsubscription
-      room.on(RoomEvent.TrackUnsubscribed, (track) => {
-        console.log("Track unsubscribed:", track.kind)
-        const mediaTrack = track.mediaStreamTrack
-        if (mediaTrack && mediaStream) {
-          mediaStream.removeTrack(mediaTrack)
+      // Handle ICE connection state
+      pc.oniceconnectionstatechange = () => {
+        console.log("ICE connection state:", pc.iceConnectionState)
+        if (pc.iceConnectionState === "connected") {
+          setConnectionStatus("connected")
+        } else if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
+          setConnectionStatus("disconnected")
         }
-      })
+      }
 
       // Handle connection state
-      room.on(RoomEvent.Connected, () => {
-        console.log("Room connected")
-        setConnectionStatus("connected")
-      })
+      pc.onconnectionstatechange = () => {
+        console.log("Connection state:", pc.connectionState)
+        if (pc.connectionState === "connected") {
+          setConnectionStatus("connected")
+        }
+      }
 
-      room.on(RoomEvent.Disconnected, (reason) => {
-        console.log("Room disconnected:", reason)
-        setConnectionStatus("disconnected")
-      })
+      // Set remote description from HeyGen SDP offer
+      await pc.setRemoteDescription(new RTCSessionDescription({
+        type: "offer",
+        sdp: sdpOffer,
+      }))
 
-      // Prepare and connect
-      await room.prepareConnection(url, accessToken)
-      await room.connect(url, accessToken)
+      // Create and set local answer
+      const answer = await pc.createAnswer()
+      await pc.setLocalDescription(answer)
+
+      console.log("WebRTC connection established, waiting for ICE...")
       
-      console.log("LiveKit connected successfully")
-      return true
+      return answer.sdp
     } catch (error) {
-      console.error("LiveKit connection error:", error)
+      console.error("WebRTC connection error:", error)
       setConnectionStatus("error")
-      return false
+      return null
     }
   }
 
@@ -254,33 +249,38 @@ export default function LiveStudio() {
         throw new Error(streamError.message || "Failed to start HeyGen session")
       }
 
-      if (!streamData?.url || !streamData?.accessToken) {
+      if (!streamData?.sdpOffer) {
         console.error("Invalid HeyGen response:", streamData)
         await supabase.from('ai_live_sessions').delete().eq('id', session.id)
-        throw new Error("Invalid response from HeyGen")
+        throw new Error("Invalid response from HeyGen - no SDP offer")
       }
 
       console.log("HeyGen session created:", streamData.sessionId)
 
-      // Connect to LiveKit for video streaming
+      // Connect via WebRTC
       toast.info("Connecting to video stream...")
-      const connected = await connectToLiveKit(streamData.url, streamData.accessToken)
+      const sdpAnswer = await connectToHeyGenWebRTC(
+        streamData.sdpOffer, 
+        streamData.iceServers || []
+      )
 
-      if (!connected) {
-        throw new Error("Failed to connect to video stream")
+      if (!sdpAnswer) {
+        throw new Error("Failed to create WebRTC answer")
       }
 
-      // Start the actual streaming
-      toast.info("Starting stream...")
+      // Send SDP answer back to HeyGen
+      toast.info("Establishing connection...")
       const { error: startError } = await supabase.functions.invoke('heygen-session', {
         body: {
           action: 'start-session',
           sessionId: session.id,
+          sdpAnswer: sdpAnswer,
         }
       })
 
       if (startError) {
         console.error("Start streaming error:", startError)
+        throw new Error("Failed to start streaming")
       }
 
       // Update session status
@@ -305,13 +305,19 @@ export default function LiveStudio() {
               text: avatar.opening_script,
             }
           })
-        }, 2000)
+        }, 3000) // Wait longer for connection to stabilize
       }
 
     } catch (error) {
       console.error("Error starting live:", error)
       toast.error(error instanceof Error ? error.message : "Failed to start live stream")
       setConnectionStatus("disconnected")
+      
+      // Cleanup on error
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close()
+        peerConnectionRef.current = null
+      }
     } finally {
       setIsStarting(false)
     }
@@ -321,10 +327,10 @@ export default function LiveStudio() {
     if (!currentSession) return
 
     try {
-      // Disconnect LiveKit
-      if (roomRef.current) {
-        roomRef.current.disconnect()
-        roomRef.current = null
+      // Disconnect WebRTC
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close()
+        peerConnectionRef.current = null
       }
 
       // Clear video
