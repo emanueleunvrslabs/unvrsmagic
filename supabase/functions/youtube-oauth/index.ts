@@ -180,9 +180,10 @@ Deno.serve(async (req) => {
       const redirectUri = `${supabaseUrl}/functions/v1/youtube-oauth`;
       const state = encodeURIComponent(JSON.stringify({ user_id, origin: requestOrigin }));
       
-      // YouTube/Google OAuth scopes - start with basic profile scope for testing
-      // Full scopes: youtube, youtube.force-ssl, youtube.readonly
+      // YouTube/Google OAuth scopes for live streaming
       const scopes = [
+        'https://www.googleapis.com/auth/youtube',
+        'https://www.googleapis.com/auth/youtube.force-ssl',
         'https://www.googleapis.com/auth/youtube.readonly',
       ].join(' ');
 
