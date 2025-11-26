@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Loader2, AlertCircle } from "lucide-react";
 import { VideoGallerySection } from "@/components/ai-social/VideoGallerySection";
 import { useUserCredits } from "@/hooks/useUserCredits";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -20,6 +21,7 @@ const VIDEO_COST = 10; // €10 per video
 export default function GenerateVideo() {
   const navigate = useNavigate();
   const { credits, isLoading: creditsLoading } = useUserCredits();
+  const { isOwner, isAdmin } = useUserRole();
   const [prompt, setPrompt] = useState("");
   const [mode, setMode] = useState("text-to-video");
   const [aspectRatio, setAspectRatio] = useState("16:9");
@@ -36,7 +38,9 @@ export default function GenerateVideo() {
   const firstFrameInputRef = useRef<HTMLInputElement>(null);
   const lastFrameInputRef = useRef<HTMLInputElement>(null);
 
-  const hasInsufficientCredits = !creditsLoading && (credits?.balance || 0) < VIDEO_COST;
+  // Owner and admin have unlimited credits
+  const hasUnlimitedCredits = isOwner || isAdmin;
+  const hasInsufficientCredits = !hasUnlimitedCredits && !creditsLoading && (credits?.balance || 0) < VIDEO_COST;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

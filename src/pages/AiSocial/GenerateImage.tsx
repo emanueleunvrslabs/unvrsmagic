@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Loader2, AlertCircle } from "lucide-react";
 import { ImageGallerySection } from "@/components/ai-social/ImageGallerySection";
 import { useUserCredits } from "@/hooks/useUserCredits";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -19,6 +20,7 @@ const IMAGE_COST = 1; // €1 per image
 export default function GenerateImage() {
   const navigate = useNavigate();
   const { credits, isLoading: creditsLoading } = useUserCredits();
+  const { isOwner, isAdmin } = useUserRole();
   const [prompt, setPrompt] = useState("");
   const [mode, setMode] = useState<"text-to-image" | "image-to-image">("text-to-image");
   const [inputImages, setInputImages] = useState<string[]>([]);
@@ -30,7 +32,9 @@ export default function GenerateImage() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const hasInsufficientCredits = !creditsLoading && (credits?.balance || 0) < IMAGE_COST;
+  // Owner and admin have unlimited credits
+  const hasUnlimitedCredits = isOwner || isAdmin;
+  const hasInsufficientCredits = !hasUnlimitedCredits && !creditsLoading && (credits?.balance || 0) < IMAGE_COST;
 
   // Update aspect ratio to "auto" when switching to image-to-image
   const handleModeChange = (newMode: "text-to-image" | "image-to-image") => {
