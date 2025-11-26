@@ -92,10 +92,10 @@ serve(async (req) => {
     // Format the response - streaming avatars have different structure
     const avatars = (data.data || []).map((avatar: any) => ({
       avatar_id: avatar.avatar_id,
-      avatar_name: avatar.avatar_name || avatar.avatar_id,
-      preview_image_url: avatar.preview_image_url || avatar.thumbnail_url,
+      avatar_name: avatar.pose_name || avatar.avatar_name || avatar.avatar_id,
+      preview_image_url: avatar.normal_preview || avatar.preview_image_url,
+      default_voice: avatar.default_voice,
       status: avatar.status,
-      is_public: avatar.is_public,
     }));
 
     console.log(`Found ${avatars.length} streaming avatars`);
