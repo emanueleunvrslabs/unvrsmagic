@@ -54,6 +54,15 @@ interface Comment {
   created_at: string
 }
 
+interface YouTubeBroadcast {
+  broadcastId: string
+  streamId: string
+  rtmpUrl: string
+  streamKey: string
+  watchUrl: string
+  liveChatId?: string
+}
+
 const PLATFORMS = [
   { id: "instagram", label: "Instagram" },
   { id: "tiktok", label: "TikTok" },
@@ -72,6 +81,8 @@ export default function LiveStudio() {
   const [isMuted, setIsMuted] = useState(false)
   const [elapsedTime, setElapsedTime] = useState(0)
   const [connectionStatus, setConnectionStatus] = useState<string>("disconnected")
+  const [youtubeBroadcast, setYoutubeBroadcast] = useState<YouTubeBroadcast | null>(null)
+  const [youtubeChatPolling, setYoutubeChatPolling] = useState<NodeJS.Timeout | null>(null)
 
   // LiveKit refs
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -92,6 +103,15 @@ export default function LiveStudio() {
       }
     }
   }, [])
+
+  // Cleanup YouTube chat polling on unmount
+  useEffect(() => {
+    return () => {
+      if (youtubeChatPolling) {
+        clearTimeout(youtubeChatPolling)
+      }
+    }
+  }, [youtubeChatPolling])
 
   // Timer for live session
   useEffect(() => {
@@ -292,6 +312,46 @@ export default function LiveStudio() {
       if (error) throw error
       setCurrentSession(session)
 
+      // If YouTube is selected, create broadcast first
+      let ytBroadcast: YouTubeBroadcast | null = null
+      if (selectedPlatforms.includes('youtube')) {
+        toast.info("Creating YouTube Live broadcast...")
+        const avatar = avatars.find(a => a.id === selectedAvatar)
+        
+        const { data: broadcastData, error: broadcastError } = await supabase.functions.invoke('youtube-broadcast', {
+          body: {
+            action: 'create',
+            title: `Live with ${avatar?.name || 'AI Avatar'}`,
+            description: `AI Avatar live stream powered by HeyGen`,
+            sessionId: session.id,
+          }
+        })
+
+        if (broadcastError) {
+          console.error("YouTube broadcast error:", broadcastError)
+          toast.error("Failed to create YouTube broadcast. Check your YouTube connection.")
+          // Continue without YouTube - don't fail the entire stream
+        } else if (broadcastData?.success) {
+          ytBroadcast = {
+            broadcastId: broadcastData.broadcastId,
+            streamId: broadcastData.streamId,
+            rtmpUrl: broadcastData.rtmpUrl,
+            streamKey: broadcastData.streamKey,
+            watchUrl: broadcastData.watchUrl,
+          }
+          setYoutubeBroadcast(ytBroadcast)
+          console.log("YouTube broadcast created:", ytBroadcast)
+          toast.success("YouTube Live created!", {
+            description: `Watch at: ${ytBroadcast.watchUrl}`,
+            action: {
+              label: "Open",
+              onClick: () => window.open(ytBroadcast!.watchUrl, '_blank')
+            },
+            duration: 10000,
+          })
+        }
+      }
+
       // Start HeyGen streaming session
       toast.info("Initializing HeyGen avatar...")
       const { data: streamData, error: streamError } = await supabase.functions.invoke('heygen-session', {
@@ -349,6 +409,11 @@ export default function LiveStudio() {
       setElapsedTime(0)
       toast.success("Live stream started!")
 
+      // Start YouTube chat polling if broadcast exists
+      if (ytBroadcast) {
+        startYoutubeChatPolling(ytBroadcast.broadcastId, session.id)
+      }
+
       // Play opening script if available - tracks are now subscribed, add small delay for HeyGen
       const avatar = avatars.find(a => a.id === selectedAvatar)
       if (avatar?.opening_script && streamData.sessionId) {
@@ -390,10 +455,110 @@ export default function LiveStudio() {
     }
   }
 
+  const startYoutubeChatPolling = async (broadcastId: string, sessionId: string) => {
+    // First get the liveChatId
+    const { data: detailsData } = await supabase.functions.invoke('youtube-broadcast', {
+      body: {
+        action: 'get-broadcast-details',
+        broadcastId,
+      }
+    })
+
+    if (!detailsData?.liveChatId) {
+      console.log("No liveChatId available yet, will retry...")
+      // Retry after 10 seconds
+      setTimeout(() => startYoutubeChatPolling(broadcastId, sessionId), 10000)
+      return
+    }
+
+    const liveChatId = detailsData.liveChatId
+    console.log("Starting YouTube chat polling with liveChatId:", liveChatId)
+
+    let nextPageToken: string | undefined
+
+    const pollChat = async () => {
+      try {
+        const { data: chatData } = await supabase.functions.invoke('youtube-broadcast', {
+          body: {
+            action: 'get-chat',
+            liveChatId,
+            pageToken: nextPageToken,
+          }
+        })
+
+        if (chatData?.items && chatData.items.length > 0) {
+          nextPageToken = chatData.nextPageToken
+
+          // Process new comments
+          for (const item of chatData.items) {
+            const commentText = item.snippet?.displayMessage
+            const authorName = item.authorDetails?.displayName
+
+            if (commentText && authorName) {
+              // Add to local comments state
+              const newComment: Comment = {
+                id: item.id,
+                commenter_name: authorName,
+                comment_text: commentText,
+                platform: 'youtube',
+                response_text: null,
+                created_at: item.snippet?.publishedAt || new Date().toISOString(),
+              }
+
+              setComments(prev => {
+                // Avoid duplicates
+                if (prev.some(c => c.id === newComment.id)) return prev
+                return [...prev, newComment]
+              })
+
+              // TODO: Send comment to AI for response and make avatar speak
+              console.log("New YouTube comment:", authorName, "-", commentText)
+            }
+          }
+        }
+
+        // Poll interval from API response or default to 5 seconds
+        const pollingInterval = chatData?.pollingIntervalMillis || 5000
+        const timeoutId = setTimeout(pollChat, pollingInterval)
+        setYoutubeChatPolling(timeoutId)
+      } catch (error) {
+        console.error("YouTube chat polling error:", error)
+        // Retry after 10 seconds on error
+        const timeoutId = setTimeout(pollChat, 10000)
+        setYoutubeChatPolling(timeoutId)
+      }
+    }
+
+    pollChat()
+  }
+
   const handleStopLive = async () => {
     if (!currentSession) return
 
     try {
+      // Stop YouTube chat polling
+      if (youtubeChatPolling) {
+        clearTimeout(youtubeChatPolling)
+        setYoutubeChatPolling(null)
+      }
+
+      // End YouTube broadcast if exists
+      if (youtubeBroadcast) {
+        try {
+          await supabase.functions.invoke('youtube-broadcast', {
+            body: {
+              action: 'transition',
+              broadcastId: youtubeBroadcast.broadcastId,
+              status: 'complete',
+            }
+          })
+          console.log("YouTube broadcast ended")
+        } catch (ytError) {
+          console.error("Failed to end YouTube broadcast:", ytError)
+        }
+        setYoutubeBroadcast(null)
+      }
+
       // Disconnect LiveKit
       if (roomRef.current) {
         roomRef.current.disconnect()
@@ -460,6 +625,17 @@ export default function LiveStudio() {
                 LIVE
               </Badge>
               <span className="font-mono text-lg">{formatTime(elapsedTime)}</span>
+              {youtubeBroadcast && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                  onClick={() => window.open(youtubeBroadcast.watchUrl, '_blank')}
+                >
+                  <Play className="h-3 w-3 mr-1" />
+                  Watch on YouTube
+                </Button>
+              )}
             </div>
           )}
         </div>
