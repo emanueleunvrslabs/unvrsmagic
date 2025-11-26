@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { Room, RoomEvent, Track, VideoPresets } from "livekit-client"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -13,13 +14,13 @@ import {
   User, 
   MessageSquare, 
   Users, 
-  Clock, 
   Loader2,
   Radio,
   ShoppingBag,
   Settings,
   Mic,
-  MicOff
+  MicOff,
+  AlertCircle
 } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
@@ -29,6 +30,7 @@ interface Avatar {
   name: string
   thumbnail_url: string | null
   personality: string
+  opening_script: string | null
 }
 
 interface LiveSession {
@@ -50,9 +52,9 @@ interface Comment {
 }
 
 const PLATFORMS = [
-  { id: "tiktok", label: "TikTok Live", color: "bg-pink-500" },
-  { id: "instagram", label: "Instagram Live", color: "bg-gradient-to-r from-purple-500 to-pink-500" },
-  { id: "youtube", label: "YouTube Live", color: "bg-red-500" },
+  { id: "instagram", label: "Instagram Live", icon: "📸" },
+  { id: "tiktok", label: "TikTok Live", icon: "🎵" },
+  { id: "youtube", label: "YouTube Live", icon: "▶️" },
 ]
 
 export default function LiveStudio() {
@@ -66,10 +68,22 @@ export default function LiveStudio() {
   const [comments, setComments] = useState<Comment[]>([])
   const [isMuted, setIsMuted] = useState(false)
   const [elapsedTime, setElapsedTime] = useState(0)
+  const [connectionStatus, setConnectionStatus] = useState<string>("disconnected")
+
+  // LiveKit refs
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const roomRef = useRef<Room | null>(null)
+  const mediaStreamRef = useRef<MediaStream | null>(null)
 
   // Load avatars
   useEffect(() => {
     loadAvatars()
+    return () => {
+      // Cleanup on unmount
+      if (roomRef.current) {
+        roomRef.current.disconnect()
+      }
+    }
   }, [])
 
   // Timer for live session
@@ -92,7 +106,7 @@ export default function LiveStudio() {
 
       const { data, error } = await supabase
         .from('ai_avatars')
-        .select('id, name, thumbnail_url, personality')
+        .select('id, name, thumbnail_url, personality, opening_script')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
@@ -121,6 +135,76 @@ export default function LiveStudio() {
     )
   }
 
+  const connectToLiveKit = async (url: string, accessToken: string) => {
+    console.log("Connecting to LiveKit...", { url })
+    setConnectionStatus("connecting")
+
+    try {
+      // Create LiveKit Room
+      const room = new Room({
+        adaptiveStream: true,
+        dynacast: true,
+        videoCaptureDefaults: {
+          resolution: VideoPresets.h720.resolution,
+        },
+      })
+
+      roomRef.current = room
+
+      // Create MediaStream for video element
+      const mediaStream = new MediaStream()
+      mediaStreamRef.current = mediaStream
+
+      // Handle track subscription
+      room.on(RoomEvent.TrackSubscribed, (track) => {
+        console.log("Track subscribed:", track.kind)
+        if (track.kind === "video" || track.kind === "audio") {
+          const mediaTrack = track.mediaStreamTrack
+          if (mediaTrack) {
+            mediaStream.addTrack(mediaTrack)
+            
+            // Update video element when we have both tracks
+            if (videoRef.current && mediaStream.getTracks().length > 0) {
+              videoRef.current.srcObject = mediaStream
+              videoRef.current.play().catch(console.error)
+            }
+          }
+        }
+      })
+
+      // Handle track unsubscription
+      room.on(RoomEvent.TrackUnsubscribed, (track) => {
+        console.log("Track unsubscribed:", track.kind)
+        const mediaTrack = track.mediaStreamTrack
+        if (mediaTrack && mediaStream) {
+          mediaStream.removeTrack(mediaTrack)
+        }
+      })
+
+      // Handle connection state
+      room.on(RoomEvent.Connected, () => {
+        console.log("Room connected")
+        setConnectionStatus("connected")
+      })
+
+      room.on(RoomEvent.Disconnected, (reason) => {
+        console.log("Room disconnected:", reason)
+        setConnectionStatus("disconnected")
+      })
+
+      // Prepare and connect
+      await room.prepareConnection(url, accessToken)
+      await room.connect(url, accessToken)
+      
+      console.log("LiveKit connected successfully")
+      return true
+    } catch (error) {
+      console.error("LiveKit connection error:", error)
+      setConnectionStatus("error")
+      return false
+    }
+  }
+
   const handleStartLive = async () => {
     if (!selectedAvatar) {
       toast.error("Please select an avatar")
@@ -132,26 +216,30 @@ export default function LiveStudio() {
     }
 
     setIsStarting(true)
+    setConnectionStatus("initializing")
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Not authenticated")
 
-      // Create live session
+      // Create live session in database
       const { data: session, error } = await supabase
         .from('ai_live_sessions')
         .insert({
           user_id: user.id,
           avatar_id: selectedAvatar,
           platforms: selectedPlatforms,
-          status: 'live',
+          status: 'starting',
           started_at: new Date().toISOString(),
         })
         .select()
         .single()
 
       if (error) throw error
+      setCurrentSession(session)
 
       // Start HeyGen streaming session
+      toast.info("Initializing HeyGen avatar...")
       const { data: streamData, error: streamError } = await supabase.functions.invoke('heygen-session', {
         body: {
           action: 'start',
@@ -161,18 +249,69 @@ export default function LiveStudio() {
       })
 
       if (streamError) {
-        // Rollback session creation
+        console.error("HeyGen error:", streamError)
         await supabase.from('ai_live_sessions').delete().eq('id', session.id)
-        throw streamError
+        throw new Error(streamError.message || "Failed to start HeyGen session")
       }
 
-      setCurrentSession(session)
+      if (!streamData?.url || !streamData?.accessToken) {
+        console.error("Invalid HeyGen response:", streamData)
+        await supabase.from('ai_live_sessions').delete().eq('id', session.id)
+        throw new Error("Invalid response from HeyGen")
+      }
+
+      console.log("HeyGen session created:", streamData.sessionId)
+
+      // Connect to LiveKit for video streaming
+      toast.info("Connecting to video stream...")
+      const connected = await connectToLiveKit(streamData.url, streamData.accessToken)
+
+      if (!connected) {
+        throw new Error("Failed to connect to video stream")
+      }
+
+      // Start the actual streaming
+      toast.info("Starting stream...")
+      const { error: startError } = await supabase.functions.invoke('heygen-session', {
+        body: {
+          action: 'start-session',
+          sessionId: session.id,
+        }
+      })
+
+      if (startError) {
+        console.error("Start streaming error:", startError)
+      }
+
+      // Update session status
+      await supabase
+        .from('ai_live_sessions')
+        .update({ status: 'live' })
+        .eq('id', session.id)
+
+      setCurrentSession({ ...session, status: 'live' })
       setIsLive(true)
       setElapsedTime(0)
       toast.success("Live stream started!")
+
+      // Play opening script if available
+      const avatar = avatars.find(a => a.id === selectedAvatar)
+      if (avatar?.opening_script && streamData.sessionId) {
+        setTimeout(async () => {
+          await supabase.functions.invoke('heygen-session', {
+            body: {
+              action: 'speak',
+              sessionId: session.id,
+              text: avatar.opening_script,
+            }
+          })
+        }, 2000)
+      }
+
     } catch (error) {
       console.error("Error starting live:", error)
-      toast.error("Failed to start live stream. Make sure HeyGen API is configured.")
+      toast.error(error instanceof Error ? error.message : "Failed to start live stream")
+      setConnectionStatus("disconnected")
     } finally {
       setIsStarting(false)
     }
@@ -182,6 +321,18 @@ export default function LiveStudio() {
     if (!currentSession) return
 
     try {
+      // Disconnect LiveKit
+      if (roomRef.current) {
+        roomRef.current.disconnect()
+        roomRef.current = null
+      }
+
+      // Clear video
+      if (videoRef.current) {
+        videoRef.current.srcObject = null
+      }
+      mediaStreamRef.current = null
+
       // Stop HeyGen session
       await supabase.functions.invoke('heygen-session', {
         body: {
@@ -202,6 +353,7 @@ export default function LiveStudio() {
       setIsLive(false)
       setCurrentSession(null)
       setComments([])
+      setConnectionStatus("disconnected")
       toast.success("Live stream ended")
     } catch (error) {
       console.error("Error stopping live:", error)
@@ -239,36 +391,76 @@ export default function LiveStudio() {
           <div className="lg:col-span-2 flex flex-col gap-4">
             <Card className="flex-1 bg-card/50 overflow-hidden">
               <div className="relative w-full h-full min-h-[400px] bg-black flex items-center justify-center">
-                {isLive ? (
+                {isLive || isStarting ? (
                   <>
-                    {/* Live video would be rendered here via LiveKit/WebRTC */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      {selectedAvatarData?.thumbnail_url ? (
-                        <img 
-                          src={selectedAvatarData.thumbnail_url} 
-                          alt="Avatar"
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      ) : (
-                        <User className="h-32 w-32 text-muted-foreground/30" />
-                      )}
-                    </div>
+                    {/* LiveKit Video */}
+                    <video
+                      ref={videoRef}
+                      className="w-full h-full object-contain"
+                      autoPlay
+                      playsInline
+                      muted={isMuted}
+                    />
+                    
+                    {/* Fallback while connecting */}
+                    {connectionStatus !== "connected" && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                        {selectedAvatarData?.thumbnail_url && (
+                          <img 
+                            src={selectedAvatarData.thumbnail_url} 
+                            alt="Avatar"
+                            className="absolute inset-0 w-full h-full object-contain opacity-30"
+                          />
+                        )}
+                        <div className="relative z-10 text-center">
+                          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+                          <p className="text-muted-foreground capitalize">{connectionStatus}...</p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Live overlay */}
-                    <div className="absolute top-4 left-4 flex items-center gap-2">
-                      <Badge variant="destructive">
-                        <Radio className="h-3 w-3 mr-1 animate-pulse" />
-                        LIVE
-                      </Badge>
-                      <Badge variant="secondary" className="bg-black/50">
-                        <Users className="h-3 w-3 mr-1" />
-                        {currentSession?.viewer_count || 0}
-                      </Badge>
-                    </div>
+                    {isLive && (
+                      <div className="absolute top-4 left-4 flex items-center gap-2">
+                        <Badge variant="destructive">
+                          <Radio className="h-3 w-3 mr-1 animate-pulse" />
+                          LIVE
+                        </Badge>
+                        <Badge variant="secondary" className="bg-black/50">
+                          <Users className="h-3 w-3 mr-1" />
+                          {currentSession?.viewer_count || 0}
+                        </Badge>
+                        {selectedPlatforms.map(p => (
+                          <Badge key={p} variant="outline" className="bg-black/50 text-xs">
+                            {PLATFORMS.find(pl => pl.id === p)?.icon} {p}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="text-center">
-                    <User className="h-24 w-24 mx-auto text-muted-foreground/30 mb-4" />
-                    <p className="text-muted-foreground">Select an avatar and go live</p>
+                    {selectedAvatarData ? (
+                      <>
+                        {selectedAvatarData.thumbnail_url ? (
+                          <img 
+                            src={selectedAvatarData.thumbnail_url} 
+                            alt={selectedAvatarData.name}
+                            className="h-64 mx-auto rounded-lg mb-4 opacity-70"
+                          />
+                        ) : (
+                          <User className="h-24 w-24 mx-auto text-muted-foreground/30 mb-4" />
+                        )}
+                        <p className="text-muted-foreground">
+                          Ready to go live with <span className="text-foreground font-medium">{selectedAvatarData.name}</span>
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <User className="h-24 w-24 mx-auto text-muted-foreground/30 mb-4" />
+                        <p className="text-muted-foreground">Select an avatar to go live</p>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -277,8 +469,8 @@ export default function LiveStudio() {
             {/* Controls */}
             <Card className="bg-card/50">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-4 flex-wrap">
                     {!isLive ? (
                       <>
                         <Select value={selectedAvatar} onValueChange={setSelectedAvatar}>
@@ -286,18 +478,26 @@ export default function LiveStudio() {
                             <SelectValue placeholder="Select Avatar" />
                           </SelectTrigger>
                           <SelectContent>
-                            {avatars.map((avatar) => (
-                              <SelectItem key={avatar.id} value={avatar.id}>
-                                <div className="flex items-center gap-2">
-                                  {avatar.thumbnail_url ? (
-                                    <img src={avatar.thumbnail_url} className="h-6 w-6 rounded-full object-cover" />
-                                  ) : (
-                                    <User className="h-6 w-6" />
-                                  )}
-                                  {avatar.name}
-                                </div>
-                              </SelectItem>
-                            ))}
+                            {avatars.length === 0 ? (
+                              <div className="p-4 text-center text-muted-foreground">
+                                <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                <p className="text-sm">No avatars found</p>
+                                <p className="text-xs">Create one in Avatar Studio</p>
+                              </div>
+                            ) : (
+                              avatars.map((avatar) => (
+                                <SelectItem key={avatar.id} value={avatar.id}>
+                                  <div className="flex items-center gap-2">
+                                    {avatar.thumbnail_url ? (
+                                      <img src={avatar.thumbnail_url} className="h-6 w-6 rounded-full object-cover" />
+                                    ) : (
+                                      <User className="h-6 w-6" />
+                                    )}
+                                    {avatar.name}
+                                  </div>
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
 
@@ -308,8 +508,10 @@ export default function LiveStudio() {
                               variant={selectedPlatforms.includes(platform.id) ? "default" : "outline"}
                               size="sm"
                               onClick={() => togglePlatform(platform.id)}
+                              className="gap-1"
                             >
-                              {platform.label}
+                              <span>{platform.icon}</span>
+                              <span className="hidden sm:inline">{platform.label}</span>
                             </Button>
                           ))}
                         </div>
@@ -387,9 +589,14 @@ export default function LiveStudio() {
                 {comments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full py-12 text-muted-foreground">
                     <MessageSquare className="h-12 w-12 mb-4 opacity-50" />
-                    <p className="text-center">
+                    <p className="text-center text-sm">
                       {isLive ? "Waiting for comments..." : "Comments will appear here when live"}
                     </p>
+                    {!isLive && selectedPlatforms.includes('instagram') && (
+                      <p className="text-center text-xs mt-2 text-muted-foreground/70">
+                        Instagram comments require app connection
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-3">

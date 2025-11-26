@@ -6,13 +6,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const HEYGEN_API_URL = 'https://api.heygen.com';
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { action, avatarId, sessionId } = await req.json();
+    const { action, avatarId, sessionId, text } = await req.json();
+    console.log(`HeyGen session action: ${action}`, { avatarId, sessionId });
 
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
@@ -76,71 +79,156 @@ serve(async (req) => {
       // Get the avatar details
       const { data: avatarData, error: avatarError } = await supabase
         .from('ai_avatars')
-        .select('heygen_avatar_id, voice_id')
+        .select('heygen_avatar_id, voice_id, opening_script')
         .eq('id', avatarId)
         .single();
 
       if (avatarError || !avatarData) {
+        console.error('Avatar not found:', avatarError);
         return new Response(
           JSON.stringify({ error: 'Avatar not found' }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Create streaming session with HeyGen
-      // Note: This is a simplified version - the actual HeyGen Streaming API
-      // requires LiveKit integration and WebSocket connections
-      const response = await fetch('https://api.heygen.com/v1/streaming.new', {
+      // Step 1: Get session token
+      console.log('Getting HeyGen session token...');
+      const tokenResponse = await fetch(`${HEYGEN_API_URL}/v1/streaming.create_token`, {
         method: 'POST',
         headers: {
-          'X-Api-Key': heygenApiKey,
           'Content-Type': 'application/json',
+          'X-Api-Key': heygenApiKey,
+        },
+      });
+
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        console.error('HeyGen token error:', tokenResponse.status, errorText);
+        return new Response(
+          JSON.stringify({ error: 'Failed to get session token', details: errorText }),
+          { status: tokenResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const tokenData = await tokenResponse.json();
+      const sessionToken = tokenData.data?.token;
+      console.log('Session token obtained');
+
+      // Step 2: Create streaming session
+      console.log('Creating streaming session with avatar:', avatarData.heygen_avatar_id);
+      const sessionResponse = await fetch(`${HEYGEN_API_URL}/v1/streaming.new`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
-          avatar_id: avatarData.heygen_avatar_id,
-          voice_id: avatarData.voice_id,
           quality: 'high',
+          avatar_name: avatarData.heygen_avatar_id,
+          voice: avatarData.voice_id ? {
+            voice_id: avatarData.voice_id,
+            rate: 1.0,
+          } : undefined,
+          version: 'v2',
+          video_encoding: 'H264',
+        }),
+      });
+
+      if (!sessionResponse.ok) {
+        const errorText = await sessionResponse.text();
+        console.error('HeyGen session error:', sessionResponse.status, errorText);
+        return new Response(
+          JSON.stringify({ error: 'Failed to create streaming session', details: errorText }),
+          { status: sessionResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const sessionData = await sessionResponse.json();
+      console.log('Streaming session created:', sessionData.data?.session_id);
+
+      // Update session with HeyGen details
+      const { error: updateError } = await supabase
+        .from('ai_live_sessions')
+        .update({ 
+          heygen_session_id: sessionData.data?.session_id,
+          metadata: {
+            access_token: sessionData.data?.access_token,
+            url: sessionData.data?.url,
+            session_token: sessionToken,
+          }
+        })
+        .eq('id', sessionId);
+
+      if (updateError) {
+        console.error('Failed to update session:', updateError);
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          sessionId: sessionData.data?.session_id,
+          accessToken: sessionData.data?.access_token,
+          url: sessionData.data?.url,
+          sessionToken: sessionToken,
+          openingScript: avatarData.opening_script,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+
+    } else if (action === 'start-session') {
+      // Start the actual streaming after LiveKit is connected
+      console.log('Starting streaming...');
+
+      const { data: sessionData } = await supabase
+        .from('ai_live_sessions')
+        .select('heygen_session_id, metadata')
+        .eq('id', sessionId)
+        .single();
+
+      if (!sessionData?.heygen_session_id || !sessionData?.metadata) {
+        return new Response(
+          JSON.stringify({ error: 'No session to start' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const metadata = sessionData.metadata as { session_token?: string };
+      
+      const response = await fetch(`${HEYGEN_API_URL}/v1/streaming.start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${metadata.session_token}`,
+        },
+        body: JSON.stringify({
+          session_id: sessionData.heygen_session_id,
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('HeyGen streaming error:', response.status, errorText);
+        console.error('HeyGen start error:', response.status, errorText);
         return new Response(
-          JSON.stringify({ error: 'Failed to start streaming session' }),
+          JSON.stringify({ error: 'Failed to start streaming', details: errorText }),
           { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      const streamData = await response.json();
-      console.log('HeyGen streaming session created:', streamData);
-
-      // Update session with HeyGen session ID
-      await supabase
-        .from('ai_live_sessions')
-        .update({ heygen_session_id: streamData.data?.session_id })
-        .eq('id', sessionId);
-
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          sessionId: streamData.data?.session_id,
-          accessToken: streamData.data?.access_token,
-        }),
+        JSON.stringify({ success: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
     } else if (action === 'stop') {
       console.log('Stopping HeyGen streaming session...');
 
-      // Get the session's HeyGen session ID
-      const { data: sessionData, error: sessionError } = await supabase
+      const { data: sessionData } = await supabase
         .from('ai_live_sessions')
-        .select('heygen_session_id')
+        .select('heygen_session_id, metadata')
         .eq('id', sessionId)
         .single();
 
-      if (sessionError || !sessionData?.heygen_session_id) {
+      if (!sessionData?.heygen_session_id) {
         console.log('No HeyGen session to stop');
         return new Response(
           JSON.stringify({ success: true }),
@@ -148,12 +236,13 @@ serve(async (req) => {
         );
       }
 
-      // Stop the HeyGen session
-      const response = await fetch('https://api.heygen.com/v1/streaming.stop', {
+      const metadata = sessionData.metadata as { session_token?: string };
+
+      const response = await fetch(`${HEYGEN_API_URL}/v1/streaming.stop`, {
         method: 'POST',
         headers: {
-          'X-Api-Key': heygenApiKey,
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${metadata?.session_token}`,
         },
         body: JSON.stringify({
           session_id: sessionData.heygen_session_id,
@@ -163,7 +252,6 @@ serve(async (req) => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('HeyGen stop error:', response.status, errorText);
-        // Don't return error - session might already be stopped
       }
 
       return new Response(
@@ -172,12 +260,11 @@ serve(async (req) => {
       );
 
     } else if (action === 'speak') {
-      // Make the avatar speak
-      const { text } = await req.json();
+      console.log('Making avatar speak:', text?.substring(0, 50));
 
       const { data: sessionData } = await supabase
         .from('ai_live_sessions')
-        .select('heygen_session_id')
+        .select('heygen_session_id, metadata')
         .eq('id', sessionId)
         .single();
 
@@ -188,11 +275,13 @@ serve(async (req) => {
         );
       }
 
-      const response = await fetch('https://api.heygen.com/v1/streaming.task', {
+      const metadata = sessionData.metadata as { session_token?: string };
+
+      const response = await fetch(`${HEYGEN_API_URL}/v1/streaming.task`, {
         method: 'POST',
         headers: {
-          'X-Api-Key': heygenApiKey,
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${metadata?.session_token}`,
         },
         body: JSON.stringify({
           session_id: sessionData.heygen_session_id,
@@ -205,7 +294,7 @@ serve(async (req) => {
         const errorText = await response.text();
         console.error('HeyGen speak error:', response.status, errorText);
         return new Response(
-          JSON.stringify({ error: 'Failed to make avatar speak' }),
+          JSON.stringify({ error: 'Failed to make avatar speak', details: errorText }),
           { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
