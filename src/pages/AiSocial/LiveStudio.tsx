@@ -137,56 +137,95 @@ export default function LiveStudio() {
     )
   }
 
-  const connectToLiveKit = async (livekitUrl: string, accessToken: string) => {
+  const connectToLiveKit = async (livekitUrl: string, accessToken: string): Promise<boolean> => {
     console.log("Connecting to LiveKit...", livekitUrl)
     setConnectionStatus("connecting")
 
-    try {
-      const room = new Room()
-      roomRef.current = room
-
-      // Handle track subscriptions
-      room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
-        console.log("Track subscribed:", track.kind, participant.identity)
+    return new Promise((resolve) => {
+      try {
+        const room = new Room()
+        roomRef.current = room
         
-        if (track.kind === Track.Kind.Video && videoRef.current) {
-          track.attach(videoRef.current)
-        } else if (track.kind === Track.Kind.Audio) {
-          const audioElement = track.attach()
-          audioElement.volume = isMuted ? 0 : 1
-          document.body.appendChild(audioElement)
+        let videoReady = false
+        let audioReady = false
+        let resolved = false
+
+        const checkReady = () => {
+          if (videoReady && audioReady && !resolved) {
+            resolved = true
+            console.log("LiveKit fully ready - video and audio tracks subscribed")
+            setConnectionStatus("connected")
+            resolve(true)
+          }
         }
-      })
 
-      room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack) => {
-        console.log("Track unsubscribed:", track.kind)
-        track.detach()
-      })
+        // Handle track subscriptions
+        room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
+          console.log("Track subscribed:", track.kind, participant.identity)
+          
+          if (track.kind === Track.Kind.Video && videoRef.current) {
+            track.attach(videoRef.current)
+            videoReady = true
+            checkReady()
+          } else if (track.kind === Track.Kind.Audio) {
+            const audioElement = track.attach()
+            audioElement.volume = isMuted ? 0 : 1
+            document.body.appendChild(audioElement)
+            audioReady = true
+            checkReady()
+          }
+        })
 
-      room.on(RoomEvent.Connected, () => {
-        console.log("LiveKit connected")
-        setConnectionStatus("connected")
-      })
+        room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack) => {
+          console.log("Track unsubscribed:", track.kind)
+          track.detach()
+        })
 
-      room.on(RoomEvent.Disconnected, () => {
-        console.log("LiveKit disconnected")
-        setConnectionStatus("disconnected")
-      })
+        room.on(RoomEvent.Connected, () => {
+          console.log("LiveKit room connected, waiting for tracks...")
+        })
 
-      room.on(RoomEvent.ConnectionStateChanged, (state) => {
-        console.log("Connection state:", state)
-      })
+        room.on(RoomEvent.Disconnected, () => {
+          console.log("LiveKit disconnected")
+          setConnectionStatus("disconnected")
+          if (!resolved) {
+            resolved = true
+            resolve(false)
+          }
+        })
 
-      // Connect to the room
-      await room.connect(livekitUrl, accessToken)
-      console.log("LiveKit room connected successfully")
-      
-      return true
-    } catch (error) {
-      console.error("LiveKit connection error:", error)
-      setConnectionStatus("error")
-      return false
-    }
+        room.on(RoomEvent.ConnectionStateChanged, (state) => {
+          console.log("Connection state:", state)
+        })
+
+        // Connect to the room
+        room.connect(livekitUrl, accessToken)
+          .then(() => {
+            console.log("LiveKit room connected, waiting for video/audio tracks...")
+            // Set a timeout in case tracks don't arrive
+            setTimeout(() => {
+              if (!resolved) {
+                console.log("Timeout waiting for tracks, proceeding anyway")
+                resolved = true
+                setConnectionStatus("connected")
+                resolve(true)
+              }
+            }, 10000) // 10 second timeout
+          })
+          .catch((error) => {
+            console.error("LiveKit connection error:", error)
+            setConnectionStatus("error")
+            if (!resolved) {
+              resolved = true
+              resolve(false)
+            }
+          })
+      } catch (error) {
+        console.error("LiveKit setup error:", error)
+        setConnectionStatus("error")
+        resolve(false)
+      }
+    })
   }
 
   const handleStartLive = async () => {
@@ -254,19 +293,8 @@ export default function LiveStudio() {
         throw new Error("Failed to connect to LiveKit")
       }
 
-      // Activate the HeyGen session (required before speak commands work)
-      toast.info("Activating avatar session...")
-      const { error: startError } = await supabase.functions.invoke('heygen-session', {
-        body: {
-          action: 'start-session',
-          sessionId: session.id,
-        }
-      })
-
-      if (startError) {
-        console.error("Failed to activate session:", startError)
-        // Continue anyway, speak might still work
-      }
+      // With LiveKit mode, session is automatically active once connected
+      // No need to call streaming.start - it's only for WebRTC mode
 
       // Update session status
       await supabase
@@ -279,18 +307,25 @@ export default function LiveStudio() {
       setElapsedTime(0)
       toast.success("Live stream started!")
 
-      // Play opening script if available
+      // Play opening script if available - tracks are now subscribed, add small delay for HeyGen
       const avatar = avatars.find(a => a.id === selectedAvatar)
       if (avatar?.opening_script && streamData.sessionId) {
         setTimeout(async () => {
-          await supabase.functions.invoke('heygen-session', {
+          console.log("Sending speak command with opening script...")
+          const { data, error: speakError } = await supabase.functions.invoke('heygen-session', {
             body: {
               action: 'speak',
               sessionId: session.id,
               text: avatar.opening_script,
             }
           })
-        }, 2000) // Wait for session to fully activate
+          if (speakError) {
+            console.error("Speak error:", speakError)
+            toast.error("Failed to make avatar speak")
+          } else {
+            console.log("Speak command sent successfully:", data)
+          }
+        }, 3000) // Small delay after tracks are ready
       }
 
     } catch (error) {
