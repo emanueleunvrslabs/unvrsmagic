@@ -175,8 +175,8 @@ serve(async (req) => {
       );
 
     } else if (action === 'start-session') {
-      // Send SDP answer back to HeyGen and start streaming
-      console.log('Starting streaming with SDP answer...');
+      // Activate the HeyGen streaming session (required before speak commands)
+      console.log('Activating HeyGen streaming session...');
 
       const { data: sessionData } = await supabase
         .from('ai_live_sessions')
@@ -193,36 +193,30 @@ serve(async (req) => {
 
       const metadata = sessionData.metadata as { session_token?: string };
 
-      // Send SDP answer
-      if (sdpAnswer) {
-        console.log('Sending SDP answer to HeyGen...');
-        const sdpResponse = await fetch(`${HEYGEN_API_URL}/v1/streaming.start`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${metadata.session_token}`,
-          },
-          body: JSON.stringify({
-            session_id: sessionData.heygen_session_id,
-            sdp: {
-              type: 'answer',
-              sdp: sdpAnswer,
-            },
-          }),
-        });
+      // Start the streaming session (required for LiveKit mode)
+      console.log('Calling streaming.start to activate session...');
+      const startResponse = await fetch(`${HEYGEN_API_URL}/v1/streaming.start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${metadata.session_token}`,
+        },
+        body: JSON.stringify({
+          session_id: sessionData.heygen_session_id,
+        }),
+      });
 
-        if (!sdpResponse.ok) {
-          const errorText = await sdpResponse.text();
-          console.error('HeyGen start error:', sdpResponse.status, errorText);
-          return new Response(
-            JSON.stringify({ error: 'Failed to start streaming', details: errorText }),
-            { status: sdpResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-
-        const startResult = await sdpResponse.json();
-        console.log('Streaming started successfully:', startResult);
+      if (!startResponse.ok) {
+        const errorText = await startResponse.text();
+        console.error('HeyGen start error:', startResponse.status, errorText);
+        return new Response(
+          JSON.stringify({ error: 'Failed to start streaming', details: errorText }),
+          { status: startResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
+
+      const startResult = await startResponse.json();
+      console.log('Streaming session activated successfully:', startResult);
 
       return new Response(
         JSON.stringify({ success: true }),
