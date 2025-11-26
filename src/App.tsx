@@ -24,6 +24,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AiSocialDashboard from "./pages/AiSocial/AiSocialDashboard";
 import GenerateImage from "./pages/AiSocial/GenerateImage";
 import GenerateVideo from "./pages/AiSocial/GenerateVideo";
+import AvatarStudio from "./pages/AiSocial/AvatarStudio";
+import LiveStudio from "./pages/AiSocial/LiveStudio";
 
 import Workflows from "./pages/AiSocial/Workflows";
 import Connection from "./pages/AiSocial/Connection";
@@ -55,6 +57,8 @@ const App = () => (
           <Route path="/ai-social" element={<ProtectedRoute><AiSocialDashboard /></ProtectedRoute>} />
           <Route path="/ai-social/generate-image" element={<ProtectedRoute><GenerateImage /></ProtectedRoute>} />
           <Route path="/ai-social/generate-video" element={<ProtectedRoute><GenerateVideo /></ProtectedRoute>} />
+          <Route path="/ai-social/avatar-studio" element={<ProtectedRoute><AvatarStudio /></ProtectedRoute>} />
+          <Route path="/ai-social/live-studio" element={<ProtectedRoute><LiveStudio /></ProtectedRoute>} />
           <Route path="/ai-social/schedule" element={<HomeRedirect />} />
           <Route path="/ai-social/workflows" element={<ProtectedRoute><Workflows /></ProtectedRoute>} />
           <Route path="/ai-social/connection" element={<ProtectedRoute><Connection /></ProtectedRoute>} />

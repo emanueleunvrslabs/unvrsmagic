@@ -310,6 +310,35 @@ serve(async (req) => {
         }
         break;
 
+      case "heygen":
+        try {
+          // HeyGen API - verify with avatars list endpoint
+          const response = await fetch("https://api.heygen.com/v2/avatars", {
+            method: "GET",
+            headers: {
+              "X-Api-Key": apiKey,
+              "Accept": "application/json",
+            },
+          });
+
+          console.log("HeyGen response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("HeyGen API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid HeyGen API key";
+            console.error("HeyGen verification failed:", response.status);
+          } else {
+            errorMessage = "Failed to verify HeyGen API key";
+            console.error("HeyGen unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify HeyGen API key";
+          console.error("HeyGen verification error:", error);
+        }
+        break;
+
       default:
         return new Response(
           JSON.stringify({ error: "Unsupported provider" }),
