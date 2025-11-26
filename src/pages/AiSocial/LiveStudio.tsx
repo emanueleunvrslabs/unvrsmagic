@@ -285,16 +285,27 @@ export default function LiveStudio() {
 
       console.log("HeyGen session created:", streamData.sessionId)
 
-      // Connect via LiveKit
+      // In LiveKit V2 mode, must call streaming.start BEFORE connecting to LiveKit
+      toast.info("Activating streaming session...")
+      const { error: startError } = await supabase.functions.invoke('heygen-session', {
+        body: {
+          action: 'start-session',
+          sessionId: session.id,
+        }
+      })
+
+      if (startError) {
+        console.error("Failed to start session:", startError)
+        throw new Error("Failed to activate streaming session")
+      }
+
+      // Now connect via LiveKit
       toast.info("Connecting to video stream...")
       const connected = await connectToLiveKit(streamData.livekitUrl, streamData.accessToken)
 
       if (!connected) {
         throw new Error("Failed to connect to LiveKit")
       }
-
-      // With LiveKit mode, session is automatically active once connected
-      // No need to call streaming.start - it's only for WebRTC mode
 
       // Update session status
       await supabase
