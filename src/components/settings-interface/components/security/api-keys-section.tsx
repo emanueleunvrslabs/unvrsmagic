@@ -22,6 +22,7 @@ const AI_PROVIDERS = [
   { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresOwnerId: true },
   { id: "fal", name: "Fal", placeholder: "Enter API key", description: "Fal AI models", requiresOwnerId: false },
   { id: "heygen", name: "HeyGen", placeholder: "Enter API key", description: "AI Avatar & Streaming", requiresOwnerId: false },
+  { id: "restream", name: "Restream", placeholder: "Enter API key", description: "Multi-platform streaming (WHIP)", requiresOwnerId: false },
   { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false },
   { id: "resend", name: "Resend", placeholder: "re_...", description: "Email API", requiresOwnerId: false },
   { id: "webshare", name: "Webshare", placeholder: "Enter API key", description: "Proxy service", requiresOwnerId: false },
@@ -44,6 +45,9 @@ const apiKeySchemas = {
   heygen: z.string().trim().min(20, {
     message: "HeyGen API key must be at least 20 characters"
   }),
+  restream: z.string().trim().min(10, {
+    message: "Restream API key must be at least 10 characters"
+  }),
   gamma: z.string().trim().min(20, {
     message: "Gamma API key must be at least 20 characters"
   }),
@@ -62,6 +66,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     qwen: "",
     fal: "",
     heygen: "",
+    restream: "",
     gamma: "",
     resend: "",
     webshare: "",

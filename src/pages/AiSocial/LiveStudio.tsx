@@ -83,11 +83,14 @@ export default function LiveStudio() {
   const [connectionStatus, setConnectionStatus] = useState<string>("disconnected")
   const [youtubeBroadcast, setYoutubeBroadcast] = useState<YouTubeBroadcast | null>(null)
   const [youtubeChatPolling, setYoutubeChatPolling] = useState<NodeJS.Timeout | null>(null)
+  const [restreamInfo, setRestreamInfo] = useState<{ whipUrl: string; streamKey: string } | null>(null)
+  const [whipPeerConnection, setWhipPeerConnection] = useState<RTCPeerConnection | null>(null)
 
   // LiveKit refs
   const videoRef = useRef<HTMLVideoElement>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const roomRef = useRef<Room | null>(null)
+  const mediaStreamRef = useRef<MediaStream | null>(null)
 
   // Load avatars
   useEffect(() => {
@@ -100,6 +103,10 @@ export default function LiveStudio() {
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current.remove()
+      }
+      // Cleanup WHIP connection
+      if (whipPeerConnection) {
+        whipPeerConnection.close()
       }
     }
   }, [])
@@ -168,6 +175,114 @@ export default function LiveStudio() {
         ? prev.filter(p => p !== platformId)
         : [...prev, platformId]
     )
+  }
+
+  // WHIP streaming to Restream
+  const startWhipStream = async (mediaStream: MediaStream, whipUrl: string): Promise<RTCPeerConnection | null> => {
+    console.log("Starting WHIP stream to Restream...", whipUrl)
+    
+    try {
+      const pc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      })
+
+      // Add tracks from the media stream
+      mediaStream.getTracks().forEach(track => {
+        console.log("Adding track to WHIP:", track.kind)
+        pc.addTrack(track, mediaStream)
+      })
+
+      // Create offer
+      const offer = await pc.createOffer()
+      await pc.setLocalDescription(offer)
+
+      // Wait for ICE gathering to complete
+      await new Promise<void>((resolve) => {
+        if (pc.iceGatheringState === 'complete') {
+          resolve()
+        } else {
+          pc.onicegatheringstatechange = () => {
+            if (pc.iceGatheringState === 'complete') {
+              resolve()
+            }
+          }
+          // Timeout after 5 seconds
+          setTimeout(resolve, 5000)
+        }
+      })
+
+      // Send offer to WHIP endpoint
+      const response = await fetch(whipUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/sdp',
+        },
+        body: pc.localDescription?.sdp,
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("WHIP endpoint error:", response.status, errorText)
+        pc.close()
+        return null
+      }
+
+      // Set remote description from WHIP response
+      const answerSdp = await response.text()
+      await pc.setRemoteDescription(new RTCSessionDescription({
+        type: 'answer',
+        sdp: answerSdp,
+      }))
+
+      console.log("WHIP stream connected successfully")
+      return pc
+    } catch (error) {
+      console.error("WHIP stream error:", error)
+      return null
+    }
+  }
+
+  // Capture MediaStream from video element for WHIP
+  const captureMediaStream = (): MediaStream | null => {
+    if (!videoRef.current) return null
+
+    try {
+      // Capture video from the video element
+      const canvas = document.createElement('canvas')
+      const video = videoRef.current
+      canvas.width = video.videoWidth || 1280
+      canvas.height = video.videoHeight || 720
+      
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return null
+
+      // Create a stream from canvas
+      const canvasStream = canvas.captureStream(30) // 30 fps
+
+      // Draw video frames to canvas
+      const drawFrame = () => {
+        if (video.readyState >= 2) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        }
+        if (videoRef.current && !videoRef.current.paused) {
+          requestAnimationFrame(drawFrame)
+        }
+      }
+      drawFrame()
+
+      // Add audio track if available
+      if (audioRef.current && audioRef.current.srcObject) {
+        const audioStream = audioRef.current.srcObject as MediaStream
+        audioStream.getAudioTracks().forEach(track => {
+          canvasStream.addTrack(track.clone())
+        })
+      }
+
+      return canvasStream
+    } catch (error) {
+      console.error("Error capturing media stream:", error)
+      return null
+    }
   }
 
   const connectToLiveKit = async (livekitUrl: string, accessToken: string): Promise<boolean> => {
@@ -398,6 +513,49 @@ export default function LiveStudio() {
         throw new Error("Failed to connect to LiveKit")
       }
 
+      // Get Restream WHIP URL and start streaming to platforms
+      toast.info("Connecting to Restream for multi-platform streaming...")
+      try {
+        const { data: restreamData, error: restreamError } = await supabase.functions.invoke('restream-stream', {
+          body: {
+            action: 'get-whip-url',
+            sessionId: session.id,
+            platforms: selectedPlatforms,
+          }
+        })
+
+        if (restreamError) {
+          console.error("Restream error:", restreamError)
+          toast.error("Restream not configured. Stream will only show locally.")
+        } else if (restreamData?.whipUrl) {
+          setRestreamInfo({ whipUrl: restreamData.whipUrl, streamKey: restreamData.streamKey })
+          console.log("Restream WHIP URL:", restreamData.whipUrl)
+          
+          // Wait a moment for video to be ready, then start WHIP stream
+          setTimeout(async () => {
+            const mediaStream = captureMediaStream()
+            if (mediaStream) {
+              mediaStreamRef.current = mediaStream
+              const pc = await startWhipStream(mediaStream, restreamData.whipUrl)
+              if (pc) {
+                setWhipPeerConnection(pc)
+                toast.success("Streaming to Restream!", {
+                  description: "Your stream is now live on all connected platforms",
+                  duration: 5000,
+                })
+              } else {
+                toast.error("Failed to connect to Restream WHIP")
+              }
+            } else {
+              toast.error("Failed to capture video stream for Restream")
+            }
+          }, 3000) // Wait for video to stabilize
+        }
+      } catch (restreamErr) {
+        console.error("Restream setup error:", restreamErr)
+        toast.error("Failed to setup Restream. Stream will only show locally.")
+      }
+
       // Update session status
       await supabase
         .from('ai_live_sessions')
@@ -559,6 +717,22 @@ export default function LiveStudio() {
         setYoutubeBroadcast(null)
       }
 
+      // Close WHIP connection
+      if (whipPeerConnection) {
+        whipPeerConnection.close()
+        setWhipPeerConnection(null)
+        console.log("WHIP connection closed")
+      }
+
+      // Stop captured media stream
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop())
+        mediaStreamRef.current = null
+      }
+
+      // Clear Restream info
+      setRestreamInfo(null)
+
       // Disconnect LiveKit
       if (roomRef.current) {
         roomRef.current.disconnect()
@@ -685,6 +859,11 @@ export default function LiveStudio() {
                           <Users className="h-3 w-3 mr-1" />
                           {currentSession?.viewer_count || 0}
                         </Badge>
+                        {restreamInfo && (
+                          <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                            Restream
+                          </Badge>
+                        )}
                         {selectedPlatforms.map(p => (
                           <Badge key={p} variant="outline" className="bg-black/50 text-xs">
                             {PLATFORMS.find(pl => pl.id === p)?.label}
