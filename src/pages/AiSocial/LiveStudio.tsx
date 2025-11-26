@@ -55,9 +55,9 @@ interface Comment {
 }
 
 const PLATFORMS = [
-  { id: "instagram", label: "Instagram Live", icon: "📸" },
-  { id: "tiktok", label: "TikTok Live", icon: "🎵" },
-  { id: "youtube", label: "YouTube Live", icon: "▶️" },
+  { id: "instagram", label: "Instagram" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "youtube", label: "YouTube" },
 ]
 
 export default function LiveStudio() {
@@ -422,7 +422,7 @@ export default function LiveStudio() {
                         </Badge>
                         {selectedPlatforms.map(p => (
                           <Badge key={p} variant="outline" className="bg-black/50 text-xs">
-                            {PLATFORMS.find(pl => pl.id === p)?.icon} {p}
+                            {PLATFORMS.find(pl => pl.id === p)?.label}
                           </Badge>
                         ))}
                       </div>
@@ -497,9 +497,8 @@ export default function LiveStudio() {
                               {selectedPlatforms.length === 0 ? (
                                 <span className="text-muted-foreground">Select Platforms</span>
                               ) : (
-                                <span className="flex items-center gap-1">
-                                  {selectedPlatforms.map(p => PLATFORMS.find(pl => pl.id === p)?.icon).join(' ')}
-                                  <span className="ml-1">({selectedPlatforms.length})</span>
+                                <span>
+                                  {selectedPlatforms.map(p => PLATFORMS.find(pl => pl.id === p)?.label).join(', ')}
                                 </span>
                               )}
                               <ChevronDown className="h-4 w-4 opacity-50" />
@@ -517,7 +516,6 @@ export default function LiveStudio() {
                                     checked={selectedPlatforms.includes(platform.id)}
                                     onCheckedChange={() => togglePlatform(platform.id)}
                                   />
-                                  <span>{platform.icon}</span>
                                   <span className="text-sm">{platform.label}</span>
                                 </div>
                               ))}
