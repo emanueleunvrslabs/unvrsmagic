@@ -44,11 +44,37 @@ export default function Connection() {
 
       if (error) throw error;
       
-      // Parse the stored JSON to get channel info
       if (data?.api_key) {
         try {
           const parsed = JSON.parse(data.api_key);
           return { ...data, channelTitle: parsed.channel_title };
+        } catch {
+          return data;
+        }
+      }
+      return data;
+    },
+  });
+
+  const { data: linkedinConnection, isLoading: isLoadingLinkedin } = useQuery({
+    queryKey: ['linkedin-connection'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('provider', 'linkedin')
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data?.api_key) {
+        try {
+          const parsed = JSON.parse(data.api_key);
+          return { ...data, name: parsed.name };
         } catch {
           return data;
         }
@@ -192,8 +218,75 @@ export default function Connection() {
     }
   };
 
+  const connectLinkedin = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in first");
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("linkedin-oauth", {
+        body: {
+          action: "start",
+          user_id: session.user.id,
+          origin: window.location.origin,
+        },
+      });
+
+      console.log('LinkedIn OAuth response:', { data, error });
+
+      if (error) {
+        console.error("Error starting LinkedIn OAuth:", error);
+        const errorMessage = (error as any).message || "Failed to connect LinkedIn";
+        toast.error(errorMessage);
+        return;
+      }
+
+      if (data && (data as any).error) {
+        console.error("LinkedIn OAuth error:", (data as any).error);
+        toast.error((data as any).error);
+        return;
+      }
+
+      if (data && (data as any).authUrl) {
+        console.log('Redirecting to LinkedIn:', (data as any).authUrl);
+        window.location.href = (data as any).authUrl as string;
+      } else {
+        console.error("Invalid response:", data);
+        toast.error("Invalid response from LinkedIn OAuth");
+      }
+    } catch (error) {
+      console.error("Error starting LinkedIn OAuth:", error);
+      toast.error("Failed to connect LinkedIn");
+    }
+  };
+
+  const disconnectLinkedin = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in first");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('api_keys')
+        .delete()
+        .eq('user_id', session.user.id)
+        .eq('provider', 'linkedin');
+
+      if (error) throw error;
+
+      toast.success("LinkedIn disconnected successfully!");
+      queryClient.invalidateQueries({ queryKey: ['linkedin-connection'] });
+    } catch (error) {
+      console.error("Error disconnecting LinkedIn:", error);
+      toast.error("Failed to disconnect LinkedIn");
+    }
+  };
+
   useEffect(() => {
-    // Check if redirected back from OAuth
     const params = new URLSearchParams(window.location.search);
     
     // Instagram callback
@@ -208,6 +301,14 @@ export default function Connection() {
       const channel = params.get('channel');
       toast.success(`YouTube connected successfully! Channel: ${channel || 'Connected'}`);
       queryClient.invalidateQueries({ queryKey: ['youtube-connection'] });
+      window.history.replaceState({}, '', '/ai-social/connection');
+    }
+
+    // LinkedIn callback
+    if (params.get('linkedin_success') === 'true') {
+      const name = params.get('name');
+      toast.success(`LinkedIn connected successfully! ${name || ''}`);
+      queryClient.invalidateQueries({ queryKey: ['linkedin-connection'] });
       window.history.replaceState({}, '', '/ai-social/connection');
     }
     
@@ -305,6 +406,46 @@ export default function Connection() {
                 >
                   <Link className="mr-2 h-4 w-4" />
                   Connect YouTube
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>LinkedIn</CardTitle>
+                <Badge 
+                  variant="outline"
+                  className={linkedinConnection ? "bg-green-500/10 text-green-500 border-green-500/20" : ""}
+                >
+                  {linkedinConnection ? "Connected" : "Not Connected"}
+                </Badge>
+              </div>
+              <CardDescription>
+                {linkedinConnection 
+                  ? `Connected as: ${(linkedinConnection as any).name || 'LinkedIn User'}` 
+                  : "Connect your LinkedIn account for publishing"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {linkedinConnection ? (
+                <Button 
+                  className="w-full bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:border-destructive/30"
+                  variant="ghost"
+                  onClick={disconnectLinkedin}
+                >
+                  <Unlink className="mr-2 h-4 w-4" />
+                  Disconnect LinkedIn
+                </Button>
+              ) : (
+                <Button 
+                  className="w-full"
+                  onClick={connectLinkedin}
+                  disabled={isLoadingLinkedin}
+                >
+                  <Link className="mr-2 h-4 w-4" />
+                  Connect LinkedIn
                 </Button>
               )}
             </CardContent>
