@@ -339,6 +339,39 @@ serve(async (req) => {
         }
         break;
 
+      case "restream":
+        try {
+          // Restream API - verify with user info endpoint
+          // The API key format for Restream is typically: client_id:client_secret or just the access token
+          const response = await fetch("https://api.restream.io/v2/user/profile", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Restream response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("Restream API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid Restream API key";
+            console.error("Restream verification failed:", response.status);
+          } else {
+            // Try to get error details
+            const errBody = await response.text().catch(() => "");
+            console.log("Restream error body:", errBody);
+            errorMessage = "Failed to verify Restream API key";
+            console.error("Restream unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Restream API key";
+          console.error("Restream verification error:", error);
+        }
+        break;
+
       default:
         return new Response(
           JSON.stringify({ error: "Unsupported provider" }),

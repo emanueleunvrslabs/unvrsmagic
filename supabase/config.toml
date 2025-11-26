@@ -38,3 +38,6 @@ verify_jwt = true
 
 [functions.heygen-session]
 verify_jwt = true
+
+[functions.restream-stream]
+verify_jwt = true
