@@ -359,6 +359,16 @@ export function ContentGallerySection() {
                   
                   {/* Agents involved row */}
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    {/* Execution type badge */}
+                    {(item.metadata as any)?.execution_type === "scheduled" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
+                        ⏰ Schedule
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
+                        ▶️ Run Now
+                      </span>
+                    )}
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
                       OpenAI
                     </span>
@@ -374,18 +384,6 @@ export function ContentGallerySection() {
                   </div>
                   
                   <div className="flex flex-wrap gap-1.5">
-                    
-                    {/* Execution type badge - check metadata.execution_type */}
-                    {(item.metadata as any)?.execution_type === "scheduled" ? (
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
-                        ⏰ Schedule
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
-                        ▶️ Run Now
-                      </span>
-                    )}
-                    
                     {/* Social platforms badges with post URLs */}
                     {item.workflow?.platforms?.map((platform: string) => {
                       const metadata = item.metadata as any;
