@@ -323,7 +323,19 @@ async function publishToLinkedin(
     return { success: false, error: "LinkedIn not configured" };
   }
 
-  const accessToken = linkedinKey.api_key;
+  // Parse the JSON credentials stored in api_key
+  let accessToken: string;
+  try {
+    const credentials = JSON.parse(linkedinKey.api_key);
+    accessToken = credentials.access_token;
+    if (!accessToken) {
+      return { success: false, error: "LinkedIn access token not found in credentials" };
+    }
+  } catch (e) {
+    // Fallback: if api_key is not JSON, use it directly (legacy support)
+    accessToken = linkedinKey.api_key;
+  }
+  
   const personUrn = `urn:li:person:${linkedinKey.owner_id}`;
 
   try {
