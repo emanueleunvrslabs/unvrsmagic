@@ -366,7 +366,7 @@ export function ContentGallerySection() {
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
-                        ▶️ Run Now
+                        Run Now
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
