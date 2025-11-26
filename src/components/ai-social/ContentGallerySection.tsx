@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Download, Trash2, Maximize2, Play, X, Loader2, Instagram } from "lucide-react";
+import { Download, Trash2, Maximize2, Play, X, Loader2, Instagram, ExternalLink, Linkedin } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -328,16 +328,51 @@ export function ContentGallerySection() {
                       </span>
                     )}
                     
-                    {/* Social platforms badges */}
-                    {item.workflow?.platforms?.map((platform: string) => (
-                      <span key={platform} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm capitalize bg-pink-500/10 text-pink-400 border-pink-500/20">
-                        {platform === "instagram" && <Instagram className="h-3 w-3" />}
-                        {platform === "facebook" && "👍 "}
-                        {platform === "twitter" && "🐦 "}
-                        {platform === "linkedin" && "💼 "}
-                        {platform}
-                      </span>
-                    ))}
+                    {/* Social platforms badges with post URLs */}
+                    {item.workflow?.platforms?.map((platform: string) => {
+                      const metadata = item.metadata as any;
+                      const postUrl = platform === "instagram" 
+                        ? metadata?.instagram_post_url 
+                        : platform === "linkedin" 
+                        ? metadata?.linkedin_post_url 
+                        : null;
+                      
+                      return postUrl ? (
+                        <a
+                          key={platform}
+                          href={postUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm capitalize transition-colors hover:opacity-80 ${
+                            platform === "linkedin" 
+                              ? "bg-[#0A66C2]/10 text-[#0A66C2] border-[#0A66C2]/20" 
+                              : "bg-pink-500/10 text-pink-400 border-pink-500/20"
+                          }`}
+                        >
+                          {platform === "instagram" && <Instagram className="h-3 w-3" />}
+                          {platform === "linkedin" && <Linkedin className="h-3 w-3" />}
+                          {platform === "facebook" && "👍 "}
+                          {platform === "twitter" && "🐦 "}
+                          {platform}
+                          <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      ) : (
+                        <span 
+                          key={platform} 
+                          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm capitalize ${
+                            platform === "linkedin" 
+                              ? "bg-[#0A66C2]/10 text-[#0A66C2] border-[#0A66C2]/20" 
+                              : "bg-pink-500/10 text-pink-400 border-pink-500/20"
+                          }`}
+                        >
+                          {platform === "instagram" && <Instagram className="h-3 w-3" />}
+                          {platform === "linkedin" && <Linkedin className="h-3 w-3" />}
+                          {platform === "facebook" && "👍 "}
+                          {platform === "twitter" && "🐦 "}
+                          {platform}
+                        </span>
+                      );
+                    })}
                   </div>
                   
                   <p className="text-xs text-muted-foreground line-clamp-2">

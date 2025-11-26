@@ -198,10 +198,31 @@ async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: s
 
     console.log(`Publishing ${isVideo ? 'video' : 'image'} to Instagram...`);
 
+    let postUrl: string | null = null;
     if (isVideo) {
-      await publishVideoToInstagram(accessToken, igUserId, mediaUrl, caption);
+      postUrl = await publishVideoToInstagram(accessToken, igUserId, mediaUrl, caption);
     } else {
-      await publishImageToInstagram(accessToken, igUserId, mediaUrl, caption);
+      postUrl = await publishImageToInstagram(accessToken, igUserId, mediaUrl, caption);
+    }
+
+    // Store post URL in content metadata
+    if (postUrl) {
+      const { data: contentData } = await supabase
+        .from("ai_social_content")
+        .select("metadata")
+        .eq("id", contentId)
+        .single();
+      
+      const existingMetadata = contentData?.metadata || {};
+      await supabase
+        .from("ai_social_content")
+        .update({
+          metadata: {
+            ...existingMetadata,
+            instagram_post_url: postUrl
+          }
+        })
+        .eq("id", contentId);
     }
 
     // Update workflow last_run_at
@@ -217,7 +238,7 @@ async function publishToInstagram(supabase: any, workflowId: string, mediaUrl: s
   }
 }
 
-async function publishImageToInstagram(accessToken: string, igUserId: string, imageUrl: string, caption: string) {
+async function publishImageToInstagram(accessToken: string, igUserId: string, imageUrl: string, caption: string): Promise<string | null> {
   const containerResponse = await fetch(
     `https://graph.facebook.com/v19.0/${igUserId}/media`,
     {
@@ -234,7 +255,7 @@ async function publishImageToInstagram(accessToken: string, igUserId: string, im
   if (!containerResponse.ok) {
     const errorText = await containerResponse.text();
     console.error("Instagram container creation failed:", errorText);
-    return;
+    return null;
   }
 
   const containerData = await containerResponse.json();
@@ -255,10 +276,13 @@ async function publishImageToInstagram(accessToken: string, igUserId: string, im
   if (publishResponse.ok) {
     const publishData = await publishResponse.json();
     console.log("Instagram post published:", publishData.id);
+    // Instagram post URL format
+    return `https://www.instagram.com/p/${publishData.id}`;
   }
+  return null;
 }
 
-async function publishVideoToInstagram(accessToken: string, igUserId: string, videoUrl: string, caption: string) {
+async function publishVideoToInstagram(accessToken: string, igUserId: string, videoUrl: string, caption: string): Promise<string | null> {
   console.log("Creating video container for Instagram Reels...");
   
   const containerResponse = await fetch(
@@ -278,7 +302,7 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
   if (!containerResponse.ok) {
     const errorText = await containerResponse.text();
     console.error("Instagram video container creation failed:", errorText);
-    return;
+    return null;
   }
 
   const containerData = await containerResponse.json();
@@ -303,7 +327,7 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
         containerReady = true;
       } else if (statusData.status_code === "ERROR") {
         console.error("Video processing failed on Instagram");
-        return;
+        return null;
       }
     }
     pollAttempts++;
@@ -311,7 +335,7 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
 
   if (!containerReady) {
     console.error("Timeout waiting for video container");
-    return;
+    return null;
   }
 
   const publishResponse = await fetch(
@@ -329,7 +353,9 @@ async function publishVideoToInstagram(accessToken: string, igUserId: string, vi
   if (publishResponse.ok) {
     const publishData = await publishResponse.json();
     console.log("Instagram Reel published:", publishData.id);
+    return `https://www.instagram.com/reel/${publishData.id}`;
   }
+  return null;
 }
 
 async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: string, contentId: string) {
@@ -361,15 +387,38 @@ async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: st
 
     const credentials = JSON.parse(linkedinData.api_key);
     const accessToken = credentials.access_token;
-    const personUrn = linkedinData.owner_id; // urn:li:person:xxxxx
+    // Construct proper URN format - owner_id is just the ID, need to add prefix
+    const personId = linkedinData.owner_id;
+    const personUrn = personId.startsWith("urn:li:person:") ? personId : `urn:li:person:${personId}`;
     const isVideo = workflow.content_type === "video";
 
-    console.log(`Publishing ${isVideo ? 'video' : 'image'} to LinkedIn...`);
+    console.log(`Publishing ${isVideo ? 'video' : 'image'} to LinkedIn with URN: ${personUrn}`);
 
+    let postUrl: string | null = null;
     if (isVideo) {
-      await publishVideoToLinkedin(accessToken, personUrn, mediaUrl);
+      postUrl = await publishVideoToLinkedin(accessToken, personUrn, mediaUrl);
     } else {
-      await publishImageToLinkedin(accessToken, personUrn, mediaUrl);
+      postUrl = await publishImageToLinkedin(accessToken, personUrn, mediaUrl);
+    }
+
+    // Store post URL in content metadata
+    if (postUrl) {
+      const { data: contentData } = await supabase
+        .from("ai_social_content")
+        .select("metadata")
+        .eq("id", contentId)
+        .single();
+      
+      const existingMetadata = contentData?.metadata || {};
+      await supabase
+        .from("ai_social_content")
+        .update({
+          metadata: {
+            ...existingMetadata,
+            linkedin_post_url: postUrl
+          }
+        })
+        .eq("id", contentId);
     }
 
     console.log("LinkedIn publishing completed");
@@ -379,7 +428,7 @@ async function publishToLinkedin(supabase: any, workflowId: string, mediaUrl: st
   }
 }
 
-async function publishImageToLinkedin(accessToken: string, personUrn: string, imageUrl: string) {
+async function publishImageToLinkedin(accessToken: string, personUrn: string, imageUrl: string): Promise<string | null> {
   // Step 1: Initialize upload
   const initResponse = await fetch("https://api.linkedin.com/v2/images?action=initializeUpload", {
     method: "POST",
@@ -398,7 +447,7 @@ async function publishImageToLinkedin(accessToken: string, personUrn: string, im
   if (!initResponse.ok) {
     const errorText = await initResponse.text();
     console.error("LinkedIn image upload init failed:", errorText);
-    return;
+    return null;
   }
 
   const initData = await initResponse.json();
@@ -424,7 +473,7 @@ async function publishImageToLinkedin(accessToken: string, personUrn: string, im
   if (!uploadResponse.ok) {
     const errorText = await uploadResponse.text();
     console.error("LinkedIn image upload failed:", errorText);
-    return;
+    return null;
   }
 
   console.log("Image uploaded to LinkedIn, creating post...");
@@ -458,15 +507,24 @@ async function publishImageToLinkedin(accessToken: string, personUrn: string, im
   });
 
   if (postResponse.ok) {
-    const postData = await postResponse.json();
-    console.log("LinkedIn post published:", postData);
+    const postId = postResponse.headers.get("x-restli-id");
+    console.log("LinkedIn post published, ID:", postId);
+    
+    // Extract person ID from URN for post URL
+    const personId = personUrn.replace("urn:li:person:", "");
+    if (postId) {
+      // LinkedIn post URL format
+      return `https://www.linkedin.com/feed/update/${postId}`;
+    }
+    return null;
   } else {
     const errorText = await postResponse.text();
     console.error("LinkedIn post creation failed:", errorText);
+    return null;
   }
 }
 
-async function publishVideoToLinkedin(accessToken: string, personUrn: string, videoUrl: string) {
+async function publishVideoToLinkedin(accessToken: string, personUrn: string, videoUrl: string): Promise<string | null> {
   // Step 1: Download video to get size
   const videoResponse = await fetch(videoUrl);
   const videoBlob = await videoResponse.blob();
@@ -496,7 +554,7 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
   if (!initResponse.ok) {
     const errorText = await initResponse.text();
     console.error("LinkedIn video upload init failed:", errorText);
-    return;
+    return null;
   }
 
   const initData = await initResponse.json();
@@ -505,7 +563,7 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
 
   if (!uploadUrl) {
     console.error("No upload URL in LinkedIn video init response");
-    return;
+    return null;
   }
 
   console.log("LinkedIn video upload URL obtained");
@@ -523,7 +581,7 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
   if (!uploadResponse.ok) {
     const errorText = await uploadResponse.text();
     console.error("LinkedIn video upload failed:", errorText);
-    return;
+    return null;
   }
 
   // Step 4: Finalize upload
@@ -580,10 +638,15 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
   });
 
   if (postResponse.ok) {
-    const postData = await postResponse.json();
-    console.log("LinkedIn video post published:", postData);
+    const postId = postResponse.headers.get("x-restli-id");
+    console.log("LinkedIn video post published, ID:", postId);
+    if (postId) {
+      return `https://www.linkedin.com/feed/update/${postId}`;
+    }
+    return null;
   } else {
     const errorText = await postResponse.text();
     console.error("LinkedIn video post creation failed:", errorText);
+    return null;
   }
 }
