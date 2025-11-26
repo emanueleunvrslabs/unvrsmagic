@@ -251,6 +251,20 @@ export default function LiveStudio() {
         throw new Error("Failed to connect to LiveKit")
       }
 
+      // Activate the HeyGen session (required before speak commands work)
+      toast.info("Activating avatar session...")
+      const { error: startError } = await supabase.functions.invoke('heygen-session', {
+        body: {
+          action: 'start-session',
+          sessionId: session.id,
+        }
+      })
+
+      if (startError) {
+        console.error("Failed to activate session:", startError)
+        // Continue anyway, speak might still work
+      }
+
       // Update session status
       await supabase
         .from('ai_live_sessions')
@@ -273,7 +287,7 @@ export default function LiveStudio() {
               text: avatar.opening_script,
             }
           })
-        }, 3000) // Wait longer for connection to stabilize
+        }, 2000) // Wait for session to fully activate
       }
 
     } catch (error) {
