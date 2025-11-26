@@ -6,7 +6,7 @@ verify_jwt = true
 [functions.youtube-oauth]
 verify_jwt = false
 
-[functions.instagram-oauth]
+[functions.youtube-broadcast]
 verify_jwt = true
 
 [functions.instagram-oauth]
