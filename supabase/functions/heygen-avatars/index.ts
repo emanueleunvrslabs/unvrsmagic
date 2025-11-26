@@ -66,9 +66,10 @@ serve(async (req) => {
       );
     }
 
-    // Fetch avatars from HeyGen API
-    console.log('Fetching avatars from HeyGen API...');
-    const response = await fetch('https://api.heygen.com/v2/avatars', {
+    // Fetch STREAMING/INTERACTIVE avatars from HeyGen API
+    // This endpoint returns only avatars that can be used for live streaming
+    console.log('Fetching streaming avatars from HeyGen API...');
+    const response = await fetch('https://api.heygen.com/v1/streaming/avatar.list', {
       method: 'GET',
       headers: {
         'X-Api-Key': apiKeyData.api_key,
@@ -80,21 +81,24 @@ serve(async (req) => {
       const errorText = await response.text();
       console.error('HeyGen API error:', response.status, errorText);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch avatars from HeyGen' }),
+        JSON.stringify({ error: 'Failed to fetch streaming avatars from HeyGen', details: errorText }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-    console.log('HeyGen avatars fetched:', data.data?.avatars?.length || 0);
+    console.log('HeyGen streaming avatars response:', JSON.stringify(data).substring(0, 500));
 
-    // Format the response
-    const avatars = (data.data?.avatars || []).map((avatar: any) => ({
+    // Format the response - streaming avatars have different structure
+    const avatars = (data.data || []).map((avatar: any) => ({
       avatar_id: avatar.avatar_id,
-      avatar_name: avatar.avatar_name,
-      preview_image_url: avatar.preview_image_url,
-      gender: avatar.gender,
+      avatar_name: avatar.avatar_name || avatar.avatar_id,
+      preview_image_url: avatar.preview_image_url || avatar.thumbnail_url,
+      status: avatar.status,
+      is_public: avatar.is_public,
     }));
+
+    console.log(`Found ${avatars.length} streaming avatars`);
 
     return new Response(
       JSON.stringify({ avatars }),

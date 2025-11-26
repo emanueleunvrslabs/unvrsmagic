@@ -184,7 +184,7 @@ export default function AvatarStudio() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Avatar Studio</h1>
             <p className="text-muted-foreground mt-1">
-              Create and manage your AI avatars for live streaming
+              Create and manage your Interactive AI avatars for live streaming
             </p>
           </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -196,9 +196,9 @@ export default function AvatarStudio() {
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Create New Avatar</DialogTitle>
+                <DialogTitle>Create Interactive Avatar</DialogTitle>
                 <DialogDescription>
-                  Select a HeyGen avatar and customize its personality
+                  Select a HeyGen Interactive Avatar for real-time streaming (only streaming-compatible avatars are shown)
                 </DialogDescription>
               </DialogHeader>
               
