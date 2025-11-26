@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Download, Trash2, Maximize2, Play, X, Loader2, Instagram, ExternalLink, Linkedin, RefreshCw } from "lucide-react";
+import { Download, Trash2, Maximize2, Play, Loader2, Instagram, ExternalLink, Linkedin, RefreshCw, Image, Video, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -261,6 +261,7 @@ export function ContentGallerySection() {
           {filteredContent.map((item) => (
             <Card key={item.id} className="group relative overflow-hidden">
               <CardContent className="p-0">
+                {/* Thumbnail con overlay badges */}
                 <div className="relative aspect-square bg-muted">
                   {item.status === "completed" && (item.media_url || item.thumbnail_url) ? (
                     <>
@@ -271,18 +272,14 @@ export function ContentGallerySection() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <>
-                          <video
-                            src={`${item.media_url}#t=0.1`}
-                            className="w-full h-full object-cover"
-                            preload="metadata"
-                            muted
-                          />
-                          <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm rounded text-xs font-medium text-white">
-                            {item.metadata?.duration || "0:00"}
-                          </div>
-                        </>
+                        <video
+                          src={`${item.media_url}#t=0.1`}
+                          className="w-full h-full object-cover"
+                          preload="metadata"
+                          muted
+                        />
                       )}
+                      {/* Hover overlay con azioni */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Button
                           size="icon"
@@ -339,104 +336,122 @@ export function ContentGallerySection() {
                       )}
                     </div>
                   )}
-                </div>
-                <div className="p-4 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-sm line-clamp-1">{item.title}</h3>
+                  
+                  {/* Overlay badges sul thumbnail */}
+                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+                    {/* Content type icon - bottom left */}
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-sm text-white text-xs">
+                      {item.type === "image" ? <Image className="h-3 w-3" /> : <Video className="h-3 w-3" />}
+                    </span>
+                    
+                    {/* Duration (video) or Status - bottom right */}
                     <div className="flex items-center gap-1.5">
-                      {item.status === "completed" && (item.metadata as any)?.fal_cost !== undefined && (item.metadata as any)?.fal_cost !== null && (
-                        <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                          ${typeof (item.metadata as any).fal_cost === 'number' 
-                            ? (item.metadata as any).fal_cost.toFixed(2) 
-                            : (item.metadata as any).fal_cost}
+                      {item.type === "video" && item.metadata?.duration && (
+                        <span className="px-1.5 py-0.5 bg-black/60 backdrop-blur-sm rounded text-xs font-medium text-white">
+                          {item.metadata.duration}
                         </span>
                       )}
-                      <Badge className={getStatusColor(item.status)} variant="outline">
+                      <span className={`px-1.5 py-0.5 rounded text-xs font-medium backdrop-blur-sm ${
+                        item.status === "completed" ? "bg-green-500/80 text-white" :
+                        item.status === "generating" ? "bg-blue-500/80 text-white" :
+                        "bg-red-500/80 text-white"
+                      }`}>
                         {item.status}
-                      </Badge>
+                      </span>
                     </div>
                   </div>
+                </div>
+                
+                {/* Card content */}
+                <div className="p-3 space-y-2">
+                  {/* Header: Title + Date */}
+                  <div>
+                    <h3 className="font-semibold text-sm line-clamp-1">{item.title}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(item.created_at), "MMM d, yyyy • HH:mm")}
+                    </p>
+                  </div>
                   
-                  {/* Agents involved row */}
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    {/* Execution type badge */}
+                  {/* Pipeline AI con frecce */}
+                  <div className="flex items-center gap-1 text-xs overflow-x-auto">
                     {(item.metadata as any)?.execution_type === "scheduled" ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
-                        ⏰ Schedule
+                      <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 rounded border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
+                        Schedule
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
+                      <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 rounded border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
                         Run Now
                       </span>
                     )}
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
+                    <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 rounded border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
                       OpenAI
                     </span>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
                     {item.type === "image" ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
-                        Nano Banana
+                      <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 rounded border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+                        Nano 🍌
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
+                      <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 rounded border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
                         Veo3
                       </span>
                     )}
                   </div>
                   
-                  <div className="flex flex-wrap gap-1.5">
-                    {/* Social platforms badges with post URLs */}
-                    {item.workflow?.platforms?.map((platform: string) => {
-                      const metadata = item.metadata as any;
-                      const postUrl = platform === "instagram" 
-                        ? metadata?.instagram_post_url 
-                        : platform === "linkedin" 
-                        ? metadata?.linkedin_post_url 
-                        : null;
-                      
-                      return postUrl ? (
-                        <a
-                          key={platform}
-                          href={postUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm capitalize transition-colors hover:opacity-80 ${
-                            platform === "linkedin" 
-                              ? "bg-[#0A66C2]/10 text-[#0A66C2] border-[#0A66C2]/20" 
-                              : "bg-pink-500/10 text-pink-400 border-pink-500/20"
-                          }`}
-                        >
-                          {platform === "instagram" && <Instagram className="h-3 w-3" />}
-                          {platform === "linkedin" && <Linkedin className="h-3 w-3" />}
-                          {platform === "facebook" && "👍 "}
-                          {platform === "twitter" && "🐦 "}
-                          {platform}
-                          <ExternalLink className="h-2.5 w-2.5" />
-                        </a>
-                      ) : (
-                        <span 
-                          key={platform} 
-                          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm capitalize ${
-                            platform === "linkedin" 
-                              ? "bg-[#0A66C2]/10 text-[#0A66C2] border-[#0A66C2]/20" 
-                              : "bg-pink-500/10 text-pink-400 border-pink-500/20"
-                          }`}
-                        >
-                          {platform === "instagram" && <Instagram className="h-3 w-3" />}
-                          {platform === "linkedin" && <Linkedin className="h-3 w-3" />}
-                          {platform === "facebook" && "👍 "}
-                          {platform === "twitter" && "🐦 "}
-                          {platform}
-                        </span>
-                      );
-                    })}
+                  {/* Footer: Social icons + Cost */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      {item.workflow?.platforms?.map((platform: string) => {
+                        const metadata = item.metadata as any;
+                        const postUrl = platform === "instagram" 
+                          ? metadata?.instagram_post_url 
+                          : platform === "linkedin" 
+                          ? metadata?.linkedin_post_url 
+                          : null;
+                        
+                        return postUrl ? (
+                          <a
+                            key={platform}
+                            href={postUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center justify-center w-6 h-6 rounded-full transition-colors hover:opacity-80 ${
+                              platform === "linkedin" 
+                                ? "bg-[#0A66C2]/20 text-[#0A66C2]" 
+                                : "bg-pink-500/20 text-pink-400"
+                            }`}
+                            title={`View on ${platform}`}
+                          >
+                            {platform === "instagram" && <Instagram className="h-3.5 w-3.5" />}
+                            {platform === "linkedin" && <Linkedin className="h-3.5 w-3.5" />}
+                          </a>
+                        ) : (
+                          <span 
+                            key={platform} 
+                            className={`inline-flex items-center justify-center w-6 h-6 rounded-full opacity-50 ${
+                              platform === "linkedin" 
+                                ? "bg-[#0A66C2]/20 text-[#0A66C2]" 
+                                : "bg-pink-500/20 text-pink-400"
+                            }`}
+                            title={platform}
+                          >
+                            {platform === "instagram" && <Instagram className="h-3.5 w-3.5" />}
+                            {platform === "linkedin" && <Linkedin className="h-3.5 w-3.5" />}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Cost badge */}
+                    {item.status === "completed" && (item.metadata as any)?.fal_cost !== undefined && (item.metadata as any)?.fal_cost !== null && (
+                      <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full border backdrop-blur-sm bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                        ${typeof (item.metadata as any).fal_cost === 'number' 
+                          ? (item.metadata as any).fal_cost.toFixed(2) 
+                          : (item.metadata as any).fal_cost}
+                      </span>
+                    )}
                   </div>
-                  
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {item.prompt}
-                  </p>
-                  <p className="text-xs text-muted-foreground text-right">
-                    {format(new Date(item.created_at), "MMM d, yyyy HH:mm")}
-                  </p>
                 </div>
               </CardContent>
             </Card>
