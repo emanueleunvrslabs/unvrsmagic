@@ -283,6 +283,31 @@ serve(async (req) => {
 
       const metadata = sessionData.metadata as { session_token?: string };
 
+      // Simple language detection based on character patterns
+      const detectLanguage = (inputText: string): string => {
+        // Check for Cyrillic (Russian, etc.)
+        if (/[\u0400-\u04FF]/.test(inputText)) return 'ru';
+        // Check for Chinese
+        if (/[\u4E00-\u9FFF]/.test(inputText)) return 'zh';
+        // Check for Japanese
+        if (/[\u3040-\u309F\u30A0-\u30FF]/.test(inputText)) return 'ja';
+        // Check for Korean
+        if (/[\uAC00-\uD7AF]/.test(inputText)) return 'ko';
+        // Check for Arabic
+        if (/[\u0600-\u06FF]/.test(inputText)) return 'ar';
+        // Check for common Italian/Spanish/French words (basic heuristic)
+        const lowerText = inputText.toLowerCase();
+        if (/\b(ciao|buongiorno|grazie|come|sono|questa|perché|molto)\b/.test(lowerText)) return 'it';
+        if (/\b(hola|gracias|buenos|cómo|está|qué|muy|para)\b/.test(lowerText)) return 'es';
+        if (/\b(bonjour|merci|comment|très|vous|cette|pourquoi)\b/.test(lowerText)) return 'fr';
+        if (/\b(guten|danke|wie|sehr|ich|diese|warum)\b/.test(lowerText)) return 'de';
+        // Default to English
+        return 'en';
+      };
+
+      const detectedLanguage = detectLanguage(text || '');
+      console.log('Detected language:', detectedLanguage);
+
       const response = await fetch(`${HEYGEN_API_URL}/v1/streaming.task`, {
         method: 'POST',
         headers: {
@@ -306,7 +331,7 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ success: true }),
+        JSON.stringify({ success: true, detectedLanguage }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
