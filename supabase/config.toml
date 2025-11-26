@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.restream-stream]
 verify_jwt = true
+
+[functions.retry-publish]
+verify_jwt = true

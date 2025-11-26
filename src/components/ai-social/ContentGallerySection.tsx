@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Download, Trash2, Maximize2, Play, X, Loader2, Instagram, ExternalLink, Linkedin } from "lucide-react";
+import { Download, Trash2, Maximize2, Play, X, Loader2, Instagram, ExternalLink, Linkedin, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -37,6 +37,7 @@ export function ContentGallerySection() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
+  const [retryingIds, setRetryingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadContent();
@@ -163,6 +164,41 @@ export function ContentGallerySection() {
     }
   };
 
+  const handleRetry = async (item: ContentItem) => {
+    if (!item.media_url || !item.workflow?.id) {
+      toast.error("Cannot retry: missing media URL or workflow");
+      return;
+    }
+
+    setRetryingIds(prev => new Set(prev).add(item.id));
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("retry-publish", {
+        body: { 
+          contentId: item.id,
+          workflowId: item.workflow.id
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success("Publishing retry started");
+      } else {
+        toast.error(data?.error || "Retry failed");
+      }
+    } catch (error) {
+      console.error("Error retrying publish:", error);
+      toast.error("Failed to retry publishing");
+    } finally {
+      setRetryingIds(prev => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
@@ -283,8 +319,24 @@ export function ContentGallerySection() {
                       <p className="text-sm text-muted-foreground">Generating...</p>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <p className="text-sm text-muted-foreground">Failed</p>
+                    <div className="flex flex-col items-center justify-center h-full gap-3">
+                      <p className="text-sm text-red-400">Generation Failed</p>
+                      {item.media_url && item.workflow?.id && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRetry(item)}
+                          disabled={retryingIds.has(item.id)}
+                          className="gap-2"
+                        >
+                          {retryingIds.has(item.id) ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                          Retry Publish
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
