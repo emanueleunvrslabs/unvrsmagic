@@ -114,7 +114,7 @@ serve(async (req) => {
       const sessionToken = tokenData.data?.token;
       console.log('Session token obtained');
 
-      // Step 2: Create streaming session with WebRTC
+      // Step 2: Create streaming session (returns LiveKit credentials)
       console.log('Creating streaming session with avatar:', avatarData.heygen_avatar_id);
       const sessionResponse = await fetch(`${HEYGEN_API_URL}/v1/streaming.new`, {
         method: 'POST',
@@ -129,8 +129,6 @@ serve(async (req) => {
             voice_id: avatarData.voice_id,
             rate: 1.0,
           } : undefined,
-          version: 'v2',
-          video_encoding: 'H264',
         }),
       });
 
@@ -145,7 +143,7 @@ serve(async (req) => {
 
       const sessionData = await sessionResponse.json();
       console.log('Streaming session created:', sessionData.data?.session_id);
-      console.log('SDP offer length:', sessionData.data?.sdp?.sdp?.length || 0);
+      console.log('LiveKit URL:', sessionData.data?.url);
 
       // Update session with HeyGen details
       const { error: updateError } = await supabase
@@ -154,7 +152,8 @@ serve(async (req) => {
           heygen_session_id: sessionData.data?.session_id,
           metadata: {
             session_token: sessionToken,
-            ice_servers: sessionData.data?.ice_servers2 || sessionData.data?.ice_servers,
+            livekit_url: sessionData.data?.url,
+            access_token: sessionData.data?.access_token,
           }
         })
         .eq('id', sessionId);
@@ -167,9 +166,10 @@ serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           sessionId: sessionData.data?.session_id,
-          sdpOffer: sessionData.data?.sdp?.sdp,
-          iceServers: sessionData.data?.ice_servers2 || sessionData.data?.ice_servers || [],
+          accessToken: sessionData.data?.access_token,
+          livekitUrl: sessionData.data?.url,
           openingScript: avatarData.opening_script,
+          sessionToken: sessionToken,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
