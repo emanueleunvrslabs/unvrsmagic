@@ -75,6 +75,7 @@ export default function LiveStudio() {
 
   // LiveKit refs
   const videoRef = useRef<HTMLVideoElement>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const roomRef = useRef<Room | null>(null)
 
   // Load avatars
@@ -84,6 +85,10 @@ export default function LiveStudio() {
       // Cleanup on unmount
       if (roomRef.current) {
         roomRef.current.disconnect()
+      }
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.remove()
       }
     }
   }, [])
@@ -100,6 +105,14 @@ export default function LiveStudio() {
     }
     return () => clearInterval(interval)
   }, [isLive, currentSession?.started_at])
+
+  // Handle mute state changes for audio
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted
+      audioRef.current.volume = isMuted ? 0 : 1
+    }
+  }, [isMuted])
 
   const loadAvatars = async () => {
     try {
@@ -168,9 +181,27 @@ export default function LiveStudio() {
             videoReady = true
             checkReady()
           } else if (track.kind === Track.Kind.Audio) {
-            const audioElement = track.attach()
-            audioElement.volume = isMuted ? 0 : 1
+            // Create audio element with proper autoplay settings
+            const audioElement = track.attach() as HTMLAudioElement
+            audioElement.autoplay = true
+            audioElement.muted = false
+            audioElement.volume = 1
+            
+            // Store reference for later control
+            audioRef.current = audioElement
+            
+            // Append to body and try to play
             document.body.appendChild(audioElement)
+            
+            // Force play to handle autoplay restrictions
+            audioElement.play().then(() => {
+              console.log("Audio playback started successfully")
+            }).catch((err) => {
+              console.error("Audio autoplay failed:", err)
+              // Show toast to user to click to enable audio
+              toast.info("Click anywhere to enable audio", { duration: 5000 })
+            })
+            
             audioReady = true
             checkReady()
           }
@@ -349,6 +380,11 @@ export default function LiveStudio() {
         roomRef.current.disconnect()
         roomRef.current = null
       }
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.remove()
+        audioRef.current = null
+      }
     } finally {
       setIsStarting(false)
     }
@@ -367,6 +403,13 @@ export default function LiveStudio() {
       // Clear video
       if (videoRef.current) {
         videoRef.current.srcObject = null
+      }
+
+      // Clean up audio element
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.remove()
+        audioRef.current = null
       }
 
       // Stop HeyGen session
