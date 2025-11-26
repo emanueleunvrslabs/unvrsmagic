@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox"
 import { 
   Play, 
   Square, 
@@ -19,7 +21,8 @@ import {
   Settings,
   Mic,
   MicOff,
-  AlertCircle
+  AlertCircle,
+  ChevronDown
 } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
@@ -456,15 +459,15 @@ export default function LiveStudio() {
             {/* Controls */}
             <Card className="bg-card/50">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="flex items-center gap-4 flex-wrap">
-                    {!isLive ? (
-                      <>
+                <div className="flex items-center justify-between gap-4">
+                  {!isLive ? (
+                    <>
+                      <div className="flex items-center gap-4 flex-wrap flex-1">
                         <Select value={selectedAvatar} onValueChange={setSelectedAvatar}>
-                          <SelectTrigger className="w-[200px]">
+                          <SelectTrigger className="w-[200px] bg-background">
                             <SelectValue placeholder="Select Avatar" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background border border-border z-50">
                             {avatars.length === 0 ? (
                               <div className="p-4 text-center text-muted-foreground">
                                 <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -488,22 +491,61 @@ export default function LiveStudio() {
                           </SelectContent>
                         </Select>
 
-                        <div className="flex items-center gap-2">
-                          {PLATFORMS.map((platform) => (
-                            <Button
-                              key={platform.id}
-                              variant={selectedPlatforms.includes(platform.id) ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => togglePlatform(platform.id)}
-                              className="gap-1"
-                            >
-                              <span>{platform.icon}</span>
-                              <span className="hidden sm:inline">{platform.label}</span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-[200px] justify-between bg-background">
+                              {selectedPlatforms.length === 0 ? (
+                                <span className="text-muted-foreground">Select Platforms</span>
+                              ) : (
+                                <span className="flex items-center gap-1">
+                                  {selectedPlatforms.map(p => PLATFORMS.find(pl => pl.id === p)?.icon).join(' ')}
+                                  <span className="ml-1">({selectedPlatforms.length})</span>
+                                </span>
+                              )}
+                              <ChevronDown className="h-4 w-4 opacity-50" />
                             </Button>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[200px] p-2 bg-background border border-border z-50">
+                            <div className="space-y-2">
+                              {PLATFORMS.map((platform) => (
+                                <div
+                                  key={platform.id}
+                                  className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer"
+                                  onClick={() => togglePlatform(platform.id)}
+                                >
+                                  <Checkbox 
+                                    checked={selectedPlatforms.includes(platform.id)}
+                                    onCheckedChange={() => togglePlatform(platform.id)}
+                                  />
+                                  <span>{platform.icon}</span>
+                                  <span className="text-sm">{platform.label}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      <Button 
+                        onClick={handleStartLive}
+                        disabled={isStarting || !selectedAvatar || selectedPlatforms.length === 0}
+                        className="bg-red-500/20 text-red-500 border border-red-500/30 hover:bg-red-500/30 hover:text-red-400"
+                      >
+                        {isStarting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Starting...
+                          </>
+                        ) : (
+                          <>
+                            <Play className="mr-2 h-4 w-4" />
+                            Go Live
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
@@ -519,29 +561,6 @@ export default function LiveStudio() {
                           <Settings className="h-4 w-4" />
                         </Button>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {!isLive ? (
-                      <Button 
-                        onClick={handleStartLive}
-                        disabled={isStarting || !selectedAvatar || selectedPlatforms.length === 0}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        {isStarting ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Starting...
-                          </>
-                        ) : (
-                          <>
-                            <Play className="mr-2 h-4 w-4" />
-                            Go Live
-                          </>
-                        )}
-                      </Button>
-                    ) : (
                       <Button 
                         onClick={handleStopLive}
                         variant="destructive"
@@ -549,8 +568,8 @@ export default function LiveStudio() {
                         <Square className="mr-2 h-4 w-4" />
                         End Live
                       </Button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
