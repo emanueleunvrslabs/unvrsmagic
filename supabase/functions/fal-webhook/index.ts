@@ -633,7 +633,11 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
     return null;
   }
 
-  // Step 4: Finalize upload
+  // Get the ETag from the upload response - required for finalize
+  const etag = uploadResponse.headers.get("etag");
+  console.log("LinkedIn video upload ETag:", etag);
+
+  // Step 4: Finalize upload with the uploaded part info
   const finalizeResponse = await fetch("https://api.linkedin.com/v2/videos?action=finalizeUpload", {
     method: "POST",
     headers: {
@@ -645,7 +649,7 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
       finalizeUploadRequest: {
         video: videoAsset,
         uploadToken: "",
-        uploadedPartIds: []
+        uploadedPartIds: etag ? [etag.replace(/"/g, '')] : []
       }
     })
   });
@@ -653,8 +657,10 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
   if (!finalizeResponse.ok) {
     const errorText = await finalizeResponse.text();
     console.error("LinkedIn video finalize failed:", errorText);
-    // Continue anyway, some APIs don't require explicit finalize
+    return null; // Must return null if finalize fails - video won't be usable
   }
+  
+  console.log("LinkedIn video finalize successful");
 
   console.log("Video uploaded to LinkedIn, creating post...");
 
