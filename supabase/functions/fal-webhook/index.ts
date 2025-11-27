@@ -633,28 +633,51 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
 
     console.log("LinkedIn video upload URL obtained:", uploadUrl.substring(0, 100) + "...");
 
-    // Step 3: Upload video with proper headers
-    console.log("Uploading video to LinkedIn...");
-    const uploadResponse = await fetch(uploadUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/octet-stream",
-        "Content-Length": videoSize.toString()
-      },
-      body: videoBuffer
-    });
+    // Step 3: Upload video in chunks according to uploadInstructions
+    console.log(`Uploading video to LinkedIn in ${uploadInstructions.length} chunk(s)...`);
+    
+    const uploadedPartIds: string[] = [];
+    
+    for (let i = 0; i < uploadInstructions.length; i++) {
+      const instruction = uploadInstructions[i];
+      const chunkUploadUrl = instruction.uploadUrl;
+      const firstByte = instruction.firstByte;
+      const lastByte = instruction.lastByte;
+      
+      // Extract chunk from video buffer
+      const chunk = videoBuffer.slice(firstByte, lastByte + 1);
+      const chunkSize = chunk.byteLength;
+      
+      console.log(`Uploading chunk ${i + 1}/${uploadInstructions.length}: bytes ${firstByte}-${lastByte} (${chunkSize} bytes)`);
+      
+      const uploadResponse = await fetch(chunkUploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Content-Length": chunkSize.toString()
+        },
+        body: chunk
+      });
 
-    if (!uploadResponse.ok) {
-      const errorText = await uploadResponse.text();
-      console.error(`LinkedIn video upload failed (${uploadResponse.status}):`, errorText.substring(0, 500));
-      return null;
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error(`LinkedIn video chunk ${i + 1} upload failed (${uploadResponse.status}):`, errorText.substring(0, 500));
+        return null;
+      }
+      
+      // Get the ETag from each chunk upload
+      const etag = uploadResponse.headers.get("etag");
+      if (etag) {
+        uploadedPartIds.push(etag.replace(/"/g, ''));
+        console.log(`Chunk ${i + 1} uploaded successfully with ETag: ${etag}`);
+      } else {
+        console.log(`Chunk ${i + 1} uploaded successfully (no ETag)`);
+      }
     }
 
-    // Get the ETag from the upload response - required for finalize
-    const etag = uploadResponse.headers.get("etag");
-    console.log("LinkedIn video upload ETag:", etag);
+    console.log("All video chunks uploaded successfully to LinkedIn");
 
-    // Step 4: Finalize upload with the uploaded part info
+    // Step 4: Finalize upload with all uploaded part IDs
     const finalizeResponse = await fetch("https://api.linkedin.com/v2/videos?action=finalizeUpload", {
       method: "POST",
       headers: {
@@ -666,7 +689,7 @@ async function publishVideoToLinkedin(accessToken: string, personUrn: string, vi
         finalizeUploadRequest: {
           video: videoAsset,
           uploadToken: "",
-          uploadedPartIds: etag ? [etag.replace(/"/g, '')] : []
+          uploadedPartIds: uploadedPartIds
         }
       })
     });
