@@ -51,8 +51,8 @@ export function LandingFooterNew() {
               Get in Touch
             </h3>
             <div className="flex flex-col gap-2">
-              <a href="mailto:info@unvrslabs.com" className="text-white/60 hover:text-white transition-colors text-sm">
-                info@unvrslabs.com
+              <a href="mailto:emanuele@unvrslabs.dev" className="text-white/60 hover:text-white transition-colors text-sm">
+                emanuele@unvrslabs.dev
               </a>
               <Link to="/auth" className="text-white/60 hover:text-white transition-colors text-sm">
                 Client Portal
