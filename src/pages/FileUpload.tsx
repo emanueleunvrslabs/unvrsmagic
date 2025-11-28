@@ -6,6 +6,7 @@ import { Upload, File, X, CheckCircle2, AlertCircle, FileArchive, FolderOpen, Tr
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import JSZip from "jszip";
 
 interface UploadedFile {
   file: File;
@@ -103,13 +104,69 @@ const FileUpload = () => {
     }
   };
 
-  const addFiles = (newFiles: File[]) => {
-    const uploadedFiles: UploadedFile[] = newFiles.map((file) => ({
-      file,
-      progress: 0,
-      status: "pending" as const,
-    }));
-    setFiles((prev) => [...prev, ...uploadedFiles]);
+  const addFiles = async (newFiles: File[]) => {
+    const filesToAdd: UploadedFile[] = [];
+    
+    for (const file of newFiles) {
+      // Check if it's a ZIP file
+      const isZip = file.name.toLowerCase().endsWith('.zip') || 
+                    file.type === 'application/zip' ||
+                    file.type === 'application/x-zip-compressed';
+      
+      if (isZip) {
+        try {
+          // Extract ZIP contents
+          const arrayBuffer = await file.arrayBuffer();
+          const zip = await JSZip.loadAsync(arrayBuffer);
+          
+          // Add original ZIP
+          filesToAdd.push({
+            file,
+            progress: 0,
+            status: "pending" as const,
+          });
+          
+          // Extract each file
+          for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
+            if (!zipEntry.dir) {
+              const content = await zipEntry.async('blob');
+              const fileName = relativePath.split('/').pop() || relativePath;
+              
+              // Create File from Blob
+              const extractedFile = new window.File([content], fileName, {
+                type: 'application/octet-stream'
+              });
+              
+              filesToAdd.push({
+                file: extractedFile,
+                progress: 0,
+                status: "pending" as const,
+              });
+            }
+          }
+          
+          toast.success(`ZIP extracted: ${Object.keys(zip.files).length} files found`);
+        } catch (error) {
+          console.error('Error extracting ZIP:', error);
+          toast.error('Failed to extract ZIP file');
+          // Add ZIP as regular file if extraction fails
+          filesToAdd.push({
+            file,
+            progress: 0,
+            status: "pending" as const,
+          });
+        }
+      } else {
+        // Regular file
+        filesToAdd.push({
+          file,
+          progress: 0,
+          status: "pending" as const,
+        });
+      }
+    }
+    
+    setFiles((prev) => [...prev, ...filesToAdd]);
   };
 
   const removeFile = (index: number) => {
