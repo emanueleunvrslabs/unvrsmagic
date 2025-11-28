@@ -34,7 +34,18 @@ export function LandingLearnMore() {
                   {word}
                 </motion.span>
               ))}
-              <span className="inline-block">❌</span>
+              <motion.span
+                initial={{ opacity: 0, scale: 0 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
+                transition={{ 
+                  delay: title1.length * 0.1,
+                  duration: 0.6,
+                  ease: [0.34, 1.56, 0.64, 1]
+                }}
+                className="inline-block"
+              >
+                ❌
+              </motion.span>
             </div>
             <div className="flex flex-wrap gap-x-4">
               {title2.map((word, index) => (
@@ -43,7 +54,7 @@ export function LandingLearnMore() {
                   initial={{ opacity: 0, scale: 0 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
                   transition={{ 
-                    delay: (title1.length * 0.1) + (index * 0.1),
+                    delay: ((title1.length + 1) * 0.1) + (index * 0.1),
                     duration: 0.6,
                     ease: [0.34, 1.56, 0.64, 1]
                   }}
@@ -52,7 +63,18 @@ export function LandingLearnMore() {
                   {word}
                 </motion.span>
               ))}
-              <span className="inline-block">🔮</span>
+              <motion.span
+                initial={{ opacity: 0, scale: 0 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
+                transition={{ 
+                  delay: ((title1.length + 1) * 0.1) + (title2.length * 0.1),
+                  duration: 0.6,
+                  ease: [0.34, 1.56, 0.64, 1]
+                }}
+                className="inline-block"
+              >
+                🔮
+              </motion.span>
             </div>
           </h2>
 
@@ -63,7 +85,7 @@ export function LandingLearnMore() {
                 initial={{ opacity: 0, scale: 0 }}
                 animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
                 transition={{ 
-                  delay: (title1.length * 0.1) + (title2.length * 0.1) + 0.3 + (index * 0.03),
+                  delay: ((title1.length + 1) * 0.1) + ((title2.length + 1) * 0.1) + 0.2 + (index * 0.02),
                   duration: 0.5,
                   ease: [0.34, 1.56, 0.64, 1]
                 }}
