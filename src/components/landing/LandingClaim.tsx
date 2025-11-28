@@ -17,6 +17,7 @@ export function LandingClaim() {
           <p className="font-orbitron text-base md:text-lg text-white/70 font-light tracking-wide leading-relaxed max-w-3xl">
             <WaveTextEntrance 
               text="Specializing in developing enterprise software, custom applications, and AI integrations, delivering innovative and scalable solutions that create real value for businesses across all digital platforms."
+              delay={1200}
             />
           </p>
         </div>
