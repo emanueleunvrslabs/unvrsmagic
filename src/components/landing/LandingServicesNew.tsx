@@ -13,12 +13,12 @@ const services = [
     description: "Tailored enterprise applications built from the ground up to match your unique business requirements.",
   },
   {
-    title: "Cloud Architecture",
-    description: "Design and implement scalable cloud infrastructure that grows with your business needs.",
-  },
-  {
     title: "Mobile Applications",
     description: "Native and cross-platform mobile solutions that deliver exceptional user experiences.",
+  },
+  {
+    title: "Cloud Architecture",
+    description: "Design and implement scalable cloud infrastructure that grows with your business needs.",
   },
   {
     title: "Consulting & Strategy",
