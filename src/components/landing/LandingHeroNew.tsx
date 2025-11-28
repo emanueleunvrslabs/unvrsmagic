@@ -74,7 +74,7 @@ where businesses and AI evolve together.";
   ];
 
   return (
-    <section id="home" className="relative bg-black flex items-start justify-center overflow-hidden pt-32 pb-16">
+    <section id="home" className="relative min-h-screen bg-black flex items-start justify-center overflow-hidden pt-32">
       {/* Center Content */}
       <div className="relative z-10 text-center px-6 max-w-6xl mx-auto mt-12">
         <div className="relative h-[180px] md:h-[280px] mb-6 flex items-center justify-center">
@@ -138,6 +138,20 @@ where businesses and AI evolve together.";
           </code>
         </motion.pre>
       </div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 1 }}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2"
+      >
+        <a href="#learn-more" className="text-white/50 hover:text-white/80 transition-colors">
+          <svg className="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </a>
+      </motion.div>
 
       <style>{`
         @keyframes slide-up {
