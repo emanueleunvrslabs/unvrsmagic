@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Check, X } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import logo from "@/assets/landing/unvrs-logo.png";
+import { MorseLED } from "@/components/MorseLED";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -290,7 +291,8 @@ export default function Auth() {
           <img src={logo} alt="Unvrs Labs" className="w-full h-full object-contain" />
         </Link>
       </header>
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm relative">
+        <MorseLED />
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             {step === "username" ? "Choose Username" : "Login with WhatsApp"}
