@@ -1,14 +1,12 @@
 .letter-container {
   position: relative;
   display: inline-block;
-  overflow: visible;
-  height: 1.2em;
+  overflow: hidden;
+  height: 1.1em;
 }
 
 .letter-top,
 .letter-bottom {
-  position: absolute;
-  left: 0;
   display: block;
   width: 100%;
   height: 1em;
@@ -16,12 +14,12 @@
 }
 
 .letter-top {
-  transform: translateY(0);
+  transform: translateY(0%);
   animation: unvrsToLabs 8s ease-in-out infinite;
 }
 
 .letter-bottom {
-  transform: translateY(100%);
+  transform: translateY(120%);
   animation: labsToUnvrs 8s ease-in-out infinite;
 }
 
@@ -52,24 +50,24 @@
 
 @keyframes unvrsToLabs {
   0%, 40% {
-    transform: translateY(0);
+    transform: translateY(0%);
   }
   50%, 90% {
-    transform: translateY(-100%);
+    transform: translateY(-120%);
   }
   100% {
-    transform: translateY(0);
+    transform: translateY(0%);
   }
 }
 
 @keyframes labsToUnvrs {
   0%, 40% {
-    transform: translateY(100%);
+    transform: translateY(120%);
   }
   50%, 90% {
-    transform: translateY(0);
+    transform: translateY(0%);
   }
   100% {
-    transform: translateY(100%);
+    transform: translateY(120%);
   }
 }
