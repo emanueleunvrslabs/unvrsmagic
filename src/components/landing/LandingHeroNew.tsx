@@ -111,7 +111,8 @@ where businesses and AI evolve together.";
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.3 }}
-          className="text-base md:text-lg lg:text-xl max-w-3xl mx-auto font-mono text-center whitespace-pre-wrap"
+          className="text-base md:text-lg lg:text-xl max-w-3xl mx-auto text-center whitespace-pre-wrap"
+          style={{ fontFamily: "Orbitron, sans-serif" }}
         >
           <code>
             {(() => {
