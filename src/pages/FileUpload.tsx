@@ -541,7 +541,7 @@ const FileUpload = () => {
                   onClick={async () => {
                     if (confirm('Sei sicuro di voler eliminare tutti i file?')) {
                       await deleteAllFilesFromStorage();
-                      toast.success('Tutti i file sono stati eliminati');
+                      toast('Tutti i file sono stati eliminati');
                     }
                   }}
                 >
