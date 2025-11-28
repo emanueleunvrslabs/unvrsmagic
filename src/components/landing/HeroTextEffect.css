@@ -1,0 +1,75 @@
+.letter-container {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  height: 1em;
+  animation: letterSlide 2s ease-in-out infinite;
+}
+
+.letter-top,
+.letter-bottom {
+  display: block;
+  transition: transform 0.6s ease-in-out;
+}
+
+.letter-top {
+  transform: translateY(0);
+}
+
+.letter-bottom {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  transform: translateY(0);
+}
+
+@keyframes letterSlide {
+  0%, 45% {
+    height: 1em;
+  }
+  50%, 95% {
+    height: 1em;
+  }
+}
+
+.letter-container:nth-child(1) .letter-top,
+.letter-container:nth-child(1) .letter-bottom {
+  animation: slideUp 2s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.letter-container:nth-child(2) .letter-top,
+.letter-container:nth-child(2) .letter-bottom {
+  animation: slideUp 2s ease-in-out infinite;
+  animation-delay: 0.15s;
+}
+
+.letter-container:nth-child(3) .letter-top,
+.letter-container:nth-child(3) .letter-bottom {
+  animation: slideUp 2s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+
+.letter-container:nth-child(4) .letter-top,
+.letter-container:nth-child(4) .letter-bottom {
+  animation: slideUp 2s ease-in-out infinite;
+  animation-delay: 0.45s;
+}
+
+.letter-container:nth-child(5) .letter-top,
+.letter-container:nth-child(5) .letter-bottom {
+  animation: slideUp 2s ease-in-out infinite;
+  animation-delay: 0.6s;
+}
+
+@keyframes slideUp {
+  0%, 45% {
+    transform: translateY(0);
+  }
+  50%, 95% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

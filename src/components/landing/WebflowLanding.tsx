@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import "./HeroTextEffect.css";
 
 const STORAGE_BASE = "https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object/public/uploads/9d8f65ef-58ef-47db-be8f-926f26411b39";
 
@@ -83,11 +84,16 @@ export function WebflowLanding() {
         <div className="w-layout-blockcontainer hero-container w-container">
           <div id="w-node-_4bb845f3-8c90-60b3-f0d6-cd46e0539714-e0539704" className="hero-block">
             <div className="hero-text-block">
-              <div className="hero-text-wrapper">
-                <h1 className="hero-text gsap-stagger-loop">Unvrs</h1>
-                <h1 className="hero-text gsap-stagger-loop">Labs</h1>
-                <h1 className="hero-text gsap-stagger-loop">UNVRS</h1>
-              </div>
+            <div className="hero-text-wrapper">
+              <h1 className="hero-text">
+                {['U', 'N', 'V', 'R', 'S'].map((letter, i) => (
+                  <span key={i} className="letter-container" style={{ animationDelay: `${i * 0.15}s` }}>
+                    <span className="letter-top">{letter}</span>
+                    <span className="letter-bottom">{['L', 'A', 'B', 'S', ' '][i] || ''}</span>
+                  </span>
+                ))}
+              </h1>
+            </div>
               <p className="hero-description gsap-stagger-fast">
                 Beyond code, we build universes<br />where businesses and AI<br />evolve together.
               </p>
