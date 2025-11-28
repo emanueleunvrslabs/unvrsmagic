@@ -37,7 +37,7 @@ export function LandingHeroNew() {
                 className="absolute inset-0 flex justify-center items-center"
               >
                 {letters.map((letter, index) => (
-                  <div key={index} className="relative inline-block overflow-hidden h-[100px] md:h-[160px] lg:h-[200px] flex items-center">
+                  <div key={index} className="relative inline-block overflow-hidden flex items-center">
                     <motion.span
                       initial={{ y: "100%" }}
                       animate={{ y: "0%" }}
