@@ -121,7 +121,7 @@ where businesses and AI evolve together.";
                 <div key={lineIdx}>
                   {line.split(/(\bfunction\b|\breturn\b|buildUniverse|"[^"]*")/).map((token, tokenIdx) => {
                     if (token === 'function') {
-                      return <span key={tokenIdx} className="text-purple-400">{token}</span>;
+                      return <span key={tokenIdx} className="text-fuchsia-500">{token}</span>;
                     } else if (token === 'return') {
                       return <span key={tokenIdx} className="text-blue-400">{token}</span>;
                     } else if (token === 'buildUniverse') {
