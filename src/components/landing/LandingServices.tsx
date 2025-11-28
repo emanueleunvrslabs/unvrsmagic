@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const services = [
   {
@@ -24,8 +25,16 @@ const services = [
 ];
 
 export function LandingServices() {
+  const { ref, isVisible } = useScrollReveal();
+  
   return (
-    <section id="services" className="relative py-32 bg-black">
+    <section 
+      ref={ref}
+      id="services" 
+      className={`relative py-32 bg-black transition-all duration-1000 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
+      }`}
+    >
       <div className="container mx-auto px-6">
         <h2 className="text-5xl md:text-7xl font-black tracking-[0.3em] text-white mb-20 text-center">
           SERVICES
