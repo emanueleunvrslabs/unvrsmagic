@@ -10,10 +10,10 @@ import zenithCorp from "@/assets/logos/zenith-corp.png";
 import catalystPartners from "@/assets/logos/catalyst-partners.png";
 
 const brands = [
-  "NEXUS TECH",
-  "APEX SYSTEMS",
+  "NEXUS",
+  "APEX",
   "QUANTUM",
-  "VERTEX LABS",
+  "VERTEX",
   "PRISM",
   "FORGE",
   "ZENITH",
