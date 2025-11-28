@@ -4,6 +4,7 @@ import { LandingLearnMore } from "@/components/landing/LandingLearnMore";
 import { LandingBrands } from "@/components/landing/LandingBrands";
 import { LandingWorksNew } from "@/components/landing/LandingWorksNew";
 import { LandingServicesNew } from "@/components/landing/LandingServicesNew";
+import { LandingReviews } from "@/components/landing/LandingReviews";
 import { LandingCTANew } from "@/components/landing/LandingCTANew";
 import { LandingFooterNew } from "@/components/landing/LandingFooterNew";
 
@@ -16,6 +17,7 @@ const Landing = () => {
       <LandingBrands />
       <LandingServicesNew />
       <LandingWorksNew />
+      <LandingReviews />
       <LandingCTANew />
       <LandingFooterNew />
     </div>
