@@ -4,12 +4,12 @@ import { BrandCard } from "./BrandCard";
 const brands = [
   { name: "OPENAI", logo: "hexagon" },
   { name: "ANTHROPIC", logo: "triangle" },
-  { name: "GOOGLE AI", logo: "circle" },
+  { name: "GEMINI", logo: "circle" },
   { name: "META AI", logo: "diamond" },
   { name: "MISTRAL", logo: "star" },
   { name: "COHERE", logo: "octagon" },
-  { name: "STABILITY", logo: "square" },
-  { name: "HUGGING FACE", logo: "pentagon" },
+  { name: "MIDJOURNEY", logo: "square" },
+  { name: "CLAUDE", logo: "pentagon" },
 ];
 
 export function LandingBrands() {
