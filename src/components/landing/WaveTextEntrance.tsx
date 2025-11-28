@@ -45,8 +45,8 @@ export function WaveTextEntrance({ text, className = "", emoji, delay = 0 }: Wav
                 key={charIndex}
                 className={`inline-block transition-all duration-500 ${
                   isVisible 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-8'
+                    ? 'opacity-100 translate-x-0' 
+                    : 'opacity-0 -translate-x-8'
                 }`}
                 style={{
                   transitionDelay: `${globalIndex * 30}ms`,
