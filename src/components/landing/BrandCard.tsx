@@ -12,6 +12,7 @@ export function BrandCard({ name, logoUrl }: BrandCardProps) {
             src={logoUrl} 
             alt={name}
             className="w-16 h-16 md:w-20 md:h-20 object-contain"
+            style={{ mixBlendMode: 'screen' }}
           />
         </div>
         <div className="brand-name">{name}</div>
