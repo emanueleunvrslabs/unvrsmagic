@@ -1,8 +1,19 @@
+.hero-text-wrapper {
+  overflow: visible !important;
+  padding: 20px 0;
+}
+
+.hero-text {
+  font-family: 'JetBrains Mono', monospace !important;
+  overflow: visible !important;
+}
+
 .letter-container {
   position: relative;
   display: inline-block;
-  overflow: hidden;
-  height: 1em;
+  overflow: visible;
+  height: 1.2em;
+  vertical-align: middle;
 }
 
 .letter-top,
@@ -10,8 +21,8 @@
 .letter-bottom {
   display: block;
   width: 100%;
-  height: 1em;
-  line-height: 1em;
+  height: 1.2em;
+  line-height: 1.2em;
 }
 
 .letter-top {
