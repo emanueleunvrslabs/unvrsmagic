@@ -39,7 +39,7 @@ export function LandingBrands() {
                 <img 
                   src={src} 
                   alt="Brand logo" 
-                  className="h-16 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                  className="h-20 w-auto opacity-80 hover:opacity-100 transition-opacity"
                 />
               </div>
             ))}
