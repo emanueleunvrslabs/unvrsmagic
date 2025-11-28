@@ -12,11 +12,14 @@ export function LandingNav() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img 
-              src={logo}
-              alt="UNVRS LABS" 
-              className="h-16 w-auto animate-[spin_8s_linear_infinite]"
-            />
+            <div className="perspective-[1000px]">
+              <img 
+                src={logo}
+                alt="UNVRS LABS" 
+                className="h-16 w-auto animate-[spin3d_8s_linear_infinite]"
+                style={{ transformStyle: 'preserve-3d' }}
+              />
+            </div>
           </Link>
 
           {/* Desktop Menu */}
