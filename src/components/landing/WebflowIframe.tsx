@@ -16,6 +16,23 @@ export function WebflowIframe() {
     return () => window.removeEventListener("message", handleMessage);
   }, [navigate]);
 
+  useEffect(() => {
+    // Intercetta gli eventi wheel del trackpad e passali all'iframe
+    const handleWheel = (e: WheelEvent) => {
+      if (iframeRef.current?.contentWindow) {
+        // Invia l'evento wheel direttamente all'iframe
+        iframeRef.current.contentWindow.scrollBy({
+          top: e.deltaY,
+          behavior: "auto" // Usa "auto" per scroll immediato senza smooth
+        });
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, []);
+
   return (
     <iframe
       ref={iframeRef}
@@ -27,6 +44,7 @@ export function WebflowIframe() {
         display: "block",
         margin: 0,
         padding: 0,
+        pointerEvents: "auto",
       }}
       title="UNVRS Labs Landing Page"
       sandbox="allow-scripts allow-same-origin allow-forms"
