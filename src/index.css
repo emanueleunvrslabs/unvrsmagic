@@ -589,15 +589,15 @@ html {
 
 /* Styles for the brand button */
 .button-1 {
-  background-color: #063525;
-  border: 3px solid #42c498;
+  background-color: #000000;
+  border: 3px solid #37FF8B;
   border-radius: 12px;
   box-shadow: 4px 4px 1px #000000;
 }
 
 .button-1:hover {
-  background-color: #1a5c46;
-  border-color: #030504;
+  background-color: #1a1a1a;
+  border-color: #37FF8B;
   transform: translate(-6px, -6px) rotate(1deg);
   box-shadow: 10px 10px 0 #000000, 15px 15px 20px rgba(64, 164, 122, 0.2);
 }
