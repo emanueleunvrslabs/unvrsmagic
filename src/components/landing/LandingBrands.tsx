@@ -6,7 +6,6 @@ import geminiLogo from "@/assets/ai-logos/gemini-transparent.png";
 import metaLogo from "@/assets/ai-logos/meta-transparent.png";
 import qwen3Logo from "@/assets/ai-logos/qwen3-transparent.png";
 import cohereLogo from "@/assets/ai-logos/cohere.png";
-import midjourneyLogo from "@/assets/ai-logos/midjourney-icon.png";
 import huggingfaceLogo from "@/assets/ai-logos/huggingface.png";
 
 const brands = [
@@ -16,7 +15,6 @@ const brands = [
   { name: "META AI", logoUrl: metaLogo },
   { name: "QWEN3", logoUrl: qwen3Logo },
   { name: "COHERE", logoUrl: cohereLogo },
-  { name: "MIDJOURNEY", logoUrl: midjourneyLogo },
   { name: "HUGGING FACE", logoUrl: huggingfaceLogo },
 ];
 
