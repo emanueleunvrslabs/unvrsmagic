@@ -21,7 +21,7 @@
 }
 
 .letter-bottom {
-  top: 100%;
+  top: 0;
   animation: swapBottom 8s ease-in-out infinite;
 }
 
@@ -51,25 +51,25 @@
 }
 
 @keyframes swapTop {
-  0%, 20% {
+  0%, 40% {
     transform: translateY(0);
   }
-  30%, 70% {
+  50%, 90% {
     transform: translateY(-100%);
   }
-  80%, 100% {
+  100% {
     transform: translateY(0);
   }
 }
 
 @keyframes swapBottom {
-  0%, 20% {
+  0%, 40% {
+    transform: translateY(100%);
+  }
+  50%, 90% {
     transform: translateY(0);
   }
-  30%, 70% {
-    transform: translateY(-100%);
-  }
-  80%, 100% {
-    transform: translateY(0);
+  100% {
+    transform: translateY(100%);
   }
 }
