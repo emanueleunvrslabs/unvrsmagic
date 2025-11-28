@@ -593,16 +593,44 @@ html {
   border: 3px solid #37FF8B;
   border-radius: 12px;
   box-shadow: 4px 4px 1px #000000;
+  position: relative;
+}
+
+.button-1::before {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle at center, rgba(55, 255, 139, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: -1;
+  filter: blur(20px);
+}
+
+.button-1:hover::before {
+  opacity: 1;
+  animation: pulse-glow 2s ease-in-out infinite;
 }
 
 .button-1:hover {
   background-color: #1a1a1a;
   border-color: #37FF8B;
   transform: translate(-6px, -6px) rotate(1deg);
-  box-shadow: 10px 10px 0 #000000, 15px 15px 20px rgba(64, 164, 122, 0.2);
+  box-shadow: 10px 10px 0 #000000, 15px 15px 20px rgba(55, 255, 139, 0.3), 0 0 40px rgba(55, 255, 139, 0.5);
 }
 
-.button-1::before,
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
 .button-1::after {
   content: "";
   position: absolute;
@@ -616,18 +644,9 @@ html {
     transparent
   );
   transition: 0.6s;
-}
-
-.button-1::before {
-  left: -100%;
-}
-.button-1::after {
   left: 100%;
 }
 
-.button-1:hover::before {
-  animation: swipeRight 1.5s infinite;
-}
 .button-1:hover::after {
   animation: swipeLeft 1.5s infinite;
 }
