@@ -80,36 +80,27 @@ export function LandingHeroNew() {
           </div>
         </div>
 
-        <motion.div
+        <motion.pre
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.3 }}
-          className="text-base md:text-lg lg:text-xl max-w-3xl mx-auto font-mono bg-black/30 backdrop-blur-sm rounded-lg p-6 border border-white/10"
+          className="text-base md:text-lg lg:text-xl max-w-3xl mx-auto font-mono text-left"
         >
-          <div className="flex items-start gap-4">
-            <div className="flex flex-col text-white/30 text-sm select-none">
-              <span>1</span>
-              <span>2</span>
-              <span>3</span>
-            </div>
-            <pre className="text-left leading-relaxed">
-              <code>
-                <span className="text-purple-400">function</span>{' '}
-                <span className="text-yellow-300">buildUniverse</span>
-                <span className="text-white/90">() {'{'}</span>
-                {'\n  '}
-                <span className="text-blue-400">return</span>{' '}
-                <span className="text-green-400">"</span>
-                <span className="text-green-400">{typewriterText.substring(0, Math.min(typewriterText.length, 100))}</span>
-                <span className="text-green-400">"</span>
-                <span className="text-white/90">;</span>
-                {'\n'}
-                <span className="text-white/90">{'}'}</span>
-                <span className="animate-pulse text-white/90">_</span>
-              </code>
-            </pre>
-          </div>
-        </motion.div>
+          <code>
+            <span className="text-purple-400">function</span>{' '}
+            <span className="text-yellow-300">buildUniverse</span>
+            <span className="text-white/90">() {'{'}</span>
+            {'\n  '}
+            <span className="text-blue-400">return</span>{' '}
+            <span className="text-green-400">"</span>
+            <span className="text-green-400">{typewriterText}</span>
+            <span className="text-green-400">"</span>
+            <span className="text-white/90">;</span>
+            {'\n'}
+            <span className="text-white/90">{'}'}</span>
+            <span className="animate-pulse text-white/90">_</span>
+          </code>
+        </motion.pre>
       </div>
 
       {/* Scroll Indicator */}
