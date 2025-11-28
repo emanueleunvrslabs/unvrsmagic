@@ -9,7 +9,7 @@ const services = [
     description: "Seamlessly integrate cutting-edge AI solutions into your existing infrastructure for enhanced automation and insights.",
   },
   {
-    title: "Custom Software Development",
+    title: "Custom Software",
     description: "Tailored enterprise applications built from the ground up to match your unique business requirements.",
   },
   {
