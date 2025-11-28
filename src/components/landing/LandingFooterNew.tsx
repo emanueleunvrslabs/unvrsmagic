@@ -10,7 +10,7 @@ export function LandingFooterNew() {
             <img 
               src="/webflow/images/Unvrs-logo-2.png" 
               alt="UNVRS LABS" 
-              className="h-12 w-auto mb-4"
+              className="h-16 w-auto mb-6"
             />
             <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
               Beyond code, we build universes where businesses and AI evolve together.
