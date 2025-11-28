@@ -6,6 +6,12 @@ export function BrandCard({ name }: BrandCardProps) {
   return (
     <div className="brand-card-container flex-shrink-0">
       <div className="brand-card">
+        <div className="brand-logo-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 2L37 12V28L20 38L3 28V12L20 2Z" stroke="white" strokeWidth="2" fill="none"/>
+            <circle cx="20" cy="20" r="6" stroke="white" strokeWidth="2" fill="none"/>
+          </svg>
+        </div>
         <div className="brand-name">{name}</div>
       </div>
       <style>{`
@@ -19,6 +25,8 @@ export function BrandCard({ name }: BrandCardProps) {
           height: 20vmin;
           background: linear-gradient(135deg, #1e1e24 10%, #050505 60%);
           display: flex;
+          flex-direction: column;
+          gap: 1rem;
           align-items: center;
           justify-content: center;
           user-select: none;
@@ -26,9 +34,13 @@ export function BrandCard({ name }: BrandCardProps) {
           background-size: 200% 200%;
         }
 
+        .brand-card .brand-logo-icon {
+          opacity: 0.8;
+        }
+
         .brand-card .brand-name {
-          font-size: 4vmin;
-          font-weight: bold;
+          font-size: 3vmin;
+          font-weight: 700;
           color: white;
           background-image: linear-gradient(to right, #626262, #fff);
           -webkit-text-fill-color: transparent;
@@ -36,6 +48,8 @@ export function BrandCard({ name }: BrandCardProps) {
           background-clip: text;
           user-select: none;
           text-align: center;
+          font-family: "Orbitron", sans-serif;
+          letter-spacing: 0.1em;
         }
 
         .brand-card::before,
