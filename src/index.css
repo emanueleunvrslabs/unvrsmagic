@@ -556,8 +556,9 @@ html {
   content: '';
   position: absolute;
   right: 0;
-  top: 0;
-  bottom: 0;
+  top: auto;
+  bottom: -0.15em;
+  height: 2px;
   width: var(--border-right);
   background: var(--animation-color);
   opacity: 0;
