@@ -88,10 +88,13 @@ export function WebflowLanding() {
             <div className="hero-text-wrapper">
               <h1 className="hero-text">
                 {['U', 'N', 'V', 'R', 'S'].map((letter, i) => (
-                  <span key={i} className="letter-container" style={{ animationDelay: `${i * 0.2}s` }}>
+                  <span
+                    key={i}
+                    className="letter-container"
+                    style={{ animationDelay: `${i * 0.2}s` }}
+                  >
                     <span className="letter-top">{letter}</span>
-                    <span className="letter-middle">{['L', 'A', 'B', 'S', ' '][i] || ''}</span>
-                    <span className="letter-bottom">{letter}</span>
+                    <span className="letter-bottom">{['L', 'A', 'B', 'S', ' '][i] || ''}</span>
                   </span>
                 ))}
               </h1>
