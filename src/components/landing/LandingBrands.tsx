@@ -10,14 +10,14 @@ import zenithCorp from "@/assets/logos/zenith-corp.png";
 import catalystPartners from "@/assets/logos/catalyst-partners.png";
 
 const brands = [
-  nexusTech,
-  apexSystems,
-  quantumDigital,
-  vertexLabs,
-  prismVentures,
-  forgeIndustries,
-  zenithCorp,
-  catalystPartners,
+  "NEXUS TECH",
+  "APEX SYSTEMS",
+  "QUANTUM",
+  "VERTEX LABS",
+  "PRISM",
+  "FORGE",
+  "ZENITH",
+  "CATALYST",
 ];
 
 export function LandingBrands() {
@@ -35,8 +35,8 @@ export function LandingBrands() {
             }}
             className="flex gap-12 items-center"
           >
-            {[...brands, ...brands].map((src, i) => (
-              <BrandCard key={i} src={src} alt="Brand logo" />
+            {[...brands, ...brands].map((name, i) => (
+              <BrandCard key={i} name={name} />
             ))}
           </motion.div>
         </div>

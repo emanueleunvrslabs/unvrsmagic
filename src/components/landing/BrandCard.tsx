@@ -1,15 +1,12 @@
-import { motion } from "framer-motion";
-
 interface BrandCardProps {
-  src: string;
-  alt: string;
+  name: string;
 }
 
-export function BrandCard({ src, alt }: BrandCardProps) {
+export function BrandCard({ name }: BrandCardProps) {
   return (
     <div className="brand-card-container flex-shrink-0">
       <div className="brand-card">
-        <img src={src} alt={alt} className="brand-logo" />
+        <div className="brand-name">{name}</div>
       </div>
       <style>{`
         .brand-card-container {
@@ -29,11 +26,16 @@ export function BrandCard({ src, alt }: BrandCardProps) {
           background-size: 200% 200%;
         }
 
-        .brand-card .brand-logo {
-          width: 90%;
-          height: 90%;
-          object-fit: contain;
+        .brand-card .brand-name {
+          font-size: 4vmin;
+          font-weight: bold;
+          color: white;
+          background-image: linear-gradient(to right, #626262, #fff);
+          -webkit-text-fill-color: transparent;
+          -webkit-background-clip: text;
+          background-clip: text;
           user-select: none;
+          text-align: center;
         }
 
         .brand-card::before,
