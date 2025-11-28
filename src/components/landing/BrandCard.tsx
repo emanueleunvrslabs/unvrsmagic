@@ -99,7 +99,7 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
         }
 
         .brand-card .brand-name {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 700;
           color: white;
           background-image: linear-gradient(to right, #626262, #fff);
@@ -109,12 +109,14 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
           user-select: none;
           text-align: center;
           font-family: "Orbitron", sans-serif;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
+          word-break: break-word;
+          max-width: 90%;
         }
 
         @media (min-width: 768px) {
           .brand-card .brand-name {
-            font-size: 3vmin;
+            font-size: 2.5vmin;
           }
         }
 
