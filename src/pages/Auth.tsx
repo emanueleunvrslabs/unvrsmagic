@@ -291,7 +291,7 @@ export default function Auth() {
           <div className="w-12 h-12">
             <img src={logo} alt="Unvrs Labs" className="w-full h-full object-contain" />
           </div>
-          <span className="text-xl font-semibold tracking-tight transition-colors group-hover:text-primary">
+          <span className="text-xl font-orbitron font-semibold tracking-tight text-white transition-opacity group-hover:opacity-80">
             UNVRS LABS
           </span>
         </Link>
