@@ -25,34 +25,34 @@ export function LandingHeroNew() {
   return (
     <section id="home" className="relative min-h-screen bg-black flex items-center justify-center overflow-hidden pt-24">
       {/* Background Grid Images - Left */}
-      <div className="absolute left-0 top-0 h-full w-[15%] overflow-hidden opacity-20">
+      <div className="absolute left-0 top-0 h-full w-[18%] overflow-hidden">
         <div className="flex flex-col gap-6 animate-[slide-up_25s_linear_infinite]">
           {[...images, ...images].map((src, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 0.5, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.8 }}
               className="w-full aspect-square"
             >
-              <img src={src} alt="" className="w-full h-full object-cover rounded-lg" />
+              <img src={src} alt="" className="w-full h-full object-cover rounded-lg opacity-40" />
             </motion.div>
           ))}
         </div>
       </div>
 
       {/* Background Grid Images - Right */}
-      <div className="absolute right-0 top-0 h-full w-[15%] overflow-hidden opacity-20">
+      <div className="absolute right-0 top-0 h-full w-[18%] overflow-hidden">
         <div className="flex flex-col gap-6 animate-[slide-down_25s_linear_infinite]">
           {[...images, ...images].map((src, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: -50 }}
-              animate={{ opacity: 0.5, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.8 }}
               className="w-full aspect-square"
             >
-              <img src={src} alt="" className="w-full h-full object-cover rounded-lg" />
+              <img src={src} alt="" className="w-full h-full object-cover rounded-lg opacity-40" />
             </motion.div>
           ))}
         </div>
