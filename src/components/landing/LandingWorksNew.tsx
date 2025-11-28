@@ -69,16 +69,18 @@ export function LandingWorksNew() {
                   </div>
                 )}
               </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold text-white mb-2" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                  {project.name}
-                </h3>
-                <p className="text-white/60 mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                  {project.description || "Enterprise solution"}
-                </p>
-                <div className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/30 text-white rounded-full hover:bg-white/10 hover:border-white/50 transition-all inline-flex w-fit">
-                  <span className="text-sm font-medium" style={{ fontFamily: "Orbitron, sans-serif" }}>View Project</span>
-                  <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              <div className="p-6 flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold text-white mb-2" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                    {project.name}
+                  </h3>
+                  <p className="text-white/60" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                    {project.description || "Enterprise solution"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1.5 bg-transparent border border-white/30 text-white rounded-full hover:bg-white/10 hover:border-white/50 transition-all flex-shrink-0">
+                  <span className="text-xs font-medium" style={{ fontFamily: "Orbitron, sans-serif" }}>View</span>
+                  <ArrowUpRight size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </div>
               </div>
             </motion.div>
