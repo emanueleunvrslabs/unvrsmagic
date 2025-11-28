@@ -27,11 +27,11 @@ export function LandingNav() {
             <a href="#about" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               ABOUT
             </a>
-            <a href="#works" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              WORKS
-            </a>
             <a href="#services" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               SERVICES
+            </a>
+            <a href="#works" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
+              WORKS
             </a>
             <a href="#contact" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               CONTACT
@@ -62,11 +62,11 @@ export function LandingNav() {
             <a href="#about" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               ABOUT
             </a>
-            <a href="#works" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              WORKS
-            </a>
             <a href="#services" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               SERVICES
+            </a>
+            <a href="#works" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
+              WORKS
             </a>
             <a href="#contact" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               CONTACT
