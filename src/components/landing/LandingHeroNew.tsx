@@ -23,7 +23,7 @@ const words = ["UNVRS", "LABS"];
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const typewriterText = useTypewriter(
-    "Beyond code, we build universes\nwhere businesses and AI\nevolve together.",
+    "Beyond code, we build universes\nwhere businesses and AI evolve together.",
     30
   );
 
