@@ -11,7 +11,7 @@ export function BrandCard({ name, logoUrl }: BrandCardProps) {
           <img 
             src={logoUrl} 
             alt={name}
-            className="w-12 h-12 md:w-16 md:h-16 object-contain"
+            className="w-14 h-14 md:w-16 md:h-16 object-contain"
           />
         </div>
         <div className="brand-name">{name}</div>
