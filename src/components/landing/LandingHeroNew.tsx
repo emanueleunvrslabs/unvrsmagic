@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
+import { FloatingElements } from "./FloatingElements";
 
 const useTypewriter = (text: string, baseSpeed: number = 50) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -75,6 +76,9 @@ where businesses and AI evolve together.";
 
   return (
     <section id="home" className="relative min-h-screen bg-black flex items-start justify-center overflow-hidden pt-32">
+      {/* Floating Elements */}
+      <FloatingElements />
+      
       {/* Center Content */}
       <div className="relative z-10 text-center px-6 max-w-6xl mx-auto mt-12">
         <div className="relative h-[180px] md:h-[280px] mb-6 flex items-center justify-center">
