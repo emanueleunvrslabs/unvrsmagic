@@ -304,7 +304,7 @@ export default function Auth() {
           </CardTitle>
           <CardDescription className="text-center font-orbitron">
             {step === "phone" 
-              ? "Enter your phone number to receive the OTP code"
+              ? <>Enter your phone number to receive<br />the OTP code</>
               : step === "otp"
               ? "Enter the code you received on WhatsApp"
               : "Choose a unique username for your account"
