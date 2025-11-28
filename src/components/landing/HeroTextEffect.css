@@ -16,13 +16,13 @@
 }
 
 .letter-top {
-  top: 0;
-  animation: swapTop 8s ease-in-out infinite;
+  transform: translateY(0);
+  animation: unvrsToLabs 8s ease-in-out infinite;
 }
 
 .letter-bottom {
-  top: 0;
-  animation: swapBottom 8s ease-in-out infinite;
+  transform: translateY(100%);
+  animation: labsToUnvrs 8s ease-in-out infinite;
 }
 
 .letter-container:nth-child(1) .letter-top,
@@ -50,7 +50,7 @@
   animation-delay: 0.8s;
 }
 
-@keyframes swapTop {
+@keyframes unvrsToLabs {
   0%, 40% {
     transform: translateY(0);
   }
@@ -62,7 +62,7 @@
   }
 }
 
-@keyframes swapBottom {
+@keyframes labsToUnvrs {
   0%, 40% {
     transform: translateY(100%);
   }
