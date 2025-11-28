@@ -1,8 +1,8 @@
 .letter-container {
   position: relative;
   display: inline-block;
-  overflow: hidden;
-  height: 1em;
+  overflow: visible;
+  height: 1.2em;
 }
 
 .letter-top,
