@@ -1,8 +1,16 @@
 import teamImage from "@/assets/landing/team-image.jpeg";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 export function LandingCreative() {
+  const { ref, isVisible } = useScrollReveal();
+  
   return (
-    <section className="relative py-32 bg-black">
+    <section 
+      ref={ref}
+      className={`relative py-32 bg-black transition-all duration-1000 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
+      }`}
+    >
       <div className="container mx-auto px-6">
         <div className="max-w-5xl mx-auto">
           <h3 className="text-2xl md:text-3xl font-light text-white/90 mb-16 text-center tracking-wide leading-relaxed">
