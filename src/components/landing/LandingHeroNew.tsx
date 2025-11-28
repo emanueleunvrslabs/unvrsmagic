@@ -1,10 +1,31 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
+const useTypewriter = (text: string, speed: number = 50) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, speed);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, text, speed]);
+
+  return displayedText;
+};
+
 const words = ["UNVRS", "LABS"];
 
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const typewriterText = useTypewriter(
+    "Beyond code, we build universes\nwhere businesses and AI\nevolve together.",
+    30
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,15 +81,20 @@ export function LandingHeroNew() {
         </div>
 
         <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-white/90 text-base md:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed drop-shadow-lg"
-          style={{ fontFamily: "Orbitron, sans-serif" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.3 }}
+          className="text-white/90 text-base md:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed drop-shadow-lg font-mono"
         >
-          Beyond code, we build universes<br />
-          where businesses and AI<br />
-          evolve together.
+          <span className="inline-block">
+            {typewriterText.split('\n').map((line, i) => (
+              <span key={i}>
+                {line}
+                {i < 2 && <br />}
+              </span>
+            ))}
+            <span className="animate-pulse">|</span>
+          </span>
         </motion.p>
       </div>
 
