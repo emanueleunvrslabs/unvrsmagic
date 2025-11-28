@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo-unvrs.png";
 
 export function LandingFooterNew() {
   return (
@@ -8,7 +9,7 @@ export function LandingFooterNew() {
           {/* Logo & Description */}
           <div>
             <img 
-              src="/webflow/images/Unvrs-logo-2.png" 
+              src={logo}
               alt="UNVRS LABS" 
               className="h-16 w-auto mb-6"
             />
