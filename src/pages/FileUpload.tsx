@@ -105,13 +105,12 @@ const FileUpload = () => {
   };
 
   const addFiles = async (newFiles: File[]) => {
-    const filesToAdd: UploadedFile[] = [];
     const MAX_ZIP_SIZE = 50 * 1024 * 1024; // 50MB limit for ZIP extraction
     
     for (const file of newFiles) {
       // Check if it's a ZIP file
-      const isZip = file.name.toLowerCase().endsWith('.zip') || 
-                    file.type === 'application/zip' ||
+      const isZip = file.type === 'application/zip' || 
+                    file.name.endsWith('.zip') ||
                     file.type === 'application/x-zip-compressed';
       
       if (isZip) {
@@ -119,11 +118,11 @@ const FileUpload = () => {
         if (file.size > MAX_ZIP_SIZE) {
           toast.error(`ZIP file "${file.name}" is too large (${formatFileSize(file.size)}). Upload it directly without extraction.`);
           // Add ZIP as regular file without extraction
-          filesToAdd.push({
+          setFiles((prev) => [...prev, {
             file,
             progress: 0,
             status: "pending" as const,
-          });
+          }]);
           continue;
         }
 
@@ -133,65 +132,170 @@ const FileUpload = () => {
           const arrayBuffer = await file.arrayBuffer();
           const zip = await JSZip.loadAsync(arrayBuffer);
           
-          // Add original ZIP
-          filesToAdd.push({
+          // First, upload the original ZIP file
+          const zipFileObj: UploadedFile = {
             file,
             progress: 0,
             status: "pending" as const,
-          });
+          };
           
-          // Extract each file
+          setFiles((prev) => [...prev, zipFileObj]);
+          
+          // Upload ZIP and get its ID
+          const zipId = await uploadZipFile(file);
+          
+          if (!zipId) {
+            toast.error(`Failed to upload ZIP: ${file.name}`);
+            continue;
+          }
+          
+          // Extract and upload each file with parent_zip_id
           let extractedCount = 0;
+          const extractedFiles: File[] = [];
+          
           for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
             if (!zipEntry.dir) {
               try {
                 const content = await zipEntry.async('blob');
                 const fileName = relativePath.split('/').pop() || relativePath;
                 
-                // Create File from Blob
                 const extractedFile = new window.File([content], fileName, {
                   type: 'application/octet-stream'
                 });
                 
-                filesToAdd.push({
-                  file: extractedFile,
-                  progress: 0,
-                  status: "pending" as const,
-                });
+                extractedFiles.push(extractedFile);
                 extractedCount++;
               } catch (extractError) {
                 console.error(`Error extracting file ${relativePath}:`, extractError);
-                toast.error(`Failed to extract: ${relativePath}`);
               }
             }
           }
           
-          toast.success(`ZIP extracted: ${extractedCount} files ready to upload`);
+          // Upload extracted files with parent_zip_id
+          for (const extractedFile of extractedFiles) {
+            const fileObj: UploadedFile = {
+              file: extractedFile,
+              progress: 0,
+              status: "pending" as const,
+            };
+            setFiles((prev) => [...prev, fileObj]);
+            await uploadExtractedFile(extractedFile, zipId);
+          }
+          
+          // Mark ZIP as extracted
+          await markZipAsExtracted(zipId);
+          
+          toast.success(`ZIP extracted: ${extractedCount} files uploaded`);
         } catch (error) {
           console.error('Error extracting ZIP:', error);
           toast.error(`Failed to extract ZIP "${file.name}". Uploading as-is.`);
           // Add ZIP as regular file if extraction fails
-          filesToAdd.push({
+          setFiles((prev) => [...prev, {
             file,
             progress: 0,
             status: "pending" as const,
-          });
+          }]);
         }
       } else {
-        // Regular file
-        filesToAdd.push({
+        // Regular file - add directly
+        setFiles((prev) => [...prev, {
           file,
           progress: 0,
           status: "pending" as const,
-        });
+        }]);
       }
     }
-    
-    setFiles((prev) => [...prev, ...filesToAdd]);
   };
 
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadZipFile = async (file: File): Promise<string | null> => {
+    try {
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) {
+        throw new Error('No active session');
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-file`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.data.session.access_token}`,
+          },
+          body: formData,
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const result = await response.json();
+      return result.file?.id || null;
+    } catch (error) {
+      console.error('Error uploading ZIP:', error);
+      return null;
+    }
+  };
+
+  const uploadExtractedFile = async (file: File, parentZipId: string) => {
+    try {
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) {
+        throw new Error('No active session');
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('parent_zip_id', parentZipId);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-file`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.data.session.access_token}`,
+          },
+          body: formData,
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading extracted file:', error);
+    }
+  };
+
+  const markZipAsExtracted = async (zipId: string) => {
+    try {
+      await supabase
+        .from('uploaded_files')
+        .update({ is_extracted: true })
+        .eq('id', zipId);
+    } catch (error) {
+      console.error('Error marking ZIP as extracted:', error);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
