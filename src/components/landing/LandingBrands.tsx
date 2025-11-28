@@ -1,15 +1,23 @@
 import { motion } from "framer-motion";
 import { BrandCard } from "./BrandCard";
+import openaiLogo from "@/assets/ai-logos/openai.svg";
+import claudeLogo from "@/assets/ai-logos/claude.png";
+import geminiLogo from "@/assets/ai-logos/gemini.svg";
+import metaLogo from "@/assets/ai-logos/meta.png";
+import mistralLogo from "@/assets/ai-logos/mistral.svg";
+import cohereLogo from "@/assets/ai-logos/cohere.png";
+import midjourneyLogo from "@/assets/ai-logos/midjourney.png";
+import huggingfaceLogo from "@/assets/ai-logos/huggingface.png";
 
 const brands = [
-  { name: "OPENAI", logo: "hexagon" },
-  { name: "ANTHROPIC", logo: "triangle" },
-  { name: "GEMINI", logo: "circle" },
-  { name: "META AI", logo: "diamond" },
-  { name: "MISTRAL", logo: "star" },
-  { name: "COHERE", logo: "octagon" },
-  { name: "MIDJOURNEY", logo: "square" },
-  { name: "CLAUDE", logo: "pentagon" },
+  { name: "OPENAI", logoUrl: openaiLogo },
+  { name: "CLAUDE 4.5", logoUrl: claudeLogo },
+  { name: "GEMINI", logoUrl: geminiLogo },
+  { name: "META AI", logoUrl: metaLogo },
+  { name: "MISTRAL", logoUrl: mistralLogo },
+  { name: "COHERE", logoUrl: cohereLogo },
+  { name: "MIDJOURNEY", logoUrl: midjourneyLogo },
+  { name: "HUGGING FACE", logoUrl: huggingfaceLogo },
 ];
 
 export function LandingBrands() {
@@ -28,7 +36,7 @@ export function LandingBrands() {
             className="flex gap-6 md:gap-12 items-center"
           >
             {[...brands, ...brands].map((brand, i) => (
-              <BrandCard key={i} name={brand.name} logoType={brand.logo} />
+              <BrandCard key={i} name={brand.name} logoUrl={brand.logoUrl} />
             ))}
           </motion.div>
         </div>
