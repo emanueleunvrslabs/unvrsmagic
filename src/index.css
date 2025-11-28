@@ -332,16 +332,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 13rem;
+  width: 9rem;
   overflow: hidden;
-  height: 3rem;
+  height: 2.5rem;
   background-size: 300% 300%;
   cursor: pointer;
   backdrop-filter: blur(1rem);
   border-radius: 5rem;
   transition: 0.5s;
   animation: gradient_301 5s ease infinite;
-  border: double 4px transparent;
+  border: double 3px transparent;
   background-image: linear-gradient(#212121, #212121),
     linear-gradient(
       137.48deg,
@@ -369,8 +369,8 @@
 .space-btn strong {
   z-index: 2;
   font-family: "Orbitron", sans-serif;
-  font-size: 12px;
-  letter-spacing: 5px;
+  font-size: 10px;
+  letter-spacing: 3px;
   color: #ffffff;
   text-shadow: 0 0 4px white;
 }
@@ -378,7 +378,7 @@
 .glow {
   position: absolute;
   display: flex;
-  width: 12rem;
+  width: 9rem;
 }
 
 .circle {
