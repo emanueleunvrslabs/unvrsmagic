@@ -24,9 +24,6 @@ export function LandingNav() {
             <a href="#home" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               HOME
             </a>
-            <a href="#about" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              ABOUT
-            </a>
             <a href="#services" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               SERVICES
             </a>
@@ -59,9 +56,6 @@ export function LandingNav() {
           <div className="md:hidden mt-4 pb-4 flex flex-col gap-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
             <a href="#home" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               HOME
-            </a>
-            <a href="#about" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              ABOUT
             </a>
             <a href="#services" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               SERVICES
