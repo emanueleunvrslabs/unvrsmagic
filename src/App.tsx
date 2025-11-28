@@ -14,6 +14,7 @@ import AiBot from "./pages/AiBot";
 import StrategiesMarketplace from "./pages/StrategiesMarketplace";
 import Settings from "./pages/Settings";
 import Subscription from "./pages/Subscription";
+import PublicProjectDetail from "./pages/PublicProjectDetail";
 import Auth from "./pages/Auth";
 import ProjectDetail from "./pages/ProjectDetail";
 import MktData from "./pages/MktData";
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/project/:projectId" element={<PublicProjectDetail />} />
           <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
           <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
           <Route path="/nkmt/mkt-data" element={<ProtectedRoute><MktData /></ProtectedRoute>} />

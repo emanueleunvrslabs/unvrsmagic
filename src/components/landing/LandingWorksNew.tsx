@@ -54,6 +54,7 @@ export function LandingWorksNew() {
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               transition={{ delay: index * 0.2, duration: 0.8 }}
               className="group relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 transition-all cursor-pointer"
+              onClick={() => window.location.href = `/project/${project.route.replace('/', '')}`}
             >
               <div className="aspect-video overflow-hidden bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center">
                 {project.icon ? (
