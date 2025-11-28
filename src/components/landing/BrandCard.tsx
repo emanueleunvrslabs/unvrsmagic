@@ -57,7 +57,7 @@ const logos: Record<string, JSX.Element> = {
 export function BrandCard({ name, logoType }: BrandCardProps) {
   return (
     <div className="flex-shrink-0">
-      <button className="brutalist-button openai">
+      <button className="brutalist-button button-1">
         <div className="brand-logo">
           {logos[logoType] || logos.hexagon}
         </div>
