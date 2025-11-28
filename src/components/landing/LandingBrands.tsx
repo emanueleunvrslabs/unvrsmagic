@@ -1,23 +1,15 @@
 import { motion } from "framer-motion";
 import { BrandCard } from "./BrandCard";
-import nexusTech from "@/assets/logos/nexus-tech.png";
-import apexSystems from "@/assets/logos/apex-systems.png";
-import quantumDigital from "@/assets/logos/quantum-digital.png";
-import vertexLabs from "@/assets/logos/vertex-labs.png";
-import prismVentures from "@/assets/logos/prism-ventures.png";
-import forgeIndustries from "@/assets/logos/forge-industries.png";
-import zenithCorp from "@/assets/logos/zenith-corp.png";
-import catalystPartners from "@/assets/logos/catalyst-partners.png";
 
 const brands = [
-  { name: "NEXUS", logo: "hexagon" },
-  { name: "APEX", logo: "triangle" },
-  { name: "NOVA", logo: "circle" },
-  { name: "VERTEX", logo: "diamond" },
-  { name: "PRISM", logo: "star" },
-  { name: "FORGE", logo: "octagon" },
-  { name: "ZENITH", logo: "square" },
-  { name: "ATLAS", logo: "pentagon" },
+  { name: "OPENAI", logo: "hexagon" },
+  { name: "ANTHROPIC", logo: "triangle" },
+  { name: "GOOGLE AI", logo: "circle" },
+  { name: "META AI", logo: "diamond" },
+  { name: "MISTRAL", logo: "star" },
+  { name: "COHERE", logo: "octagon" },
+  { name: "STABILITY", logo: "square" },
+  { name: "HUGGING FACE", logo: "pentagon" },
 ];
 
 export function LandingBrands() {
