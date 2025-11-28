@@ -113,8 +113,6 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
         }
 
         .brand-card:hover .brand-logo-icon svg {
-          width: 40px !important;
-          height: 40px !important;
           animation: spin-and-zoom 4s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
         }
 
@@ -130,17 +128,11 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
           text-align: center;
           font-family: "Orbitron", sans-serif;
           letter-spacing: 0.1em;
-          opacity: 0;
-          max-height: 0;
-          overflow: hidden;
           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
           z-index: 3;
         }
 
         .brand-card:hover .brand-name {
-          opacity: 1;
-          max-height: 60px;
-          margin-top: 8px;
           text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
@@ -184,12 +176,9 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
           animation: blur-animation 3s ease-in-out alternate infinite;
         }
 
-        .brand-card::before {
-          left: -100%;
-        }
-
         .brand-card:hover::before {
           animation: swipeRight 1.5s infinite, blur-animation 3s ease-in-out alternate infinite;
+          left: -100%;
         }
 
         @keyframes swipeRight {
