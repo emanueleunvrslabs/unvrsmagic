@@ -14,6 +14,7 @@ const Landing = () => {
         left: 0
       }}
       title="UNVRS Labs"
+      sandbox="allow-scripts allow-same-origin"
     />
   );
 };
