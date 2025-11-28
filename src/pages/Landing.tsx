@@ -8,31 +8,16 @@ import { LandingReviews } from "@/components/landing/LandingReviews";
 import { LandingStats } from "@/components/landing/LandingStats";
 import { LandingCTANew } from "@/components/landing/LandingCTANew";
 import { LandingFooterNew } from "@/components/landing/LandingFooterNew";
-import { StarfieldBackground } from "@/components/landing/StarfieldBackground";
-import { CustomCursor } from "@/components/landing/CustomCursor";
-import { TechStackOrbit } from "@/components/landing/TechStackOrbit";
-import { InteractiveTimeline } from "@/components/landing/InteractiveTimeline";
-import { MatrixRain } from "@/components/landing/MatrixRain";
 
 const Landing = () => {
   return (
-    <div className="bg-black min-h-screen relative" style={{ cursor: "none" }}>
-      {/* Background Effects */}
-      <MatrixRain />
-      <StarfieldBackground />
-      
-      {/* Custom Cursor */}
-      <CustomCursor />
-      
-      {/* Content */}
+    <div className="bg-black min-h-screen">
       <LandingNav />
       <LandingHeroNew />
       <LandingClaim />
       <LandingBrands />
-      <TechStackOrbit />
       <LandingServicesNew />
       <LandingWorksNew />
-      <InteractiveTimeline />
       <LandingReviews />
       <LandingStats />
       <LandingCTANew />
