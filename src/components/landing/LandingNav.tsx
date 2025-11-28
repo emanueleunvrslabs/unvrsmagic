@@ -38,16 +38,10 @@ export function LandingNav() {
             </a>
             <Link 
               to="/auth" 
-              className="space-btn"
+              className="login-button"
             >
-              <strong>LOGIN</strong>
-              <div className="container-stars">
-                <div className="stars"></div>
-              </div>
-              <div className="glow">
-                <div className="circle"></div>
-                <div className="circle"></div>
-              </div>
+              <span className="actual-text">&nbsp;LOGIN&nbsp;</span>
+              <span aria-hidden="true" className="hover-text">&nbsp;LOGIN&nbsp;</span>
             </Link>
           </div>
 
@@ -80,16 +74,10 @@ export function LandingNav() {
             </a>
             <Link 
               to="/auth" 
-              className="space-btn"
+              className="login-button"
             >
-              <strong>LOGIN</strong>
-              <div className="container-stars">
-                <div className="stars"></div>
-              </div>
-              <div className="glow">
-                <div className="circle"></div>
-                <div className="circle"></div>
-              </div>
+              <span className="actual-text">&nbsp;LOGIN&nbsp;</span>
+              <span aria-hidden="true" className="hover-text">&nbsp;LOGIN&nbsp;</span>
             </Link>
           </div>
         )}
