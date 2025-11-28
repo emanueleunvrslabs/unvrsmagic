@@ -10,7 +10,7 @@ import huggingfaceLogo from "@/assets/ai-logos/huggingface.png";
 
 const brands = [
   { name: "OPENAI", logoUrl: openaiLogo },
-  { name: "CLAUDE 4.5", logoUrl: claudeLogo },
+  { name: "CLAUDE", logoUrl: claudeLogo },
   { name: "GEMINI", logoUrl: geminiLogo },
   { name: "META AI", logoUrl: metaLogo },
   { name: "QWEN3", logoUrl: qwen3Logo },
