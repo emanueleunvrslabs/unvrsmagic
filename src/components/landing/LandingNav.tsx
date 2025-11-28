@@ -38,9 +38,16 @@ export function LandingNav() {
             </a>
             <Link 
               to="/auth" 
-              className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/20 transition-all border border-white/20 rounded-full"
+              className="space-btn"
             >
-              LOGIN
+              <strong>LOGIN</strong>
+              <div className="container-stars">
+                <div className="stars"></div>
+              </div>
+              <div className="glow">
+                <div className="circle"></div>
+                <div className="circle"></div>
+              </div>
             </Link>
           </div>
 
@@ -73,9 +80,16 @@ export function LandingNav() {
             </a>
             <Link 
               to="/auth" 
-              className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/20 transition-all border border-white/20 rounded-full text-center"
+              className="space-btn"
             >
-              LOGIN
+              <strong>LOGIN</strong>
+              <div className="container-stars">
+                <div className="stars"></div>
+              </div>
+              <div className="glow">
+                <div className="circle"></div>
+                <div className="circle"></div>
+              </div>
             </Link>
           </div>
         )}
