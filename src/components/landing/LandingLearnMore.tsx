@@ -6,44 +6,74 @@ export function LandingLearnMore() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
+  const title1 = "We Don't Just Design for the Present".split(" ");
+  const title2 = "We Craft Experiences for the Future".split(" ");
+  const description = "Specializing in developing enterprise software, custom applications, and AI integrations, delivering innovative and scalable solutions that create real value for businesses across all digital platforms.".split(" ");
+
   return (
     <section id="learn-more" ref={ref} className="py-32 bg-black">
       <div className="container mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-5xl mx-auto"
-        >
+        <div className="max-w-5xl mx-auto">
           <h2 
             className="text-4xl md:text-6xl font-light text-white mb-8 leading-tight"
             style={{ fontFamily: "Orbitron, sans-serif" }}
           >
-            We Don't Just Design for the Present{" "}
-            <span className="inline-block">❌</span>
-            <br />
-            <motion.span
-              initial={{ opacity: 0, x: -20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              className="text-white/90"
-            >
-              We Craft Experiences for the Future{" "}
+            <div className="mb-4 flex flex-wrap gap-x-4">
+              {title1.map((word, index) => (
+                <motion.span
+                  key={index}
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+                  transition={{ 
+                    delay: index * 0.1,
+                    duration: 0.5,
+                    ease: "easeOut"
+                  }}
+                  className="inline-block"
+                >
+                  {word}
+                </motion.span>
+              ))}
+              <span className="inline-block">❌</span>
+            </div>
+            <div className="flex flex-wrap gap-x-4">
+              {title2.map((word, index) => (
+                <motion.span
+                  key={index}
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+                  transition={{ 
+                    delay: (title1.length * 0.1) + (index * 0.1),
+                    duration: 0.5,
+                    ease: "easeOut"
+                  }}
+                  className="inline-block text-white/90"
+                >
+                  {word}
+                </motion.span>
+              ))}
               <span className="inline-block">🔮</span>
-            </motion.span>
+            </div>
           </h2>
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="text-white/70 text-lg md:text-xl leading-relaxed"
-            style={{ fontFamily: "Orbitron, sans-serif" }}
-          >
-            Specializing in developing enterprise software, custom applications, and AI integrations,
-            delivering innovative and scalable solutions that create real value for businesses across all digital platforms.
-          </motion.p>
-        </motion.div>
+          <div className="text-white/70 text-lg md:text-xl leading-relaxed flex flex-wrap gap-x-2" style={{ fontFamily: "Orbitron, sans-serif" }}>
+            {description.map((word, index) => (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, x: -30 }}
+                animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+                transition={{ 
+                  delay: (title1.length * 0.1) + (title2.length * 0.1) + 0.3 + (index * 0.03),
+                  duration: 0.4,
+                  ease: "easeOut"
+                }}
+                className="inline-block"
+              >
+                {word}
+              </motion.span>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
