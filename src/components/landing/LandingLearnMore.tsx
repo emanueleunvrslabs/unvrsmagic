@@ -4,7 +4,7 @@ import { useRef } from "react";
 
 export function LandingLearnMore() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { margin: "-100px" });
 
   const title1 = "We Don't Just Design for the Present".split(" ");
   const title2 = "We Craft Experiences for the Future".split(" ");
