@@ -1,8 +1,10 @@
 import teamImage from "@/assets/landing/team-image.jpeg";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { useParallax } from "@/hooks/useParallax";
 
 export function LandingCreative() {
   const { ref, isVisible } = useScrollReveal();
+  const { ref: parallaxRef, offset } = useParallax(0.3);
   
   return (
     <section 
@@ -18,11 +20,12 @@ export function LandingCreative() {
             <span className="inline-block">And we're here to help you make sense of it.</span>
           </h3>
           
-          <div className="aspect-video rounded-3xl overflow-hidden mb-16">
+          <div ref={parallaxRef as any} className="aspect-video rounded-3xl overflow-hidden mb-16">
             <img
               src={teamImage}
               alt="UNVRS Labs Team"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-100"
+              style={{ transform: `translateY(${-offset * 0.5}px)` }}
             />
           </div>
           
