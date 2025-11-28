@@ -5,12 +5,25 @@ const STORAGE_BASE = "https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object
 
 export function WebflowLanding() {
   useEffect(() => {
-    // Initialize Webflow interactions
-    if (window.Webflow) {
-      window.Webflow.destroy();
-      window.Webflow.ready();
-      window.Webflow.require('ix2').init();
-    }
+    // Wait for Webflow script to load
+    const initWebflow = () => {
+      if (window.Webflow) {
+        window.Webflow.destroy();
+        window.Webflow.ready();
+        window.Webflow.require('ix2').init();
+        
+        // Trigger any scroll-based animations
+        window.dispatchEvent(new Event('scroll'));
+      }
+    };
+
+    // Try to initialize immediately
+    initWebflow();
+    
+    // Also try after a short delay in case the script hasn't loaded yet
+    const timeout = setTimeout(initWebflow, 100);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   return (
