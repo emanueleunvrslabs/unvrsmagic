@@ -511,28 +511,27 @@
   margin: 0;
   height: auto;
   background: transparent;
-  padding: 8px 16px;
+  padding: 0;
   border: none;
   cursor: pointer;
   --border-right: 4px;
-  --text-stroke-color: rgba(255,255,255,0.6);
   --animation-color: #37FF8B;
-  --fs-size: 1rem;
-  letter-spacing: 2px;
+  --fs-size: 0.875rem;
+  letter-spacing: 0.05em;
   text-decoration: none;
   font-size: var(--fs-size);
   font-family: "Orbitron", sans-serif;
   position: relative;
   text-transform: uppercase;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--text-stroke-color);
-  font-weight: 700;
+  font-weight: 500;
   display: inline-block;
+  color: white;
 }
 
 .login-button .actual-text {
   display: block;
   position: relative;
+  color: white;
 }
 
 .login-button .hover-text {
@@ -545,13 +544,10 @@
   border-right: var(--border-right) solid var(--animation-color);
   overflow: hidden;
   transition: width 0.5s ease;
-  -webkit-text-stroke: 1px var(--animation-color);
   white-space: nowrap;
-  padding: 8px 16px;
-  margin: -8px -16px;
 }
 
 .login-button:hover .hover-text {
-  width: calc(100% + 32px);
+  width: 100%;
   filter: drop-shadow(0 0 23px var(--animation-color));
 }
