@@ -48,7 +48,7 @@ export function LandingHeroNew() {
                         ease: [0.43, 0.13, 0.23, 0.96]
                       }}
                       className="inline-block text-[80px] md:text-[140px] lg:text-[180px] font-bold text-white tracking-tighter leading-none"
-                      style={{ fontFamily: "Inter, sans-serif" }}
+                      style={{ fontFamily: "Orbitron, sans-serif" }}
                     >
                       {letter}
                     </motion.span>
