@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { BrandCard } from "./BrandCard";
-import openaiLogo from "@/assets/ai-logos/openai.svg";
+import openaiLogo from "@/assets/ai-logos/openai-logo.svg";
 import claudeLogo from "@/assets/ai-logos/claude-icon.png";
 import geminiLogo from "@/assets/ai-logos/gemini-logo.svg";
 import metaLogo from "@/assets/ai-logos/meta-icon.png";
