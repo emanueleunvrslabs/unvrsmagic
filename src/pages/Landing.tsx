@@ -14,8 +14,8 @@ const Landing = () => {
     <div className="bg-black min-h-screen">
       <LandingNav />
       <LandingHeroNew />
-      <LandingBrands />
       <LandingClaim />
+      <LandingBrands />
       <LandingServicesNew />
       <LandingWorksNew />
       <LandingReviews />
