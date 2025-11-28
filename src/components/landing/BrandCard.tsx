@@ -82,9 +82,6 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
           animation: gradient-shift 5s ease-in-out infinite;
           background-size: 200% 200%;
           border-radius: 1rem;
-          cursor: pointer;
-          overflow: hidden;
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         @media (min-width: 768px) {
@@ -94,26 +91,11 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
           }
         }
 
-        .brand-card:hover {
-          transform: translate(-6px, -6px) rotate(1deg);
-        }
-
         .brand-card .brand-logo-icon {
           opacity: 0.8;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          z-index: 3;
-        }
-
-        .brand-card:hover .brand-logo-icon {
-          transform: translateY(-10px);
-          opacity: 1;
-        }
-
-        .brand-card:hover .brand-logo-icon svg {
-          animation: spin-and-zoom 4s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
         }
 
         .brand-card .brand-name {
@@ -128,23 +110,12 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
           text-align: center;
           font-family: "Orbitron", sans-serif;
           letter-spacing: 0.1em;
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          z-index: 3;
-        }
-
-        .brand-card:hover .brand-name {
-          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         @media (min-width: 768px) {
           .brand-card .brand-name {
             font-size: 3vmin;
           }
-        }
-
-        .brand-card:active .brand-logo-icon,
-        .brand-card:active .brand-name {
-          transform: scale(0.95);
         }
 
         .brand-card::before,
@@ -161,7 +132,6 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
             radial-gradient(circle at 0 100%, #ff0056, transparent),
             radial-gradient(circle at 100% 100%, #6500ff, transparent);
           border-radius: 1rem;
-          transition: 0.6s;
         }
 
         .brand-card::after {
@@ -174,17 +144,6 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
           z-index: -2;
           filter: blur(2vmin);
           animation: blur-animation 3s ease-in-out alternate infinite;
-        }
-
-        .brand-card:hover::before {
-          animation: swipeRight 1.5s infinite, blur-animation 3s ease-in-out alternate infinite;
-          left: -100%;
-        }
-
-        @keyframes swipeRight {
-          100% {
-            transform: translateX(200%) skew(-45deg);
-          }
         }
 
         @keyframes blur-animation {
@@ -203,18 +162,6 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
           }
           100% {
             background-position: 0% 50%;
-          }
-        }
-
-        @keyframes spin-and-zoom {
-          0% {
-            transform: rotate(0deg) scale(1);
-          }
-          50% {
-            transform: rotate(180deg) scale(1.1);
-          }
-          100% {
-            transform: rotate(360deg) scale(1);
           }
         }
       `}</style>
