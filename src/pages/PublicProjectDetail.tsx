@@ -33,6 +33,19 @@ const projectFeatures: Record<string, string[]> = {
   ],
 };
 
+const projectScreenshots: Record<string, string[]> = {
+  "ai-social": [
+    "/images/ai-social-dashboard.jpg",
+    "/images/ai-social-content.jpg",
+    "/images/ai-social-workflows.jpg",
+  ],
+  "nkmt": [
+    "/images/nkmt-dashboard.jpg",
+    "/images/nkmt-agents.jpg",
+    "/images/nkmt-analytics.jpg",
+  ],
+};
+
 const projectHowItWorks: Record<string, { step: string; description: string }[]> = {
   "ai-social": [
     {
@@ -111,6 +124,7 @@ export default function PublicProjectDetail() {
 
   const features = projectFeatures[projectId || ""] || [];
   const howItWorks = projectHowItWorks[projectId || ""] || [];
+  const screenshots = projectScreenshots[projectId || ""] || [];
 
   return (
     <div className="min-h-screen bg-black">
@@ -204,6 +218,44 @@ export default function PublicProjectDetail() {
                       {feature}
                     </p>
                   </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Screenshots Section */}
+      {screenshots.length > 0 && (
+        <section className="py-20 bg-black border-t border-white/10">
+          <div className="container mx-auto px-6">
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-4xl md:text-5xl font-bold text-white text-center mb-16"
+              style={{ fontFamily: "Orbitron, sans-serif" }}
+            >
+              Dashboard Preview
+            </motion.h2>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              {screenshots.map((screenshot, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.8 }}
+                  className="group relative overflow-hidden rounded-xl border border-white/10 hover:border-white/30 transition-all"
+                >
+                  <img
+                    src={screenshot}
+                    alt={`${project.name} screenshot ${index + 1}`}
+                    className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </motion.div>
               ))}
             </div>
