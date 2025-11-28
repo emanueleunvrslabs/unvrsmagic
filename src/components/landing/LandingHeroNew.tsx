@@ -64,7 +64,7 @@ export function LandingHeroNew() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
           className="text-white/90 text-base md:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed drop-shadow-lg"
-          style={{ fontFamily: "Inter, sans-serif" }}
+          style={{ fontFamily: "Orbitron, sans-serif" }}
         >
           Beyond code, we build universes<br />
           where businesses and AI<br />
