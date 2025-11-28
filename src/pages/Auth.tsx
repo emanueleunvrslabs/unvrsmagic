@@ -299,10 +299,10 @@ export default function Auth() {
       <Card className="w-full max-w-sm relative">
         <MorseLED />
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
+          <CardTitle className="text-2xl font-bold text-center font-orbitron">
             {step === "username" ? "Choose Username" : "Login with WhatsApp"}
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center font-orbitron">
             {step === "phone" 
               ? "Enter your phone number to receive the OTP code"
               : step === "otp"
