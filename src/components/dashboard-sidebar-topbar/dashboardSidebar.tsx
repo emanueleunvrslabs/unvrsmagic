@@ -39,6 +39,7 @@ import {
   User,
   UserPlus,
   Wallet,
+  Wand2,
   XIcon,
   Zap,
 } from "lucide-react";
@@ -150,6 +151,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     "nkmt": false,
     "projects": false,
     "ai-social": false,
+    "ai-art": false,
   });
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -229,6 +231,14 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         setActiveItem("ai-social-connection");
       }
       setOpenSubmenus((prev) => ({ ...prev, "ai-social": true }));
+    } else if (pathname.startsWith("/ai-art")) {
+      // Handle AI Art routes
+      if (pathname === "/ai-art/generate-image") {
+        setActiveItem("ai-art-generate-image");
+      } else if (pathname === "/ai-art/generate-video") {
+        setActiveItem("ai-art-generate-video");
+      }
+      setOpenSubmenus((prev) => ({ ...prev, "ai-art": true }));
     } else if (pathname === "/notifications") {
       setActiveItem("notifications");
     } else if (pathname === "/file-upload") {
@@ -398,6 +408,20 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         };
       }
       
+      // Special handling for AI Art project
+      if (up.project.route === '/ai-art') {
+        return {
+          id: `user-project-${up.project_id}`,
+          label: up.project.name,
+          icon: Wand2,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "ai-art-generate-image", label: "Generate Images", icon: Image, href: "/ai-art/generate-image" },
+            { id: "ai-art-generate-video", label: "Generate Videos", icon: Gauge, href: "/ai-art/generate-video" },
+          ],
+        };
+      }
+      
       // Generic handling for other projects
       return {
         id: `user-project-${up.project_id}`,
@@ -440,6 +464,16 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "ai-social-live-studio", label: "Live Studio", icon: Radio, href: "/ai-social/live-studio" },
             { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
             { id: "ai-social-connection", label: "Connection", icon: Layers, href: "/ai-social/connection" },
+          ],
+        },
+        {
+          id: "ai-art",
+          label: "AI Art",
+          icon: Wand2,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "ai-art-generate-image", label: "Generate Images", icon: Image, href: "/ai-art/generate-image" },
+            { id: "ai-art-generate-video", label: "Generate Videos", icon: Gauge, href: "/ai-art/generate-video" },
           ],
         },
         {
