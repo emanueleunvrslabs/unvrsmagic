@@ -398,11 +398,11 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           hasSubmenu: true,
           submenuItems: [
             { id: "ai-social-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/ai-social" },
+            { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
             { id: "ai-social-generate-image", label: "Generate Images", icon: Image, href: "/ai-social/generate-image" },
             { id: "ai-social-generate-video", label: "Generate Videos", icon: Gauge, href: "/ai-social/generate-video" },
             { id: "ai-social-avatar-studio", label: "Avatar Studio", icon: User, href: "/ai-social/avatar-studio" },
             { id: "ai-social-live-studio", label: "Live Studio", icon: Radio, href: "/ai-social/live-studio" },
-            { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
             { id: "ai-social-connection", label: "Connection", icon: Layers, href: "/ai-social/connection" },
           ],
         };
@@ -458,11 +458,11 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           hasSubmenu: true,
           submenuItems: [
             { id: "ai-social-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/ai-social" },
+            { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
             { id: "ai-social-generate-image", label: "Generate Images", icon: Gauge, href: "/ai-social/generate-image" },
             { id: "ai-social-generate-video", label: "Generate Videos", icon: Gauge, href: "/ai-social/generate-video" },
             { id: "ai-social-avatar-studio", label: "Avatar Studio", icon: User, href: "/ai-social/avatar-studio" },
             { id: "ai-social-live-studio", label: "Live Studio", icon: Radio, href: "/ai-social/live-studio" },
-            { id: "ai-social-workflows", label: "Automated Workflows", icon: Repeat, href: "/ai-social/workflows" },
             { id: "ai-social-connection", label: "Connection", icon: Layers, href: "/ai-social/connection" },
           ],
         },
