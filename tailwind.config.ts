@@ -121,6 +121,11 @@ export default {
         },
       },
       
+      /* Perspective for 3D transforms */
+      perspective: {
+        '1000': '1000px',
+      },
+      
       /* Animations */
       keyframes: {
         "accordion-down": {
@@ -139,12 +144,17 @@ export default {
           from: { transform: "translateY(10px)", opacity: "0" },
           to: { transform: "translateY(0)", opacity: "1" },
         },
+        "spin3d": {
+          "0%": { transform: "rotateY(0deg)" },
+          "100%": { transform: "rotateY(360deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "slide-up": "slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        "spin3d": "spin3d 8s linear infinite",
       },
     },
   },
