@@ -33,7 +33,7 @@ export function LandingWorksNew() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.8 }}
           className="text-6xl md:text-8xl font-bold text-white text-center mb-16"
-          style={{ fontFamily: "Inter, sans-serif" }}
+          style={{ fontFamily: "Orbitron, sans-serif" }}
         >
           Works
         </motion.h1>
@@ -55,14 +55,14 @@ export function LandingWorksNew() {
                 />
               </div>
               <div className="p-6">
-                <h3 className="text-2xl font-semibold text-white mb-2" style={{ fontFamily: "Inter, sans-serif" }}>
+                <h3 className="text-2xl font-semibold text-white mb-2" style={{ fontFamily: "Orbitron, sans-serif" }}>
                   {work.title}
                 </h3>
-                <p className="text-white/60 mb-4" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p className="text-white/60 mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
                   {work.description}
                 </p>
                 <div className="flex items-center gap-2 text-white/80 group-hover:text-white transition-colors">
-                  <span className="text-sm font-medium">View Work</span>
+                  <span className="text-sm font-medium" style={{ fontFamily: "Orbitron, sans-serif" }}>View Work</span>
                   <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </div>
               </div>

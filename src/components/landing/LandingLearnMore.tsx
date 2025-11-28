@@ -17,7 +17,7 @@ export function LandingLearnMore() {
         >
           <h2 
             className="text-4xl md:text-6xl font-light text-white mb-8 leading-tight"
-            style={{ fontFamily: "Inter, sans-serif" }}
+            style={{ fontFamily: "Orbitron, sans-serif" }}
           >
             We Don't Just Design for the Present{" "}
             <span className="inline-block">❌</span>
@@ -38,7 +38,7 @@ export function LandingLearnMore() {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ delay: 0.6, duration: 0.8 }}
             className="text-white/70 text-lg md:text-xl leading-relaxed"
-            style={{ fontFamily: "Inter, sans-serif" }}
+            style={{ fontFamily: "Orbitron, sans-serif" }}
           >
             Specializing in developing enterprise software, custom applications, and AI integrations,
             delivering innovative and scalable solutions that create real value for businesses across all digital platforms.
