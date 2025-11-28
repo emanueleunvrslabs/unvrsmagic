@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { FloatingElements } from "./FloatingElements";
+import { HeroVideoBackground } from "./HeroVideoBackground";
 
 const useTypewriter = (text: string, baseSpeed: number = 50) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -76,6 +77,9 @@ where businesses and AI evolve together.";
 
   return (
     <section id="home" className="relative min-h-screen bg-black flex items-start justify-center overflow-hidden pt-32">
+      {/* Video Background with Overlays */}
+      <HeroVideoBackground />
+      
       {/* Floating Elements */}
       <FloatingElements />
       
