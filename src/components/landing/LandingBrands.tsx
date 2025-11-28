@@ -3,7 +3,7 @@ import { BrandCard } from "./BrandCard";
 import openaiLogo from "@/assets/ai-logos/openai-transparent.png";
 import claudeLogo from "@/assets/ai-logos/claude-transparent.png";
 import geminiLogo from "@/assets/ai-logos/gemini-transparent.png";
-import metaLogo from "@/assets/ai-logos/meta-icon.png";
+import metaLogo from "@/assets/ai-logos/meta-transparent.png";
 import mistralLogo from "@/assets/ai-logos/mistral.svg";
 import cohereLogo from "@/assets/ai-logos/cohere.png";
 import midjourneyLogo from "@/assets/ai-logos/midjourney-icon.png";
