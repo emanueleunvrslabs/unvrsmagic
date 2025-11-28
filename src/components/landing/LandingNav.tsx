@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import logo from "@/assets/landing/unvrs-logo.png";
 
 export function LandingNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,14 +13,14 @@ export function LandingNav() {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
-              src="/webflow/images/Unvrs-logo-2.png" 
+              src={logo}
               alt="UNVRS LABS" 
               className="h-12 w-auto"
             />
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-8" style={{ fontFamily: "Orbitron, sans-serif" }}>
             <a href="#home" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               HOME
             </a>
@@ -54,7 +55,7 @@ export function LandingNav() {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden mt-4 pb-4 flex flex-col gap-4">
+          <div className="md:hidden mt-4 pb-4 flex flex-col gap-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
             <a href="#home" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
               HOME
             </a>

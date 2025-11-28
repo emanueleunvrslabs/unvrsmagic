@@ -42,7 +42,7 @@ export function LandingServicesNew() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.8 }}
           className="text-6xl md:text-8xl font-bold text-white text-center mb-16"
-          style={{ fontFamily: "Inter, sans-serif" }}
+          style={{ fontFamily: "Orbitron, sans-serif" }}
         >
           Services
         </motion.h1>
@@ -56,10 +56,10 @@ export function LandingServicesNew() {
               transition={{ delay: index * 0.1, duration: 0.8 }}
               className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all cursor-pointer"
             >
-              <h2 className="text-2xl font-semibold text-white mb-4" style={{ fontFamily: "Inter, sans-serif" }}>
+              <h2 className="text-2xl font-semibold text-white mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
                 {service.title}
               </h2>
-              <p className="text-white/60 mb-6 leading-relaxed" style={{ fontFamily: "Inter, sans-serif" }}>
+              <p className="text-white/60 mb-6 leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
                 {service.description}
               </p>
               <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 group-hover:border-white/40 transition-all">

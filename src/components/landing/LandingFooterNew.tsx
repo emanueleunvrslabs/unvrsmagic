@@ -12,14 +12,14 @@ export function LandingFooterNew() {
               alt="UNVRS LABS" 
               className="h-12 w-auto mb-4"
             />
-            <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: "Inter, sans-serif" }}>
+            <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
               Beyond code, we build universes where businesses and AI evolve together.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4" style={{ fontFamily: "Inter, sans-serif" }}>
+            <h3 className="text-white font-semibold mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
               Quick Links
             </h3>
             <div className="flex flex-col gap-2">
@@ -43,7 +43,7 @@ export function LandingFooterNew() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-white font-semibold mb-4" style={{ fontFamily: "Inter, sans-serif" }}>
+            <h3 className="text-white font-semibold mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
               Get in Touch
             </h3>
             <div className="flex flex-col gap-2">
@@ -58,7 +58,7 @@ export function LandingFooterNew() {
         </div>
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-white/40 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
+          <p className="text-white/40 text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
             © {new Date().getFullYear()} UNVRS LABS. All rights reserved.
           </p>
           <div className="flex gap-6">

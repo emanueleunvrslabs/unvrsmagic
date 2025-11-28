@@ -18,7 +18,7 @@ export function LandingCTANew() {
         >
           <h2 
             className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight"
-            style={{ fontFamily: "Inter, sans-serif" }}
+            style={{ fontFamily: "Orbitron, sans-serif" }}
           >
             Ready to Build<br />Your Universe?
           </h2>
@@ -28,7 +28,7 @@ export function LandingCTANew() {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-white/70 text-xl mb-12 leading-relaxed"
-            style={{ fontFamily: "Inter, sans-serif" }}
+            style={{ fontFamily: "Orbitron, sans-serif" }}
           >
             Let's collaborate to create innovative solutions that drive your business forward.
           </motion.p>
@@ -41,7 +41,7 @@ export function LandingCTANew() {
             <Link 
               to="/auth"
               className="inline-block px-12 py-4 bg-white text-black text-lg font-semibold rounded-full hover:bg-white/90 transition-all hover:scale-105"
-              style={{ fontFamily: "Inter, sans-serif" }}
+              style={{ fontFamily: "Orbitron, sans-serif" }}
             >
               Get Started
             </Link>
