@@ -40,8 +40,8 @@ export function LandingNav() {
               to="/auth" 
               className="login-button"
             >
-              <span className="actual-text">&nbsp;LOGIN&nbsp;</span>
-              <span aria-hidden="true" className="hover-text">&nbsp;LOGIN&nbsp;</span>
+              <span className="actual-text">&nbsp;Magic AI&nbsp;</span>
+              <span aria-hidden="true" className="hover-text">&nbsp;Magic AI&nbsp;</span>
             </Link>
           </div>
 
@@ -76,8 +76,8 @@ export function LandingNav() {
               to="/auth" 
               className="login-button"
             >
-              <span className="actual-text">&nbsp;LOGIN&nbsp;</span>
-              <span aria-hidden="true" className="hover-text">&nbsp;LOGIN&nbsp;</span>
+              <span className="actual-text">&nbsp;Magic AI&nbsp;</span>
+              <span aria-hidden="true" className="hover-text">&nbsp;Magic AI&nbsp;</span>
             </Link>
           </div>
         )}
