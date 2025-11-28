@@ -527,10 +527,29 @@ const FileUpload = () => {
         {/* Saved Files Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Uploaded Files</CardTitle>
-            <CardDescription>
-              View and manage your uploaded files. ZIP files show extracted contents.
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Uploaded Files</CardTitle>
+                <CardDescription>
+                  View and manage your uploaded files. ZIP files show extracted contents.
+                </CardDescription>
+              </div>
+              {savedFiles.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={async () => {
+                    if (confirm('Sei sicuro di voler eliminare tutti i file?')) {
+                      await deleteAllFilesFromStorage();
+                      toast.success('Tutti i file sono stati eliminati');
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Elimina tutto
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
