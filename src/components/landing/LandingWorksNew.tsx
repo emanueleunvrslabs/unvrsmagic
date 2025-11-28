@@ -43,7 +43,7 @@ export function LandingWorksNew() {
           className="text-6xl md:text-8xl font-bold text-white text-center mb-16"
           style={{ fontFamily: "Orbitron, sans-serif" }}
         >
-          Works
+          Progetti
         </motion.h1>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -73,10 +73,10 @@ export function LandingWorksNew() {
                   {project.name}
                 </h3>
                 <p className="text-white/60 mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                  {project.description || "Enterprise solution"}
+                  {project.description || "Soluzione aziendale"}
                 </p>
                 <div className="flex items-center gap-2 text-white/80 group-hover:text-white transition-colors">
-                  <span className="text-sm font-medium" style={{ fontFamily: "Orbitron, sans-serif" }}>View Project</span>
+                  <span className="text-sm font-medium" style={{ fontFamily: "Orbitron, sans-serif" }}>Vedi Progetto</span>
                   <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </div>
               </div>

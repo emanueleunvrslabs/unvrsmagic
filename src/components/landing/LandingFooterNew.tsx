@@ -13,30 +13,30 @@ export function LandingFooterNew() {
               className="h-12 w-auto mb-4"
             />
             <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              Beyond code, we build universes where businesses and AI evolve together.
+              Oltre il codice, costruiamo universi dove aziende e AI evolvono insieme.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
             <h3 className="text-white font-semibold mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              Quick Links
+              Link Rapidi
             </h3>
             <div className="flex flex-col gap-2">
               <a href="#home" className="text-white/60 hover:text-white transition-colors text-sm">
                 Home
               </a>
               <a href="#about" className="text-white/60 hover:text-white transition-colors text-sm">
-                About
+                Chi Siamo
               </a>
               <a href="#works" className="text-white/60 hover:text-white transition-colors text-sm">
-                Works
+                Progetti
               </a>
               <a href="#services" className="text-white/60 hover:text-white transition-colors text-sm">
-                Services
+                Servizi
               </a>
               <a href="#contact" className="text-white/60 hover:text-white transition-colors text-sm">
-                Contact
+                Contatti
               </a>
             </div>
           </div>
@@ -44,14 +44,14 @@ export function LandingFooterNew() {
           {/* Contact */}
           <div>
             <h3 className="text-white font-semibold mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              Get in Touch
+              Contattaci
             </h3>
             <div className="flex flex-col gap-2">
               <a href="mailto:info@unvrslabs.com" className="text-white/60 hover:text-white transition-colors text-sm">
                 info@unvrslabs.com
               </a>
               <Link to="/auth" className="text-white/60 hover:text-white transition-colors text-sm">
-                Client Portal
+                Portale Clienti
               </Link>
             </div>
           </div>
@@ -59,14 +59,14 @@ export function LandingFooterNew() {
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/40 text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
-            © {new Date().getFullYear()} UNVRS LABS. All rights reserved.
+            © {new Date().getFullYear()} UNVRS LABS. Tutti i diritti riservati.
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-white/40 hover:text-white transition-colors text-sm">
               Privacy Policy
             </a>
             <a href="#" className="text-white/40 hover:text-white transition-colors text-sm">
-              Terms of Service
+              Termini di Servizio
             </a>
           </div>
         </div>
