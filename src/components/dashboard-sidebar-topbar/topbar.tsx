@@ -139,13 +139,6 @@ export function Topbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Link to="/file-upload">
-          <Button variant="outline" size="icon">
-            <Upload className="h-4 w-4" />
-            <span className="sr-only">Upload Files</span>
-          </Button>
-        </Link>
-
         {/* Wallet Connection - only show if connected */}
         {isConnected && (
           <DropdownMenu>
