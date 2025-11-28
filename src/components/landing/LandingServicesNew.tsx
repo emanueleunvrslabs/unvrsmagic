@@ -32,15 +32,15 @@ const services = [
 
 export function LandingServicesNew() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
     <section id="services" ref={ref} className="py-32 bg-black">
       <div className="container mx-auto px-6">
         <motion.h1
-          initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="text-6xl md:text-8xl font-bold text-white text-center mb-16"
           style={{ fontFamily: "Orbitron, sans-serif" }}
         >
@@ -51,9 +51,9 @@ export function LandingServicesNew() {
           {services.map((service, index) => (
             <motion.div
               key={service.title}
-              initial={{ opacity: 0, y: 50 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-              transition={{ delay: index * 0.1, duration: 0.8 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
               className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all cursor-pointer"
             >
               <h2 className="text-2xl font-semibold text-white mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>

@@ -14,7 +14,7 @@ interface Project {
 
 export function LandingWorksNew() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
@@ -37,9 +37,9 @@ export function LandingWorksNew() {
     <section id="works" ref={ref} className="py-32 bg-black">
       <div className="container mx-auto px-6">
         <motion.h1
-          initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="text-6xl md:text-8xl font-bold text-white text-center mb-16"
           style={{ fontFamily: "Orbitron, sans-serif" }}
         >
@@ -50,9 +50,9 @@ export function LandingWorksNew() {
           {projects.map((project, index) => (
             <motion.div
               key={project.id}
-              initial={{ opacity: 0, y: 50 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-              transition={{ delay: index * 0.2, duration: 0.8 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ delay: index * 0.08, duration: 0.4, ease: "easeOut" }}
               className="group relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 transition-all cursor-pointer"
               onClick={() => window.location.href = `/project/${project.route.replace('/', '')}`}
             >
