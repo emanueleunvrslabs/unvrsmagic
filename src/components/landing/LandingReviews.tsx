@@ -47,11 +47,16 @@ const reviews = [
 ];
 
 export function LandingReviews() {
+  // Split reviews into 3 columns
+  const column1 = reviews.slice(0, 2);
+  const column2 = reviews.slice(2, 4);
+  const column3 = reviews.slice(4, 6);
+
   return (
     <section className="py-32 bg-black overflow-hidden">
       <div className="container mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-12 items-center mb-16">
-          <div className="lg:w-1/3">
+        <div className="grid lg:grid-cols-[1fr_2fr] gap-12 items-start">
+          <div>
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -70,53 +75,89 @@ export function LandingReviews() {
             </motion.div>
           </div>
 
-          <div className="lg:w-2/3 relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-h-[600px] overflow-hidden">
+            {/* Column 1 - scrolls up */}
             <motion.div
-              initial={{ x: 0 }}
-              animate={{ x: "-50%" }}
+              initial={{ y: 0 }}
+              animate={{ y: "-50%" }}
               transition={{
-                duration: 30,
+                duration: 20,
                 repeat: Infinity,
                 ease: "linear",
               }}
-              className="flex gap-6"
+              className="flex flex-col gap-6"
             >
-              {[...reviews, ...reviews].map((review, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 w-[350px] p-6 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/20 transition-all"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center border border-white/20">
-                      <span className="text-white font-semibold text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                        {review.avatar}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                        {review.name}
-                      </h3>
-                      <p className="text-white/60 text-xs" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                        {review.role}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} size={14} className="fill-yellow-500 text-yellow-500" />
-                    ))}
-                  </div>
+              {[...column1, ...column1, ...column1].map((review, i) => (
+                <ReviewCard key={`col1-${i}`} review={review} />
+              ))}
+            </motion.div>
 
-                  <p className="text-white/70 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                    {review.text}
-                  </p>
-                </div>
+            {/* Column 2 - scrolls up with delay */}
+            <motion.div
+              initial={{ y: 0 }}
+              animate={{ y: "-50%" }}
+              transition={{
+                duration: 25,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="flex flex-col gap-6"
+            >
+              {[...column2, ...column2, ...column2].map((review, i) => (
+                <ReviewCard key={`col2-${i}`} review={review} />
+              ))}
+            </motion.div>
+
+            {/* Column 3 - scrolls up slower */}
+            <motion.div
+              initial={{ y: 0 }}
+              animate={{ y: "-50%" }}
+              transition={{
+                duration: 22,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="flex flex-col gap-6"
+            >
+              {[...column3, ...column3, ...column3].map((review, i) => (
+                <ReviewCard key={`col3-${i}`} review={review} />
               ))}
             </motion.div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function ReviewCard({ review }: { review: typeof reviews[0] }) {
+  return (
+    <div className="flex-shrink-0 p-6 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/20 transition-all">
+      <div className="flex items-center gap-4 mb-4">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center border border-white/20">
+          <span className="text-white font-semibold text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
+            {review.avatar}
+          </span>
+        </div>
+        <div>
+          <h3 className="text-white font-semibold text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
+            {review.name}
+          </h3>
+          <p className="text-white/60 text-xs" style={{ fontFamily: "Orbitron, sans-serif" }}>
+            {review.role}
+          </p>
+        </div>
+      </div>
+      
+      <div className="flex gap-1 mb-4">
+        {[...Array(review.rating)].map((_, i) => (
+          <Star key={i} size={14} className="fill-yellow-500 text-yellow-500" />
+        ))}
+      </div>
+
+      <p className="text-white/70 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
+        {review.text}
+      </p>
+    </div>
   );
 }
