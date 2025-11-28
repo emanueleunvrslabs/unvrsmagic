@@ -106,6 +106,7 @@ const FileUpload = () => {
 
   const addFiles = async (newFiles: File[]) => {
     const filesToAdd: UploadedFile[] = [];
+    const MAX_ZIP_SIZE = 50 * 1024 * 1024; // 50MB limit for ZIP extraction
     
     for (const file of newFiles) {
       // Check if it's a ZIP file
@@ -114,7 +115,20 @@ const FileUpload = () => {
                     file.type === 'application/x-zip-compressed';
       
       if (isZip) {
+        // Check ZIP size before attempting extraction
+        if (file.size > MAX_ZIP_SIZE) {
+          toast.error(`ZIP file "${file.name}" is too large (${formatFileSize(file.size)}). Upload it directly without extraction.`);
+          // Add ZIP as regular file without extraction
+          filesToAdd.push({
+            file,
+            progress: 0,
+            status: "pending" as const,
+          });
+          continue;
+        }
+
         try {
+          toast.info(`Extracting ZIP: ${file.name}...`);
           // Extract ZIP contents
           const arrayBuffer = await file.arrayBuffer();
           const zip = await JSZip.loadAsync(arrayBuffer);
@@ -127,28 +141,35 @@ const FileUpload = () => {
           });
           
           // Extract each file
+          let extractedCount = 0;
           for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
             if (!zipEntry.dir) {
-              const content = await zipEntry.async('blob');
-              const fileName = relativePath.split('/').pop() || relativePath;
-              
-              // Create File from Blob
-              const extractedFile = new window.File([content], fileName, {
-                type: 'application/octet-stream'
-              });
-              
-              filesToAdd.push({
-                file: extractedFile,
-                progress: 0,
-                status: "pending" as const,
-              });
+              try {
+                const content = await zipEntry.async('blob');
+                const fileName = relativePath.split('/').pop() || relativePath;
+                
+                // Create File from Blob
+                const extractedFile = new window.File([content], fileName, {
+                  type: 'application/octet-stream'
+                });
+                
+                filesToAdd.push({
+                  file: extractedFile,
+                  progress: 0,
+                  status: "pending" as const,
+                });
+                extractedCount++;
+              } catch (extractError) {
+                console.error(`Error extracting file ${relativePath}:`, extractError);
+                toast.error(`Failed to extract: ${relativePath}`);
+              }
             }
           }
           
-          toast.success(`ZIP extracted: ${Object.keys(zip.files).length} files found`);
+          toast.success(`ZIP extracted: ${extractedCount} files ready to upload`);
         } catch (error) {
           console.error('Error extracting ZIP:', error);
-          toast.error('Failed to extract ZIP file');
+          toast.error(`Failed to extract ZIP "${file.name}". Uploading as-is.`);
           // Add ZIP as regular file if extraction fails
           filesToAdd.push({
             file,
@@ -205,7 +226,10 @@ const FileUpload = () => {
         throw new Error('No active session');
       }
 
-      // Call edge function to upload file (and extract if ZIP)
+      // Call edge function to upload file
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-file`,
         {
@@ -214,11 +238,14 @@ const FileUpload = () => {
             'Authorization': `Bearer ${session.access_token}`,
           },
           body: formData,
+          signal: controller.signal,
         }
       );
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
         throw new Error(errorData.error || 'Upload failed');
       }
 
