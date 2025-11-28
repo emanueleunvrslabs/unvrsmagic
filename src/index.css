@@ -560,6 +560,12 @@ html {
   bottom: 0;
   width: var(--border-right);
   background: var(--animation-color);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.login-button:hover .hover-text::after {
+  opacity: 1;
 }
 
 .login-button:hover .hover-text {
