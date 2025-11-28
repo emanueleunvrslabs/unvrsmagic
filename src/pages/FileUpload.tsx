@@ -1,8 +1,8 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState, useCallback } from "react";
-import { Upload, File, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { Upload, File, X, CheckCircle2, AlertCircle, FileArchive, FolderOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -12,12 +12,45 @@ interface UploadedFile {
   progress: number;
   status: "pending" | "uploading" | "completed" | "error";
   error?: string;
-  url?: string;
+}
+
+interface SavedFile {
+  id: string;
+  file_name: string;
+  file_size: number;
+  file_type: string;
+  is_extracted: boolean;
+  parent_zip_id: string | null;
+  created_at: string;
 }
 
 const FileUpload = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [savedFiles, setSavedFiles] = useState<SavedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load saved files from database
+  useEffect(() => {
+    loadSavedFiles();
+  }, []);
+
+  const loadSavedFiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('uploaded_files')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSavedFiles(data || []);
+    } catch (error) {
+      console.error('Error loading files:', error);
+      toast.error('Failed to load files');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -79,30 +112,52 @@ const FileUpload = () => {
     );
 
     try {
-      const fileName = `${user.id}/${Date.now()}-${file.name}`;
-      
-      const { data, error } = await supabase.storage
-        .from("uploads")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', file);
 
-      if (error) throw error;
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session');
+      }
 
-      const { data: urlData } = supabase.storage
-        .from("uploads")
-        .getPublicUrl(fileName);
+      // Call edge function to upload file (and extract if ZIP)
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-file`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const result = await response.json();
+      console.log('Upload result:', result);
 
       setFiles((prev) =>
         prev.map((f, i) =>
           i === index
-            ? { ...f, status: "completed" as const, progress: 100, url: urlData.publicUrl }
+            ? { 
+                ...f, 
+                status: "completed" as const, 
+                progress: 100,
+              }
             : f
         )
       );
 
-      toast.success(`${file.name} uploaded successfully`);
+      toast.success(result.message || `${file.name} uploaded successfully`);
+      
+      // Reload saved files to show newly uploaded files
+      await loadSavedFiles();
     } catch (error: any) {
       console.error("Upload error:", error);
       setFiles((prev) =>
@@ -112,7 +167,7 @@ const FileUpload = () => {
             : f
         )
       );
-      toast.error(`Failed to upload ${file.name}`);
+      toast.error(`Failed to upload ${file.name}: ${error.message}`);
     }
   };
 
@@ -226,6 +281,54 @@ const FileUpload = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Saved Files Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Uploaded Files</CardTitle>
+            <CardDescription>
+              View and manage your uploaded files. ZIP files show extracted contents.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading files...</div>
+            ) : savedFiles.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No files uploaded yet</div>
+            ) : (
+              <div className="space-y-2">
+                {savedFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg border bg-card",
+                      file.parent_zip_id && "ml-8 border-l-2 border-primary/30"
+                    )}
+                  >
+                    {file.is_extracted ? (
+                      <FileArchive className="h-5 w-5 text-primary" />
+                    ) : file.parent_zip_id ? (
+                      <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <File className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{file.file_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatFileSize(file.file_size)}
+                        {file.is_extracted && " • ZIP Archive (Extracted)"}
+                        {file.parent_zip_id && " • Extracted from ZIP"}
+                      </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(file.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
