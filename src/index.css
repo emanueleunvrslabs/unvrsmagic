@@ -537,17 +537,27 @@
 .login-button .hover-text {
   position: absolute;
   top: 0;
-  left: -4px;
+  left: 0;
+  right: 0;
   box-sizing: border-box;
   color: var(--animation-color);
   width: 0%;
-  border-right: var(--border-right) solid var(--animation-color);
   overflow: hidden;
   transition: width 0.5s ease;
   white-space: nowrap;
 }
 
+.login-button .hover-text::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--border-right);
+  background: var(--animation-color);
+}
+
 .login-button:hover .hover-text {
-  width: calc(100% + 4px);
+  width: 100%;
   filter: drop-shadow(0 0 23px var(--animation-color));
 }
