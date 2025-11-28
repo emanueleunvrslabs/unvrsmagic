@@ -75,7 +75,7 @@ export function LandingReviews() {
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-h-[600px] overflow-hidden">
+          <div className="grid grid-cols-3 gap-6 h-[600px] overflow-hidden">
             {/* Column 1 - scrolls up */}
             <motion.div
               initial={{ y: 0 }}
@@ -92,12 +92,12 @@ export function LandingReviews() {
               ))}
             </motion.div>
 
-            {/* Column 2 - scrolls up with delay */}
+            {/* Column 2 - scrolls down (opposite direction) */}
             <motion.div
-              initial={{ y: 0 }}
-              animate={{ y: "-50%" }}
+              initial={{ y: "-50%" }}
+              animate={{ y: 0 }}
               transition={{
-                duration: 25,
+                duration: 20,
                 repeat: Infinity,
                 ease: "linear",
               }}
@@ -108,12 +108,12 @@ export function LandingReviews() {
               ))}
             </motion.div>
 
-            {/* Column 3 - scrolls up slower */}
+            {/* Column 3 - scrolls up (same as column 1) */}
             <motion.div
               initial={{ y: 0 }}
               animate={{ y: "-50%" }}
               transition={{
-                duration: 22,
+                duration: 20,
                 repeat: Infinity,
                 ease: "linear",
               }}
