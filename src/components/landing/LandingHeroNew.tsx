@@ -51,10 +51,8 @@ export function LandingHeroNew() {
                         delay: index * 0.06,
                         ease: [0.43, 0.13, 0.23, 0.96]
                       }}
-                      className="inline-block text-[80px] md:text-[140px] lg:text-[180px] font-bold text-white tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
-                      style={{ 
-                        textShadow: "0 0 40px rgba(255, 255, 255, 0.2), 0 0 80px rgba(255, 255, 255, 0.1)"
-                      }}
+                      className="inline-block text-[80px] md:text-[140px] lg:text-[180px] font-bold text-white tracking-tighter leading-none"
+                      style={{ fontFamily: "Inter, sans-serif" }}
                     >
                       {letter}
                     </motion.span>
