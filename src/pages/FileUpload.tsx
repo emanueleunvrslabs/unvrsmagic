@@ -35,7 +35,32 @@ const FileUpload = () => {
   // Load saved files from database
   useEffect(() => {
     loadSavedFiles();
+    deleteAllFilesFromStorage();
   }, []);
+
+  const deleteAllFilesFromStorage = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-all-files`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        console.log('All files deleted from storage');
+        await loadSavedFiles();
+      }
+    } catch (error) {
+      console.error('Error deleting files:', error);
+    }
+  };
 
   const loadSavedFiles = async () => {
     try {
