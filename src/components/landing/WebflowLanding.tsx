@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./HeroTextEffect.css";
+import logoTransp from "@/assets/Logo_transp.png";
 
 const STORAGE_BASE = "https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object/public/uploads/9d8f65ef-58ef-47db-be8f-926f26411b39";
 
@@ -32,10 +33,10 @@ export function WebflowLanding() {
       {/* Logo fisso in alto */}
       <a href="/" className="logo-link-wrapper hide-on-tab brand-2 w-nav-brand w--current">
         <img 
-          width="100" 
+          width="120" 
           height="Auto" 
-          alt="" 
-          src={`${STORAGE_BASE}/1764321299606-Unvrs-logo-2.png`}
+          alt="UNVRS Labs Logo" 
+          src={logoTransp}
           loading="eager" 
           className="logo"
         />
@@ -45,7 +46,7 @@ export function WebflowLanding() {
       <div data-animation="default" className="navbar w-nav" data-easing2="ease" data-easing="ease" data-collapse="medium" role="banner" data-no-scroll="1" data-duration="400" data-doc-height="1">
         <div className="nav-container w-container">
           <a href="/" className="logo-link-wrapper show-on-tab w-nav-brand w--current">
-            <img width="Auto" height="Auto" alt="" src={`${STORAGE_BASE}/1764321298692-Unvrs-labs-logo.png`} loading="eager" className="logo" />
+            <img width="120" height="Auto" alt="UNVRS Labs Logo" src={logoTransp} loading="eager" className="logo" />
           </a>
           <div className="menu-button w-nav-button">
             <div className="burger-icon w-icon-nav-menu"></div>
