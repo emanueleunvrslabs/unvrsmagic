@@ -30,9 +30,6 @@ export function LandingFooterNew() {
               <a href="#home" className="text-white/60 hover:text-white transition-colors text-sm">
                 Home
               </a>
-              <a href="#about" className="text-white/60 hover:text-white transition-colors text-sm">
-                About
-              </a>
               <a href="#works" className="text-white/60 hover:text-white transition-colors text-sm">
                 Works
               </a>
