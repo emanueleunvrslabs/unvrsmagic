@@ -14,8 +14,8 @@ const Landing = () => {
       <LandingHeroNew />
       <LandingLearnMore />
       <LandingBrands />
-      <LandingWorksNew />
       <LandingServicesNew />
+      <LandingWorksNew />
       <LandingCTANew />
       <LandingFooterNew />
     </div>
