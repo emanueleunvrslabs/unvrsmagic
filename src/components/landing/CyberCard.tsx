@@ -100,28 +100,12 @@ export function CyberCard({ title, description, delay = 0 }: CyberCardProps) {
               {title}
             </div>
 
-            {/* Hover Prompt */}
-            <p
-              className="absolute left-1/2 -translate-x-1/2 z-20 text-base font-semibold tracking-[2px] text-center transition-all duration-300"
-              style={{
-                bottom: '140px',
-                fontFamily: 'Orbitron, sans-serif',
-                color: 'rgba(255,255,255,0.7)',
-                textShadow: '0 0 10px rgba(255,255,255,0.3)',
-                opacity: isHovered ? 0 : 1,
-              }}
-            >
-              HOVER ME
-            </p>
-
             {/* Description */}
             <div
-              className="absolute bottom-12 w-full text-center px-6 text-xs tracking-[2px] transition-all duration-300"
+              className="absolute bottom-12 w-full text-center px-6 text-xs tracking-[2px] leading-relaxed"
               style={{
                 fontFamily: 'Orbitron, sans-serif',
                 color: 'rgba(255,255,255,0.6)',
-                transform: isHovered ? 'translateY(0)' : 'translateY(30px)',
-                opacity: isHovered ? 1 : 0,
               }}
             >
               <span>{description}</span>
