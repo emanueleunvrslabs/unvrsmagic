@@ -35,6 +35,7 @@ import {
   Repeat,
   Settings,
   Store,
+  Upload,
   User,
   UserPlus,
   Wallet,
@@ -230,6 +231,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       setOpenSubmenus((prev) => ({ ...prev, "ai-social": true }));
     } else if (pathname === "/notifications") {
       setActiveItem("notifications");
+    } else if (pathname === "/file-upload") {
+      setActiveItem("file-upload");
     } else {
       // Extract the main path without subpaths
       const mainPath = pathname.split("/")[1];
@@ -474,6 +477,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     section: "Preferences",
     items: [
       { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
+      { id: "file-upload", label: "Upload", icon: Upload, href: "/file-upload" },
     ],
   });
 
