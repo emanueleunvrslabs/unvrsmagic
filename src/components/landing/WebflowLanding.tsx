@@ -42,14 +42,14 @@ export function WebflowLanding() {
 
       {/* Navbar */}
       <div data-animation="default" className="navbar w-nav" data-easing2="ease" data-easing="ease" data-collapse="medium" role="banner" data-no-scroll="1" data-duration="400" data-doc-height="1">
-        <div className="nav-container w-container">
-          <a href="/" className="logo-link-wrapper show-on-tab w-nav-brand w--current">
+        <div className="nav-container w-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <a href="/" className="logo-link-wrapper show-on-tab w-nav-brand w--current" style={{ position: 'absolute', left: '20px' }}>
             <img width="Auto" height="Auto" alt="" src={`${STORAGE_BASE}/1764321298692-Unvrs-labs-logo.png`} loading="eager" className="logo" />
           </a>
           <div className="menu-button w-nav-button">
             <div className="burger-icon w-icon-nav-menu"></div>
           </div>
-          <nav role="navigation" className="nav-menu w-nav-menu">
+          <nav role="navigation" className="nav-menu w-nav-menu" style={{ position: 'static' }}>
             <a href="#" className="nav-link-wrapper first w-inline-block w--current">
               <div className="nav-link-block">
                 <p className="nav-link">HOME</p>
