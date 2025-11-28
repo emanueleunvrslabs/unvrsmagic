@@ -237,77 +237,84 @@ const FileUpload = () => {
 
   const uploadZipFile = async (file: File): Promise<string | null> => {
     try {
-      const session = await supabase.auth.getSession();
-      if (!session.data.session) {
-        throw new Error('No active session');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("You must be logged in to upload files");
       }
 
-      const formData = new FormData();
-      formData.append('file', file);
+      const fileName = `${user.id}/${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("uploads")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-file`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.data.session.access_token}`,
+      if (uploadError) throw uploadError;
+
+      const { data: fileRecord, error: dbError } = await supabase
+        .from("uploaded_files")
+        .insert({
+          user_id: user.id,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type || "application/octet-stream",
+          file_path: uploadData.path,
+          original_name: file.name,
+          is_extracted: false,
+          parent_zip_id: null,
+          metadata: {
+            upload_timestamp: new Date().toISOString(),
           },
-          body: formData,
-          signal: controller.signal,
-        }
-      );
+        })
+        .select()
+        .single();
 
-      clearTimeout(timeoutId);
+      if (dbError) throw dbError;
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
-        throw new Error(errorData.error || 'Upload failed');
-      }
-
-      const result = await response.json();
-      return result.file?.id || null;
+      return fileRecord.id as string;
     } catch (error) {
-      console.error('Error uploading ZIP:', error);
+      console.error("Error uploading ZIP:", error);
       return null;
     }
   };
 
   const uploadExtractedFile = async (file: File, parentZipId: string) => {
     try {
-      const session = await supabase.auth.getSession();
-      if (!session.data.session) {
-        throw new Error('No active session');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("You must be logged in to upload files");
       }
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('parent_zip_id', parentZipId);
+      const fileName = `${user.id}/${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("uploads")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-file`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.data.session.access_token}`,
+      if (uploadError) throw uploadError;
+
+      const { error: dbError } = await supabase
+        .from("uploaded_files")
+        .insert({
+          user_id: user.id,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type || "application/octet-stream",
+          file_path: uploadData.path,
+          original_name: file.name,
+          is_extracted: true,
+          parent_zip_id: parentZipId,
+          metadata: {
+            upload_timestamp: new Date().toISOString(),
           },
-          body: formData,
-          signal: controller.signal,
-        }
-      );
+        });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
+      if (dbError) throw dbError;
     } catch (error) {
-      console.error('Error uploading extracted file:', error);
+      console.error("Error uploading extracted file:", error);
     }
   };
 
@@ -344,57 +351,48 @@ const FileUpload = () => {
     );
 
     try {
-      // Create form data
-      const formData = new FormData();
-      formData.append('file', file);
+      const fileName = `${user.id}/${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("uploads")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
 
-      // Get auth token
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No active session');
-      }
+      if (uploadError) throw uploadError;
 
-      // Call edge function to upload file
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-file`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
+      const { error: dbError } = await supabase
+        .from("uploaded_files")
+        .insert({
+          user_id: user.id,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type || "application/octet-stream",
+          file_path: uploadData.path,
+          original_name: file.name,
+          is_extracted: false,
+          parent_zip_id: null,
+          metadata: {
+            upload_timestamp: new Date().toISOString(),
           },
-          body: formData,
-          signal: controller.signal,
-        }
-      );
+        });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
-        throw new Error(errorData.error || 'Upload failed');
-      }
-
-      const result = await response.json();
-      console.log('Upload result:', result);
+      if (dbError) throw dbError;
 
       setFiles((prev) =>
         prev.map((f, i) =>
           i === index
-            ? { 
-                ...f, 
-                status: "completed" as const, 
+            ? {
+                ...f,
+                status: "completed" as const,
                 progress: 100,
               }
             : f
         )
       );
 
-      toast.success(result.message || `${file.name} uploaded successfully`);
-      
-      // Reload saved files to show newly uploaded files
+      toast.success(`${file.name} uploaded successfully`);
+
       await loadSavedFiles();
     } catch (error: any) {
       console.error("Upload error:", error);
