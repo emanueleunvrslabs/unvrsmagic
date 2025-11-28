@@ -9,7 +9,7 @@ const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, React.Compo
     <OTPInput
       ref={ref}
       containerClassName={cn("flex items-center gap-2 has-[:disabled]:opacity-50", containerClassName)}
-      className={cn("disabled:cursor-not-allowed", className)}
+      className={cn("disabled:cursor-not-allowed selection:bg-transparent [&_*::selection]:bg-transparent", className)}
       {...props}
     />
   ),
