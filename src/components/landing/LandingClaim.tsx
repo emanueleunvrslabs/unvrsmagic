@@ -4,11 +4,13 @@ export function LandingClaim() {
       <div className="container mx-auto px-6">
         <div className="max-w-5xl text-left">
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-white mb-8 tracking-wide leading-tight">
-            We Don't Just Design for the Present{" "}
+            We Don't Just Design<br />
+            for the Present{" "}
             <span className="inline-block">❌</span>
           </h2>
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-white mb-16 tracking-wide leading-tight">
-            We Craft Experiences for the Future{" "}
+            We Craft Experiences<br />
+            for the Future{" "}
             <span className="inline-block">🔮</span>
           </h2>
           
