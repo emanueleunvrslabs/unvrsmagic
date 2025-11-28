@@ -1,19 +1,35 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
-const useTypewriter = (text: string, speed: number = 50) => {
+const useTypewriter = (text: string, baseSpeed: number = 50) => {
   const [displayedText, setDisplayedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     if (currentIndex < text.length) {
+      const currentChar = text[currentIndex];
+      
+      // Velocità variabile per simulare digitazione umana
+      let speed = baseSpeed + Math.random() * 40;
+      
+      // Pause più lunghe dopo punteggiatura
+      if ([',', '.', ';', '\n', '{', '}'].includes(currentChar)) {
+        speed += 100 + Math.random() * 200;
+      }
+      
+      // Pause dopo spazi
+      if (currentChar === ' ') {
+        speed += 20 + Math.random() * 30;
+      }
+      
       const timeout = setTimeout(() => {
         setDisplayedText(prev => prev + text[currentIndex]);
         setCurrentIndex(prev => prev + 1);
       }, speed);
+      
       return () => clearTimeout(timeout);
     }
-  }, [currentIndex, text, speed]);
+  }, [currentIndex, text, baseSpeed]);
 
   return displayedText;
 };
