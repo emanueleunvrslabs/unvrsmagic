@@ -3,12 +3,12 @@ export function LandingClaim() {
     <section className="relative py-32 bg-black overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="max-w-5xl text-left">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-white mb-8 tracking-wide leading-tight animate-fade-in">
+          <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-light text-white mb-8 tracking-wide leading-tight animate-fade-in">
             We Don't Just Design<br />
             for the Present{" "}
             <span className="inline-block">❌</span>
           </h2>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-white mb-16 tracking-wide leading-tight animate-fade-in [animation-delay:200ms]">
+          <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-light text-white mb-16 tracking-wide leading-tight animate-fade-in [animation-delay:200ms]">
             We Craft Experiences<br />
             for the Future{" "}
             <span className="inline-block">🔮</span>
