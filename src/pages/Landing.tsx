@@ -1,18 +1,25 @@
-import { useEffect } from "react";
-import { WebflowIframe } from "@/components/landing/WebflowIframe";
+import { LandingNav } from "@/components/landing/LandingNav";
+import { LandingHeroNew } from "@/components/landing/LandingHeroNew";
+import { LandingLearnMore } from "@/components/landing/LandingLearnMore";
+import { LandingBrands } from "@/components/landing/LandingBrands";
+import { LandingWorksNew } from "@/components/landing/LandingWorksNew";
+import { LandingServicesNew } from "@/components/landing/LandingServicesNew";
+import { LandingCTANew } from "@/components/landing/LandingCTANew";
+import { LandingFooterNew } from "@/components/landing/LandingFooterNew";
 
 const Landing = () => {
-  useEffect(() => {
-    // Blocca lo scroll del body principale per evitare il double-scroll
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
-  return <WebflowIframe />;
+  return (
+    <div className="bg-black min-h-screen">
+      <LandingNav />
+      <LandingHeroNew />
+      <LandingLearnMore />
+      <LandingBrands />
+      <LandingWorksNew />
+      <LandingServicesNew />
+      <LandingCTANew />
+      <LandingFooterNew />
+    </div>
+  );
 };
 
 export default Landing;
