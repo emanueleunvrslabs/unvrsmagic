@@ -29,11 +29,11 @@ export function LandingBrands() {
             initial={{ x: 0 }}
             animate={{ x: "-50%" }}
             transition={{
-              duration: 30,
+              duration: 20,
               repeat: Infinity,
               ease: "linear",
             }}
-            className="flex gap-12 items-center"
+            className="flex gap-6 md:gap-12 items-center"
           >
             {[...brands, ...brands].map((brand, i) => (
               <BrandCard key={i} name={brand.name} logoType={brand.logo} />
