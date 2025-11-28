@@ -345,10 +345,10 @@
   background-image: linear-gradient(#212121, #212121),
     linear-gradient(
       137.48deg,
-      #ffdb3b 10%,
-      #fe53bb 45%,
-      #8f51ea 67%,
-      #0044ff 87%
+      hsl(27deg 93% 60%) 10%,
+      #ff0056 45%,
+      #6500ff 67%,
+      #00a6ff 87%
     );
   background-origin: border-box;
   background-clip: content-box, border-box;
@@ -390,11 +390,11 @@
 }
 
 .circle:nth-of-type(1) {
-  background: rgba(254, 83, 186, 0.636);
+  background: rgba(255, 0, 86, 0.636);
 }
 
 .circle:nth-of-type(2) {
-  background: rgba(142, 81, 234, 0.704);
+  background: rgba(101, 0, 255, 0.704);
 }
 
 .space-btn:hover .container-stars {
@@ -407,14 +407,14 @@
 }
 
 .space-btn:active {
-  border: double 4px #fe53bb;
+  border: double 4px #ff0056;
   background-origin: border-box;
   background-clip: content-box, border-box;
   animation: none;
 }
 
 .space-btn:active .circle {
-  background: #fe53bb;
+  background: #ff0056;
 }
 
 .stars {
