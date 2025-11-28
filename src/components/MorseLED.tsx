@@ -87,8 +87,8 @@ export function MorseLED() {
       <div 
         className={`w-5 h-5 rounded-full border-2 transition-all duration-75 ${
           isActive 
-            ? 'bg-green-500 border-green-400 shadow-[0_0_12px_rgba(34,197,94,0.9)]' 
-            : 'bg-green-500/20 border-green-500/30'
+            ? 'bg-green-500 border-green-300 shadow-[0_0_12px_rgba(34,197,94,0.9)]' 
+            : 'bg-green-500/20 border-green-700/50'
         }`}
       />
     </div>
