@@ -1,11 +1,7 @@
-import { WebflowLanding } from "@/components/landing/WebflowLanding";
+import { WebflowTemplate } from "@/components/landing/WebflowTemplate";
 
 const Landing = () => {
-  return (
-    <div className="webflow-page">
-      <WebflowLanding />
-    </div>
-  );
+  return <WebflowTemplate />;
 };
 
 export default Landing;
