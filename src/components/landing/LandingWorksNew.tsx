@@ -33,10 +33,6 @@ export function LandingWorksNew() {
     fetchProjects();
   }, []);
 
-  if (projects.length === 0) {
-    return null;
-  }
-
   return (
     <section id="works" ref={ref} className="py-32 bg-black">
       <div className="container mx-auto px-6">
