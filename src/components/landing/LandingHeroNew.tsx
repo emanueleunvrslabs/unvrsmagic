@@ -114,33 +114,26 @@ where businesses and AI evolve together.";
           className="text-base md:text-lg lg:text-xl max-w-3xl mx-auto font-mono text-center whitespace-pre-wrap"
         >
           <code>
-            {typewriterText.split('').map((char, idx) => {
-              const text = typewriterText.substring(0, idx + 1);
-              let color = "text-white/90";
-              
-              // Colora "function" e "return" in viola
-              if (text.includes('function') && idx < 8) color = "text-purple-400";
-              if (text.includes('return') && idx >= fullCode.indexOf('return') && idx < fullCode.indexOf('return') + 6) color = "text-blue-400";
-              
-              // Colora il nome della funzione in giallo
-              if (idx >= 9 && idx < 21) color = "text-yellow-300";
-              
-              // Colora le stringhe in verde
-              if (idx >= fullCode.indexOf('"') && idx <= fullCode.lastIndexOf('"')) {
-                if (idx === fullCode.indexOf('"') || idx === fullCode.lastIndexOf('"')) {
-                  color = "text-green-400";
-                } else if (idx > fullCode.indexOf('"') && idx < fullCode.lastIndexOf('"')) {
-                  color = "text-green-400";
-                }
-              }
-              
-              return (
-                <span key={idx} className={color}>
-                  {char}
-                </span>
-              );
-            })}
-            <span className="animate-pulse text-white/90">_</span>
+            {(() => {
+              const lines = typewriterText.split('\n');
+              return lines.map((line, lineIdx) => (
+                <div key={lineIdx}>
+                  {line.split(/(\bfunction\b|\breturn\b|buildUniverse|"[^"]*")/).map((token, tokenIdx) => {
+                    if (token === 'function') {
+                      return <span key={tokenIdx} className="text-purple-400">{token}</span>;
+                    } else if (token === 'return') {
+                      return <span key={tokenIdx} className="text-blue-400">{token}</span>;
+                    } else if (token === 'buildUniverse') {
+                      return <span key={tokenIdx} className="text-yellow-300">{token}</span>;
+                    } else if (token.startsWith('"')) {
+                      return <span key={tokenIdx} className="text-green-400">{token}</span>;
+                    }
+                    return <span key={tokenIdx} className="text-white/90">{token}</span>;
+                  })}
+                </div>
+              ));
+            })()}
+            <span className="animate-pulse">_</span>
           </code>
         </motion.pre>
       </div>
