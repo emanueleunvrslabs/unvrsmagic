@@ -63,7 +63,7 @@ export function CyberCard({ title, description, delay = 0 }: CyberCardProps) {
             ))}
           </div>
 
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full flex flex-col justify-between p-8">
             {/* Glowing Elements */}
             <div className="absolute inset-0 pointer-events-none">
               {[
@@ -86,29 +86,30 @@ export function CyberCard({ title, description, delay = 0 }: CyberCardProps) {
 
             {/* Title */}
             <div
-              className="absolute w-full text-center px-6 pt-8 text-3xl font-extrabold tracking-[4px] transition-all duration-300"
+              className="relative z-10 text-center text-2xl font-extrabold tracking-[3px] transition-all duration-300"
               style={{
                 fontFamily: 'Orbitron, sans-serif',
                 background: 'linear-gradient(45deg, #00ffaa, #00a2ff)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 filter: 'drop-shadow(0 0 15px rgba(0,255,170,0.3))',
-                opacity: isHovered ? 1 : 0,
-                transform: isHovered ? 'translateY(0)' : 'translateY(10px)',
               }}
             >
               {title}
             </div>
 
+            {/* Spacer */}
+            <div className="flex-1" />
+
             {/* Description */}
             <div
-              className="absolute bottom-12 w-full text-center px-6 text-xs tracking-[2px] leading-relaxed"
+              className="relative z-10 text-center text-sm tracking-[1px] leading-relaxed px-2"
               style={{
                 fontFamily: 'Orbitron, sans-serif',
-                color: 'rgba(255,255,255,0.6)',
+                color: 'rgba(255,255,255,0.7)',
               }}
             >
-              <span>{description}</span>
+              {description}
             </div>
 
             {/* Particles */}
