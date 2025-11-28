@@ -141,6 +141,14 @@ export default {
           "0%, 100%": { transform: "scaleY(1)" },
           "50%": { transform: "scaleY(1.3)" },
         },
+        "gradient-shift": {
+          "0%, 100%": { 
+            backgroundPosition: "0% 50%",
+          },
+          "50%": { 
+            backgroundPosition: "100% 50%",
+          },
+        },
         "fade-in": {
           from: { opacity: "0" },
           to: { opacity: "1" },
@@ -160,7 +168,7 @@ export default {
         "fade-in": "fade-in 0.3s ease-out",
         "slide-up": "slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         "spin3d": "spin3d 8s linear infinite",
-        "wave": "wave 1s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 3s ease infinite",
       },
     },
   },
