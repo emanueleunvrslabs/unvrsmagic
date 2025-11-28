@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { BrandCard } from "./BrandCard";
 import nexusTech from "@/assets/logos/nexus-tech.png";
 import apexSystems from "@/assets/logos/apex-systems.png";
 import quantumDigital from "@/assets/logos/quantum-digital.png";
@@ -35,13 +36,7 @@ export function LandingBrands() {
             className="flex gap-12 items-center"
           >
             {[...brands, ...brands].map((src, i) => (
-              <div key={i} className="flex-shrink-0">
-                <img 
-                  src={src} 
-                  alt="Brand logo" 
-                  className="h-20 w-auto opacity-80 hover:opacity-100 transition-opacity"
-                />
-              </div>
+              <BrandCard key={i} src={src} alt="Brand logo" />
             ))}
           </motion.div>
         </div>
