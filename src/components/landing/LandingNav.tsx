@@ -25,22 +25,22 @@ export function LandingNav() {
               HOME
             </a>
             <a href="#about" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              CHI SIAMO
+              ABOUT
             </a>
             <a href="#works" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              PROGETTI
+              WORKS
             </a>
             <a href="#services" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              SERVIZI
+              SERVICES
             </a>
             <a href="#contact" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              CONTATTI
+              CONTACT
             </a>
             <Link 
               to="/auth" 
               className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/20 transition-all border border-white/20 rounded-full"
             >
-              ACCEDI
+              LOGIN
             </Link>
           </div>
 
@@ -60,22 +60,22 @@ export function LandingNav() {
               HOME
             </a>
             <a href="#about" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              CHI SIAMO
+              ABOUT
             </a>
             <a href="#works" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              PROGETTI
+              WORKS
             </a>
             <a href="#services" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              SERVIZI
+              SERVICES
             </a>
             <a href="#contact" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              CONTATTI
+              CONTACT
             </a>
             <Link 
               to="/auth" 
               className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/20 transition-all border border-white/20 rounded-full text-center"
             >
-              ACCEDI
+              LOGIN
             </Link>
           </div>
         )}
