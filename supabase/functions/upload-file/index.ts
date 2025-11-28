@@ -52,6 +52,8 @@ Deno.serve(async (req) => {
     // Parse form data
     const formData = await req.formData();
     const file = formData.get('file') as File;
+    const parentZipId = formData.get('parent_zip_id') as string | null;
+    const isExtracted = formData.get('is_extracted') === 'true';
 
     if (!file) {
       return new Response(
@@ -94,7 +96,8 @@ Deno.serve(async (req) => {
         file_type: file.type || 'application/octet-stream',
         file_path: uploadData.path,
         original_name: file.name,
-        is_extracted: false,
+        is_extracted: isExtracted,
+        parent_zip_id: parentZipId,
         metadata: {
           upload_timestamp: new Date().toISOString()
         }
@@ -113,6 +116,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
+        file: fileRecord,
         files: uploadedFiles,
         message: 'File uploaded successfully'
       }),
