@@ -22,12 +22,12 @@ export function LandingLearnMore() {
               {title1.map((word, index) => (
                 <motion.span
                   key={index}
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
                   transition={{ 
                     delay: index * 0.1,
-                    duration: 0.5,
-                    ease: "easeOut"
+                    duration: 0.6,
+                    ease: [0.34, 1.56, 0.64, 1]
                   }}
                   className="inline-block"
                 >
@@ -40,12 +40,12 @@ export function LandingLearnMore() {
               {title2.map((word, index) => (
                 <motion.span
                   key={index}
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
                   transition={{ 
                     delay: (title1.length * 0.1) + (index * 0.1),
-                    duration: 0.5,
-                    ease: "easeOut"
+                    duration: 0.6,
+                    ease: [0.34, 1.56, 0.64, 1]
                   }}
                   className="inline-block text-white/90"
                 >
@@ -60,12 +60,12 @@ export function LandingLearnMore() {
             {description.map((word, index) => (
               <motion.span
                 key={index}
-                initial={{ opacity: 0, x: -30 }}
-                animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
                 transition={{ 
                   delay: (title1.length * 0.1) + (title2.length * 0.1) + 0.3 + (index * 0.03),
-                  duration: 0.4,
-                  ease: "easeOut"
+                  duration: 0.5,
+                  ease: [0.34, 1.56, 0.64, 1]
                 }}
                 className="inline-block"
               >
