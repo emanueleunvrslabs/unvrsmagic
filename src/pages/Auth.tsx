@@ -286,9 +286,14 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-primary/5 p-4">
-      <header className="fixed top-6 left-6 z-50">
-        <Link to="/" className="block w-12 h-12">
-          <img src={logo} alt="Unvrs Labs" className="w-full h-full object-contain" />
+      <header className="fixed top-6 left-6 z-50 flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-12 h-12">
+            <img src={logo} alt="Unvrs Labs" className="w-full h-full object-contain" />
+          </div>
+          <span className="text-xl font-semibold tracking-tight transition-colors group-hover:text-primary">
+            UNVRS LABS
+          </span>
         </Link>
       </header>
       <Card className="w-full max-w-sm relative">
