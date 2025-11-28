@@ -39,6 +39,7 @@ import {
   Settings,
   Store,
   TrendingUp,
+  Upload,
   User,
   UserPlus,
   Wallet,
@@ -137,6 +138,13 @@ export function Topbar() {
             <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium">View all notifications</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Link to="/file-upload">
+          <Button variant="outline" size="icon">
+            <Upload className="h-4 w-4" />
+            <span className="sr-only">Upload Files</span>
+          </Button>
+        </Link>
 
         {/* Wallet Connection - only show if connected */}
         {isConnected && (
