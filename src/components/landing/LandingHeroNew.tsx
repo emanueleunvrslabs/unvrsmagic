@@ -121,11 +121,11 @@ where businesses and AI evolve together.";
                 <div key={lineIdx}>
                   {line.split(/(\bfunction\b|\breturn\b|buildUniverse|"[^"]*")/).map((token, tokenIdx) => {
                     if (token === 'function') {
-                      return <span key={tokenIdx} className="text-fuchsia-500">{token}</span>;
+                      return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
                     } else if (token === 'return') {
-                      return <span key={tokenIdx} className="text-blue-400">{token}</span>;
+                      return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
                     } else if (token === 'buildUniverse') {
-                      return <span key={tokenIdx} className="text-yellow-300">{token}</span>;
+                      return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
                     } else if (token.startsWith('"')) {
                       return <span key={tokenIdx} className="text-green-400">{token}</span>;
                     }
