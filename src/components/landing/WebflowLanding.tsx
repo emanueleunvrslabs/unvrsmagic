@@ -86,7 +86,7 @@ export function WebflowLanding() {
           <div id="w-node-_4bb845f3-8c90-60b3-f0d6-cd46e0539714-e0539704" className="hero-block">
             <div className="hero-text-block">
             <div className="hero-text-wrapper">
-              <h1 className="hero-text">
+              <h1 className="hero-text font-mono">
                 {['U', 'N', 'V', 'R', 'S'].map((letter, i) => (
                   <span key={i} className="letter-container" style={{ animationDelay: `${i * 0.2}s` }}>
                     <span className="letter-top">{letter}</span>
