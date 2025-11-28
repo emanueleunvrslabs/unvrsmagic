@@ -31,17 +31,13 @@ export function LandingHeroNew() {
       <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
         <div className="relative h-[180px] md:h-[280px] mb-12 flex items-center justify-center">
           <div className="relative inline-flex justify-center items-center min-w-[400px] md:min-w-[700px] lg:min-w-[900px]" style={{ fontFamily: "Inter, sans-serif" }}>
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.div
                 key={currentIndex}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
                 className="absolute inset-0 flex justify-center items-center"
               >
                 {letters.map((letter, index) => (
-                  <div key={index} className="relative inline-block overflow-hidden">
+                  <div key={index} className="relative inline-block overflow-hidden h-[80px] md:h-[140px] lg:h-[180px]">
                     <motion.span
                       initial={{ y: "100%" }}
                       animate={{ y: "0%" }}
