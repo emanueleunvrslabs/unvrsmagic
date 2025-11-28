@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.81.1';
-import JSZip from 'https://esm.sh/jszip@3.10.1';
+import JSZip from 'https://esm.sh/jszip@3.10.1?target=deno';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
