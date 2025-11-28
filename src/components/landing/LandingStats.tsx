@@ -16,7 +16,7 @@ function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string
   useEffect(() => {
     if (isInView) {
       const controls = animate(motionValue, value, {
-        duration: 2,
+        duration: 3.5,
         ease: "easeOut",
       });
       return controls.stop;
