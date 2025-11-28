@@ -1,3 +1,4 @@
+import { useParallax } from "@/hooks/useParallax";
 import element1 from "@/assets/landing/3d-element-1.png";
 import element2 from "@/assets/landing/3d-element-2.png";
 import element3 from "@/assets/landing/3d-element-3.png";
@@ -15,26 +16,36 @@ const floatingElements = [
 ];
 
 export function LandingHero() {
+  const { ref, offset } = useParallax(0.2);
+  
   return (
     <section
+      ref={ref as any}
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
     >
       {/* Floating 3D Elements */}
-      {floatingElements.map((element, index) => (
-        <div
-          key={index}
-          className={`pointer-events-none absolute ${element.position} w-24 h-24 md:w-40 md:h-40 lg:w-52 lg:h-52 opacity-80 animate-float`}
-          style={{ animationDelay: element.delay }}
-        >
-          <img
-            src={element.src}
-            alt="UNVRS visual"
-            className="w-full h-full object-contain"
-            draggable={false}
-          />
-        </div>
-      ))}
+      {floatingElements.map((element, index) => {
+        const parallaxY = offset * 0.15 * (index % 2 === 0 ? -1 : 1);
+        
+        return (
+          <div
+            key={index}
+            className={`pointer-events-none absolute ${element.position} w-24 h-24 md:w-40 md:h-40 lg:w-52 lg:h-52 opacity-80 animate-float transition-transform duration-100`}
+            style={{ 
+              animationDelay: element.delay,
+              transform: `translateY(${parallaxY}px)`
+            }}
+          >
+            <img
+              src={element.src}
+              alt="UNVRS visual"
+              className="w-full h-full object-contain"
+              draggable={false}
+            />
+          </div>
+        );
+      })}
 
       {/* Main Content */}
       <div className="relative z-10 text-center px-6">
