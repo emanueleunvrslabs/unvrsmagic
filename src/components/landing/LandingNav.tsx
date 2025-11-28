@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/landing/unvrs-logo.png";
+import logo from "@/assets/logo-unvrs.png";
 
 export function LandingNav() {
   const [isOpen, setIsOpen] = useState(false);
