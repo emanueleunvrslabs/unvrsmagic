@@ -115,6 +115,7 @@ export function BrandCard({ name, logoType }: BrandCardProps) {
             radial-gradient(circle at 100% 0, #00a6ff, transparent),
             radial-gradient(circle at 0 100%, #ff0056, transparent),
             radial-gradient(circle at 100% 100%, #6500ff, transparent);
+          border-radius: 1rem;
         }
 
         .brand-card::after {
