@@ -29,31 +29,39 @@ export function LandingHeroNew() {
     <section id="home" className="relative min-h-screen bg-black flex items-center justify-center overflow-hidden pt-24">
       {/* Center Content */}
       <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
-        <div className="relative h-[180px] md:h-[280px] mb-12 flex items-center justify-center overflow-hidden">
-          <div className="flex gap-2" style={{ fontFamily: "Inter, sans-serif" }}>
-            {letters.map((letter, index) => (
-              <div key={index} className="relative inline-block overflow-hidden" style={{ width: letter === " " ? "20px" : "auto" }}>
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={`${currentIndex}-${index}`}
-                    initial={{ y: "100%" }}
-                    animate={{ y: "0%" }}
-                    exit={{ y: "-100%" }}
-                    transition={{ 
-                      duration: 0.6, 
-                      delay: index * 0.08,
-                      ease: [0.43, 0.13, 0.23, 0.96]
-                    }}
-                    className="inline-block text-[80px] md:text-[140px] lg:text-[180px] font-bold text-white tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
-                    style={{ 
-                      textShadow: "0 0 40px rgba(255, 255, 255, 0.2), 0 0 80px rgba(255, 255, 255, 0.1)"
-                    }}
-                  >
-                    {letter}
-                  </motion.span>
-                </AnimatePresence>
-              </div>
-            ))}
+        <div className="relative h-[180px] md:h-[280px] mb-12 flex items-center justify-center">
+          <div className="relative inline-flex justify-center items-center min-w-[400px] md:min-w-[700px] lg:min-w-[900px]" style={{ fontFamily: "Inter, sans-serif" }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 flex justify-center items-center"
+              >
+                {letters.map((letter, index) => (
+                  <div key={index} className="relative inline-block overflow-hidden">
+                    <motion.span
+                      initial={{ y: "100%" }}
+                      animate={{ y: "0%" }}
+                      exit={{ y: "-100%" }}
+                      transition={{ 
+                        duration: 0.5, 
+                        delay: index * 0.06,
+                        ease: [0.43, 0.13, 0.23, 0.96]
+                      }}
+                      className="inline-block text-[80px] md:text-[140px] lg:text-[180px] font-bold text-white tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+                      style={{ 
+                        textShadow: "0 0 40px rgba(255, 255, 255, 0.2), 0 0 80px rgba(255, 255, 255, 0.1)"
+                      }}
+                    >
+                      {letter}
+                    </motion.span>
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
 
