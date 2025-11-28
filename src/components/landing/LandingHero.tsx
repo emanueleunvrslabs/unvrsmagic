@@ -1,38 +1,62 @@
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import element1 from "@/assets/landing/3d-element-1.png";
+import element2 from "@/assets/landing/3d-element-2.png";
+import element3 from "@/assets/landing/3d-element-3.png";
+import element4 from "@/assets/landing/3d-element-4.png";
+import element5 from "@/assets/landing/3d-element-5.png";
+import element6 from "@/assets/landing/3d-element-6.png";
+
+const floatingElements = [
+  { src: element1, position: "top-20 left-32", delay: "0s" },
+  { src: element2, position: "top-40 right-32", delay: "0.5s" },
+  { src: element3, position: "top-1/3 left-20", delay: "1s" },
+  { src: element4, position: "bottom-1/3 right-24", delay: "1.5s" },
+  { src: element5, position: "bottom-40 left-40", delay: "2s" },
+  { src: element6, position: "bottom-32 right-40", delay: "2.5s" },
+];
 
 export function LandingHero() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-      
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            Innovazione AI per il
-            <span className="text-primary"> Tuo Business</span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Trasformiamo le tue idee in soluzioni digitali intelligenti attraverso l'intelligenza artificiale e il design innovativo
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth">
-              <Button size="lg" className="bg-transparent border border-border hover:bg-accent/10">
-                Inizia Ora
-              </Button>
-            </Link>
-            <a href="#services">
-              <Button size="lg" variant="outline" className="bg-transparent border border-border hover:bg-accent/10">
-                Scopri di Più
-              </Button>
-            </a>
-          </div>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+      {/* Floating 3D Elements */}
+      {floatingElements.map((element, index) => (
+        <div
+          key={index}
+          className={`absolute ${element.position} w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 opacity-70 animate-float`}
+          style={{
+            animationDelay: element.delay,
+            transform: `translate(${(mousePosition.x - window.innerWidth / 2) * 0.02}px, ${(mousePosition.y - window.innerHeight / 2) * 0.02}px)`,
+            transition: "transform 0.3s ease-out",
+          }}
+        >
+          <img
+            src={element.src}
+            alt=""
+            className="w-full h-full object-contain"
+            draggable={false}
+          />
         </div>
+      ))}
+
+      {/* Main Content */}
+      <div className="relative z-10 text-center px-6">
+        <h1 className="text-[10vw] md:text-[12vw] lg:text-[15vw] font-black tracking-[0.2em] text-white mb-8 leading-none">
+          UNVRS
+        </h1>
+        <p className="text-base md:text-lg lg:text-xl text-white/80 max-w-3xl mx-auto font-light tracking-wide leading-relaxed">
+          Beyond code, we build universes<br />where businesses and AI<br />evolve together.
+        </p>
       </div>
-      
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     </section>
   );
 }

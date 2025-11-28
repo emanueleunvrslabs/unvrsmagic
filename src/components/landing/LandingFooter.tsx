@@ -1,74 +1,42 @@
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 export function LandingFooter() {
   return (
-    <footer id="contact" className="border-t border-border/40 py-12">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          <div>
-            <h3 className="text-xl font-bold mb-4">UNVRS LABS</h3>
-            <p className="text-muted-foreground">
-              Innovazione AI per il futuro digitale
-            </p>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Prodotti</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
-                  AI Social
-                </Link>
-              </li>
-              <li>
-                <Link to="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Trading AI
-                </Link>
-              </li>
-              <li>
-                <Link to="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Automation
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Azienda</h4>
-            <ul className="space-y-2">
-              <li>
-                <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Chi Siamo
-                </a>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Contatti</h4>
-            <ul className="space-y-2 text-muted-foreground">
-              <li>info@unvrslabs.com</li>
-              <li>+39 XXX XXX XXXX</li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="pt-8 border-t border-border/40">
-          <p className="text-center text-muted-foreground text-sm">
-            © {new Date().getFullYear()} UNVRS LABS. All rights reserved.
-          </p>
-        </div>
-      </div>
+    <footer className="fixed bottom-0 left-0 right-0 z-50 pb-8">
+      <nav className="flex items-center justify-center gap-4 md:gap-8">
+        <a
+          href="#home"
+          className="px-6 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/20 transition-all border border-white/20"
+        >
+          HOME
+        </a>
+        <a
+          href="#about"
+          className="px-6 py-2 text-white/70 text-sm font-medium hover:text-white transition-colors"
+        >
+          ABOUT
+        </a>
+        <a
+          href="#contact"
+          className="px-6 py-2 text-white/70 text-sm font-medium hover:text-white transition-colors"
+        >
+          CONTACT
+        </a>
+        <button className="px-6 py-2 text-white/70 text-sm font-medium hover:text-white transition-colors flex items-center gap-1">
+          MORE
+          <ChevronDown className="w-4 h-4" />
+        </button>
+        <Link to="/auth">
+          <Button
+            variant="outline"
+            className="bg-transparent border-white/20 text-white hover:bg-white/10"
+          >
+            ACCEDI
+          </Button>
+        </Link>
+      </nav>
     </footer>
   );
 }
