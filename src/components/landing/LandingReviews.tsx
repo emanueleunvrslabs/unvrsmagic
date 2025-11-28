@@ -144,7 +144,7 @@ export function LandingReviews() {
               initial={{ y: 0 }}
               animate={{ y: "-50%" }}
               transition={{
-                duration: 40,
+                duration: 60,
                 repeat: Infinity,
                 ease: "linear",
               }}
@@ -160,7 +160,7 @@ export function LandingReviews() {
               initial={{ y: "-50%" }}
               animate={{ y: 0 }}
               transition={{
-                duration: 40,
+                duration: 60,
                 repeat: Infinity,
                 ease: "linear",
               }}
@@ -176,7 +176,7 @@ export function LandingReviews() {
               initial={{ y: 0 }}
               animate={{ y: "-50%" }}
               transition={{
-                duration: 40,
+                duration: 60,
                 repeat: Infinity,
                 ease: "linear",
               }}
