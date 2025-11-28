@@ -23,6 +23,14 @@ const projectFeatures: Record<string, string[]> = {
     "Real-time content gallery",
     "OpenAI prompt enhancement",
   ],
+  "ai-art": [
+    "Professional image generation powered by Nano Banana 2",
+    "High-quality video creation with Veo3.1 Fast",
+    "Multiple generation modes (text-to-image, image-to-image, text-to-video)",
+    "Advanced aspect ratio and resolution controls",
+    "First/last frame video generation support",
+    "Reference-based video creation",
+  ],
   "nkmt": [
     "Advanced AI trading agents",
     "Real-time market data analysis",
@@ -38,6 +46,11 @@ const projectScreenshots: Record<string, string[]> = {
     "/images/ai-social-dashboard.jpg",
     "/images/ai-social-content.jpg",
     "/images/ai-social-workflows.jpg",
+  ],
+  "ai-art": [
+    "/images/ai-art-image-gen.jpg",
+    "/images/ai-art-video-gen.jpg",
+    "/images/ai-art-gallery.jpg",
   ],
   "nkmt": [
     "/images/nkmt-dashboard.jpg",
@@ -59,6 +72,20 @@ const projectHowItWorks: Record<string, { step: string; description: string }[]>
     {
       step: "Schedule & Publish",
       description: "Set up automated workflows to publish content across multiple social media platforms.",
+    },
+  ],
+  "ai-art": [
+    {
+      step: "Choose Your Mode",
+      description: "Select from multiple generation modes: text-to-image, image-to-image, or video creation with Nano Banana 2 and Veo3.1 Fast.",
+    },
+    {
+      step: "Configure & Generate",
+      description: "Set your desired parameters like aspect ratio, resolution, and style. Enter your creative prompt and let AI bring your vision to life.",
+    },
+    {
+      step: "Download & Use",
+      description: "Access your generated content instantly from the gallery. Download high-quality images and videos for your creative projects.",
     },
   ],
   "nkmt": [
