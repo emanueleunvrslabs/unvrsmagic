@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Check, X } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
+import logo from "@/assets/landing/unvrs-logo.png";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -284,6 +285,11 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-primary/5 p-4">
+      <header className="fixed top-6 left-6 z-50">
+        <Link to="/" className="block w-12 h-12">
+          <img src={logo} alt="Unvrs Labs" className="w-full h-full object-contain" />
+        </Link>
+      </header>
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
