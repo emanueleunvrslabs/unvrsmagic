@@ -28,6 +28,14 @@ const useTypewriter = (text: string, baseSpeed: number = 50) => {
       }, speed);
       
       return () => clearTimeout(timeout);
+    } else {
+      // Quando finisce, aspetta 2 secondi e riparte
+      const resetTimeout = setTimeout(() => {
+        setDisplayedText("");
+        setCurrentIndex(0);
+      }, 2000);
+      
+      return () => clearTimeout(resetTimeout);
     }
   }, [currentIndex, text, baseSpeed]);
 
