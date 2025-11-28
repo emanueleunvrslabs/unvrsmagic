@@ -138,13 +138,13 @@ export function LandingReviews() {
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-3 gap-6 h-[600px] overflow-hidden">
-            {/* Column 1 - scrolls up */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] overflow-hidden">
+            {/* Column 1 - scrolls up - always visible */}
             <motion.div
               initial={{ y: 0 }}
               animate={{ y: "-50%" }}
               transition={{
-                duration: 20,
+                duration: 40,
                 repeat: Infinity,
                 ease: "linear",
               }}
@@ -155,32 +155,32 @@ export function LandingReviews() {
               ))}
             </motion.div>
 
-            {/* Column 2 - scrolls down (opposite direction) */}
+            {/* Column 2 - scrolls down - hidden on mobile */}
             <motion.div
               initial={{ y: "-50%" }}
               animate={{ y: 0 }}
               transition={{
-                duration: 20,
+                duration: 40,
                 repeat: Infinity,
                 ease: "linear",
               }}
-              className="flex flex-col gap-6"
+              className="hidden md:flex flex-col gap-6"
             >
               {[...column2, ...column2, ...column2].map((review, i) => (
                 <ReviewCard key={`col2-${i}`} review={review} />
               ))}
             </motion.div>
 
-            {/* Column 3 - scrolls up (same as column 1) */}
+            {/* Column 3 - scrolls up - hidden on mobile */}
             <motion.div
               initial={{ y: 0 }}
               animate={{ y: "-50%" }}
               transition={{
-                duration: 20,
+                duration: 40,
                 repeat: Infinity,
                 ease: "linear",
               }}
-              className="flex flex-col gap-6"
+              className="hidden md:flex flex-col gap-6"
             >
               {[...column3, ...column3, ...column3].map((review, i) => (
                 <ReviewCard key={`col3-${i}`} review={review} />
