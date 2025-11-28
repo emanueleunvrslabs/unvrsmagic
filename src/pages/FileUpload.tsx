@@ -35,7 +35,6 @@ const FileUpload = () => {
   // Load saved files from database
   useEffect(() => {
     loadSavedFiles();
-    deleteAllFilesFromStorage();
   }, []);
 
   const deleteAllFilesFromStorage = async () => {
