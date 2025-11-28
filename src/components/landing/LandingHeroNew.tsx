@@ -26,9 +26,9 @@ export function LandingHeroNew() {
   ];
 
   return (
-    <section id="home" className="relative min-h-screen bg-black flex items-center justify-center overflow-hidden pt-24">
+    <section id="home" className="relative min-h-screen bg-black flex items-start justify-center overflow-hidden pt-32">
       {/* Center Content */}
-      <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
+      <div className="relative z-10 text-center px-6 max-w-6xl mx-auto mt-12">
         <div className="relative h-[180px] md:h-[280px] mb-6 flex items-center justify-center">
           <div className="relative inline-flex justify-center items-center min-w-[400px] md:min-w-[700px] lg:min-w-[900px]" style={{ fontFamily: "Inter, sans-serif" }}>
             <AnimatePresence>
