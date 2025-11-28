@@ -1,10 +1,20 @@
-import { WebflowLanding } from "@/components/landing/WebflowLanding";
-
 const Landing = () => {
   return (
-    <div className="webflow-page">
-      <WebflowLanding />
-    </div>
+    <iframe
+      src="/webflow/index.html"
+      style={{
+        width: "100%",
+        height: "100vh",
+        border: "none",
+        display: "block",
+        margin: 0,
+        padding: 0,
+        position: "fixed",
+        top: 0,
+        left: 0
+      }}
+      title="UNVRS Labs"
+    />
   );
 };
 
