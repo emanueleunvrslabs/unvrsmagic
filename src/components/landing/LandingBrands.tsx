@@ -1,14 +1,22 @@
 import { motion } from "framer-motion";
+import nexusTech from "@/assets/logos/nexus-tech.png";
+import apexSystems from "@/assets/logos/apex-systems.png";
+import quantumDigital from "@/assets/logos/quantum-digital.png";
+import vertexLabs from "@/assets/logos/vertex-labs.png";
+import prismVentures from "@/assets/logos/prism-ventures.png";
+import forgeIndustries from "@/assets/logos/forge-industries.png";
+import zenithCorp from "@/assets/logos/zenith-corp.png";
+import catalystPartners from "@/assets/logos/catalyst-partners.png";
 
 const brands = [
-  "/webflow/images/DuneLight.svg",
-  "/webflow/images/InvertLight.svg",
-  "/webflow/images/PentaLight.svg",
-  "/webflow/images/TerraLight.svg",
-  "/webflow/images/Iceberglight.svg",
-  "/webflow/images/PinpointLight.svg",
-  "/webflow/images/HitechLight.svg",
-  "/webflow/images/ProLineLight.svg",
+  nexusTech,
+  apexSystems,
+  quantumDigital,
+  vertexLabs,
+  prismVentures,
+  forgeIndustries,
+  zenithCorp,
+  catalystPartners,
 ];
 
 export function LandingBrands() {
