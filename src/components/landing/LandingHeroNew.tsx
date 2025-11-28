@@ -47,9 +47,9 @@ const words = ["UNVRS", "LABS"];
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  const fullCode = `function buildUniverse() {
-  return "Beyond code, we build universes
-where businesses and AI evolve together.";
+  const fullCode = `function costruisciUniverso() {
+  return "Oltre il codice, costruiamo universi
+dove aziende e AI evolvono insieme.";
 }`;
   
   const typewriterText = useTypewriter(fullCode, 30);
@@ -119,12 +119,12 @@ where businesses and AI evolve together.";
               const lines = typewriterText.split('\n');
               return lines.map((line, lineIdx) => (
                 <div key={lineIdx}>
-                  {line.split(/(\bfunction\b|\breturn\b|buildUniverse|"[^"]*")/).map((token, tokenIdx) => {
+                  {line.split(/(\bfunction\b|\breturn\b|costruisciUniverso|"[^"]*")/).map((token, tokenIdx) => {
                     if (token === 'function') {
                       return <span key={tokenIdx} className="text-fuchsia-500">{token}</span>;
                     } else if (token === 'return') {
                       return <span key={tokenIdx} className="text-blue-400">{token}</span>;
-                    } else if (token === 'buildUniverse') {
+                    } else if (token === 'costruisciUniverso') {
                       return <span key={tokenIdx} className="text-yellow-300">{token}</span>;
                     } else if (token.startsWith('"')) {
                       return <span key={tokenIdx} className="text-green-400">{token}</span>;

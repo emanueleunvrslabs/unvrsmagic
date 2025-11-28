@@ -20,7 +20,7 @@ export function LandingCTANew() {
             className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight"
             style={{ fontFamily: "Orbitron, sans-serif" }}
           >
-            Ready to Build<br />Your Universe?
+            Pronto a Costruire<br />Il Tuo Universo?
           </h2>
           
           <motion.p
@@ -30,7 +30,7 @@ export function LandingCTANew() {
             className="text-white/70 text-xl mb-12 leading-relaxed"
             style={{ fontFamily: "Orbitron, sans-serif" }}
           >
-            Let's collaborate to create innovative solutions that drive your business forward.
+            Collaboriamo per creare soluzioni innovative che fanno avanzare il tuo business.
           </motion.p>
 
           <motion.div
@@ -125,7 +125,7 @@ export function LandingCTANew() {
                     className="bg-gradient-to-b ml-1.5 from-white to-white/50 bg-clip-text text-sm text-transparent group-hover:scale-105 transition transform-gpu"
                     style={{ fontFamily: "Orbitron, sans-serif" }}
                   >
-                    Get Started
+                    Inizia Ora
                   </span>
                 </span>
               </button>

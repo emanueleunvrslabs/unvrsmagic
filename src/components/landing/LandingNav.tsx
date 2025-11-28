@@ -25,16 +25,16 @@ export function LandingNav() {
               HOME
             </a>
             <a href="#about" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              ABOUT
+              CHI SIAMO
             </a>
             <a href="#works" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              WORKS
+              PROGETTI
             </a>
             <a href="#services" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              SERVICES
+              SERVIZI
             </a>
             <a href="#contact" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              CONTACT
+              CONTATTI
             </a>
             <Link 
               to="/auth" 
@@ -60,16 +60,16 @@ export function LandingNav() {
               HOME
             </a>
             <a href="#about" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              ABOUT
+              CHI SIAMO
             </a>
             <a href="#works" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              WORKS
+              PROGETTI
             </a>
             <a href="#services" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              SERVICES
+              SERVIZI
             </a>
             <a href="#contact" className="text-white hover:text-white/70 transition-colors text-sm font-medium">
-              CONTACT
+              CONTATTI
             </a>
             <Link 
               to="/auth" 
