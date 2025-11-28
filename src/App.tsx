@@ -35,6 +35,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Wallet from "./pages/Wallet";
 import FileUpload from "./pages/FileUpload";
+import AiArtGenerateImage from "./pages/AiArt/GenerateImage";
+import AiArtGenerateVideo from "./pages/AiArt/GenerateVideo";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +74,8 @@ const App = () => (
           <Route path="/ai-social/schedule" element={<HomeRedirect />} />
           <Route path="/ai-social/workflows" element={<ProtectedRoute><Workflows /></ProtectedRoute>} />
           <Route path="/ai-social/connection" element={<ProtectedRoute><Connection /></ProtectedRoute>} />
+          <Route path="/ai-art/generate-image" element={<ProtectedRoute><AiArtGenerateImage /></ProtectedRoute>} />
+          <Route path="/ai-art/generate-video" element={<ProtectedRoute><AiArtGenerateVideo /></ProtectedRoute>} />
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />

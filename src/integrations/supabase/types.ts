@@ -223,6 +223,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_art_content: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          media_url: string | null
+          metadata: Json | null
+          prompt: string
+          status: string
+          thumbnail_url: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          media_url?: string | null
+          metadata?: Json | null
+          prompt: string
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          media_url?: string | null
+          metadata?: Json | null
+          prompt?: string
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_avatars: {
         Row: {
           closing_script: string | null
