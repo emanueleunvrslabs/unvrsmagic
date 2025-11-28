@@ -76,7 +76,7 @@ export function LandingWorksNew() {
                 <p className="text-white/60 mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
                   {project.description || "Enterprise solution"}
                 </p>
-                <div className="flex items-center gap-2 text-white/80 group-hover:text-white transition-colors">
+                <div className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/30 text-white rounded-full hover:bg-white/10 hover:border-white/50 transition-all inline-flex w-fit">
                   <span className="text-sm font-medium" style={{ fontFamily: "Orbitron, sans-serif" }}>View Project</span>
                   <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </div>
