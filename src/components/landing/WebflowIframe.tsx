@@ -27,6 +27,9 @@ export function WebflowIframe() {
         display: "block",
         margin: 0,
         padding: 0,
+        overflowY: "scroll",
+        WebkitOverflowScrolling: "touch",
+        scrollBehavior: "smooth",
       }}
       title="UNVRS Labs Landing Page"
       sandbox="allow-scripts allow-same-origin allow-forms"
