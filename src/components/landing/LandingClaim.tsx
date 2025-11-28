@@ -14,7 +14,7 @@ export function LandingClaim() {
             <WaveText text="for the Future" className="block" emoji="🔮" />
           </h2>
           
-          <p className="text-base md:text-lg text-white/70 font-light tracking-wide leading-relaxed max-w-3xl animate-fade-in [animation-delay:400ms]">
+          <p className="font-sans text-base md:text-lg text-white/70 font-light tracking-wide leading-relaxed max-w-3xl animate-fade-in [animation-delay:400ms]">
             Specializing in developing enterprise software, custom applications, and AI integrations,
             delivering innovative and scalable solutions that create real value for businesses across all digital platforms.
           </p>
