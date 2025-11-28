@@ -83,6 +83,7 @@ export function MorseLED() {
   
   return (
     <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
+      <div className="absolute inset-0 bg-background rounded-full scale-110 -z-10" />
       <div 
         className={`w-5 h-5 rounded-full transition-all duration-75 ${
           isActive 
