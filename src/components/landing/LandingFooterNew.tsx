@@ -17,7 +17,7 @@ export function LandingFooterNew() {
               UNVRS LABS - Coding the Universe
             </p>
             <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              Beyond code, we build universes where businesses and AI evolve together.
+              Coding the Universe
             </p>
           </div>
 
