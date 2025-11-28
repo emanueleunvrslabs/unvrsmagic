@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState, useCallback, useEffect } from "react";
-import { Upload, File, X, CheckCircle2, AlertCircle, FileArchive, FolderOpen } from "lucide-react";
+import { Upload, File, X, CheckCircle2, AlertCircle, FileArchive, FolderOpen, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ interface SavedFile {
   file_name: string;
   file_size: number;
   file_type: string;
+  file_path: string;
   is_extracted: boolean;
   parent_zip_id: string | null;
   created_at: string;
@@ -49,6 +50,31 @@ const FileUpload = () => {
       toast.error('Failed to load files');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteFile = async (fileId: string, filePath: string) => {
+    try {
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('uploads')
+        .remove([filePath]);
+
+      if (storageError) throw storageError;
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('uploaded_files')
+        .delete()
+        .eq('id', fileId);
+
+      if (dbError) throw dbError;
+
+      toast.success('File deleted successfully');
+      await loadSavedFiles();
+    } catch (error: any) {
+      console.error('Error deleting file:', error);
+      toast.error('Failed to delete file');
     }
   };
 
@@ -327,6 +353,13 @@ const FileUpload = () => {
                     <p className="text-xs text-muted-foreground">
                       {new Date(file.created_at).toLocaleDateString()}
                     </p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteFile(file.id, file.file_path)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
