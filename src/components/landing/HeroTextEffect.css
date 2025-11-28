@@ -15,21 +15,21 @@
 }
 
 .letter-top {
-  animation: slideTopToMiddleToBottom 6s ease-in-out infinite;
+  animation: slideTopToMiddleToBottom 10s ease-in-out infinite;
 }
 
 .letter-middle {
   position: absolute;
   top: 100%;
   left: 0;
-  animation: slideMiddleToTop 6s ease-in-out infinite;
+  animation: slideMiddleToTop 10s ease-in-out infinite;
 }
 
 .letter-bottom {
   position: absolute;
   top: 200%;
   left: 0;
-  animation: slideBottomToMiddle 6s ease-in-out infinite;
+  animation: slideBottomToMiddle 10s ease-in-out infinite;
 }
 
 .letter-container:nth-child(1) .letter-top,
