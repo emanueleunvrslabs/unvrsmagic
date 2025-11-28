@@ -25,42 +25,42 @@ export function LandingHeroNew() {
   return (
     <section id="home" className="relative min-h-screen bg-black flex items-center justify-center overflow-hidden pt-24">
       {/* Background Grid Images - Left */}
-      <div className="absolute left-0 top-0 h-full w-1/4 overflow-hidden">
-        <div className="flex flex-col gap-8 animate-[slide-up_20s_linear_infinite]">
+      <div className="absolute left-0 top-0 h-full w-[15%] overflow-hidden opacity-20">
+        <div className="flex flex-col gap-6 animate-[slide-up_25s_linear_infinite]">
           {[...images, ...images].map((src, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 0.3, y: 0 }}
+              animate={{ opacity: 0.5, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.8 }}
               className="w-full aspect-square"
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <img src={src} alt="" className="w-full h-full object-cover rounded-lg" />
             </motion.div>
           ))}
         </div>
       </div>
 
       {/* Background Grid Images - Right */}
-      <div className="absolute right-0 top-0 h-full w-1/4 overflow-hidden">
-        <div className="flex flex-col gap-8 animate-[slide-down_20s_linear_infinite]">
+      <div className="absolute right-0 top-0 h-full w-[15%] overflow-hidden opacity-20">
+        <div className="flex flex-col gap-6 animate-[slide-down_25s_linear_infinite]">
           {[...images, ...images].map((src, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: -50 }}
-              animate={{ opacity: 0.3, y: 0 }}
+              animate={{ opacity: 0.5, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.8 }}
               className="w-full aspect-square"
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <img src={src} alt="" className="w-full h-full object-cover rounded-lg" />
             </motion.div>
           ))}
         </div>
       </div>
 
       {/* Center Content */}
-      <div className="relative z-10 text-center px-6">
-        <div className="relative h-[200px] md:h-[300px] mb-8 overflow-hidden">
+      <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
+        <div className="relative h-[180px] md:h-[280px] mb-12 flex items-center justify-center">
           {heroTexts.map((text, index) => (
             <motion.h1
               key={text}
@@ -70,8 +70,11 @@ export function LandingHeroNew() {
                 opacity: index === currentIndex ? 1 : 0,
               }}
               transition={{ duration: 0.6, ease: "easeInOut" }}
-              className="absolute inset-0 text-[120px] md:text-[200px] font-bold text-white tracking-tighter leading-none"
-              style={{ fontFamily: "Inter, sans-serif" }}
+              className="absolute text-[80px] md:text-[140px] lg:text-[180px] font-bold text-white tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+              style={{ 
+                fontFamily: "Inter, sans-serif",
+                textShadow: "0 0 40px rgba(255, 255, 255, 0.2), 0 0 80px rgba(255, 255, 255, 0.1)"
+              }}
             >
               {text}
             </motion.h1>
@@ -82,7 +85,7 @@ export function LandingHeroNew() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
+          className="text-white/90 text-base md:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed drop-shadow-lg"
           style={{ fontFamily: "Inter, sans-serif" }}
         >
           Beyond code, we build universes<br />
