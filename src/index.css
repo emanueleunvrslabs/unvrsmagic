@@ -537,7 +537,7 @@
 .login-button .hover-text {
   position: absolute;
   top: 0;
-  left: 0;
+  left: -4px;
   box-sizing: border-box;
   color: var(--animation-color);
   width: 0%;
@@ -548,6 +548,6 @@
 }
 
 .login-button:hover .hover-text {
-  width: 100%;
+  width: calc(100% + 4px);
   filter: drop-shadow(0 0 23px var(--animation-color));
 }
