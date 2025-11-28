@@ -45,8 +45,8 @@ export function WaveTextEntrance({ text, className = "", emoji, delay = 0 }: Wav
                 key={charIndex}
                 className={`inline-block transition-all duration-500 ${
                   isVisible 
-                    ? 'opacity-100 translate-x-0' 
-                    : 'opacity-0 -translate-x-8'
+                    ? 'opacity-100 translate-x-0 blur-0' 
+                    : 'opacity-0 -translate-x-8 blur-sm'
                 }`}
                 style={{
                   transitionDelay: `${globalIndex * 30}ms`,
@@ -63,8 +63,8 @@ export function WaveTextEntrance({ text, className = "", emoji, delay = 0 }: Wav
         <span 
           className={`inline-block ml-2 transition-all duration-500 ${
             isVisible 
-              ? 'opacity-100 scale-100 rotate-0' 
-              : 'opacity-0 scale-0 rotate-180'
+              ? 'opacity-100 scale-100 rotate-0 blur-0' 
+              : 'opacity-0 scale-0 rotate-180 blur-sm'
           }`}
           style={{
             transitionDelay: `${text.length * 30}ms`,
