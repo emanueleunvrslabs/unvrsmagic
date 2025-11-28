@@ -43,7 +43,7 @@ export function LandingWorksNew() {
           className="text-6xl md:text-8xl font-bold text-white text-center mb-16"
           style={{ fontFamily: "Orbitron, sans-serif" }}
         >
-          Works
+          Magic AI
         </motion.h1>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -31,7 +31,7 @@ export function LandingFooterNew() {
                 Home
               </a>
               <a href="#works" className="text-white/60 hover:text-white transition-colors text-sm">
-                Works
+                Magic AI
               </a>
               <a href="#services" className="text-white/60 hover:text-white transition-colors text-sm">
                 Services
