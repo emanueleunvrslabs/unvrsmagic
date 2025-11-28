@@ -66,11 +66,11 @@ export function LandingCTANew() {
                   />
                 </span>
 
-                <span className="flex items-center justify-center gap-1 relative z-[1] bg-neutral-950/90 rounded-full py-2 px-4 pl-2 w-full">
+                <span className="flex items-center justify-center gap-1.5 relative z-[1] bg-neutral-950/90 rounded-full py-3 px-6 pl-3 w-full">
                   <span className="relative group-hover:scale-105 transition-transform group-hover:rotate-[360deg] duration-500">
                     <svg
-                      width="18"
-                      height="18"
+                      width="22"
+                      height="22"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -122,7 +122,7 @@ export function LandingCTANew() {
                     />
                   </span>
                   <span
-                    className="bg-gradient-to-b ml-1.5 from-white to-white/50 bg-clip-text text-xs text-transparent group-hover:scale-105 transition transform-gpu"
+                    className="bg-gradient-to-b ml-1.5 from-white to-white/50 bg-clip-text text-sm text-transparent group-hover:scale-105 transition transform-gpu"
                     style={{ fontFamily: "Orbitron, sans-serif" }}
                   >
                     Get Started
