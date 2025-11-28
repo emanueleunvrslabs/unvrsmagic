@@ -46,10 +46,13 @@ const words = ["UNVRS", "LABS"];
 
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const typewriterText = useTypewriter(
-    "Beyond code, we build universes\nwhere businesses and AI evolve together.",
-    30
-  );
+  
+  const fullCode = `function buildUniverse() {
+  return "Beyond code, we build universes
+where businesses and AI evolve together.";
+}`;
+  
+  const typewriterText = useTypewriter(fullCode, 30);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -108,20 +111,35 @@ export function LandingHeroNew() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.3 }}
-          className="text-base md:text-lg lg:text-xl max-w-3xl mx-auto font-mono text-center"
+          className="text-base md:text-lg lg:text-xl max-w-3xl mx-auto font-mono text-center whitespace-pre-wrap"
         >
           <code>
-            <span className="text-purple-400">function</span>{' '}
-            <span className="text-yellow-300">buildUniverse</span>
-            <span className="text-white/90">() {'{'}</span>
-            {'\n  '}
-            <span className="text-blue-400">return</span>{' '}
-            <span className="text-green-400">"</span>
-            <span className="text-green-400">{typewriterText}</span>
-            <span className="text-green-400">"</span>
-            <span className="text-white/90">;</span>
-            {'\n'}
-            <span className="text-white/90">{'}'}</span>
+            {typewriterText.split('').map((char, idx) => {
+              const text = typewriterText.substring(0, idx + 1);
+              let color = "text-white/90";
+              
+              // Colora "function" e "return" in viola
+              if (text.includes('function') && idx < 8) color = "text-purple-400";
+              if (text.includes('return') && idx >= fullCode.indexOf('return') && idx < fullCode.indexOf('return') + 6) color = "text-blue-400";
+              
+              // Colora il nome della funzione in giallo
+              if (idx >= 9 && idx < 21) color = "text-yellow-300";
+              
+              // Colora le stringhe in verde
+              if (idx >= fullCode.indexOf('"') && idx <= fullCode.lastIndexOf('"')) {
+                if (idx === fullCode.indexOf('"') || idx === fullCode.lastIndexOf('"')) {
+                  color = "text-green-400";
+                } else if (idx > fullCode.indexOf('"') && idx < fullCode.lastIndexOf('"')) {
+                  color = "text-green-400";
+                }
+              }
+              
+              return (
+                <span key={idx} className={color}>
+                  {char}
+                </span>
+              );
+            })}
             <span className="animate-pulse text-white/90">_</span>
           </code>
         </motion.pre>
