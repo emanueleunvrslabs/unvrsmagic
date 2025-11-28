@@ -41,27 +41,37 @@ export function WebflowLanding() {
       </a>
 
       {/* Navbar */}
-      <div data-animation="default" className="navbar w-nav" data-easing2="ease" data-easing="ease" data-collapse="medium" role="banner" data-no-scroll="1" data-duration="400" data-doc-height="1" style={{ position: 'fixed', bottom: '40px', left: '50%', transform: 'translateX(-50%)', top: 'auto', width: 'auto', background: 'transparent' }}>
-        <div className="nav-container" style={{ background: 'rgba(20, 20, 20, 0.9)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '50px', padding: '12px 24px', backdropFilter: 'blur(10px)' }}>
-          <nav role="navigation" className="nav-menu w-nav-menu" style={{ position: 'static', display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <a href="#" className="nav-link-wrapper first w-inline-block w--current" style={{ background: 'white', borderRadius: '30px', padding: '8px 24px' }}>
+      <div data-animation="default" className="navbar w-nav" data-easing2="ease" data-easing="ease" data-collapse="medium" role="banner" data-no-scroll="1" data-duration="400" data-doc-height="1">
+        <div className="nav-container w-container">
+          <a href="/" className="logo-link-wrapper show-on-tab w-nav-brand w--current">
+            <img width="Auto" height="Auto" alt="" src={`${STORAGE_BASE}/1764321298692-Unvrs-labs-logo.png`} loading="eager" className="logo" />
+          </a>
+          <div className="menu-button w-nav-button">
+            <div className="burger-icon w-icon-nav-menu"></div>
+          </div>
+          <nav role="navigation" className="nav-menu w-nav-menu">
+            <a href="#" className="nav-link-wrapper first w-inline-block w--current">
               <div className="nav-link-block">
-                <p className="nav-link" style={{ color: 'black', margin: 0 }}>HOME</p>
+                <p className="nav-link">HOME</p>
+                <p className="nav-link hide-on-tab">HOME</p>
               </div>
             </a>
-            <a href="#learn-more" className="nav-link-wrapper w-inline-block" style={{ padding: '8px 24px' }}>
+            <a href="#learn-more" className="nav-link-wrapper w-inline-block">
               <div className="nav-link-block">
-                <p className="nav-link" style={{ margin: 0 }}>ABOUT</p>
+                <p className="nav-link">ABOUT</p>
+                <p className="nav-link hide-on-tab">ABOUT</p>
               </div>
             </a>
-            <a href="#" className="nav-link-wrapper w-inline-block" style={{ padding: '8px 24px' }}>
+            <a href="#" className="nav-link-wrapper w-inline-block">
               <div className="nav-link-block">
-                <p className="nav-link" style={{ margin: 0 }}>CONTACT</p>
+                <p className="nav-link">CONTACT</p>
+                <p className="nav-link hide-on-tab">CONTACT</p>
               </div>
             </a>
-            <div className="nav-link-wrapper w-inline-block" style={{ padding: '8px 24px' }}>
+            <div className="nav-link-wrapper w-inline-block">
               <Link to="/auth" className="nav-link-block">
-                <p className="nav-link" style={{ margin: 0 }}>ACCEDI</p>
+                <p className="nav-link">ACCEDI</p>
+                <p className="nav-link hide-on-tab">ACCEDI</p>
               </Link>
             </div>
           </nav>
