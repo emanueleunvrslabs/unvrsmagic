@@ -15,7 +15,7 @@ export function LandingNav() {
             <img 
               src={logo}
               alt="UNVRS LABS" 
-              className="h-12 w-auto"
+              className="h-16 w-auto transition-transform duration-700 hover:rotate-[360deg]"
             />
           </Link>
 
