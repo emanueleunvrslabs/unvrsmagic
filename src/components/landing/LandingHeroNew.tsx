@@ -1,17 +1,20 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
-const heroTexts = ["Unvrs", "Labs", "UNVRS"];
+const words = ["UNVRS", "LABS"];
 
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % heroTexts.length);
-    }, 2000);
+      setCurrentIndex((prev) => (prev + 1) % words.length);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  const currentWord = words[currentIndex];
+  const letters = currentWord.split("");
 
   const images = [
     "/webflow/images/Tavola-disegno-5_102x.png",
@@ -60,25 +63,30 @@ export function LandingHeroNew() {
 
       {/* Center Content */}
       <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
-        <div className="relative h-[180px] md:h-[280px] mb-12 flex items-center justify-center">
-          {heroTexts.map((text, index) => (
-            <motion.h1
-              key={text}
-              initial={{ y: 100, opacity: 0 }}
-              animate={{
-                y: index === currentIndex ? 0 : index < currentIndex ? -100 : 100,
-                opacity: index === currentIndex ? 1 : 0,
-              }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-              className="absolute text-[80px] md:text-[140px] lg:text-[180px] font-bold text-white tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
-              style={{ 
-                fontFamily: "Inter, sans-serif",
-                textShadow: "0 0 40px rgba(255, 255, 255, 0.2), 0 0 80px rgba(255, 255, 255, 0.1)"
-              }}
-            >
-              {text}
-            </motion.h1>
-          ))}
+        <div className="relative h-[180px] md:h-[280px] mb-12 flex items-center justify-center overflow-hidden">
+          <div className="flex" style={{ fontFamily: "Inter, sans-serif" }}>
+            <AnimatePresence mode="wait">
+              {letters.map((letter, index) => (
+                <motion.span
+                  key={`${currentIndex}-${index}`}
+                  initial={{ y: 100, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -100, opacity: 0 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: index * 0.05,
+                    ease: "easeInOut" 
+                  }}
+                  className="inline-block text-[80px] md:text-[140px] lg:text-[180px] font-bold text-white tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+                  style={{ 
+                    textShadow: "0 0 40px rgba(255, 255, 255, 0.2), 0 0 80px rgba(255, 255, 255, 0.1)"
+                  }}
+                >
+                  {letter}
+                </motion.span>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
 
         <motion.p
