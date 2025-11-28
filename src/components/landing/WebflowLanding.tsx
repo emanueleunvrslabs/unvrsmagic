@@ -81,23 +81,6 @@ export function WebflowLanding() {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="w-layout-blockcontainer hero-container w-container">
-          <div id="w-node-_4bb845f3-8c90-60b3-f0d6-cd46e0539706-e0539704" className="hero-wrapper">
-            <div className="grid-left gsap-stagger-divs-slow">
-              {[
-                '1764321369906-Tavola-disegno-5_102x-p-500.png',
-                '1764321369022-Tavola-disegno-5_122x-p-500.png',
-                '1764321365977-Tavola-disegno-5_82x-p-1080.png',
-                '1764321364906-Tavola-disegno-5_92x-p-1600.png',
-                '1764321362044-Tavola-disegno-5_42x-p-500.png',
-                '1764321360918-Tavola-disegno-5_72x-p-500.png'
-              ].map((img, i) => (
-                <div key={i} className="hero-image-wrapper">
-                  <img src={`${STORAGE_BASE}/${img}`} loading="lazy" alt="" className="hero-image" />
-                </div>
-              ))}
-            </div>
-          </div>
-          
           <div id="w-node-_4bb845f3-8c90-60b3-f0d6-cd46e0539714-e0539704" className="hero-block">
             <div className="hero-text-block">
               <div className="hero-text-wrapper">
@@ -108,35 +91,6 @@ export function WebflowLanding() {
               <p className="hero-description gsap-stagger-fast">
                 Beyond code, we build universes<br />where businesses and AI<br />evolve together.
               </p>
-            </div>
-            
-            {/* Immagini hero full */}
-            {[
-              '1764321369906-Tavola-disegno-5_102x-p-500.png',
-              '1764321369022-Tavola-disegno-5_122x-p-500.png',
-              '1764321365977-Tavola-disegno-5_82x-p-1080.png',
-              '1764321364906-Tavola-disegno-5_92x-p-1600.png',
-              '1764321362044-Tavola-disegno-5_42x-p-500.png',
-              '1764321360918-Tavola-disegno-5_72x-p-500.png'
-            ].map((img, i) => (
-              <img key={i} src={`${STORAGE_BASE}/${img}`} loading="lazy" alt="" className="hero-full-image" />
-            ))}
-          </div>
-
-          <div className="hero-wrapper">
-            <div className="grid-right gsap-stagger-divs-slow">
-              {[
-                '1764321359933-Tavola-disegno-5_12x-p-500.png',
-                '1764321358945-Tavola-disegno-5_112x-p-500.png',
-                '1764321358121-Tavola-disegno-5_32x-p-500.png',
-                '1764321357263-Tavola-disegno-5_22x-p-500.png',
-                '1764321356401-Tavola-disegno-5_62x-p-500.png',
-                '1764321355457-IMG_2790.jpeg'
-              ].map((img, i) => (
-                <div key={i} className="hero-image-wrapper">
-                  <img src={`${STORAGE_BASE}/${img}`} loading="lazy" alt="" className="hero-image shadow-left" />
-                </div>
-              ))}
             </div>
           </div>
         </div>
