@@ -76,7 +76,7 @@ export const MktDataInterface = () => {
   // Extract OHLCV data from backend
   const dbOhlcvArray = (chartSourceData?.ohlcv as any[]) || []
 
-  // Scegli la sorgente migliore: se dal backend ho meno di 10 candele, uso Bitget
+  // Choose the best source: if backend has less than 10 candles, use Bitget
   const ohlcvArray = dbOhlcvArray.length >= 10
     ? dbOhlcvArray
     : (bitgetHistorical as any[]) || []

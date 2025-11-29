@@ -213,11 +213,11 @@ export default function GenerateVideo() {
         {hasInsufficientCredits && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Crediti insufficienti</AlertTitle>
+            <AlertTitle>Insufficient Credits</AlertTitle>
             <AlertDescription className="flex items-center justify-between">
-              <span>Hai bisogno di almeno €{VIDEO_COST} per generare un video.</span>
+              <span>You need at least €{VIDEO_COST} to generate a video.</span>
               <Button variant="outline" size="sm" onClick={() => navigate("/wallet")}>
-                Vai al Wallet
+                Go to Wallet
               </Button>
             </AlertDescription>
           </Alert>
