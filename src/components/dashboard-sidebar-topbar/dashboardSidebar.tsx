@@ -450,7 +450,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       section: "Admin",
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
-        { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
         {
           id: "ai-social",
           label: "Ai Social",
@@ -501,6 +500,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
           ],
         },
+        { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
         { id: "strategies-marketplace", label: "Strategies Marketplace", icon: Store, href: "/strategies-marketplace" },
       ],
     });
