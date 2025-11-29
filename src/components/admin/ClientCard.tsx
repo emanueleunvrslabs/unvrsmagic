@@ -90,64 +90,62 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
 
         {/* Collapsible Billing Section */}
         <div className={`contacts-section ${billingOpen ? 'open' : ''}`}>
-          <div className="contact-item-card">
-            <div className="flex flex-col gap-3 w-full">
+          <div className="flex flex-col gap-3 w-full px-4 py-3">
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Company Name</label>
+              <input 
+                type="text" 
+                defaultValue={client.company_name}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">VAT Number</label>
+              <input 
+                type="text" 
+                defaultValue={client.vat_number}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Street</label>
+              <input 
+                type="text" 
+                defaultValue={client.street}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Company Name</label>
+                <label className="text-xs text-muted-foreground">City</label>
                 <input 
                   type="text" 
-                  defaultValue={client.company_name}
+                  defaultValue={client.city}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">VAT Number</label>
+                <label className="text-xs text-muted-foreground">Postal Code</label>
                 <input 
                   type="text" 
-                  defaultValue={client.vat_number}
+                  defaultValue={client.postal_code}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Street</label>
-                <input 
-                  type="text" 
-                  defaultValue={client.street}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">City</label>
-                  <input 
-                    type="text" 
-                    defaultValue={client.city}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Postal Code</label>
-                  <input 
-                    type="text" 
-                    defaultValue={client.postal_code}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Country</label>
-                <input 
-                  type="text" 
-                  defaultValue={client.country}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Country</label>
+              <input 
+                type="text" 
+                defaultValue={client.country}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                onClick={(e) => e.stopPropagation()}
+              />
             </div>
           </div>
         </div>
