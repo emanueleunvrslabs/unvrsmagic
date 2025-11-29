@@ -45,8 +45,8 @@
 
 .social-icons svg,
 .social-icons .icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 .social-media-card::before {
@@ -81,6 +81,7 @@
 .card-heading {
   z-index: 2;
   transition: 0.4s ease-in-out;
+  font-size: 1.1em;
 }
 
 .social-media-card:hover .card-heading {
