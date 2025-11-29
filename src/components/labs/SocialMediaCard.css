@@ -27,7 +27,8 @@
 }
 
 .social-media-card.expanded-lateral {
-  width: 48em;
+  width: auto;
+  max-width: 52em;
   height: 25em;
 }
 
@@ -413,7 +414,7 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 2em 1.5em 2em 0.75em;
-  width: 22em;
+  width: 26em;
   height: 100%;
   opacity: 0;
   max-width: 0;
@@ -426,7 +427,7 @@
 
 .billing-section-lateral.open {
   opacity: 1;
-  max-width: 22em;
+  max-width: 26em;
   pointer-events: auto;
 }
 
@@ -436,7 +437,7 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 3em 1.5em 2em 1.5em;
-  width: 22em;
+  width: 18em;
   height: 25em;
   opacity: 0;
   max-width: 0;
@@ -449,7 +450,7 @@
 
 .contacts-section-lateral.open {
   opacity: 1;
-  max-width: 22em;
+  max-width: 18em;
   pointer-events: auto;
 }
 
