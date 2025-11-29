@@ -59,16 +59,24 @@
   cursor: pointer;
 }
 
-.social-svg {
+.social-svg-wrapper {
   transition: all 0.3s;
   padding: 1rem;
   height: 60px;
   width: 60px;
   border-radius: 100%;
-  color: rgb(255, 174, 0);
-  fill: currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.05);
   box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3),
     inset 0 0 5px rgba(255, 255, 255, 0.5), 0 5px 5px rgba(0, 0, 0, 0.164);
+}
+
+.social-svg-icon {
+  color: rgb(255, 174, 0);
+  width: 28px;
+  height: 28px;
 }
 
 .social-text {
@@ -155,7 +163,7 @@
   position: relative;
 }
 
-.social-iso-pro:hover a > .social-svg {
+.social-iso-pro:hover a > .social-svg-wrapper {
   transform: translate(15px, -15px);
   border-radius: 100%;
 }
@@ -165,7 +173,7 @@
   transform: translate(25px, -2px) skew(-5deg);
 }
 
-.social-iso-pro:hover .social-svg {
+.social-iso-pro:hover .social-svg-wrapper {
   transform: translate(5px, -5px);
 }
 
