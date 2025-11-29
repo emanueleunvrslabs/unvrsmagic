@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { Briefcase, FileText, StickyNote, Pencil, Mail, MessageCircle, Receipt } from "lucide-react";
+import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt } from "lucide-react";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
@@ -74,7 +74,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               setBillingOpen(false);
             }}
           >
-            <StickyNote className="icon" strokeWidth={2} />
+            <Users className="icon" strokeWidth={2} />
           </a>
           <a 
             href="#" 
