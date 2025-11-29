@@ -38,40 +38,25 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Unauthorized");
     }
 
-    // Get WASender API key from owner
-    const { data: ownerData, error: ownerError } = await supabase
-      .from("user_roles")
-      .select("user_id")
-      .eq("role", "owner")
-      .single();
-
-    if (ownerError || !ownerData) {
-      throw new Error("Owner not found");
-    }
-
-    const { data: apiKeyData, error: apiKeyError } = await supabase
-      .from("api_keys")
-      .select("api_key")
-      .eq("user_id", ownerData.user_id)
-      .eq("provider", "wasender")
-      .single();
-
-    if (apiKeyError || !apiKeyData) {
-      throw new Error("WASender API key not found");
+    // Get WASender API key from Supabase secrets
+    const wasenderApiKey = Deno.env.get('WASENDER_API_KEY');
+    
+    if (!wasenderApiKey) {
+      throw new Error("WASender API key not configured");
     }
 
     const { phoneNumber, message, clientId, contactId }: SendWhatsAppRequest = await req.json();
 
     // Send message via WASender API
-    const wasenderResponse = await fetch("https://api.wasender.com/api/v1/message/send", {
+    const wasenderResponse = await fetch("https://www.wasenderapi.com/api/send-message", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKeyData.api_key}`,
+        "Authorization": `Bearer ${wasenderApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        phone: phoneNumber,
-        message: message,
+        to: phoneNumber,
+        text: message,
       }),
     });
 

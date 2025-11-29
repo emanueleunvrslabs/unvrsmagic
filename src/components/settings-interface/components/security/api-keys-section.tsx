@@ -26,7 +26,6 @@ const AI_PROVIDERS = [
   { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false },
   { id: "resend", name: "Resend", placeholder: "re_...", description: "Email API", requiresOwnerId: false },
   { id: "webshare", name: "Webshare", placeholder: "Enter API key", description: "Proxy service", requiresOwnerId: false },
-  { id: "wasender", name: "WASender", placeholder: "Enter API key", description: "WhatsApp messaging", requiresOwnerId: false },
 ]
 
 // Validation schemas for each provider
@@ -57,9 +56,6 @@ const apiKeySchemas = {
   }),
   webshare: z.string().trim().min(20, {
     message: "Webshare API key must be at least 20 characters"
-  }),
-  wasender: z.string().trim().min(10, {
-    message: "WASender API key must be at least 10 characters"
   })
 }
 
@@ -74,7 +70,6 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     gamma: "",
     resend: "",
     webshare: "",
-    wasender: "",
   })
   const [ownerIds, setOwnerIds] = useState<Record<string, string>>({
     qwen: "",
