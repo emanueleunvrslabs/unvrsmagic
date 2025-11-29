@@ -30,9 +30,9 @@ export default function AdminProjects() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Gestione Progetti</h1>
+          <h1 className="text-3xl font-bold">Project Management</h1>
           <p className="text-muted-foreground mt-2">
-            Gestisci i progetti e la loro visibilità nel marketplace
+            Manage projects and their visibility in the marketplace
           </p>
         </div>
 
@@ -45,7 +45,7 @@ export default function AdminProjects() {
                     <CardTitle className="flex items-center gap-2">
                       {project.name}
                       {project.published && (
-                        <Badge variant="secondary">Pubblicato</Badge>
+                        <Badge variant="secondary">Published</Badge>
                       )}
                     </CardTitle>
                     <CardDescription>{project.description}</CardDescription>
@@ -53,7 +53,7 @@ export default function AdminProjects() {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-sm">
-                        {project.published ? "Visibile nel marketplace" : "Nascosto"}
+                        {project.published ? "Visible in marketplace" : "Hidden"}
                       </span>
                       <Switch
                         checked={project.published}
@@ -72,7 +72,7 @@ export default function AdminProjects() {
 
         {allProjects.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Nessun progetto creato</p>
+            <p className="text-muted-foreground">No projects created</p>
           </div>
         )}
       </div>

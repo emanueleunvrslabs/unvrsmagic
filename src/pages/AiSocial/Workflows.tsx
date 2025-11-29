@@ -555,7 +555,7 @@ export default function Workflows() {
           // Check credits only for regular users when activating
           if (hasInsufficientCredits(workflow.content_type as "image" | "video")) {
             const requiredCredits = getRequiredCredits(workflow.content_type as "image" | "video");
-            toast.error(`Crediti insufficienti. Hai bisogno di almeno €${requiredCredits} per attivare questo workflow.`);
+            toast.error(`Insufficient credits. You need at least €${requiredCredits} to activate this workflow.`);
             // Revert the active status update
             await supabase
               .from('ai_social_workflows')
@@ -616,7 +616,7 @@ export default function Workflows() {
     
     // Check credits first
     if (hasInsufficientCredits(workflow.content_type)) {
-      toast.error(`Crediti insufficienti. Hai bisogno di almeno €${requiredCredits} per eseguire questo workflow.`);
+      toast.error(`Insufficient credits. You need at least €${requiredCredits} to run this workflow.`);
       return;
     }
 

@@ -68,7 +68,7 @@ export function WebflowTemplate() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Caricamento template...</div>
+        <div className="text-white text-xl">Loading template...</div>
       </div>
     );
   }

@@ -10,7 +10,7 @@ const PrivacyPolicy = () => {
           <Link to="/">
             <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Torna alla Home
+              Back to Home
             </Button>
           </Link>
         </div>
@@ -19,54 +19,54 @@ const PrivacyPolicy = () => {
           <h1 className="text-3xl font-bold text-foreground mb-8">Privacy Policy</h1>
           
           <p className="text-muted-foreground mb-6">
-            Ultimo aggiornamento: {new Date().toLocaleDateString('it-IT')}
+            Last updated: {new Date().toLocaleDateString('en-US')}
           </p>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">1. Introduzione</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">1. Introduction</h2>
             <p className="text-muted-foreground">
-              UNVRS LABS ("noi", "nostro" o "ci") gestisce la piattaforma UNVRS Magic AI. 
-              Questa Privacy Policy descrive come raccogliamo, utilizziamo e proteggiamo le tue informazioni 
-              personali quando utilizzi i nostri servizi.
+              UNVRS LABS ("we", "our" or "us") operates the UNVRS Magic AI platform. 
+              This Privacy Policy describes how we collect, use and protect your personal information 
+              when you use our services.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">2. Informazioni che Raccogliamo</h2>
-            <p className="text-muted-foreground mb-4">Raccogliamo le seguenti categorie di informazioni:</p>
+            <h2 className="text-xl font-semibold text-foreground mb-4">2. Information We Collect</h2>
+            <p className="text-muted-foreground mb-4">We collect the following categories of information:</p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li><strong>Informazioni dell'account:</strong> Nome, email, numero di telefono quando crei un account.</li>
-              <li><strong>Dati di utilizzo:</strong> Informazioni su come utilizzi i nostri servizi.</li>
-              <li><strong>Connessioni social media:</strong> Quando connetti account social (Instagram, YouTube, TikTok), 
-                  riceviamo token di accesso per pubblicare contenuti per tuo conto.</li>
-              <li><strong>Contenuti generati:</strong> Immagini e video che crei utilizzando i nostri strumenti AI.</li>
+              <li><strong>Account information:</strong> Name, email, phone number when you create an account.</li>
+              <li><strong>Usage data:</strong> Information about how you use our services.</li>
+              <li><strong>Social media connections:</strong> When you connect social accounts (Instagram, YouTube, TikTok), 
+                  we receive access tokens to publish content on your behalf.</li>
+              <li><strong>Generated content:</strong> Images and videos you create using our AI tools.</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">3. Utilizzo delle Informazioni</h2>
-            <p className="text-muted-foreground mb-4">Utilizziamo le tue informazioni per:</p>
+            <h2 className="text-xl font-semibold text-foreground mb-4">3. Use of Information</h2>
+            <p className="text-muted-foreground mb-4">We use your information to:</p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li>Fornire e migliorare i nostri servizi</li>
-              <li>Generare contenuti AI secondo le tue richieste</li>
-              <li>Pubblicare contenuti sui tuoi account social connessi</li>
-              <li>Gestire il tuo account e le transazioni</li>
-              <li>Comunicare aggiornamenti e informazioni sui servizi</li>
+              <li>Provide and improve our services</li>
+              <li>Generate AI content according to your requests</li>
+              <li>Publish content to your connected social accounts</li>
+              <li>Manage your account and transactions</li>
+              <li>Communicate updates and service information</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">4. Accesso ai Dati YouTube</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">4. YouTube Data Access</h2>
             <p className="text-muted-foreground mb-4">
-              Quando connetti il tuo account YouTube, richiediamo accesso per:
+              When you connect your YouTube account, we request access to:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li>Visualizzare le informazioni del tuo canale YouTube</li>
-              <li>Gestire i tuoi video e live streaming</li>
-              <li>Pubblicare contenuti per tuo conto</li>
+              <li>View your YouTube channel information</li>
+              <li>Manage your videos and live streaming</li>
+              <li>Publish content on your behalf</li>
             </ul>
             <p className="text-muted-foreground mt-4">
-              Puoi revocare l'accesso in qualsiasi momento dalle impostazioni del tuo account Google: {" "}
+              You can revoke access at any time from your Google Account settings: {" "}
               <a 
                 href="https://myaccount.google.com/permissions" 
                 target="_blank" 
@@ -79,57 +79,57 @@ const PrivacyPolicy = () => {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">5. Condivisione delle Informazioni</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">5. Information Sharing</h2>
             <p className="text-muted-foreground">
-              Non vendiamo le tue informazioni personali. Possiamo condividere le tue informazioni solo con:
+              We do not sell your personal information. We may share your information only with:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2 mt-4">
-              <li>Fornitori di servizi che ci aiutano a gestire la piattaforma (es. hosting, generazione AI)</li>
-              <li>Piattaforme social media quando pubblichi contenuti tramite il nostro servizio</li>
-              <li>Autorità legali quando richiesto dalla legge</li>
+              <li>Service providers who help us run the platform (e.g. hosting, AI generation)</li>
+              <li>Social media platforms when you publish content through our service</li>
+              <li>Legal authorities when required by law</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">6. Sicurezza dei Dati</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">6. Data Security</h2>
             <p className="text-muted-foreground">
-              Implementiamo misure di sicurezza tecniche e organizzative per proteggere le tue informazioni, 
-              inclusa la crittografia dei dati sensibili e l'accesso limitato ai dati personali.
+              We implement technical and organizational security measures to protect your information, 
+              including encryption of sensitive data and limited access to personal data.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">7. I Tuoi Diritti</h2>
-            <p className="text-muted-foreground mb-4">Hai il diritto di:</p>
+            <h2 className="text-xl font-semibold text-foreground mb-4">7. Your Rights</h2>
+            <p className="text-muted-foreground mb-4">You have the right to:</p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li>Accedere ai tuoi dati personali</li>
-              <li>Correggere dati inesatti</li>
-              <li>Richiedere la cancellazione dei tuoi dati</li>
-              <li>Revocare il consenso al trattamento</li>
-              <li>Esportare i tuoi dati</li>
+              <li>Access your personal data</li>
+              <li>Correct inaccurate data</li>
+              <li>Request deletion of your data</li>
+              <li>Withdraw consent to processing</li>
+              <li>Export your data</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">8. Conservazione dei Dati</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">8. Data Retention</h2>
             <p className="text-muted-foreground">
-              Conserviamo i tuoi dati per il tempo necessario a fornire i nostri servizi o come richiesto dalla legge. 
-              Puoi richiedere la cancellazione del tuo account in qualsiasi momento.
+              We retain your data for as long as necessary to provide our services or as required by law. 
+              You can request deletion of your account at any time.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">9. Modifiche alla Privacy Policy</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">9. Changes to Privacy Policy</h2>
             <p className="text-muted-foreground">
-              Possiamo aggiornare questa Privacy Policy periodicamente. Ti notificheremo di modifiche significative 
-              tramite email o avviso sulla piattaforma.
+              We may update this Privacy Policy periodically. We will notify you of significant changes 
+              via email or notice on the platform.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">10. Contatti</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">10. Contact</h2>
             <p className="text-muted-foreground">
-              Per domande sulla nostra Privacy Policy o sul trattamento dei tuoi dati, contattaci a:{" "}
+              For questions about our Privacy Policy or your data processing, contact us at:{" "}
               <a href="mailto:privacy@unvrslabs.com" className="text-primary hover:underline">
                 privacy@unvrslabs.com
               </a>

@@ -537,14 +537,14 @@ const FileUpload = () => {
                   variant="destructive"
                   size="sm"
                   onClick={async () => {
-                    if (confirm('Sei sicuro di voler eliminare tutti i file?')) {
+                    if (confirm('Are you sure you want to delete all files?')) {
                       await deleteAllFilesFromStorage();
-                      toast('Tutti i file sono stati eliminati');
+                      toast('All files have been deleted');
                     }
                   }}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Elimina tutto
+                  Delete All
                 </Button>
               )}
             </div>
