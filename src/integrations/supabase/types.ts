@@ -692,28 +692,37 @@ export type Database = {
       }
       clients: {
         Row: {
-          address: string
+          city: string
           company_name: string
+          country: string
           created_at: string | null
           id: string
+          postal_code: string
+          street: string
           updated_at: string | null
           user_id: string
           vat_number: string
         }
         Insert: {
-          address: string
+          city: string
           company_name: string
+          country: string
           created_at?: string | null
           id?: string
+          postal_code: string
+          street: string
           updated_at?: string | null
-          user_id: string
+          user_id?: string
           vat_number: string
         }
         Update: {
-          address?: string
+          city?: string
           company_name?: string
+          country?: string
           created_at?: string | null
           id?: string
+          postal_code?: string
+          street?: string
           updated_at?: string | null
           user_id?: string
           vat_number?: string
