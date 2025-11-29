@@ -158,7 +158,7 @@ export function WhatsAppChatModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-5xl">
+      <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-2xl">
         <div className="glass-card-large">
           {/* Header */}
           <div className="p-4 border-b border-white/10 flex items-center gap-3">
