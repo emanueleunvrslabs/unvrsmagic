@@ -1,8 +1,9 @@
 /* Social Card Styles */
-.social-card-container {
+.social-cards-wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  gap: 1rem;
 }
 
 .social-card {
@@ -22,6 +23,10 @@
 .social-card:hover {
   animation: ease-out 5s;
   background: rgba(173, 173, 173, 0.05);
+}
+
+.company-name-card {
+  padding: 1rem;
 }
 
 .social-card ul {
@@ -68,8 +73,9 @@
 }
 
 /* Company Name Styles */
-.company-name-item {
+.company-name-item-solo {
   position: relative;
+  cursor: pointer;
 }
 
 .company-name-content {
@@ -89,13 +95,44 @@
 .company-name-text {
   color: rgb(255, 174, 0);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   text-align: center;
   white-space: nowrap;
 }
 
-.company-name-item:hover .company-name-content {
+.company-name-item-solo:hover .company-name-content {
   transform: translate(5px, -5px);
+}
+
+.company-name-item-solo span {
+  opacity: 0;
+  position: absolute;
+  color: #1877f2;
+  border-color: #1877f2;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3),
+    inset 0 0 5px rgba(255, 255, 255, 0.5), 0 5px 5px rgba(0, 0, 0, 0.164);
+  border-radius: 15px;
+  transition: all 0.3s;
+  min-height: 60px;
+  min-width: 120px;
+}
+
+.company-name-item-solo:hover span {
+  opacity: 1;
+}
+
+.company-name-item-solo:hover span:nth-child(1) {
+  opacity: 0.2;
+}
+
+.company-name-item-solo:hover span:nth-child(2) {
+  opacity: 0.4;
+  transform: translate(5px, -5px);
+}
+
+.company-name-item-solo:hover span:nth-child(3) {
+  opacity: 0.6;
+  transform: translate(10px, -10px);
 }
 
 /* Isometric projection */
@@ -129,12 +166,6 @@
   transition: all 0.3s;
   height: 60px;
   width: 60px;
-}
-
-.company-name-item span {
-  border-radius: 15px;
-  min-height: 60px;
-  min-width: 120px;
 }
 
 .social-iso-pro:hover span {
