@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Send, Paperclip } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import "@/components/labs/SocialCard.css";
+import "@/components/labs/GlassCards.css";
 
 interface WhatsAppChatModalProps {
   open: boolean;
@@ -157,9 +158,10 @@ export function WhatsAppChatModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-md">
-        <div className="chat-card">
-          <div className="chat-header">
+      <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-5xl">
+        <div className="glass-card-large">
+          {/* Header */}
+          <div className="p-4 border-b border-white/10 flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-500/20 border border-green-500/30">
               <svg
                 width="24"
@@ -176,42 +178,49 @@ export function WhatsAppChatModal({
               </svg>
             </div>
             <div className="flex-1">
-              <div className="chat-title">{contactName}</div>
-              <div className="text-xs text-muted-foreground">{contactPhone}</div>
+              <div className="text-lg font-semibold text-white">{contactName}</div>
+              <div className="text-xs text-white/60">{contactPhone}</div>
             </div>
           </div>
 
-          <ScrollArea className="chat-messages" ref={scrollRef}>
+          {/* Messages Area */}
+          <ScrollArea className="flex-1 p-6" ref={scrollRef}>
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : messages.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-muted-foreground text-center px-4">
+              <div className="flex items-center justify-center h-full text-white/60 text-center px-4">
                 No messages yet. Start the conversation!
               </div>
             ) : (
-              <div className="messages-container">
+              <div className="space-y-4">
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`message ${
-                      message.direction === "outgoing" ? "message-user" : "message-bot"
+                    className={`flex ${
+                      message.direction === "outgoing" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    <div className="message-bubble">
-                      <p className="whitespace-pre-wrap break-words">{message.message_text}</p>
-                    </div>
-                    <div className="message-time">
-                      {format(new Date(message.created_at), "HH:mm")}
-                      {message.direction === "outgoing" && (
-                        <span className="ml-1">
-                          {message.status === "sent" && "✓"}
-                          {message.status === "delivered" && "✓✓"}
-                          {message.status === "read" && "✓✓"}
-                          {message.status === "failed" && "✗"}
-                        </span>
-                      )}
+                    <div
+                      className={`max-w-[80%] rounded-lg p-3 ${
+                        message.direction === "outgoing"
+                          ? "bg-primary/30 text-white"
+                          : "bg-white/10 text-white"
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.message_text}</p>
+                      <p className="text-xs opacity-60 mt-1 flex items-center gap-1">
+                        {format(new Date(message.created_at), "HH:mm")}
+                        {message.direction === "outgoing" && (
+                          <span>
+                            {message.status === "sent" && "✓"}
+                            {message.status === "delivered" && "✓✓"}
+                            {message.status === "read" && "✓✓"}
+                            {message.status === "failed" && "✗"}
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -219,40 +228,38 @@ export function WhatsAppChatModal({
             )}
           </ScrollArea>
 
-          <div className="chat-input-container">
-            <Textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              className="chat-input"
-              rows={2}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!newMessage.trim() || sending}
-              className="chat-send-button"
-            >
-              {sending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </button>
+          {/* Input Area */}
+          <div className="p-4 border-t border-white/10">
+            <div className="flex items-end gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-white hover:bg-white/10"
+              >
+                <Paperclip className="h-5 w-5" />
+              </Button>
+              <Textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type a message..."
+                className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/50 resize-none"
+                rows={1}
+                disabled={sending}
+              />
+              <Button
+                onClick={handleSend}
+                disabled={!newMessage.trim() || sending}
+                size="icon"
+                className="shrink-0 bg-primary/30 hover:bg-primary/40 text-white"
+              >
+                {sending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
