@@ -53,7 +53,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
         >
           <div className="card-main-content">
             {isOpen && (
-              <div className="absolute top-4 right-4 z-10 mb-3">
+              <div className="absolute top-4 right-4 z-10 pb-4">
                 <button
                   className="text-xs text-primary/70 hover:text-primary transition-colors"
                   onClick={(e) => {
