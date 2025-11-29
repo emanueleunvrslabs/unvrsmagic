@@ -52,6 +52,17 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
           className={`social-media-card ${billingOpen || isOpen ? 'expanded-lateral' : ''}`}
         >
           <div className="card-main-content">
+            <div className="absolute top-4 right-4 z-10">
+              <button
+                className="text-xs text-primary/70 hover:text-primary transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAddContact(!showAddContact);
+                }}
+              >
+                {showAddContact ? "Cancel" : "Add Contact"}
+              </button>
+            </div>
             <img
               src="https://uiverse.io/astronaut.png"
               alt="Astronaut"
@@ -131,16 +142,6 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                 ))}
               </>
             )}
-            
-            <button
-              className="w-full text-center text-sm text-primary/70 hover:text-primary transition-colors py-2 mt-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowAddContact(!showAddContact);
-              }}
-            >
-              {showAddContact ? "Cancel" : "Add Contact"}
-            </button>
             
             {showAddContact && (
               <div className="flex flex-col gap-3 w-full mt-3 pt-3 border-t border-white/10">
