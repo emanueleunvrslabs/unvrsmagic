@@ -80,6 +80,52 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
             </li>
           </ul>
         </div>
+
+        {client.client_contacts && client.client_contacts.length > 0 && (
+          <div className="social-card contacts-list-card">
+            <div className="contacts-list">
+              {client.client_contacts.map((contact: any) => (
+                <div key={contact.id} className="contact-item">
+                  <span className="contact-name">
+                    {contact.first_name} {contact.last_name}
+                  </span>
+                  <div className="contact-actions">
+                    <button
+                      className="contact-action-btn"
+                      onClick={() => {
+                        setSelectedContact({
+                          email: contact.email,
+                          name: `${contact.first_name} ${contact.last_name}`,
+                          phone: contact.whatsapp_number,
+                          id: contact.id,
+                        });
+                        setEmailModalOpen(true);
+                      }}
+                      aria-label="Send email"
+                    >
+                      <Mail className="contact-action-icon" />
+                    </button>
+                    <button
+                      className="contact-action-btn"
+                      onClick={() => {
+                        setSelectedContact({
+                          email: contact.email,
+                          name: `${contact.first_name} ${contact.last_name}`,
+                          phone: contact.whatsapp_number,
+                          id: contact.id,
+                        });
+                        setWhatsappModalOpen(true);
+                      }}
+                      aria-label="Send WhatsApp message"
+                    >
+                      <MessageCircle className="contact-action-icon" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Contacts Modal */}
