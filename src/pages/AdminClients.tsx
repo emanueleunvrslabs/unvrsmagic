@@ -91,6 +91,9 @@ export default function AdminClients() {
 
         <div className="social-card-container mt-8">
           <div className="social-card">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold">Company Name Example</h3>
+            </div>
             <ul>
               <li className="social-iso-pro">
                 <span></span>
