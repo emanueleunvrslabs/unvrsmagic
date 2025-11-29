@@ -88,7 +88,9 @@ export default function AdminClients() {
             </div>
           )}
         </div>
+      </div>
 
+      <div className="flex justify-center w-full">
         <SocialMediaCard />
       </div>
 
