@@ -34,7 +34,8 @@
   cursor: grab;
 }
 
-.social-icons svg {
+.social-icons svg,
+.social-icons .icon {
   width: 20px;
   height: 20px;
 }
@@ -219,42 +220,34 @@
 
 .instagram-link,
 .x-link,
-.discord-link {
+.discord-link,
+.fourth-link {
   position: relative;
   transition: 0.4s ease-in-out;
 }
 
-.instagram-link svg path,
-.x-link svg path,
-.discord-link svg path {
-  stroke: #808080;
+.instagram-link .icon,
+.x-link .icon,
+.discord-link .icon,
+.fourth-link .icon {
+  color: hsl(210 100% 64% / 0.7);
   transition: 0.4s ease-in-out;
 }
 
-.instagram-link:hover svg path {
-  stroke: #cc39a4;
+.instagram-link:hover .icon,
+.x-link:hover .icon,
+.discord-link:hover .icon,
+.fourth-link:hover .icon {
+  color: hsl(210 100% 64%);
 }
 
-.x-link:hover svg path {
-  stroke: black;
-}
-
-.discord-link:hover svg path {
-  stroke: #8c9eff;
-}
-
-.instagram-link svg,
-.x-link svg,
-.discord-link svg {
-  transition: 0.3s ease-in-out;
-}
-
-.instagram-link:hover svg {
+.instagram-link:hover .icon {
   scale: 1.4;
 }
 
-.x-link:hover svg,
-.discord-link:hover svg {
+.x-link:hover .icon,
+.discord-link:hover .icon,
+.fourth-link:hover .icon {
   scale: 1.25;
 }
 
@@ -298,15 +291,30 @@
   animation-delay: 5s;
 }
 
+.fourth-link::before {
+  content: "";
+  position: absolute;
+  top: -1700%;
+  left: 1100%;
+  rotate: -45deg;
+  width: 5em;
+  height: 1px;
+  background: linear-gradient(90deg, #ffffff, transparent);
+  animation: 4s shooting-star ease-in-out infinite;
+  animation-delay: 2s;
+}
+
 .social-media-card:hover .instagram-link::before,
 .social-media-card:hover .x-link::before,
-.social-media-card:hover .discord-link::before {
+.social-media-card:hover .discord-link::before,
+.social-media-card:hover .fourth-link::before {
   filter: blur(3px);
 }
 
 .astronaut-image:active ~ .social-icons .instagram-link::before,
 .astronaut-image:active ~ .social-icons .x-link::before,
-.astronaut-image:active ~ .social-icons .discord-link::before {
+.astronaut-image:active ~ .social-icons .discord-link::before,
+.astronaut-image:active ~ .social-icons .fourth-link::before {
   animation: none;
   opacity: 0;
 }
