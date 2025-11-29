@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, MessageCircle, Pencil, ChevronDown, ChevronUp, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
@@ -25,12 +24,13 @@ interface Client {
 interface ClientCardProps {
   client: Client;
   onEdit: (client: Client) => void;
+  isOpen: boolean;
+  onToggle: (open: boolean) => void;
 }
 
-export function ClientCard({ client, onEdit }: ClientCardProps) {
+export function ClientCard({ client, onEdit, isOpen, onToggle }: ClientCardProps) {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
-  const [contactsOpen, setContactsOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
     email: string; 
     name: string;
@@ -82,8 +82,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
       <CardFooter className="flex flex-col items-start border-t p-4 mt-auto">
         {client.client_contacts && client.client_contacts.length > 0 ? (
           <Collapsible 
-            open={contactsOpen} 
-            onOpenChange={setContactsOpen} 
+            open={isOpen} 
+            onOpenChange={onToggle} 
             className="w-full"
           >
             <CollapsibleTrigger asChild>
@@ -98,7 +98,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                     Contacts ({client.client_contacts.length})
                   </span>
                 </div>
-                {contactsOpen ? (
+                {isOpen ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
                   <ChevronDown className="h-4 w-4" />

@@ -15,6 +15,7 @@ export default function AdminClients() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
+  const [openClientId, setOpenClientId] = useState<string | null>(null);
 
   const { data: clients, isLoading, refetch } = useQuery({
     queryKey: ["clients"],
@@ -74,6 +75,8 @@ export default function AdminClients() {
                 key={client.id}
                 client={client}
                 onEdit={handleEditClient}
+                isOpen={openClientId === client.id}
+                onToggle={(open) => setOpenClientId(open ? client.id : null)}
               />
             ))
           ) : (
