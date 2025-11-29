@@ -82,6 +82,7 @@ export default function AdminClients() {
               onContactAdded={refetch}
               clientProjects={[]}
               onCancel={() => setShowNewClientForm(false)}
+              onClientCreated={() => setShowNewClientForm(false)}
             />
           )}
           
