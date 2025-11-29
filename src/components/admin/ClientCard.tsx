@@ -1,10 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MessageCircle, Pencil } from "lucide-react";
+import { Mail, MessageCircle, Pencil, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface Client {
   id: string;
@@ -25,6 +30,7 @@ interface ClientCardProps {
 export function ClientCard({ client, onEdit }: ClientCardProps) {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [contactsOpen, setContactsOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
     email: string; 
     name: string;
@@ -73,35 +79,57 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
       <CardContent className="p-4 pt-0 flex-1">
       </CardContent>
 
-      <CardFooter className="flex flex-col items-start border-t p-4 mt-auto gap-2">
+      <CardFooter className="flex flex-col items-start border-t p-4 mt-auto">
         {client.client_contacts && client.client_contacts.length > 0 ? (
-          <div className="w-full space-y-2">
-            {client.client_contacts.map((contact: any) => (
-              <div key={contact.id} className="flex items-center justify-between w-full">
-                <span className="text-sm font-medium">
-                  {contact.first_name} {contact.last_name}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => handleEmail(contact)}
-                  >
-                    <Mail className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => handleWhatsApp(contact)}
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                  </Button>
+          <Collapsible open={contactsOpen} onOpenChange={setContactsOpen} className="w-full">
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full flex items-center justify-between p-2 h-auto"
+              >
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    Contacts ({client.client_contacts.length})
+                  </span>
                 </div>
+                {contactsOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2">
+              <div className="space-y-2">
+                {client.client_contacts.map((contact: any) => (
+                  <div key={contact.id} className="flex items-center justify-between w-full py-2">
+                    <span className="text-sm font-medium">
+                      {contact.first_name} {contact.last_name}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleEmail(contact)}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleWhatsApp(contact)}
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
         ) : (
           <p className="text-sm text-muted-foreground">No contacts available</p>
         )}
