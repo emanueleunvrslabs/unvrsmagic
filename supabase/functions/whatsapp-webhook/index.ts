@@ -38,14 +38,38 @@ serve(async (req) => {
 
     const payload = await req.json();
 
-    // Process the webhook payload
-    // This can be used to handle incoming messages, delivery reports, etc.
-    
+    // Initialize Supabase client with service role
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Process incoming messages
     if (payload.event === 'message.received') {
-      const { from, message } = payload.data || {};
+      const { from, text } = payload.data || {};
       
-      // You can add custom logic here to handle incoming messages
-      // For example, auto-replies, commands, etc.
+      if (from && text) {
+        // Find the contact by phone number
+        const { data: contact } = await supabase
+          .from('client_contacts')
+          .select('id, client_id, first_name, last_name')
+          .eq('whatsapp_number', from)
+          .single();
+
+        if (contact) {
+          // Save incoming message to database
+          await supabase
+            .from('whatsapp_messages')
+            .insert({
+              client_id: contact.client_id,
+              contact_id: contact.id,
+              phone_number: from,
+              message_text: text,
+              direction: 'incoming',
+              status: 'received',
+              user_id: (await supabase.from('user_roles').select('user_id').eq('role', 'owner').single()).data?.user_id
+            });
+        }
+      }
     }
 
     return new Response(
