@@ -58,11 +58,10 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
         />
         <div className="card-heading">{client.company_name}</div>
         <div className="social-icons">
-          <a href="#" className="instagram-link" onClick={(e) => e.stopPropagation()}>
+          <button className="instagram-link" onClick={(e) => e.stopPropagation()}>
             <Briefcase className="icon" strokeWidth={2} />
-          </a>
-          <a 
-            href="#" 
+          </button>
+          <button 
             className="x-link" 
             onClick={(e) => {
               e.stopPropagation();
@@ -71,9 +70,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
             }}
           >
             <FileText className="icon" strokeWidth={2} />
-          </a>
-          <a 
-            href="#" 
+          </button>
+          <button 
             className="discord-link" 
             onClick={(e) => {
               e.stopPropagation();
@@ -82,9 +80,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
             }}
           >
             <Users className="icon" strokeWidth={2} />
-          </a>
-          <a 
-            href="#" 
+          </button>
+          <button 
             className="fourth-link" 
             onClick={(e) => {
               e.stopPropagation();
@@ -92,7 +89,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
             }}
           >
             <Pencil className="icon" strokeWidth={2} />
-          </a>
+          </button>
         </div>
 
         {/* Collapsible Billing Section */}
