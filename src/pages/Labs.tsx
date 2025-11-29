@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
+import { SocialMediaCard } from "@/components/labs/SocialMediaCard";
 
 export default function LabsPage() {
   return (
@@ -12,12 +13,14 @@ export default function LabsPage() {
         </div>
 
         <div className="grid gap-6">
-          {/* Add your experimental components here */}
           <div className="p-6 rounded-lg border border-border bg-card">
-            <h2 className="text-xl font-semibold mb-4">Component Testing Area</h2>
-            <p className="text-muted-foreground">
-              This is your experimental space. Add components, test designs, and prototype new features here.
+            <h2 className="text-xl font-semibold mb-4">Social Media Card</h2>
+            <p className="text-muted-foreground mb-6">
+              Interactive card with animated astronaut and social media links. Hover and drag the astronaut!
             </p>
+            <div className="flex justify-center">
+              <SocialMediaCard />
+            </div>
           </div>
         </div>
       </div>
