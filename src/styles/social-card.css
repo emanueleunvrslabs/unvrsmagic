@@ -21,8 +21,7 @@
 /* Company Name Card - Simple without effects */
 .company-name-card-simple {
   padding: 1rem 1.5rem;
-  width: 100%;
-  max-width: fit-content;
+  width: 320px;
 }
 
 .company-name-content-simple {
@@ -42,7 +41,7 @@
 
 /* Icons Card */
 .icons-card {
-  width: fit-content;
+  width: 320px;
 }
 
 .social-card ul {
@@ -87,8 +86,7 @@
 /* Contacts List Card */
 .contacts-list-card {
   padding: 1rem;
-  width: 100%;
-  max-width: fit-content;
+  width: 320px;
 }
 
 .contacts-list {
