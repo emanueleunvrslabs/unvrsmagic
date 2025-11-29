@@ -399,9 +399,9 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                   {contacts.map((contact) => (
                     <div key={contact.id} className="contact-item-card">
                       <span className="contact-name-card">{contact.name}</span>
-                      <div className="contact-actions-card">
+                      <div className="social-icons">
                         <button
-                          className="contact-btn-card"
+                          className="instagram-link"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedContact(contact);
@@ -409,10 +409,10 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                           }}
                           aria-label="Send email"
                         >
-                          <Mail className="contact-icon-card" size={18} />
+                          <Mail className="icon" strokeWidth={2} />
                         </button>
                         <button
-                          className="contact-btn-card"
+                          className="x-link"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedContact(contact);
@@ -420,17 +420,17 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                           }}
                           aria-label="Send WhatsApp"
                         >
-                          <MessageCircle className="contact-icon-card" size={18} />
+                          <MessageCircle className="icon" strokeWidth={2} />
                         </button>
                         <button
-                          className="contact-btn-card"
+                          className="discord-link"
                           onClick={(e) => {
                             e.stopPropagation();
                             startEditContact(contact);
                           }}
                           aria-label="Edit contact"
                         >
-                          <Pencil className="contact-icon-card" size={16} />
+                          <Pencil className="icon" strokeWidth={2} />
                         </button>
                       </div>
                     </div>
