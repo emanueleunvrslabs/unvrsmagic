@@ -74,9 +74,8 @@ export default function AdminClients() {
           </Button>
         </div>
 
-        <div className="flex justify-center">
-          <div className="flex flex-wrap gap-6 max-w-[1200px]">
-            {showNewClientForm && (
+        <div className="flex flex-wrap gap-6 justify-center mx-auto" style={{ maxWidth: 'fit-content' }}>
+          {showNewClientForm && (
             <ClientCard
               client={null}
               onEdit={() => {}}
@@ -103,8 +102,7 @@ export default function AdminClients() {
                 No clients yet. Start by adding your first client using the "New Client" button above.
               </p>
             </div>
-            ) : null}
-          </div>
+          ) : null}
         </div>
       </div>
 
