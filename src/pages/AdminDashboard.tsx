@@ -104,13 +104,23 @@ const AdminDashboard = () => {
     }
   });
 
-  // Fetch credit transactions (last 5)
+  // Fetch credit transactions (last 5, excluding owner/admin)
   const { data: transactionsData, isLoading: loadingTransactions } = useQuery({
     queryKey: ['admin-transactions'],
     queryFn: async () => {
+      // First get owner/admin user IDs
+      const { data: adminUsers } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['owner', 'admin']);
+      
+      const adminUserIds = adminUsers?.map(u => u.user_id) || [];
+      
+      // Then fetch transactions excluding admin users
       const { data, error } = await supabase
         .from('credit_transactions')
-        .select('id, amount, type, description, created_at')
+        .select('id, amount, type, description, created_at, user_id')
+        .not('user_id', 'in', `(${adminUserIds.join(',')})`)
         .order('created_at', { ascending: false })
         .limit(ITEMS_PER_PAGE);
       
