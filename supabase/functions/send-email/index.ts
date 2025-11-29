@@ -20,8 +20,14 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    if (!supabaseUrl) {
+      console.error("SUPABASE_URL env variable is not set in the send-email function");
+      throw new Error("SUPABASE_URL env variable is not set");
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get owner's Resend API key
