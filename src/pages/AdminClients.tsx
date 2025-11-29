@@ -2,14 +2,13 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Loader2, UserPlus, Briefcase, Users, Settings } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { NewClientModal } from "@/components/admin/NewClientModal";
 import { EditClientModal } from "@/components/admin/EditClientModal";
 import { ClientCard } from "@/components/admin/ClientCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import "@/styles/social-card.css";
 
 export default function AdminClients() {
   const { isOwner, loading: roleLoading } = useUserRole();
@@ -87,52 +86,6 @@ export default function AdminClients() {
               </p>
             </div>
           )}
-        </div>
-
-        <div className="social-cards-wrapper mt-8">
-          <div className="social-card company-name-card-simple">
-            <div className="company-name-content-simple">
-              <span className="company-name-text">Company Name</span>
-            </div>
-          </div>
-
-          <div className="social-card icons-card">
-            <ul>
-              <li className="social-iso-pro">
-                <span></span>
-                <span></span>
-                <span></span>
-                <a href="#">
-                  <div className="social-svg-wrapper">
-                    <Briefcase className="social-svg-icon" strokeWidth={2} />
-                  </div>
-                </a>
-                <div className="social-text">Projects</div>
-              </li>
-              <li className="social-iso-pro">
-                <span></span>
-                <span></span>
-                <span></span>
-                <a href="#">
-                  <div className="social-svg-wrapper">
-                    <Users className="social-svg-icon" strokeWidth={2} />
-                  </div>
-                </a>
-                <div className="social-text">Contact</div>
-              </li>
-              <li className="social-iso-pro">
-                <span></span>
-                <span></span>
-                <span></span>
-                <a href="#">
-                  <div className="social-svg-wrapper">
-                    <Settings className="social-svg-icon" strokeWidth={2} />
-                  </div>
-                </a>
-                <div className="social-text">Edit</div>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
 
