@@ -397,42 +397,40 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
               contacts.length > 0 && (
                 <>
                   {contacts.map((contact) => (
-                    <div key={contact.id} className="contact-item-card">
+                    <div key={contact.id} className="social-icons">
                       <span className="contact-name-card">{contact.name}</span>
-                      <div className="social-icons">
-                        <button
-                          className="instagram-link"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedContact(contact);
-                            setEmailModalOpen(true);
-                          }}
-                          aria-label="Send email"
-                        >
-                          <Mail className="icon" strokeWidth={2} />
-                        </button>
-                        <button
-                          className="x-link"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedContact(contact);
-                            setWhatsappModalOpen(true);
-                          }}
-                          aria-label="Send WhatsApp"
-                        >
-                          <MessageCircle className="icon" strokeWidth={2} />
-                        </button>
-                        <button
-                          className="discord-link"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            startEditContact(contact);
-                          }}
-                          aria-label="Edit contact"
-                        >
-                          <Pencil className="icon" strokeWidth={2} />
-                        </button>
-                      </div>
+                      <button
+                        className="instagram-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedContact(contact);
+                          setEmailModalOpen(true);
+                        }}
+                        aria-label="Send email"
+                      >
+                        <Mail className="icon" strokeWidth={2} />
+                      </button>
+                      <button
+                        className="x-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedContact(contact);
+                          setWhatsappModalOpen(true);
+                        }}
+                        aria-label="Send WhatsApp"
+                      >
+                        <MessageCircle className="icon" strokeWidth={2} />
+                      </button>
+                      <button
+                        className="discord-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEditContact(contact);
+                        }}
+                        aria-label="Edit contact"
+                      >
+                        <Pencil className="icon" strokeWidth={2} />
+                      </button>
                     </div>
                   ))}
                 </>
