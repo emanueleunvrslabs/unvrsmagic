@@ -135,7 +135,7 @@ export function StrategyDetailsModal({
           {/* Right column - Purchase options */}
           <div className="space-y-4">
             <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">Purchase Options</h3>
+              <h3 className="mb-4 text-lg font-semibold">Projects</h3>
               <PurchaseOptions strategy={strategy} onPurchase={onPurchase} />
             </div>
 
@@ -197,7 +197,7 @@ export function StrategyDetailsModal({
           ) : (
             <Button className="gap-1" onClick={() => onPurchase?.(strategy.id)}>
               <ShoppingCart className="h-4 w-4" />
-              <span>Buy Now</span>
+              <span>New Project</span>
             </Button>
           )}
         </DialogFooter>
