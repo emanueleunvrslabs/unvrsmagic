@@ -67,7 +67,7 @@ export default function AdminClients() {
           </div>
           <Button 
             onClick={() => setShowNewClientForm(true)} 
-            className="gap-2 px-5 py-6"
+            className="gap-2 px-5 py-6 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30"
           >
             <UserPlus className="h-4 w-4" />
             New Client
