@@ -1,6 +1,10 @@
 import "./SocialMediaCard.css";
 
-export const SocialMediaCard = () => {
+interface SocialMediaCardProps {
+  companyName?: string;
+}
+
+export const SocialMediaCard = ({ companyName = "Company Name S.r.l." }: SocialMediaCardProps) => {
   return (
     <div className="social-media-card">
       <img
@@ -8,7 +12,7 @@ export const SocialMediaCard = () => {
         alt="Astronaut"
         className="astronaut-image"
       />
-      <div className="card-heading">We're on Social Media</div>
+      <div className="card-heading">{companyName}</div>
       <div className="social-icons">
         <a href="https://www.instagram.com/uiverse.io/" className="instagram-link">
           <svg
