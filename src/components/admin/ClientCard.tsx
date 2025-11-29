@@ -49,7 +49,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
     <>
       <div className="client-card-wrapper">
         <div 
-          className={`social-media-card ${(billingOpen || addContactOpen) ? 'expanded-lateral' : (isOpen ? 'expanded' : '')}`}
+          className={`social-media-card ${(billingOpen || addContactOpen || isOpen) ? 'expanded-lateral' : ''}`}
         >
           <div className="card-main-content">
             <img
@@ -94,11 +94,14 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                 <Pencil className="icon" strokeWidth={2} />
               </button>
             </div>
+          </div>
 
-            {/* Collapsible Contacts Section */}
-            <div className={`contacts-section ${isOpen ? 'open' : ''}`}>
+          {/* Collapsible Contacts Section - Lateral */}
+          <div className={`billing-section-lateral ${isOpen ? 'open' : ''}`}>
+            <h3 className="text-base font-semibold text-white mb-2">Contacts</h3>
+            <div className="flex flex-col gap-3 w-full">
               {contacts.length > 0 && (
-                <>
+                <div className="flex flex-col gap-2">
                   {contacts.map((contact) => (
                     <div key={contact.id} className="contact-item-card">
                       <span className="contact-name-card">{contact.name}</span>
@@ -128,7 +131,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                       </div>
                     </div>
                   ))}
-                </>
+                </div>
               )}
               
               <button
