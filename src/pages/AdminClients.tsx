@@ -9,6 +9,7 @@ import { EditClientModal } from "@/components/admin/EditClientModal";
 import { ClientCard } from "@/components/admin/ClientCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialMediaCard } from "@/components/admin/SocialMediaCard";
 
 export default function AdminClients() {
   const { isOwner, loading: roleLoading } = useUserRole();
@@ -87,6 +88,8 @@ export default function AdminClients() {
             </div>
           )}
         </div>
+
+        <SocialMediaCard />
       </div>
 
       <NewClientModal 
