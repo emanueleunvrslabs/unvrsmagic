@@ -1,9 +1,8 @@
-import { Card } from "@/components/ui/card";
+import "../labs/SocialMediaCard.css";
 import { Briefcase, FileText, StickyNote, Settings, Mail, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
-import "@/styles/social-card.css";
 
 interface Client {
   id: string;
@@ -19,11 +18,10 @@ interface Client {
 interface ClientCardProps {
   client: Client;
   onEdit: (client: Client) => void;
-  isOpen: boolean;
-  onToggle: (open: boolean) => void;
 }
 
 export function ClientCard({ client, onEdit }: ClientCardProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
@@ -32,154 +30,87 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
     phone: string;
     id: string;
   } | null>(null);
-  const [showContactsModal, setShowContactsModal] = useState(false);
+
+  const contacts = client.client_contacts?.map(contact => ({
+    id: contact.id,
+    name: `${contact.first_name} ${contact.last_name}`,
+    email: contact.email,
+    phone: contact.whatsapp_number
+  })) || [];
 
   return (
     <>
-      <div className="social-cards-wrapper">
-        <div className="social-card company-name-card-simple">
-          <div className="company-name-content-simple">
-            <span className="company-name-text">{client.company_name}</span>
-          </div>
+      <div 
+        className={`social-media-card ${isOpen ? 'expanded' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <img
+          src="https://uiverse.io/astronaut.png"
+          alt="Astronaut"
+          className="astronaut-image"
+        />
+        <div className="card-heading">{client.company_name}</div>
+        <div className="social-icons">
+          <a href="#" className="instagram-link" onClick={(e) => e.stopPropagation()}>
+            <Briefcase className="icon" strokeWidth={2} />
+          </a>
+          <a href="#" className="x-link" onClick={(e) => e.stopPropagation()}>
+            <FileText className="icon" strokeWidth={2} />
+          </a>
+          <a href="#" className="discord-link" onClick={(e) => e.stopPropagation()}>
+            <StickyNote className="icon" strokeWidth={2} />
+          </a>
+          <a 
+            href="#" 
+            className="fourth-link" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(client);
+            }}
+          >
+            <Settings className="icon" strokeWidth={2} />
+          </a>
         </div>
 
-        <div className="social-card icons-card">
-          <ul>
-            <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Navigate to projects */ }}>
-                <div className="social-svg-wrapper">
-                  <Briefcase className="social-svg-icon" strokeWidth={2} />
+        {/* Collapsible Contacts Section */}
+        <div className={`contacts-section ${isOpen ? 'open' : ''}`}>
+          {contacts.length > 0 ? (
+            contacts.map((contact) => (
+              <div key={contact.id} className="contact-item-card">
+                <span className="contact-name-card">{contact.name}</span>
+                <div className="contact-actions-card">
+                  <button
+                    className="contact-btn-card"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedContact(contact);
+                      setEmailModalOpen(true);
+                    }}
+                    aria-label="Send email"
+                  >
+                    <Mail className="contact-icon-card" size={18} />
+                  </button>
+                  <button
+                    className="contact-btn-card"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedContact(contact);
+                      setWhatsappModalOpen(true);
+                    }}
+                    aria-label="Send WhatsApp"
+                  >
+                    <MessageCircle className="contact-icon-card" size={18} />
+                  </button>
                 </div>
-              </a>
-            </li>
-            <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Navigate to invoices */ }}>
-                <div className="social-svg-wrapper">
-                  <FileText className="social-svg-icon" strokeWidth={2} />
-                </div>
-              </a>
-            </li>
-            <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Navigate to notes */ }}>
-                <div className="social-svg-wrapper">
-                  <StickyNote className="social-svg-icon" strokeWidth={2} />
-                </div>
-              </a>
-            </li>
-            <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); onEdit(client); }}>
-                <div className="social-svg-wrapper">
-                  <Settings className="social-svg-icon" strokeWidth={2} />
-                </div>
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {client.client_contacts && client.client_contacts.length > 0 && (
-          <div className="social-card contacts-list-card">
-            <div className="contacts-list">
-              {client.client_contacts.map((contact: any) => (
-                <div key={contact.id} className="contact-item">
-                  <span className="contact-name">
-                    {contact.first_name} {contact.last_name}
-                  </span>
-                  <div className="contact-actions">
-                    <button
-                      className="contact-action-btn"
-                      onClick={() => {
-                        setSelectedContact({
-                          email: contact.email,
-                          name: `${contact.first_name} ${contact.last_name}`,
-                          phone: contact.whatsapp_number,
-                          id: contact.id,
-                        });
-                        setEmailModalOpen(true);
-                      }}
-                      aria-label="Send email"
-                    >
-                      <div className="social-svg-wrapper">
-                        <Mail className="contact-action-icon" />
-                      </div>
-                    </button>
-                    <button
-                      className="contact-action-btn"
-                      onClick={() => {
-                        setSelectedContact({
-                          email: contact.email,
-                          name: `${contact.first_name} ${contact.last_name}`,
-                          phone: contact.whatsapp_number,
-                          id: contact.id,
-                        });
-                        setWhatsappModalOpen(true);
-                      }}
-                      aria-label="Send WhatsApp message"
-                    >
-                      <div className="social-svg-wrapper">
-                        <MessageCircle className="contact-action-icon" />
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Contacts Modal */}
-      {showContactsModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => setShowContactsModal(false)}>
-          <Card className="w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold mb-4">Contacts for {client.company_name}</h3>
-            {client.client_contacts && client.client_contacts.length > 0 ? (
-              <div className="space-y-3">
-                {client.client_contacts.map((contact: any) => (
-                  <div key={contact.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm font-medium">
-                      {contact.first_name} {contact.last_name}
-                    </span>
-                    <div className="flex gap-2">
-                      <button
-                        className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted transition-colors"
-                        onClick={() => {
-                          setSelectedContact({
-                            email: contact.email,
-                            name: `${contact.first_name} ${contact.last_name}`,
-                            phone: contact.whatsapp_number,
-                            id: contact.id,
-                          });
-                          setEmailModalOpen(true);
-                          setShowContactsModal(false);
-                        }}
-                      >
-                        <Mail className="h-4 w-4" />
-                      </button>
-                      <button
-                        className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted transition-colors"
-                        onClick={() => {
-                          setSelectedContact({
-                            email: contact.email,
-                            name: `${contact.first_name} ${contact.last_name}`,
-                            phone: contact.whatsapp_number,
-                            id: contact.id,
-                          });
-                          setWhatsappModalOpen(true);
-                          setShowContactsModal(false);
-                        }}
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No contacts available</p>
-            )}
-          </Card>
+            ))
+          ) : (
+            <div className="contact-item-card">
+              <span className="contact-name-card text-muted-foreground">No contacts available</span>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {selectedContact && (
         <>
