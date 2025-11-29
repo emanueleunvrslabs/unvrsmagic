@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import './styles/modal-glassmorphism.css';
+@import './styles/social-media-card.css';
 
 /* Smooth scroll behavior */
 html {
