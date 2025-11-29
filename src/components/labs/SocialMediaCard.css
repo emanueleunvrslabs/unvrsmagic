@@ -513,3 +513,59 @@
 .contact-icon-card {
   color: rgba(193, 119, 241, 0.8);
 }
+
+/* WhatsApp Chat Modal */
+.whatsapp-chat-modal {
+  position: relative;
+  width: 600px;
+  max-width: 90vw;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  background-color: #171717;
+  color: white;
+  font-family: Montserrat, system-ui, -apple-system, sans-serif;
+  border-radius: 20px;
+  padding: 2em;
+  overflow: hidden;
+  z-index: 1;
+  backdrop-filter: blur(15px);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.192),
+    inset 0 0 5px rgba(255, 255, 255, 0.274), 0 5px 5px rgba(0, 0, 0, 0.164);
+}
+
+.whatsapp-chat-modal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  opacity: 1;
+  box-shadow: 220px 118px #fff, 280px 176px #fff, 40px 50px #fff,
+    60px 180px #fff, 120px 130px #fff, 180px 176px #fff, 220px 290px #fff,
+    520px 250px #fff, 400px 220px #fff, 50px 350px #fff, 10px 230px #fff;
+  z-index: -1;
+  transition: 1s ease;
+  animation: 1s glowing-stars linear alternate infinite;
+  animation-delay: 0s;
+}
+
+.whatsapp-chat-modal::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  opacity: 1;
+  box-shadow: 140px 20px #fff, 425px 20px #fff, 70px 120px #fff, 20px 130px #fff,
+    110px 80px #fff, 280px 80px #fff, 250px 350px #fff, 280px 230px #fff,
+    220px 190px #fff, 450px 100px #fff, 380px 80px #fff, 520px 50px #fff;
+  z-index: -1;
+  transition: 1.5s ease;
+  animation: 1s glowing-stars linear alternate infinite;
+  animation-delay: 0.4s;
+}
