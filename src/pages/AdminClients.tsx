@@ -15,7 +15,6 @@ export default function AdminClients() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
-  const [openClientId, setOpenClientId] = useState<string | null>(null);
 
   const { data: clients, isLoading, refetch } = useQuery({
     queryKey: ["clients"],
@@ -68,15 +67,13 @@ export default function AdminClients() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="flex flex-col items-center gap-6">
           {clients && clients.length > 0 ? (
             clients.map((client) => (
               <ClientCard
                 key={client.id}
                 client={client}
                 onEdit={handleEditClient}
-                isOpen={openClientId === client.id}
-                onToggle={(open) => setOpenClientId(open ? client.id : null)}
               />
             ))
           ) : (
