@@ -89,16 +89,6 @@ export function StrategyDetailsModal({
 
           {/* Right column - Actions */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <Button variant="outline" size="sm" className="gap-1">
-                <Share2 className="h-4 w-4" />
-                <span>Share</span>
-              </Button>
-              <Button variant="outline" size="sm" className="gap-1" onClick={() => onToggleFavorite(strategy.id)}>
-                <Heart className={cn("h-4 w-4", strategy.isFavorite ? "fill-red-500 text-red-500" : "")} />
-                <span>{strategy.isFavorite ? "Favorited" : "Add to Favorites"}</span>
-              </Button>
-            </div>
           </div>
         </div>
 
