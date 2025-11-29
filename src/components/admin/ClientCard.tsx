@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { Briefcase, FileText, StickyNote, Settings, Mail, MessageCircle } from "lucide-react";
+import { Briefcase, FileText, StickyNote, Pencil, Mail, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
@@ -68,7 +68,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               onEdit(client);
             }}
           >
-            <Settings className="icon" strokeWidth={2} />
+            <Pencil className="icon" strokeWidth={2} />
           </a>
         </div>
 
