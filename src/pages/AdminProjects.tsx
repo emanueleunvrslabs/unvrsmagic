@@ -49,7 +49,6 @@ export default function AdminProjects() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      {project.icon && <span className="text-2xl">{project.icon}</span>}
                       {project.name}
                       {project.published && (
                         <Badge variant="secondary">Pubblicato</Badge>

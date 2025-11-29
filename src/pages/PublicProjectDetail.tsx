@@ -186,16 +186,6 @@ export default function PublicProjectDetail() {
             transition={{ duration: 0.8 }}
             className="max-w-4xl mx-auto text-center"
           >
-            {project.icon && (
-              <div className="mb-8 flex justify-center">
-                <img
-                  src={project.icon}
-                  alt={project.name}
-                  className="w-full max-w-2xl h-64 object-cover rounded-2xl"
-                />
-              </div>
-            )}
-
             <h1
               className="text-5xl md:text-7xl font-bold text-white mb-12"
               style={{ fontFamily: "Orbitron, sans-serif" }}

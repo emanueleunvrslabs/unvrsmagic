@@ -100,8 +100,7 @@ export function ProjectDetailsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] max-w-5xl overflow-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl flex items-center gap-3">
-            {project.icon && <span className="text-3xl">{project.icon}</span>}
+          <DialogTitle className="text-2xl">
             {project.name}
           </DialogTitle>
           <DialogDescription>
