@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Loader2, UserPlus } from "lucide-react";
 import { Navigate } from "react-router-dom";
-import { NewClientModal } from "@/components/admin/NewClientModal";
+import { NewClientCard } from "@/components/admin/NewClientCard";
 import { EditClientModal } from "@/components/admin/EditClientModal";
 import { ClientCard } from "@/components/admin/ClientCard";
 import { useQuery } from "@tanstack/react-query";
@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminClients() {
   const { isOwner, loading: roleLoading } = useUserRole();
-  const [modalOpen, setModalOpen] = useState(false);
+  const [creatingNewClient, setCreatingNewClient] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
 
@@ -67,7 +67,7 @@ export default function AdminClients() {
             </p>
           </div>
           <Button 
-            onClick={() => setModalOpen(true)} 
+            onClick={() => setCreatingNewClient(true)} 
             className="gap-2 px-5 py-6"
           >
             <UserPlus className="h-4 w-4" />
@@ -75,7 +75,17 @@ export default function AdminClients() {
           </Button>
         </div>
 
-        <div className="flex flex-wrap gap-6">
+        <div className="flex flex-col">
+          {creatingNewClient && (
+            <NewClientCard
+              onSuccess={() => {
+                setCreatingNewClient(false);
+                refetch();
+              }}
+              onCancel={() => setCreatingNewClient(false)}
+            />
+          )}
+
           {clients && clients.length > 0 ? (
             clients.map((client) => (
               <ClientCard
@@ -86,21 +96,15 @@ export default function AdminClients() {
                 clientProjects={client.client_projects || []}
               />
             ))
-          ) : (
+          ) : !creatingNewClient ? (
             <div className="text-center py-12 w-full">
               <p className="text-muted-foreground">
                 No clients yet. Start by adding your first client using the "New Client" button above.
               </p>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
-
-      <NewClientModal 
-        open={modalOpen} 
-        onOpenChange={setModalOpen}
-        onSuccess={refetch}
-      />
 
       <EditClientModal
         client={selectedClient}
