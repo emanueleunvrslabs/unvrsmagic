@@ -10,8 +10,6 @@ import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { it } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const ITEMS_PER_PAGE = 5;
-
 const AdminDashboard = () => {
   // Fetch total projects count
   const { data: projectsData, isLoading: loadingProjects } = useQuery({
@@ -104,7 +102,7 @@ const AdminDashboard = () => {
     }
   });
 
-  // Fetch credit transactions (last 5, excluding owner/admin)
+  // Fetch credit transactions (excluding owner/admin, with scroll)
   const { data: transactionsData, isLoading: loadingTransactions } = useQuery({
     queryKey: ['admin-transactions'],
     queryFn: async () => {
@@ -116,13 +114,18 @@ const AdminDashboard = () => {
       
       const adminUserIds = adminUsers?.map(u => u.user_id) || [];
       
-      // Then fetch transactions excluding admin users
-      const { data, error } = await supabase
+      // Then fetch all transactions excluding admin users (no limit for scroll)
+      const query = supabase
         .from('credit_transactions')
         .select('id, amount, type, description, created_at, user_id')
-        .not('user_id', 'in', `(${adminUserIds.join(',')})`)
-        .order('created_at', { ascending: false })
-        .limit(ITEMS_PER_PAGE);
+        .order('created_at', { ascending: false });
+      
+      // Only apply filter if there are admin users
+      if (adminUserIds.length > 0) {
+        query.not('user_id', 'in', `(${adminUserIds.join(',')})`);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       return data || [];
