@@ -245,16 +245,6 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                 />
               </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Country</label>
-              <input 
-                type="text" 
-                defaultValue={client.country}
-                className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                style={{ borderRadius: '16px' }}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
           </div>
         </div>
       </div>
