@@ -429,24 +429,26 @@
   pointer-events: auto;
 }
 
-/* Contacts Section Styles */
-.contacts-section {
+/* Contacts Section - Lateral */
+.contacts-section-lateral {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  width: 100%;
-  padding: 0 1em;
-  margin-top: 1em;
-  z-index: 10;
-  max-height: 0;
+  padding: 2em 1.5em;
+  width: 22em;
+  height: 25em;
   opacity: 0;
+  max-width: 0;
   overflow: hidden;
-  transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+  pointer-events: none;
+  transition: max-width 0.4s ease-in-out, opacity 0.3s ease-in-out;
+  flex-shrink: 0;
 }
 
-.contacts-section.open {
-  max-height: 500px;
+.contacts-section-lateral.open {
   opacity: 1;
+  max-width: 22em;
+  pointer-events: auto;
 }
 
 .contact-item-card {
