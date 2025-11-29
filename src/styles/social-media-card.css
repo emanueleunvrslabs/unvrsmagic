@@ -1,7 +1,7 @@
 /* From Uiverse.io by Praashoo7 */ 
 /* HOLD THE ASTRONAUT */
 
-.card {
+.social-card-root .card {
   position: relative;
   width: 19em;
   height: 25em;
@@ -9,33 +9,33 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #171717 !important;
-  color: white !important;
-  font-family: Montserrat, sans-serif !important;
-  font-weight: bold !important;
+  background-color: #171717;
+  color: white;
+  font-family: Montserrat;
+  font-weight: bold;
   padding: 1em 2em 1em 1em;
   border-radius: 20px;
   overflow: hidden;
   z-index: 1;
   row-gap: 1em;
 }
-.card img {
+.social-card-root .card img {
   width: 12em;
   margin-right: 1em;
   animation: move 10s ease-in-out infinite;
   z-index: 5;
 }
-.image:hover {
+.social-card-root .image:hover {
   cursor: -webkit-grab;
   cursor: grab;
 }
 
-.icons svg {
+.social-card-root .icons svg {
   width: 20px;
   height: 20px;
 }
 
-.card::before {
+.social-card-root .card::before {
   content: "";
   position: absolute;
   width: 100%;
@@ -47,12 +47,12 @@
   transition: 0.4s ease-in-out;
   z-index: -1;
 }
-.card:hover::before {
+.social-card-root .card:hover::before {
   width: 150%;
   height: 100%;
   margin-left: -4.25em;
 }
-.card::after {
+.social-card-root .card::after {
   content: "";
   position: absolute;
   inset: 2px;
@@ -62,15 +62,15 @@
   z-index: -1;
 }
 
-.heading {
+.social-card-root .heading {
   z-index: 2;
   transition: 0.4s ease-in-out;
 }
-.card:hover .heading {
+.social-card-root .card:hover .heading {
   letter-spacing: 0.025em;
 }
 
-.heading::before {
+.social-card-root .heading::before {
   content: "";
   position: absolute;
   top: 0;
@@ -87,7 +87,7 @@
   animation: 1s glowing-stars linear alternate infinite;
   animation-delay: 0s;
 }
-.icons::before {
+.social-card-root .icons::before {
   content: "";
   position: absolute;
   top: 0;
@@ -104,7 +104,7 @@
   animation: 1s glowing-stars linear alternate infinite;
   animation-delay: 0.4s;
 }
-.icons::after {
+.social-card-root .icons::after {
   content: "";
   position: absolute;
   top: 0;
@@ -122,17 +122,17 @@
   animation: 1s glowing-stars linear alternate infinite;
   animation-delay: 0.8s;
 }
-.card:hover .heading::before,
-.card:hover .icons::before,
-.card:hover .icons::after {
+.social-card-root .card:hover .heading::before,
+.social-card-root .card:hover .icons::before,
+.social-card-root .card:hover .icons::after {
   filter: blur(3px);
 }
 
-.image:active {
+.social-card-root .image:active {
   cursor: -webkit-grabbing;
   cursor: grabbing;
 }
-.image:active + .heading::before {
+.social-card-root .image:active + .heading::before {
   box-shadow: 240px 20px #9b40fc, 240px 25px #9b40fc, 240px 30px #9b40fc,
     240px 35px #9b40fc, 240px 40px #9b40fc, 242px 45px #9b40fc,
     246px 48px #9b40fc, 251px 49px #9b40fc, 256px 48px #9b40fc,
@@ -145,7 +145,7 @@
   scale: 0.65;
   transform: translateX(9em) translateY(1em);
 }
-.image:active ~ .icons::before {
+.social-card-root .image:active ~ .icons::before {
   box-shadow: 262px 35px #9b40fc, 262px 30px #9b40fc, 262px 25px #9b40fc,
     262px 20px #9b40fc, 275px 20px #9b40fc, 275px 24px #9b40fc,
     275px 28px #9b40fc, 275px 32px #9b40fc, 275px 36px #9b40fc,
@@ -158,7 +158,7 @@
   scale: 0.65;
   transform: translateX(9em) translateY(1em);
 }
-.image:active ~ .icons::after {
+.social-card-root .image:active ~ .icons::after {
   box-shadow: 238px 60px #9b40fc, 242px 60px #9b40fc, 246px 60px #9b40fc,
     250px 60px #9b40fc, 254px 60px #9b40fc, 258px 60px #9b40fc,
     262px 60px #9b40fc, 266px 60px #9b40fc, 270px 60px #9b40fc,
@@ -173,7 +173,7 @@
   transform: translateX(9em) translateY(1.25em);
 }
 
-.heading::after {
+.social-card-root .heading::after {
   content: "";
   top: -8.5%;
   left: -8.5%;
@@ -189,12 +189,12 @@
   transition: 0.4s ease-in-out;
   z-index: -1;
 }
-.card:hover .heading::after {
+.social-card-root .card:hover .heading::after {
   box-shadow: 0px 0px 200px rgba(193, 119, 241, 1),
     0px 0px 200px rgba(135, 42, 211, 1), inset #9b40fc 0px 0px 40px -12px;
 }
 
-.icons {
+.social-card-root .icons {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,15 +203,15 @@
   z-index: 1;
 }
 
-.instagram,
-.x,
-.discord {
+.social-card-root .instagram,
+.social-card-root .x,
+.social-card-root .discord {
   position: relative;
   transition: 0.4s ease-in-out;
 }
-.instagram:after,
-.x:after,
-.discord:after {
+.social-card-root .instagram:after,
+.social-card-root .x:after,
+.social-card-root .discord:after {
   content: "";
   position: absolute;
   width: 0.5em;
@@ -224,41 +224,41 @@
   z-index: -1;
   transition: 0.3s ease-in-out;
 }
-.instagram svg path,
-.x svg path,
-.discord svg path {
+.social-card-root .instagram svg path,
+.social-card-root .x svg path,
+.social-card-root .discord svg path {
   stroke: #808080;
   transition: 0.4s ease-in-out;
 }
-.instagram:hover svg path {
+.social-card-root .instagram:hover svg path {
   stroke: #cc39a4;
 }
-.x:hover svg path {
+.social-card-root .x:hover svg path {
   stroke: black;
 }
-.discord:hover svg path {
+.social-card-root .discord:hover svg path {
   stroke: #8c9eff;
 }
-.instagram svg,
-.x svg,
-.discord svg {
+.social-card-root .instagram svg,
+.social-card-root .x svg,
+.social-card-root .discord svg {
   transition: 0.3s ease-in-out;
 }
-.instagram:hover svg {
+.social-card-root .instagram:hover svg {
   scale: 1.4;
 }
-.x:hover svg,
-.discord:hover svg {
+.social-card-root .x:hover svg,
+.social-card-root .discord:hover svg {
   scale: 1.25;
 }
-.instagram:hover:after,
-.x:hover:after,
-.discord:hover:after {
+.social-card-root .instagram:hover:after,
+.social-card-root .x:hover:after,
+.social-card-root .discord:hover:after {
   scale: 4;
   transform: translateX(0.09em) translateY(0.09em);
 }
 
-.instagram::before {
+.social-card-root .instagram::before {
   content: "";
   position: absolute;
   top: -700%;
@@ -271,7 +271,7 @@
   transition: 1s ease;
   animation-delay: 1s;
 }
-.x::before {
+.social-card-root .x::before {
   content: "";
   position: absolute;
   top: -1300%;
@@ -283,7 +283,7 @@
   animation: 4s shootingStar ease-in-out infinite;
   animation-delay: 3s;
 }
-.discord::before {
+.social-card-root .discord::before {
   content: "";
   position: absolute;
   top: -2100%;
@@ -295,14 +295,14 @@
   animation: 4s shootingStar ease-in-out infinite;
   animation-delay: 5s;
 }
-.card:hover .instagram::before,
-.card:hover .x::before,
-.card:hover .discord::before {
+.social-card-root .card:hover .instagram::before,
+.social-card-root .card:hover .x::before,
+.social-card-root .card:hover .discord::before {
   filter: blur(3px);
 }
-.image:active ~ .icons .instagram::before,
-.image:active ~ .icons .x::before,
-.image:active ~ .icons .discord::before {
+.social-card-root .image:active ~ .icons .instagram::before,
+.social-card-root .image:active ~ .icons .x::before,
+.social-card-root .image:active ~ .icons .discord::before {
   animation: none;
   opacity: 0;
 }
