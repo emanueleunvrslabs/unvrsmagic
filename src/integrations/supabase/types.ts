@@ -652,6 +652,74 @@ export type Database = {
         }
         Relationships: []
       }
+      client_contacts: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          whatsapp_number: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          whatsapp_number: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          whatsapp_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          address: string
+          company_name: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          vat_number: string
+        }
+        Insert: {
+          address: string
+          company_name: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          vat_number: string
+        }
+        Update: {
+          address?: string
+          company_name?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          vat_number?: string
+        }
+        Relationships: []
+      }
       credit_transactions: {
         Row: {
           amount: number
