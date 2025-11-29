@@ -55,65 +55,6 @@ export function StrategyDetailsModal({
         <div className="grid grid-cols-1 gap-6 py-4 md:grid-cols-3">
           {/* Left column - Performance metrics */}
           <div className="space-y-4 md:col-span-2">
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">Performance</h3>
-
-              <div className="mb-4">
-                <PerformanceChart strategy={strategy} height={250} showControls />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <div>
-                  <div className="text-sm text-muted-foreground">Daily Return</div>
-                  <div
-                    className={cn(
-                      "flex items-center gap-1 text-lg font-semibold",
-                      getReturnColor(strategy.returns.daily),
-                    )}
-                  >
-                    <span>{getReturnIcon(strategy.returns.daily)}</span>
-                    {formatPercentage(strategy.returns.daily)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground">Weekly Return</div>
-                  <div
-                    className={cn(
-                      "flex items-center gap-1 text-lg font-semibold",
-                      getReturnColor(strategy.returns.weekly),
-                    )}
-                  >
-                    <span>{getReturnIcon(strategy.returns.weekly)}</span>
-                    {formatPercentage(strategy.returns.weekly)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground">Monthly Return</div>
-                  <div
-                    className={cn(
-                      "flex items-center gap-1 text-lg font-semibold",
-                      getReturnColor(strategy.returns.monthly),
-                    )}
-                  >
-                    <span>{getReturnIcon(strategy.returns.monthly)}</span>
-                    {formatPercentage(strategy.returns.monthly)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground">Yearly Return</div>
-                  <div
-                    className={cn(
-                      "flex items-center gap-1 text-lg font-semibold",
-                      getReturnColor(strategy.returns.yearly),
-                    )}
-                  >
-                    <span>{getReturnIcon(strategy.returns.yearly)}</span>
-                    {formatPercentage(strategy.returns.yearly)}
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="rounded-lg border p-4">
                 <h3 className="mb-4 text-lg font-semibold">Risk Metrics</h3>
