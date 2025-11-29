@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Share2, Heart, Mail, MessageCircle } from "lucide-react";
+import { Mail, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Client {
@@ -28,10 +28,13 @@ export function ClientCard({ client }: ClientCardProps) {
       </CardHeader>
 
       <CardContent className="p-4 pt-0 flex-1">
+      </CardContent>
+
+      <CardFooter className="flex flex-col items-start border-t p-4 mt-auto gap-2">
         {client.client_contacts && client.client_contacts.length > 0 ? (
-          <div className="space-y-3">
+          <div className="w-full space-y-2">
             {client.client_contacts.map((contact: any) => (
-              <div key={contact.id} className="flex items-center justify-between">
+              <div key={contact.id} className="flex items-center justify-between w-full">
                 <span className="text-sm font-medium">
                   {contact.first_name} {contact.last_name}
                 </span>
@@ -59,15 +62,6 @@ export function ClientCard({ client }: ClientCardProps) {
         ) : (
           <p className="text-sm text-muted-foreground">No contacts available</p>
         )}
-      </CardContent>
-
-      <CardFooter className="flex items-center justify-start border-t p-4 mt-auto gap-2">
-        <Button variant="outline" size="sm" className="gap-1">
-          <Share2 className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="sm" className="gap-1">
-          <Heart className="h-4 w-4" />
-        </Button>
       </CardFooter>
     </Card>
   );
