@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MessageCircle } from "lucide-react";
+import { Mail, MessageCircle, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface Client {
   id: string;
@@ -16,15 +17,26 @@ interface Client {
 
 interface ClientCardProps {
   client: Client;
+  onEdit: (client: Client) => void;
 }
 
-export function ClientCard({ client }: ClientCardProps) {
+export function ClientCard({ client, onEdit }: ClientCardProps) {
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md flex flex-col h-full">
       <CardHeader className="p-4">
-        <CardTitle className="line-clamp-1">
-          {client.company_name}
-        </CardTitle>
+        <div className="flex items-start justify-between">
+          <CardTitle className="line-clamp-1 flex-1">
+            {client.company_name}
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 ml-2"
+            onClick={() => onEdit(client)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent className="p-4 pt-0 flex-1">
