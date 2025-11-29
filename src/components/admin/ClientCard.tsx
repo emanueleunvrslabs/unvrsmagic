@@ -22,6 +22,11 @@ interface ClientCardProps {
   client: Client;
   onEdit: (client: Client) => void;
   onContactAdded?: () => void;
+  clientProjects?: Array<{
+    id: string;
+    project_name: string;
+    description?: string;
+  }>;
 }
 
 const contactSchema = z.object({
@@ -34,7 +39,7 @@ const projectSchema = z.object({
   projectName: z.string().trim().min(1, "Project name is required").max(200),
 });
 
-export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) {
+export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [] }: ClientCardProps) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [billingOpen, setBillingOpen] = useState(false);
@@ -535,9 +540,19 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-3 w-full items-center justify-center py-8">
-                <span className="text-white/70 text-sm">No projects assigned</span>
-              </div>
+              clientProjects.length > 0 ? (
+                <>
+                  {clientProjects.map((project) => (
+                    <div key={project.id} className="social-icons">
+                      <span className="contact-name-card text-left flex-1">{project.project_name}</span>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="flex flex-col gap-3 w-full items-center justify-center py-8">
+                  <span className="text-white/70 text-sm">No projects assigned</span>
+                </div>
+              )
             )}
           </div>
 

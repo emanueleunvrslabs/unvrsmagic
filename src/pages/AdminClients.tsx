@@ -23,7 +23,12 @@ export default function AdminClients() {
         .from("clients")
         .select(`
           *,
-          client_contacts (*)
+          client_contacts (*),
+          client_projects:client_projects (
+            id,
+            project_name,
+            description
+          )
         `)
         .order("created_at", { ascending: false });
 
@@ -78,6 +83,7 @@ export default function AdminClients() {
                 client={client}
                 onEdit={handleEditClient}
                 onContactAdded={refetch}
+                clientProjects={client.client_projects || []}
               />
             ))
           ) : (
