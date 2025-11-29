@@ -66,7 +66,7 @@ export default function AdminClients() {
                 <CardHeader>
                   <CardTitle>{client.company_name}</CardTitle>
                   <CardDescription>
-                    VAT: {client.vat_number} • {client.address}
+                    VAT: {client.vat_number} • {client.street}, {client.city} {client.postal_code}, {client.country}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

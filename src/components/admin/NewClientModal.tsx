@@ -18,7 +18,10 @@ const contactSchema = z.object({
 const clientSchema = z.object({
   company_name: z.string().trim().min(1, "Company name is required").max(255),
   vat_number: z.string().trim().min(1, "VAT number is required").max(50),
-  address: z.string().trim().min(1, "Address is required").max(500),
+  street: z.string().trim().min(1, "Street is required").max(255),
+  city: z.string().trim().min(1, "City is required").max(100),
+  postal_code: z.string().trim().min(1, "Postal code is required").max(20),
+  country: z.string().trim().min(1, "Country is required").max(100),
   contacts: z.array(contactSchema).min(1, "At least one contact person is required"),
 });
 
@@ -38,7 +41,10 @@ export function NewClientModal({ open, onOpenChange, onSuccess }: NewClientModal
   const [formData, setFormData] = useState<Omit<ClientFormData, 'contacts'>>({
     company_name: "",
     vat_number: "",
-    address: "",
+    street: "",
+    city: "",
+    postal_code: "",
+    country: "",
   });
 
   const [contacts, setContacts] = useState<Contact[]>([
@@ -72,18 +78,16 @@ export function NewClientModal({ open, onOpenChange, onSuccess }: NewClientModal
         contacts,
       });
 
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
       // Insert client
       const { data: client, error: clientError } = await supabase
         .from("clients")
         .insert({
-          user_id: user.id,
           company_name: validatedData.company_name,
           vat_number: validatedData.vat_number,
-          address: validatedData.address,
+          street: validatedData.street,
+          city: validatedData.city,
+          postal_code: validatedData.postal_code,
+          country: validatedData.country,
         })
         .select()
         .single();
@@ -111,7 +115,14 @@ export function NewClientModal({ open, onOpenChange, onSuccess }: NewClientModal
       });
 
       // Reset form
-      setFormData({ company_name: "", vat_number: "", address: "" });
+      setFormData({ 
+        company_name: "", 
+        vat_number: "", 
+        street: "", 
+        city: "", 
+        postal_code: "", 
+        country: "" 
+      });
       setContacts([{ first_name: "", last_name: "", whatsapp_number: "", email: "" }]);
       
       onSuccess();
@@ -170,12 +181,47 @@ export function NewClientModal({ open, onOpenChange, onSuccess }: NewClientModal
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Address *</Label>
+              <Label htmlFor="street">Street *</Label>
               <Input
-                id="address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Enter address"
+                id="street"
+                value={formData.street}
+                onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                placeholder="Enter street address"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  placeholder="Enter city"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="postal_code">Postal Code *</Label>
+                <Input
+                  id="postal_code"
+                  value={formData.postal_code}
+                  onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                  placeholder="Enter postal code"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="country">Country *</Label>
+              <Input
+                id="country"
+                value={formData.country}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                placeholder="Enter country"
                 required
               />
             </div>
