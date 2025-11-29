@@ -247,7 +247,7 @@
 .x-link .icon,
 .discord-link .icon,
 .fourth-link .icon {
-  color: rgba(103, 232, 249, 0.8);
+  color: rgba(193, 119, 241, 0.8);
   transition: 0.4s ease-in-out;
 }
 
@@ -255,7 +255,7 @@
 .x-link:hover .icon,
 .discord-link:hover .icon,
 .fourth-link:hover .icon {
-  color: rgb(103, 232, 249);
+  color: rgb(193, 119, 241);
 }
 
 .instagram-link:hover .icon {
@@ -452,5 +452,5 @@
 }
 
 .contact-icon-card {
-  color: rgba(103, 232, 249, 0.8);
+  color: rgba(193, 119, 241, 0.8);
 }
