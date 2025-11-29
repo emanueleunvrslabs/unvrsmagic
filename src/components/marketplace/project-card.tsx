@@ -43,12 +43,6 @@ export function ProjectCard({ project, isAdded, onViewDetails }: ProjectCardProp
       </CardHeader>
 
       <CardContent className="p-4 pt-0">
-        <div className="mb-4 flex flex-wrap gap-1">
-          <Badge variant="outline" className="border-primary text-primary">
-            Project
-          </Badge>
-        </div>
-
       </CardContent>
 
       <CardFooter className="flex items-center justify-between border-t p-4">
