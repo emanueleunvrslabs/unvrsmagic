@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Mail, MessageCircle, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { SendEmailModal } from "./SendEmailModal";
 
 interface Client {
   id: string;
@@ -21,6 +22,17 @@ interface ClientCardProps {
 }
 
 export function ClientCard({ client, onEdit }: ClientCardProps) {
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<{ email: string; name: string } | null>(null);
+
+  const handleEmail = (contact: { first_name: string; last_name: string; email: string }) => {
+    setSelectedContact({
+      email: contact.email,
+      name: `${contact.first_name} ${contact.last_name}`
+    });
+    setEmailModalOpen(true);
+  };
+
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md flex flex-col h-full">
       <CardHeader className="p-4">
@@ -55,7 +67,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                     variant="outline"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={() => window.open(`mailto:${contact.email}`, '_blank')}
+                    onClick={() => handleEmail(contact)}
                   >
                     <Mail className="h-4 w-4" />
                   </Button>
@@ -75,6 +87,15 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
           <p className="text-sm text-muted-foreground">No contacts available</p>
         )}
       </CardFooter>
+
+      {selectedContact && (
+        <SendEmailModal
+          recipientEmail={selectedContact.email}
+          recipientName={selectedContact.name}
+          open={emailModalOpen}
+          onOpenChange={setEmailModalOpen}
+        />
+      )}
     </Card>
   );
 }
