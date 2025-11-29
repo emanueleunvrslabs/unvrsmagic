@@ -19,7 +19,7 @@ interface Client {
 }
 
 interface ClientCardProps {
-  client: Client;
+  client: Client | null;
   onEdit: (client: Client) => void;
   onContactAdded?: () => void;
   clientProjects?: Array<{
@@ -27,6 +27,7 @@ interface ClientCardProps {
     project_name: string;
     description?: string;
   }>;
+  onCancel?: () => void;
 }
 
 const contactSchema = z.object({
@@ -39,10 +40,11 @@ const projectSchema = z.object({
   projectName: z.string().trim().min(1, "Project name is required").max(200),
 });
 
-export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [] }: ClientCardProps) {
+export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [], onCancel }: ClientCardProps) {
   const { toast } = useToast();
+  const isCreationMode = client === null;
   const [isOpen, setIsOpen] = useState(false);
-  const [billingOpen, setBillingOpen] = useState(false);
+  const [billingOpen, setBillingOpen] = useState(isCreationMode);
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
@@ -58,6 +60,14 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     phone: string;
     id: string;
   } | null>(null);
+  const [newClientData, setNewClientData] = useState({
+    company_name: "",
+    vat_number: "",
+    street: "",
+    city: "",
+    postal_code: "",
+    country: "",
+  });
   const [newContact, setNewContact] = useState({
     name: "",
     email: "",
@@ -353,7 +363,52 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     });
   };
 
-  const contacts = client.client_contacts?.map(contact => ({
+  const handleCreateClient = async () => {
+    setSaving(true);
+
+    try {
+      if (!newClientData.company_name.trim()) {
+        throw new Error("Company name is required");
+      }
+
+      const { data: createdClient, error: clientError } = await supabase
+        .from("clients")
+        .insert({
+          company_name: newClientData.company_name,
+          vat_number: newClientData.vat_number || "",
+          street: newClientData.street || "",
+          city: newClientData.city || "",
+          postal_code: newClientData.postal_code || "",
+          country: newClientData.country || "",
+        })
+        .select()
+        .single();
+
+      if (clientError) throw clientError;
+
+      toast({
+        title: "Success",
+        description: "Client created successfully",
+      });
+
+      if (onContactAdded) {
+        onContactAdded();
+      }
+      if (onCancel) {
+        onCancel();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create client",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const contacts = client?.client_contacts?.map(contact => ({
     id: contact.id,
     name: `${contact.first_name} ${contact.last_name}`,
     email: contact.email,
@@ -398,42 +453,33 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
               alt="Astronaut"
               className="astronaut-image"
             />
-            <div className="card-heading">{client.company_name}</div>
-            <div className="social-icons">
-              <button 
-                className="instagram-link" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setProjectsOpen(!projectsOpen);
-                  setIsOpen(false);
-                  setBillingOpen(false);
-                }}
-              >
-                <Briefcase className="icon" strokeWidth={2} />
-              </button>
-              <button 
-                className="x-link" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setBillingOpen(!billingOpen);
-                  setIsOpen(false);
-                  setProjectsOpen(false);
-                }}
-              >
-                <FileText className="icon" strokeWidth={2} />
-              </button>
-              <button 
-                className="discord-link" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsOpen(!isOpen);
-                  setBillingOpen(false);
-                  setProjectsOpen(false);
-                }}
-              >
-                <Users className="icon" strokeWidth={2} />
-              </button>
+            <div className="card-heading">
+              {isCreationMode ? (
+                <input
+                  type="text"
+                  value={newClientData.company_name}
+                  onChange={(e) => setNewClientData({ ...newClientData, company_name: e.target.value })}
+                  placeholder="Enter company name"
+                  className="bg-transparent border-b border-primary/30 text-white text-center text-xl font-bold px-2 py-1 focus:outline-none focus:border-primary/70 w-full max-w-xs"
+                />
+              ) : (
+                client?.company_name
+              )}
             </div>
+              {isCreationMode && (
+                <div className="flex gap-2 mt-2 justify-center w-full">
+                  <button
+                    className="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 py-2 text-sm transition-colors"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onCancel) onCancel();
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
 
             {/* Collapsible Contacts Section */}
           </div>
@@ -708,30 +754,39 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 <label className="text-xs text-muted-foreground">Company Name</label>
                 <input 
                   type="text" 
-                  defaultValue={client.company_name}
+                  value={isCreationMode ? newClientData.company_name : undefined}
+                  defaultValue={!isCreationMode ? client?.company_name : undefined}
+                  onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, company_name: e.target.value }) : undefined}
                   className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '12px' }}
                   onClick={(e) => e.stopPropagation()}
+                  placeholder="Enter company name"
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-xs text-muted-foreground">VAT Number</label>
                 <input 
                   type="text" 
-                  defaultValue={client.vat_number}
+                  value={isCreationMode ? newClientData.vat_number : undefined}
+                  defaultValue={!isCreationMode ? client?.vat_number : undefined}
+                  onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, vat_number: e.target.value }) : undefined}
                   className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '12px' }}
                   onClick={(e) => e.stopPropagation()}
+                  placeholder="Enter VAT number"
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-xs text-muted-foreground">Street</label>
                 <input 
                   type="text" 
-                  defaultValue={client.street}
+                  value={isCreationMode ? newClientData.street : undefined}
+                  defaultValue={!isCreationMode ? client?.street : undefined}
+                  onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, street: e.target.value }) : undefined}
                   className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '12px' }}
                   onClick={(e) => e.stopPropagation()}
+                  placeholder="Enter street address"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -739,29 +794,73 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   <label className="text-xs text-muted-foreground">City</label>
                   <input 
                     type="text" 
-                    defaultValue={client.city}
+                    value={isCreationMode ? newClientData.city : undefined}
+                    defaultValue={!isCreationMode ? client?.city : undefined}
+                    onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, city: e.target.value }) : undefined}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
+                    placeholder="Enter city"
                   />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs text-muted-foreground">Postal Code</label>
                   <input 
                     type="text" 
-                    defaultValue={client.postal_code}
+                    value={isCreationMode ? newClientData.postal_code : undefined}
+                    defaultValue={!isCreationMode ? client?.postal_code : undefined}
+                    onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, postal_code: e.target.value }) : undefined}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
+                    placeholder="Enter postal code"
                   />
                 </div>
               </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Country</label>
+                <input 
+                  type="text" 
+                  value={isCreationMode ? newClientData.country : undefined}
+                  defaultValue={!isCreationMode ? client?.country : undefined}
+                  onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, country: e.target.value }) : undefined}
+                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  style={{ borderRadius: '12px' }}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="Enter country"
+                />
+              </div>
+              {isCreationMode && (
+                <div className="flex gap-2 mt-2">
+                  <button
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 py-2 text-sm transition-colors"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onCancel) onCancel();
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="flex-1 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-4 py-2 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCreateClient();
+                    }}
+                    disabled={saving}
+                  >
+                    {saving ? "Saving..." : "Save Client"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {selectedContact && (
+      {selectedContact && client && (
         <>
           <SendEmailModal
             recipientEmail={selectedContact.email}
