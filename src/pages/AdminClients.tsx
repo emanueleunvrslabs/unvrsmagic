@@ -76,6 +76,18 @@ export default function AdminClients() {
         </div>
 
         <div className="flex flex-col">
+          {clients && clients.length > 0 && (
+            clients.map((client) => (
+              <ClientCard
+                key={client.id}
+                client={client}
+                onEdit={handleEditClient}
+                onContactAdded={refetch}
+                clientProjects={client.client_projects || []}
+              />
+            ))
+          )}
+
           {creatingNewClient && (
             <NewClientCard
               onSuccess={() => {
@@ -86,23 +98,13 @@ export default function AdminClients() {
             />
           )}
 
-          {clients && clients.length > 0 ? (
-            clients.map((client) => (
-              <ClientCard
-                key={client.id}
-                client={client}
-                onEdit={handleEditClient}
-                onContactAdded={refetch}
-                clientProjects={client.client_projects || []}
-              />
-            ))
-          ) : !creatingNewClient ? (
+          {!clients?.length && !creatingNewClient && (
             <div className="text-center py-12 w-full">
               <p className="text-muted-foreground">
                 No clients yet. Start by adding your first client using the "New Client" button above.
               </p>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
 
