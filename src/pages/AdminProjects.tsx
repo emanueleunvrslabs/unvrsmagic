@@ -55,9 +55,6 @@ export default function AdminProjects() {
                       )}
                     </CardTitle>
                     <CardDescription>{project.description}</CardDescription>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Route: <code className="bg-muted px-2 py-1 rounded">{project.route}</code>
-                    </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
