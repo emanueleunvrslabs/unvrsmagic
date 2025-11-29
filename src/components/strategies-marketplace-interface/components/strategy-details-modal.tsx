@@ -153,17 +153,6 @@ export function StrategyDetailsModal({
                   <span className="text-sm font-medium">{formatNumber(strategy.purchases)}</span>
                 </div>
                 <Separator />
-                <div>
-                  <div className="mb-1 text-sm">Tags</div>
-                  <div className="flex flex-wrap gap-1">
-                    {strategy.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <Separator />
                 <Button className="w-full gap-1" onClick={() => onPurchase?.(strategy.id)}>
                   <ShoppingCart className="h-4 w-4" />
                   <span>New Project</span>
