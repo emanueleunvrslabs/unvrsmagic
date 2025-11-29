@@ -111,42 +111,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
 
           {/* Collapsible Contacts Section - Lateral */}
           <div className={`contacts-section-lateral ${isOpen ? 'open' : ''}`}>
-            {contacts.length > 0 && (
-              <>
-                {contacts.map((contact) => (
-                  <div key={contact.id} className="contact-item-card">
-                    <span className="contact-name-card">{contact.name}</span>
-                    <div className="contact-actions-card">
-                      <button
-                        className="contact-btn-card"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedContact(contact);
-                          setEmailModalOpen(true);
-                        }}
-                        aria-label="Send email"
-                      >
-                        <Mail className="contact-icon-card" size={18} />
-                      </button>
-                      <button
-                        className="contact-btn-card"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedContact(contact);
-                          setWhatsappModalOpen(true);
-                        }}
-                        aria-label="Send WhatsApp"
-                      >
-                        <MessageCircle className="contact-icon-card" size={18} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-            
             {showAddContact && (
-              <div className="flex flex-col gap-3 w-full mt-3 pt-3 border-t border-white/10">
+              <div className="flex flex-col gap-3 w-full pb-3 border-b border-white/10">
                 <div className="space-y-1">
                   <label className="text-xs text-muted-foreground">Name</label>
                   <input 
@@ -193,6 +159,40 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                   Save Contact
                 </button>
               </div>
+            )}
+            
+            {contacts.length > 0 && (
+              <>
+                {contacts.map((contact) => (
+                  <div key={contact.id} className="contact-item-card">
+                    <span className="contact-name-card">{contact.name}</span>
+                    <div className="contact-actions-card">
+                      <button
+                        className="contact-btn-card"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedContact(contact);
+                          setEmailModalOpen(true);
+                        }}
+                        aria-label="Send email"
+                      >
+                        <Mail className="contact-icon-card" size={18} />
+                      </button>
+                      <button
+                        className="contact-btn-card"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedContact(contact);
+                          setWhatsappModalOpen(true);
+                        }}
+                        aria-label="Send WhatsApp"
+                      >
+                        <MessageCircle className="contact-icon-card" size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </>
             )}
           </div>
 
