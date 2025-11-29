@@ -221,7 +221,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
             {isOpen && (
               <div className="absolute top-2 right-4 z-10">
                 <button
-                  className="text-xs text-primary/70 hover:text-primary transition-colors"
+                  className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowAddContact(!showAddContact);
