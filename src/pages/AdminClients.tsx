@@ -61,7 +61,10 @@ export default function AdminClients() {
               Manage your clients and their access to projects
             </p>
           </div>
-          <Button onClick={() => setModalOpen(true)} className="gap-2">
+          <Button 
+            onClick={() => setModalOpen(true)} 
+            className="gap-2 px-5 py-6 rounded-2xl backdrop-blur-[15px] bg-white/5 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)] hover:bg-white/10 transition-all duration-300"
+          >
             <UserPlus className="h-4 w-4" />
             New Client
           </Button>
