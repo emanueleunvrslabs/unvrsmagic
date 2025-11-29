@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Upload, X } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SendEmailModalProps {
   recipientEmail: string;
@@ -122,7 +121,7 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
           </div>
 
           <div className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="file-upload">
                 <Button type="button" variant="outline" asChild disabled={loading}>
                   <span className="cursor-pointer">
@@ -139,28 +138,30 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
                 className="hidden"
                 disabled={loading}
               />
-            </div>
-
-            {attachments.length > 0 && (
-              <ScrollArea className="h-[150px]">
-                <div className="space-y-2">
+              
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
                   {attachments.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-background/50 rounded-lg">
-                      <span className="text-sm truncate flex-1">{file.name}</span>
+                    <div
+                      key={index}
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-background/50 rounded-lg text-sm border"
+                    >
+                      <span className="truncate max-w-[200px]">{file.name}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
+                        className="h-4 w-4 p-0 hover:bg-transparent"
                         onClick={() => removeAttachment(index)}
                         disabled={loading}
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-3 w-3" />
                       </Button>
                     </div>
                   ))}
                 </div>
-              </ScrollArea>
-            )}
+              )}
+            </div>
           </div>
 
           <div className="flex justify-end">
