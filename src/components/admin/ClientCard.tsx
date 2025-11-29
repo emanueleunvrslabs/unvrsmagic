@@ -4,6 +4,7 @@ import { Mail, MessageCircle, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
+import { WhatsAppChatModal } from "./WhatsAppChatModal";
 
 interface Client {
   id: string;
@@ -23,14 +24,32 @@ interface ClientCardProps {
 
 export function ClientCard({ client, onEdit }: ClientCardProps) {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<{ email: string; name: string } | null>(null);
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<{ 
+    email: string; 
+    name: string;
+    phone: string;
+    id: string;
+  } | null>(null);
 
-  const handleEmail = (contact: { first_name: string; last_name: string; email: string }) => {
+  const handleEmail = (contact: { first_name: string; last_name: string; email: string; whatsapp_number: string; id: string }) => {
     setSelectedContact({
       email: contact.email,
-      name: `${contact.first_name} ${contact.last_name}`
+      name: `${contact.first_name} ${contact.last_name}`,
+      phone: contact.whatsapp_number,
+      id: contact.id,
     });
     setEmailModalOpen(true);
+  };
+
+  const handleWhatsApp = (contact: { first_name: string; last_name: string; email: string; whatsapp_number: string; id: string }) => {
+    setSelectedContact({
+      email: contact.email,
+      name: `${contact.first_name} ${contact.last_name}`,
+      phone: contact.whatsapp_number,
+      id: contact.id,
+    });
+    setWhatsappModalOpen(true);
   };
 
   return (
@@ -75,7 +94,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                     variant="outline"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={() => window.open(`https://wa.me/${contact.whatsapp_number.replace(/\D/g, '')}`, '_blank')}
+                    onClick={() => handleWhatsApp(contact)}
                   >
                     <MessageCircle className="h-4 w-4" />
                   </Button>
@@ -89,12 +108,22 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
       </CardFooter>
 
       {selectedContact && (
-        <SendEmailModal
-          recipientEmail={selectedContact.email}
-          recipientName={selectedContact.name}
-          open={emailModalOpen}
-          onOpenChange={setEmailModalOpen}
-        />
+        <>
+          <SendEmailModal
+            recipientEmail={selectedContact.email}
+            recipientName={selectedContact.name}
+            open={emailModalOpen}
+            onOpenChange={setEmailModalOpen}
+          />
+          <WhatsAppChatModal
+            open={whatsappModalOpen}
+            onOpenChange={setWhatsappModalOpen}
+            contactName={selectedContact.name}
+            contactPhone={selectedContact.phone}
+            clientId={client.id}
+            contactId={selectedContact.id}
+          />
+        </>
       )}
     </Card>
   );
