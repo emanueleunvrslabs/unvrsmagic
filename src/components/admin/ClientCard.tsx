@@ -261,15 +261,6 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
               >
                 <Users className="icon" strokeWidth={2} />
               </button>
-              <button 
-                className="fourth-link" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(client);
-                }}
-              >
-                <Pencil className="icon" strokeWidth={2} />
-              </button>
             </div>
 
             {/* Collapsible Contacts Section */}
