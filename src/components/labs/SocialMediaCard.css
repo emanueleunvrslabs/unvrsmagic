@@ -221,22 +221,6 @@
   transition: 0.4s ease-in-out;
 }
 
-.instagram-link:after,
-.x-link:after,
-.discord-link:after {
-  content: "";
-  position: absolute;
-  width: 0.5em;
-  height: 0.5em;
-  left: 0;
-  background-color: white;
-  box-shadow: 0px 0px 10px rgba(233, 233, 233, 0.5),
-    0px 0px 10px rgba(192, 192, 192, 0.5);
-  border-radius: 50%;
-  z-index: -1;
-  transition: 0.3s ease-in-out;
-}
-
 .instagram-link svg path,
 .x-link svg path,
 .discord-link svg path {
@@ -269,13 +253,6 @@
 .x-link:hover svg,
 .discord-link:hover svg {
   scale: 1.25;
-}
-
-.instagram-link:hover:after,
-.x-link:hover:after,
-.discord-link:hover:after {
-  scale: 4;
-  transform: translateX(0.09em) translateY(0.09em);
 }
 
 .instagram-link::before {
