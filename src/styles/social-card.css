@@ -31,7 +31,7 @@
 }
 
 .company-name-text {
-  color: rgb(255, 174, 0);
+  color: hsl(var(--primary));
   font-weight: 600;
   font-size: 16px;
   text-align: center;
@@ -74,7 +74,7 @@
 }
 
 .social-svg-icon {
-  color: rgb(255, 174, 0);
+  color: hsl(var(--primary));
   width: 28px;
   height: 28px;
 }
@@ -84,7 +84,7 @@
   border-radius: 5px;
   padding: 5px;
   transition: all 0.3s;
-  color: rgb(255, 174, 0);
+  color: hsl(var(--primary));
   background-color: rgba(255, 255, 255, 0.3);
   position: absolute;
   z-index: 9999;
@@ -115,7 +115,7 @@
 }
 
 .company-name-text {
-  color: rgb(255, 174, 0);
+  color: hsl(var(--primary));
   font-weight: 600;
   font-size: 16px;
   text-align: center;
