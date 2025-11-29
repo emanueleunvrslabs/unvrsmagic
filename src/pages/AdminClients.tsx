@@ -67,7 +67,7 @@ export default function AdminClients() {
           </Button>
         </div>
 
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-wrap gap-6 justify-center">
           {clients && clients.length > 0 ? (
             clients.map((client) => (
               <ClientCard
@@ -77,7 +77,7 @@ export default function AdminClients() {
               />
             ))
           ) : (
-            <div className="text-center py-12">
+            <div className="text-center py-12 w-full">
               <p className="text-muted-foreground">
                 No clients yet. Start by adding your first client using the "New Client" button above.
               </p>
