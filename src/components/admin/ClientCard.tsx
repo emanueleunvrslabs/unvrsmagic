@@ -81,9 +81,14 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
 
       <CardFooter className="flex flex-col items-start border-t p-4 mt-auto">
         {client.client_contacts && client.client_contacts.length > 0 ? (
-          <Collapsible open={contactsOpen} onOpenChange={setContactsOpen} className="w-full">
+          <Collapsible 
+            open={contactsOpen} 
+            onOpenChange={setContactsOpen} 
+            className="w-full"
+          >
             <CollapsibleTrigger asChild>
               <Button
+                type="button"
                 variant="ghost"
                 className="w-full flex items-center justify-between p-2 h-auto"
               >
