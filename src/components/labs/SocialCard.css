@@ -70,65 +70,7 @@
   letter-spacing: 0.025em;
 }
 
-.heading::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  opacity: 1;
-  box-shadow: 220px 118px #fff, 280px 176px #fff, 40px 50px #fff,
-    60px 180px #fff, 120px 130px #fff, 180px 176px #fff, 220px 290px #fff,
-    520px 250px #fff, 400px 220px #fff, 50px 350px #fff, 10px 230px #fff;
-  z-index: -1;
-  transition: 1s ease;
-  animation: 1s glowing-stars linear alternate infinite;
-  animation-delay: 0s;
-}
-.icons::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  opacity: 1;
-  box-shadow: 140px 20px #fff, 425px 20px #fff, 70px 120px #fff, 20px 130px #fff,
-    110px 80px #fff, 280px 80px #fff, 250px 350px #fff, 280px 230px #fff,
-    220px 190px #fff, 450px 100px #fff, 380px 80px #fff, 520px 50px #fff;
-  z-index: -1;
-  transition: 1.5s ease;
-  animation: 1s glowing-stars linear alternate infinite;
-  animation-delay: 0.4s;
-}
-.icons::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  opacity: 1;
-  box-shadow: 490px 330px #fff, 420px 300px #fff, 320px 280px #fff,
-    380px 350px #fff, 546px 170px #fff, 420px 180px #fff, 370px 150px #fff,
-    200px 250px #fff, 80px 20px #fff, 190px 50px #fff, 270px 20px #fff,
-    120px 230px #fff, 350px -1px #fff, 150px 369px #fff;
-  z-index: -1;
-  transition: 2s ease;
-  animation: 1s glowing-stars linear alternate infinite;
-  animation-delay: 0.8s;
-}
-.card:hover .heading::before,
-.card:hover .icons::before,
-.card:hover .icons::after {
-  filter: blur(3px);
-}
-
-.image:active {
+.heading::after {
   cursor: -webkit-grabbing;
   cursor: grabbing;
 }
@@ -300,12 +242,6 @@
 .card:hover .discord::before {
   filter: blur(3px);
 }
-.image:active ~ .icons .instagram::before,
-.image:active ~ .icons .x::before,
-.image:active ~ .icons .discord::before {
-  animation: none;
-  opacity: 0;
-}
 
 @keyframes shootingStar {
   0% {
@@ -343,19 +279,5 @@
   }
   100% {
     transform: translateX(0em) translateY(0em);
-  }
-}
-
-@keyframes glowing-stars {
-  0% {
-    opacity: 0;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
   }
 }
