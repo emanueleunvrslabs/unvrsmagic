@@ -387,6 +387,43 @@
   }
 }
 
+/* Client Card Wrapper */
+.client-card-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Billing Section - Lateral */
+.billing-section-lateral {
+  position: absolute;
+  left: calc(100% + 1em);
+  top: 0;
+  width: 22em;
+  height: auto;
+  min-height: 25em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5em;
+  background-color: #171717;
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.192),
+    inset 0 0 5px rgba(255, 255, 255, 0.274), 0 5px 5px rgba(0, 0, 0, 0.164);
+  z-index: 100;
+  opacity: 0;
+  transform: translateX(-20px);
+  pointer-events: none;
+  transition: transform 0.4s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.billing-section-lateral.open {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
 /* Contacts Section Styles */
 .contacts-section {
   display: flex;
