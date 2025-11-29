@@ -7,6 +7,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Contact {
   id?: string;
@@ -36,6 +46,7 @@ interface EditClientModalProps {
 
 export function EditClientModal({ client, open, onOpenChange, onSuccess }: EditClientModalProps) {
   const [loading, setLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState<Omit<Client, 'id'>>({
     company_name: "",
     vat_number: "",
@@ -45,11 +56,15 @@ export function EditClientModal({ client, open, onOpenChange, onSuccess }: EditC
     country: "",
     client_contacts: []
   });
+  const [originalData, setOriginalData] = useState<Omit<Client, 'id'> | null>(null);
+
+  // Check if form has been modified
+  const hasChanges = originalData && JSON.stringify(formData) !== JSON.stringify(originalData);
 
   // Update form when client changes
   useEffect(() => {
     if (client) {
-      setFormData({
+      const data = {
         company_name: client.company_name,
         vat_number: client.vat_number,
         street: client.street,
@@ -57,7 +72,9 @@ export function EditClientModal({ client, open, onOpenChange, onSuccess }: EditC
         postal_code: client.postal_code,
         country: client.country,
         client_contacts: client.client_contacts || []
-      });
+      };
+      setFormData(data);
+      setOriginalData(JSON.parse(JSON.stringify(data))); // Deep copy for comparison
     }
   }, [client]);
 
@@ -113,6 +130,39 @@ export function EditClientModal({ client, open, onOpenChange, onSuccess }: EditC
       onOpenChange(false);
     } catch (error: any) {
       toast.error(error.message || "Failed to update client");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!client) return;
+
+    setLoading(true);
+
+    try {
+      // Delete client contacts first (due to foreign key)
+      const { error: contactsError } = await supabase
+        .from("client_contacts")
+        .delete()
+        .eq("client_id", client.id);
+
+      if (contactsError) throw contactsError;
+
+      // Delete client
+      const { error: clientError } = await supabase
+        .from("clients")
+        .delete()
+        .eq("id", client.id);
+
+      if (clientError) throw clientError;
+
+      toast.success("Client deleted successfully");
+      onSuccess();
+      onOpenChange(false);
+      setDeleteDialogOpen(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete client");
     } finally {
       setLoading(false);
     }
@@ -291,21 +341,48 @@ export function EditClientModal({ client, open, onOpenChange, onSuccess }: EditC
             )}
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-between gap-2">
             <Button
               type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
+              variant="destructive"
+              onClick={() => setDeleteDialogOpen(true)}
               disabled={loading}
             >
-              Cancel
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Client
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
+            
+            {hasChanges && (
+              <Button type="submit" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            )}
           </div>
         </form>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the client
+                "{client?.company_name}" and all associated contacts.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={loading}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
