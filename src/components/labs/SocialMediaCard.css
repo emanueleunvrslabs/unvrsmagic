@@ -369,3 +369,103 @@
     opacity: 0;
   }
 }
+
+/* Contacts Section Styles */
+.contacts-toggle {
+  background: transparent;
+  border: none;
+  color: white;
+  font-family: Montserrat, system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  transition: all 0.3s ease;
+  z-index: 10;
+  margin-top: 0.5em;
+}
+
+.contacts-toggle:hover {
+  color: hsl(210 100% 64% / 0.9);
+}
+
+.chevron-icon {
+  transition: transform 0.3s ease;
+}
+
+.chevron-icon.open {
+  transform: rotate(180deg);
+}
+
+.contacts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0 1em;
+  margin-top: 0.5em;
+  z-index: 10;
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contact-item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.contact-name-card {
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: Montserrat, system-ui, -apple-system, sans-serif;
+}
+
+.contact-actions-card {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.contact-btn-card {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.contact-btn-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px) scale(1.1);
+}
+
+.contact-icon-card {
+  color: hsl(210 100% 64% / 0.7);
+}
