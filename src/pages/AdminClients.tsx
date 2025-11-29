@@ -77,6 +77,7 @@ export default function AdminClients() {
                 key={client.id}
                 client={client}
                 onEdit={handleEditClient}
+                onContactAdded={refetch}
               />
             ))
           ) : (

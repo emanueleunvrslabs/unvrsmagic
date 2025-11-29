@@ -3,6 +3,9 @@ import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt } from
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
 interface Client {
   id: string;
@@ -18,14 +21,23 @@ interface Client {
 interface ClientCardProps {
   client: Client;
   onEdit: (client: Client) => void;
+  onContactAdded?: () => void;
 }
 
-export function ClientCard({ client, onEdit }: ClientCardProps) {
+const contactSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(200),
+  email: z.string().trim().email("Invalid email address").max(255),
+  whatsappNumber: z.string().trim().min(1, "WhatsApp number is required").max(20),
+});
+
+export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [billingOpen, setBillingOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [showAddContact, setShowAddContact] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
     email: string; 
     name: string;
@@ -37,6 +49,64 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
     email: "",
     whatsappNumber: ""
   });
+
+  const handleSaveContact = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSaving(true);
+
+    try {
+      // Validate input
+      const validated = contactSchema.parse(newContact);
+
+      // Split name into first and last name
+      const nameParts = validated.name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Insert contact
+      const { error } = await supabase
+        .from("client_contacts")
+        .insert({
+          client_id: client.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: validated.email,
+          whatsapp_number: validated.whatsappNumber,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Contact added successfully",
+      });
+
+      // Reset form
+      setNewContact({ name: "", email: "", whatsappNumber: "" });
+      setShowAddContact(false);
+      
+      // Trigger refresh
+      if (onContactAdded) {
+        onContactAdded();
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to add contact",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const contacts = client.client_contacts?.map(contact => ({
     id: contact.id,
@@ -148,16 +218,12 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                   />
                 </div>
                 <button
-                  className="w-full bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-4 py-3 text-sm transition-colors"
+                  className="w-full bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-4 py-3 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ borderRadius: '16px' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Save contact functionality will be implemented
-                    console.log("Save contact:", newContact);
-                    setShowAddContact(false);
-                  }}
+                  onClick={handleSaveContact}
+                  disabled={saving}
                 >
-                  Save Contact
+                  {saving ? "Saving..." : "Save Contact"}
                 </button>
               </div>
             ) : (
