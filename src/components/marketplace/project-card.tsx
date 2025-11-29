@@ -26,8 +26,7 @@ export function ProjectCard({ project, isAdded, onViewDetails }: ProjectCardProp
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="flex items-center gap-2 line-clamp-1">
-              {project.icon && <span className="text-2xl">{project.icon}</span>}
+            <CardTitle className="line-clamp-1">
               {project.name}
             </CardTitle>
             <CardDescription className="line-clamp-2 mt-1">
