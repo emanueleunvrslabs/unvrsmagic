@@ -132,13 +132,8 @@ export function StrategyDetailsModal({
             </div>
           </div>
 
-          {/* Right column - Purchase options */}
+          {/* Right column - Strategy details */}
           <div className="space-y-4">
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">Projects</h3>
-              <PurchaseOptions strategy={strategy} onPurchase={onPurchase} />
-            </div>
-
             <div className="rounded-lg border p-4">
               <h3 className="mb-4 text-lg font-semibold">Strategy Details</h3>
               <div className="space-y-3">
@@ -168,6 +163,11 @@ export function StrategyDetailsModal({
                     ))}
                   </div>
                 </div>
+                <Separator />
+                <Button className="w-full gap-1" onClick={() => onPurchase?.(strategy.id)}>
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>New Project</span>
+                </Button>
               </div>
             </div>
 
@@ -189,17 +189,6 @@ export function StrategyDetailsModal({
             <Download className="h-4 w-4" />
             <span>Download Whitepaper</span>
           </Button>
-          {strategy.isFree ? (
-            <Button className="gap-1" onClick={() => onPurchase?.(strategy.id)}>
-              <Download className="h-4 w-4" />
-              <span>Get Free Strategy</span>
-            </Button>
-          ) : (
-            <Button className="gap-1" onClick={() => onPurchase?.(strategy.id)}>
-              <ShoppingCart className="h-4 w-4" />
-              <span>New Project</span>
-            </Button>
-          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
