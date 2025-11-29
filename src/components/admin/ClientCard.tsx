@@ -67,6 +67,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     city: "",
     postal_code: "",
   });
+  const [createdClientId, setCreatedClientId] = useState<string | null>(null);
   const [newContact, setNewContact] = useState({
     name: "",
     email: "",
@@ -84,24 +85,24 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     projectName: ""
   });
 
-  const handleSaveContact = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSaving(true);
+  const handleAutoSaveContact = async () => {
+    if (!newContact.name.trim() || !newContact.email.trim() || !newContact.whatsappNumber.trim()) {
+      return; // Don't save if required fields are empty
+    }
 
     try {
-      // Validate input
       const validated = contactSchema.parse(newContact);
-
-      // Split name into first and last name
       const nameParts = validated.name.trim().split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      // Insert contact
+      const clientId = isCreationMode ? createdClientId : client?.id;
+      if (!clientId) return;
+
       const { error } = await supabase
         .from("client_contacts")
         .insert({
-          client_id: client.id,
+          client_id: clientId,
           first_name: firstName,
           last_name: lastName,
           email: validated.email,
@@ -110,16 +111,9 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Contact added successfully",
-      });
-
-      // Reset form
       setNewContact({ name: "", email: "", whatsappNumber: "" });
       setShowAddContact(false);
       
-      // Trigger refresh
       if (onContactAdded) {
         onContactAdded();
       }
@@ -137,13 +131,13 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
           variant: "destructive",
         });
       }
-    } finally {
-      setSaving(false);
     }
   };
 
-  const handleUpdateContact = async (contactId: string) => {
-    setSaving(true);
+  const handleAutoUpdateContact = async (contactId: string) => {
+    if (!editContact.name.trim() || !editContact.email.trim() || !editContact.whatsappNumber.trim()) {
+      return;
+    }
 
     try {
       const validated = contactSchema.parse(editContact);
@@ -163,11 +157,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Contact updated successfully",
-      });
-
       setEditingContactId(null);
       if (onContactAdded) {
         onContactAdded();
@@ -186,8 +175,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
           variant: "destructive",
         });
       }
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -222,34 +209,29 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     }
   };
 
-  const handleSaveProject = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSaving(true);
+  const handleAutoSaveProject = async () => {
+    if (!newProject.projectName.trim()) {
+      return;
+    }
 
     try {
-      // Validate input
       const validated = projectSchema.parse(newProject);
 
-      // Insert project
+      const clientId = isCreationMode ? createdClientId : client?.id;
+      if (!clientId) return;
+
       const { error } = await supabase
         .from("client_projects")
         .insert({
-          client_id: client.id,
+          client_id: clientId,
           project_name: validated.projectName,
         });
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Project added successfully",
-      });
-
-      // Reset form
       setNewProject({ projectName: "" });
       setShowAddProject(false);
       
-      // Trigger refresh
       if (onContactAdded) {
         onContactAdded();
       }
@@ -267,13 +249,13 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
           variant: "destructive",
         });
       }
-    } finally {
-      setSaving(false);
     }
   };
 
-  const handleUpdateProject = async (projectId: string) => {
-    setSaving(true);
+  const handleAutoUpdateProject = async (projectId: string) => {
+    if (!editProject.projectName.trim()) {
+      return;
+    }
 
     try {
       const validated = projectSchema.parse(editProject);
@@ -286,11 +268,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
         .eq("id", projectId);
 
       if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Project updated successfully",
-      });
 
       setEditingProjectId(null);
       if (onContactAdded) {
@@ -310,8 +287,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
           variant: "destructive",
         });
       }
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -362,48 +337,82 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     });
   };
 
-  const handleCreateClient = async () => {
-    setSaving(true);
-
+  const handleCreateOrUpdateClient = async (field?: string) => {
     try {
-      if (!newClientData.company_name.trim()) {
-        throw new Error("Company name is required");
+      if (!newClientData.company_name.trim() && !createdClientId) {
+        return; // Don't create client without company name
       }
 
-      const { data: createdClient, error: clientError } = await supabase
-        .from("clients")
-        .insert({
-          company_name: newClientData.company_name,
-          vat_number: newClientData.vat_number || "",
-          street: newClientData.street || "",
-          city: newClientData.city || "",
-          postal_code: newClientData.postal_code || "",
-          country: "",
-        })
-        .select()
-        .single();
+      if (!createdClientId) {
+        // Create new client
+        const { data: createdClient, error: clientError } = await supabase
+          .from("clients")
+          .insert({
+            company_name: newClientData.company_name,
+            vat_number: newClientData.vat_number || "",
+            street: newClientData.street || "",
+            city: newClientData.city || "",
+            postal_code: newClientData.postal_code || "",
+            country: "",
+          })
+          .select()
+          .single();
 
-      if (clientError) throw clientError;
+        if (clientError) throw clientError;
 
-      toast({
-        title: "Success",
-        description: "Client created successfully",
-      });
+        setCreatedClientId(createdClient.id);
+        
+        if (onContactAdded) {
+          onContactAdded();
+        }
+      } else {
+        // Update existing client
+        const { error: updateError } = await supabase
+          .from("clients")
+          .update({
+            company_name: newClientData.company_name,
+            vat_number: newClientData.vat_number || "",
+            street: newClientData.street || "",
+            city: newClientData.city || "",
+            postal_code: newClientData.postal_code || "",
+          })
+          .eq("id", createdClientId);
 
-      if (onContactAdded) {
-        onContactAdded();
-      }
-      if (onCancel) {
-        onCancel();
+        if (updateError) throw updateError;
+
+        if (onContactAdded) {
+          onContactAdded();
+        }
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create client",
+        description: error instanceof Error ? error.message : "Failed to save client",
         variant: "destructive",
       });
-    } finally {
-      setSaving(false);
+    }
+  };
+
+  const handleUpdateExistingClient = async (field: string, value: string) => {
+    if (!client?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from("clients")
+        .update({ [field]: value })
+        .eq("id", client.id);
+
+      if (error) throw error;
+
+      if (onContactAdded) {
+        onContactAdded();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update client",
+        variant: "destructive",
+      });
     }
   };
 
@@ -458,6 +467,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   type="text"
                   value={newClientData.company_name}
                   onChange={(e) => setNewClientData({ ...newClientData, company_name: e.target.value })}
+                  onBlur={() => handleCreateOrUpdateClient('company_name')}
                   placeholder="Enter company name"
                   className="bg-transparent border-b border-primary/30 text-white text-center text-xl font-bold px-2 py-1 focus:outline-none focus:border-primary/70 w-full max-w-xs"
                 />
@@ -502,21 +512,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
               </button>
             </div>
 
-            {isCreationMode && (
-              <div className="flex gap-2 mt-2 justify-center w-full">
-                <button
-                  className="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 py-2 text-sm transition-colors"
-                  style={{ borderRadius: '12px' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onCancel) onCancel();
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
             {/* Collapsible Contacts Section */}
           </div>
 
@@ -530,6 +525,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     type="text"
                     value={newContact.name}
                     onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                    onBlur={handleAutoSaveContact}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -541,6 +537,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     type="email"
                     value={newContact.email}
                     onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                    onBlur={handleAutoSaveContact}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -552,20 +549,13 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     type="tel"
                     value={newContact.whatsappNumber}
                     onChange={(e) => setNewContact({...newContact, whatsappNumber: e.target.value})}
+                    onBlur={handleAutoSaveContact}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="+1234567890"
                   />
                 </div>
-                <button
-                  className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ borderRadius: '12px' }}
-                  onClick={handleSaveContact}
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save Contact"}
-                </button>
               </div>
             ) : editingContactId ? (
               <div className="flex flex-col gap-3 w-full">
@@ -575,6 +565,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     type="text"
                     value={editContact.name}
                     onChange={(e) => setEditContact({...editContact, name: e.target.value})}
+                    onBlur={() => handleAutoUpdateContact(editingContactId!)}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -586,6 +577,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     type="email"
                     value={editContact.email}
                     onChange={(e) => setEditContact({...editContact, email: e.target.value})}
+                    onBlur={() => handleAutoUpdateContact(editingContactId!)}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -597,6 +589,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     type="tel"
                     value={editContact.whatsappNumber}
                     onChange={(e) => setEditContact({...editContact, whatsappNumber: e.target.value})}
+                    onBlur={() => handleAutoUpdateContact(editingContactId!)}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -624,17 +617,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     }}
                   >
                     Cancel
-                  </button>
-                  <button
-                    className="flex-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleUpdateContact(editingContactId);
-                    }}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Update"}
                   </button>
                 </div>
               </div>
@@ -693,20 +675,13 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     type="text"
                     value={newProject.projectName}
                     onChange={(e) => setNewProject({projectName: e.target.value})}
+                    onBlur={handleAutoSaveProject}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="Enter project name"
                   />
                 </div>
-                <button
-                  className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ borderRadius: '12px' }}
-                  onClick={handleSaveProject}
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save Project"}
-                </button>
               </div>
             ) : editingProjectId ? (
               <div className="flex flex-col gap-3 w-full">
@@ -716,6 +691,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     type="text"
                     value={editProject.projectName}
                     onChange={(e) => setEditProject({projectName: e.target.value})}
+                    onBlur={() => handleAutoUpdateProject(editingProjectId!)}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -742,17 +718,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     }}
                   >
                     Cancel
-                  </button>
-                  <button
-                    className="flex-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleUpdateProject(editingProjectId);
-                    }}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Update"}
                   </button>
                 </div>
               </div>
@@ -793,6 +758,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   value={isCreationMode ? newClientData.company_name : undefined}
                   defaultValue={!isCreationMode ? client?.company_name : undefined}
                   onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, company_name: e.target.value }) : undefined}
+                  onBlur={isCreationMode ? () => handleCreateOrUpdateClient('company_name') : (e) => handleUpdateExistingClient('company_name', e.currentTarget.value)}
                   className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '12px' }}
                   onClick={(e) => e.stopPropagation()}
@@ -806,6 +772,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   value={isCreationMode ? newClientData.vat_number : undefined}
                   defaultValue={!isCreationMode ? client?.vat_number : undefined}
                   onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, vat_number: e.target.value }) : undefined}
+                  onBlur={isCreationMode ? () => handleCreateOrUpdateClient('vat_number') : (e) => handleUpdateExistingClient('vat_number', e.currentTarget.value)}
                   className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '12px' }}
                   onClick={(e) => e.stopPropagation()}
@@ -819,6 +786,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   value={isCreationMode ? newClientData.street : undefined}
                   defaultValue={!isCreationMode ? client?.street : undefined}
                   onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, street: e.target.value }) : undefined}
+                  onBlur={isCreationMode ? () => handleCreateOrUpdateClient('street') : (e) => handleUpdateExistingClient('street', e.currentTarget.value)}
                   className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '12px' }}
                   onClick={(e) => e.stopPropagation()}
@@ -828,11 +796,12 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-xs text-muted-foreground">City</label>
-                  <input 
+                    <input 
                     type="text" 
                     value={isCreationMode ? newClientData.city : undefined}
                     defaultValue={!isCreationMode ? client?.city : undefined}
                     onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, city: e.target.value }) : undefined}
+                    onBlur={isCreationMode ? () => handleCreateOrUpdateClient('city') : (e) => handleUpdateExistingClient('city', e.currentTarget.value)}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -841,11 +810,12 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs text-muted-foreground">Postal Code</label>
-                  <input 
+                    <input 
                     type="text" 
                     value={isCreationMode ? newClientData.postal_code : undefined}
                     defaultValue={!isCreationMode ? client?.postal_code : undefined}
                     onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, postal_code: e.target.value }) : undefined}
+                    onBlur={isCreationMode ? () => handleCreateOrUpdateClient('postal_code') : (e) => handleUpdateExistingClient('postal_code', e.currentTarget.value)}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -853,31 +823,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   />
                 </div>
               </div>
-              {isCreationMode && (
-                <div className="flex gap-2 mt-2">
-                  <button
-                    className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 py-2 text-sm transition-colors"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onCancel) onCancel();
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="flex-1 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-4 py-2 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCreateClient();
-                    }}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Save Client"}
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
