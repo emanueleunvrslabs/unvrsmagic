@@ -63,7 +63,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               setIsOpen(false);
             }}
           >
-            <Receipt className="icon" strokeWidth={2} />
+            <FileText className="icon" strokeWidth={2} />
           </a>
           <a 
             href="#" 
