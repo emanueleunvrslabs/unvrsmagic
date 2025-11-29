@@ -400,8 +400,7 @@
   left: calc(100% + 1em);
   top: 0;
   width: 22em;
-  height: auto;
-  min-height: 25em;
+  height: 25em;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
