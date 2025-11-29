@@ -421,16 +421,6 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                       >
                         <MessageCircle className="icon" strokeWidth={2} />
                       </button>
-                      <button
-                        className="discord-link"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startEditContact(contact);
-                        }}
-                        aria-label="Edit contact"
-                      >
-                        <Pencil className="icon" strokeWidth={2} />
-                      </button>
                     </div>
                   ))}
                 </>
