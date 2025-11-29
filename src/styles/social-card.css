@@ -21,7 +21,7 @@
 /* Company Name Card - Simple without effects */
 .company-name-card-simple {
   padding: 1rem 1.5rem;
-  width: 280px;
+  width: 320px;
 }
 
 .company-name-content-simple {
@@ -40,7 +40,7 @@
 
 /* Icons Card */
 .icons-card {
-  width: 280px;
+  width: 320px;
 }
 
 .social-card ul {
@@ -51,7 +51,6 @@
   align-items: center;
   justify-content: center;
   align-content: center;
-  flex-wrap: wrap;
   flex-direction: row;
 }
 
@@ -85,7 +84,7 @@
 /* Contacts List Card */
 .contacts-list-card {
   padding: 1rem;
-  width: 280px;
+  width: 320px;
 }
 
 .contacts-list {
