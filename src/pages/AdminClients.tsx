@@ -55,7 +55,7 @@ export default function AdminClients() {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div className="space-y-2 px-6 py-4 rounded-2xl backdrop-blur-[15px] bg-white/5 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)]">
+          <div>
             <h1 className="text-3xl font-bold">Client Management</h1>
             <p className="text-muted-foreground mt-2">
               Manage your clients and their access to projects
