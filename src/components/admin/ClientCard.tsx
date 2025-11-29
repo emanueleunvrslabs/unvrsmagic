@@ -332,6 +332,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   e.stopPropagation();
                   setBillingOpen(!billingOpen);
                   setIsOpen(false);
+                  setProjectsOpen(false);
                 }}
               >
                 <FileText className="icon" strokeWidth={2} />
@@ -342,6 +343,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   e.stopPropagation();
                   setIsOpen(!isOpen);
                   setBillingOpen(false);
+                  setProjectsOpen(false);
                 }}
               >
                 <Users className="icon" strokeWidth={2} />
