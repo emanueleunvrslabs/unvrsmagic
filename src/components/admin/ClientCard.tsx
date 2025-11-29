@@ -25,12 +25,19 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
   const [billingOpen, setBillingOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [showAddContact, setShowAddContact] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
     email: string; 
     name: string;
     phone: string;
     id: string;
   } | null>(null);
+  const [newContact, setNewContact] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    whatsappNumber: ""
+  });
 
   const contacts = client.client_contacts?.map(contact => ({
     id: contact.id,
@@ -193,11 +200,74 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                 className="w-full text-center text-sm text-primary/70 hover:text-primary transition-colors py-2 mt-2"
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Add contact functionality here
+                  setShowAddContact(!showAddContact);
                 }}
               >
-                Add Contact
+                {showAddContact ? "Cancel" : "Add Contact"}
               </button>
+              
+              {showAddContact && (
+                <div className="flex flex-col gap-3 w-full mt-3 pt-3 border-t border-white/10">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">First Name</label>
+                      <input 
+                        type="text"
+                        value={newContact.firstName}
+                        onChange={(e) => setNewContact({...newContact, firstName: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '16px' }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Last Name</label>
+                      <input 
+                        type="text"
+                        value={newContact.lastName}
+                        onChange={(e) => setNewContact({...newContact, lastName: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '16px' }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Email</label>
+                    <input 
+                      type="email"
+                      value={newContact.email}
+                      onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      style={{ borderRadius: '16px' }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">WhatsApp Number</label>
+                    <input 
+                      type="tel"
+                      value={newContact.whatsappNumber}
+                      onChange={(e) => setNewContact({...newContact, whatsappNumber: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      style={{ borderRadius: '16px' }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="+1234567890"
+                    />
+                  </div>
+                  <button
+                    className="w-full bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-4 py-3 text-sm transition-colors"
+                    style={{ borderRadius: '16px' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Save contact functionality will be implemented
+                      console.log("Save contact:", newContact);
+                    }}
+                  >
+                    Save Contact
+                  </button>
+                </div>
+              )}
             </>
           ) : (
             <div className="contact-item-card">
