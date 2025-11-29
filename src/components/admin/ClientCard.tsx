@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { Briefcase, FileText, StickyNote, Pencil, Mail, MessageCircle } from "lucide-react";
+import { Briefcase, FileText, StickyNote, Pencil, Mail, MessageCircle, Receipt } from "lucide-react";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
@@ -22,6 +22,7 @@ interface ClientCardProps {
 
 export function ClientCard({ client, onEdit }: ClientCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [billingOpen, setBillingOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
@@ -54,8 +55,15 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
           <a href="#" className="instagram-link" onClick={(e) => e.stopPropagation()}>
             <Briefcase className="icon" strokeWidth={2} />
           </a>
-          <a href="#" className="x-link" onClick={(e) => e.stopPropagation()}>
-            <FileText className="icon" strokeWidth={2} />
+          <a 
+            href="#" 
+            className="x-link" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setBillingOpen(!billingOpen);
+            }}
+          >
+            <Receipt className="icon" strokeWidth={2} />
           </a>
           <a href="#" className="discord-link" onClick={(e) => e.stopPropagation()}>
             <StickyNote className="icon" strokeWidth={2} />
@@ -70,6 +78,34 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
           >
             <Pencil className="icon" strokeWidth={2} />
           </a>
+        </div>
+
+        {/* Collapsible Billing Section */}
+        <div className={`contacts-section ${billingOpen ? 'open' : ''}`}>
+          <div className="contact-item-card">
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Company Name:</span>
+                <span className="contact-name-card">{client.company_name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">VAT Number:</span>
+                <span className="contact-name-card">{client.vat_number}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Address:</span>
+                <span className="contact-name-card text-right">{client.street}, {client.city}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Postal Code:</span>
+                <span className="contact-name-card">{client.postal_code}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Country:</span>
+                <span className="contact-name-card">{client.country}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Collapsible Contacts Section */}
