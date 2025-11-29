@@ -466,20 +466,57 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 client?.company_name
               )}
             </div>
-              {isCreationMode && (
-                <div className="flex gap-2 mt-2 justify-center w-full">
-                  <button
-                    className="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 py-2 text-sm transition-colors"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onCancel) onCancel();
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
+            
+            <div className="social-icons">
+              <button 
+                className="instagram-link" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setProjectsOpen(!projectsOpen);
+                  setIsOpen(false);
+                  setBillingOpen(false);
+                }}
+              >
+                <Briefcase className="icon" strokeWidth={2} />
+              </button>
+              <button 
+                className="x-link" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setBillingOpen(!billingOpen);
+                  setIsOpen(false);
+                  setProjectsOpen(false);
+                }}
+              >
+                <FileText className="icon" strokeWidth={2} />
+              </button>
+              <button 
+                className="discord-link" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(!isOpen);
+                  setBillingOpen(false);
+                  setProjectsOpen(false);
+                }}
+              >
+                <Users className="icon" strokeWidth={2} />
+              </button>
+            </div>
+
+            {isCreationMode && (
+              <div className="flex gap-2 mt-2 justify-center w-full">
+                <button
+                  className="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 py-2 text-sm transition-colors"
+                  style={{ borderRadius: '12px' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onCancel) onCancel();
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
 
             {/* Collapsible Contacts Section */}
           </div>
