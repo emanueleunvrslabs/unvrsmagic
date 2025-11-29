@@ -55,6 +55,22 @@ const projectConfigs: Record<string, {
     category: "AI Content Creation",
     description: "Create stunning AI-generated images and videos, schedule posts, and publish directly to social media with automated workflows.",
   },
+  "ai-art": {
+    features: [
+      { icon: Image, text: "Professional Image Generation with Nano Banana 2" },
+      { icon: Video, text: "High-Quality Video Creation with Veo 3.1 Fast" },
+      { icon: Sparkles, text: "Multiple Generation Modes (Text-to-Image, Image-to-Image, Text-to-Video)" },
+      { icon: Bot, text: "Advanced Aspect Ratio & Resolution Controls" },
+      { icon: Calendar, text: "First/Last Frame Video Generation" },
+      { icon: Share2, text: "Reference-Based Video Creation" },
+    ],
+    pricing: [
+      { type: "Image", price: "€1.00", unit: "per image", description: "Professional AI-generated images with Nano Banana 2" },
+      { type: "Video", price: "€10.00", unit: "per video", description: "High-quality AI-generated videos with Veo 3.1 Fast" },
+    ],
+    category: "AI Art Generation",
+    description: "Create professional AI-generated images and videos with advanced controls. Perfect for artists, designers, and content creators who need high-quality visual content.",
+  },
   "dispacciamento": {
     features: [
       { icon: Bot, text: "7 AI Agents for Data Processing" },
