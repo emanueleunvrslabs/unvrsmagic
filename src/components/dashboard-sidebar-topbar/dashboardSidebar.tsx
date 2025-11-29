@@ -501,7 +501,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           ],
         },
         { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
-        { id: "strategies-marketplace", label: "Strategies Marketplace", icon: Store, href: "/strategies-marketplace" },
       ],
     });
   }
@@ -512,6 +511,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     items: [
       { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
       { id: "file-upload", label: "Upload", icon: Upload, href: "/file-upload" },
+      { id: "strategies-marketplace", label: "Strategies Marketplace", icon: Store, href: "/strategies-marketplace" },
     ],
   });
 
