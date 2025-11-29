@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CreditCard, Plus, Image, Video, Loader2, TrendingUp, TrendingDown } from "lucide-react";
 import { useUserCredits } from "@/hooks/useUserCredits";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ const CREDIT_PACKAGES = [
 
 export function CreditBalanceCard() {
   const { credits, transactions, isLoading, purchaseCredits, isPurchasing } = useUserCredits();
+  const { isOwner } = useUserRole();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const formatCurrency = (amount: number) => {
@@ -142,7 +144,7 @@ export function CreditBalanceCard() {
         </div>
 
         {/* Recent Transactions */}
-        {transactions && transactions.length > 0 && (
+        {!isOwner && transactions && transactions.length > 0 && (
           <>
             <Separator />
             <div>
