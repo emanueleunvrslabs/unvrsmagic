@@ -1,14 +1,14 @@
 export function SocialMediaCard() {
   return (
-    <div className="social-media-card">
+    <div className="card">
       <img
         src="https://uiverse.io/astronaut.png"
-        alt="Astronaut"
-        className="social-media-image"
+        alt=""
+        className="image"
       />
-      <div className="social-media-heading">We're on Social Media</div>
-      <div className="social-media-icons">
-        <a href="https://www.instagram.com/uiverse.io/" className="social-instagram">
+      <div className="heading">We're on Social Media</div>
+      <div className="icons">
+        <a href="https://www.instagram.com/uiverse.io/" className="instagram">
           <svg
             width="24"
             height="25"
@@ -25,7 +25,7 @@ export function SocialMediaCard() {
             ></path>
           </svg>
         </a>
-        <a href="https://twitter.com/uiverse_io" className="social-x">
+        <a href="https://twitter.com/uiverse_io" className="x">
           <svg
             width="24"
             height="24"
@@ -42,7 +42,7 @@ export function SocialMediaCard() {
             ></path>
           </svg>
         </a>
-        <a href="https://discord.gg/KD8ba2uUpT" className="social-discord">
+        <a href="https://discord.gg/KD8ba2uUpT" className="discord">
           <svg
             width="25"
             height="25"
