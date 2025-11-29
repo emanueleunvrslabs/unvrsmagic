@@ -50,6 +50,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
   const [showAddProject, setShowAddProject] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
     email: string; 
@@ -68,6 +69,9 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     whatsappNumber: ""
   });
   const [newProject, setNewProject] = useState({
+    projectName: ""
+  });
+  const [editProject, setEditProject] = useState({
     projectName: ""
   });
 
@@ -257,6 +261,87 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleUpdateProject = async (projectId: string) => {
+    setSaving(true);
+
+    try {
+      const validated = projectSchema.parse(editProject);
+
+      const { error } = await supabase
+        .from("client_projects")
+        .update({
+          project_name: validated.projectName,
+        })
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Project updated successfully",
+      });
+
+      setEditingProjectId(null);
+      if (onContactAdded) {
+        onContactAdded();
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to update project",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    setDeleting(true);
+
+    try {
+      const { error } = await supabase
+        .from("client_projects")
+        .delete()
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+
+      setEditingProjectId(null);
+      if (onContactAdded) {
+        onContactAdded();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete project",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const startEditProject = (project: any) => {
+    setEditingProjectId(project.id);
+    setEditProject({
+      projectName: project.project_name,
+    });
   };
 
   const startEditContact = (contact: any) => {
@@ -541,12 +626,70 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   {saving ? "Saving..." : "Save Project"}
                 </button>
               </div>
+            ) : editingProjectId ? (
+              <div className="flex flex-col gap-3 w-full">
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Project Name</label>
+                  <input 
+                    type="text"
+                    value={editProject.projectName}
+                    onChange={(e) => setEditProject({projectName: e.target.value})}
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteProject(editingProjectId);
+                    }}
+                    disabled={deleting}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  <button
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-2 text-xs transition-colors"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingProjectId(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="flex-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUpdateProject(editingProjectId);
+                    }}
+                    disabled={saving}
+                  >
+                    {saving ? "Saving..." : "Update"}
+                  </button>
+                </div>
+              </div>
             ) : (
               clientProjects.length > 0 ? (
                 <>
                   {clientProjects.map((project) => (
                     <div key={project.id} className="social-icons">
                       <span className="contact-name-card text-left flex-1">{project.project_name}</span>
+                      <button
+                        className="discord-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEditProject(project);
+                        }}
+                        aria-label="Edit project"
+                      >
+                        <Pencil className="icon" strokeWidth={2} />
+                      </button>
                     </div>
                   ))}
                 </>
