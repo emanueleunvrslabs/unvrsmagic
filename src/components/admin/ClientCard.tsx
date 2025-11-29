@@ -446,7 +446,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 <input 
                   type="text" 
                   defaultValue={client.company_name}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="max-w-xs bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '16px' }}
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -456,7 +456,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 <input 
                   type="text" 
                   defaultValue={client.vat_number}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="max-w-xs bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '16px' }}
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -466,12 +466,12 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 <input 
                   type="text" 
                   defaultValue={client.street}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="max-w-xs bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '16px' }}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 max-w-xs">
                 <div className="space-y-1">
                   <label className="text-xs text-muted-foreground">City</label>
                   <input 
