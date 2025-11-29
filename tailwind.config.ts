@@ -120,6 +120,26 @@ export default {
           stroke: "hsl(var(--glass-stroke))",
           highlight: "hsl(var(--glass-highlight))",
         },
+        orange: {
+          DEFAULT: "hsl(var(--orange))",
+          foreground: "hsl(var(--orange-foreground))",
+        },
+        pink: {
+          DEFAULT: "hsl(var(--pink))",
+          foreground: "hsl(var(--pink-foreground))",
+        },
+        purple: {
+          DEFAULT: "hsl(var(--purple))",
+          foreground: "hsl(var(--purple-foreground))",
+        },
+        cyan: {
+          DEFAULT: "hsl(var(--cyan))",
+          foreground: "hsl(var(--cyan-foreground))",
+        },
+        lime: {
+          DEFAULT: "hsl(var(--lime))",
+          foreground: "hsl(var(--lime-foreground))",
+        },
       },
       
       /* Perspective for 3D transforms */

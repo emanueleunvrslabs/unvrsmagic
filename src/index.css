@@ -136,6 +136,27 @@ html {
     --primary: 210 100% 56%;
     --primary-foreground: 0 0% 100%;
     
+    /* Vibrant Color Palette */
+    --orange: 27 93% 60%;
+    --orange-foreground: 0 0% 100%;
+    
+    --pink: 330 85% 65%;
+    --pink-foreground: 0 0% 100%;
+    
+    --purple: 270 75% 65%;
+    --purple-foreground: 0 0% 100%;
+    
+    --cyan: 190 85% 55%;
+    --cyan-foreground: 0 0% 100%;
+    
+    --lime: 85 70% 55%;
+    --lime-foreground: 0 0% 10%;
+    
+    /* Gradient Accents */
+    --gradient-primary: linear-gradient(135deg, hsl(27, 93%, 60%), hsl(330, 85%, 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(270, 75%, 65%), hsl(190, 85%, 55%));
+    --gradient-vibrant: linear-gradient(135deg, hsl(27, 93%, 60%) 0%, hsl(330, 85%, 65%) 25%, hsl(270, 75%, 65%) 50%, hsl(190, 85%, 55%) 100%);
+    
     /* Secondary Glass Surface */
     --secondary: 0 0% 96% / 0.6;
     --secondary-foreground: 0 0% 10%;
@@ -194,6 +215,27 @@ html {
     /* Accent (Vibrant Blue - brighter in dark) */
     --primary: 210 100% 64%;
     --primary-foreground: 0 0% 100%;
+    
+    /* Vibrant Color Palette (Dark) */
+    --orange: 27 93% 65%;
+    --orange-foreground: 0 0% 100%;
+    
+    --pink: 330 85% 70%;
+    --pink-foreground: 0 0% 100%;
+    
+    --purple: 270 75% 70%;
+    --purple-foreground: 0 0% 100%;
+    
+    --cyan: 190 85% 60%;
+    --cyan-foreground: 0 0% 100%;
+    
+    --lime: 85 70% 60%;
+    --lime-foreground: 0 0% 10%;
+    
+    /* Gradient Accents (Dark) */
+    --gradient-primary: linear-gradient(135deg, hsl(27, 93%, 65%), hsl(330, 85%, 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(270, 75%, 70%), hsl(190, 85%, 60%));
+    --gradient-vibrant: linear-gradient(135deg, hsl(27, 93%, 65%) 0%, hsl(330, 85%, 70%) 25%, hsl(270, 75%, 70%) 50%, hsl(190, 85%, 60%) 100%);
     
     /* Secondary Glass Surface */
     --secondary: 0 0% 12% / 0.6;

@@ -68,7 +68,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 ml-2"
+            className="h-8 w-8 p-0 ml-2 hover:bg-purple/20 hover:text-purple transition-all"
             onClick={() => onEdit(client)}
           >
             <Pencil className="h-4 w-4" />
@@ -85,18 +85,18 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full flex items-center justify-between p-2 h-auto"
+                className="w-full flex items-center justify-between p-2 h-auto hover:bg-pink/10 transition-all"
               >
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
+                  <Users className="h-4 w-4 text-pink" />
                   <span className="text-sm font-medium">
                     Contacts ({client.client_contacts.length})
                   </span>
                 </div>
                 {contactsOpen ? (
-                  <ChevronUp className="h-4 w-4" />
+                  <ChevronUp className="h-4 w-4 text-pink" />
                 ) : (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 text-pink" />
                 )}
               </Button>
             </CollapsibleTrigger>
@@ -111,18 +111,18 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 border-orange/30 bg-orange/10 hover:bg-orange/20 hover:border-orange/50 transition-all"
                         onClick={() => handleEmail(contact)}
                       >
-                        <Mail className="h-4 w-4" />
+                        <Mail className="h-4 w-4 text-orange" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 border-cyan/30 bg-cyan/10 hover:bg-cyan/20 hover:border-cyan/50 transition-all"
                         onClick={() => handleWhatsApp(contact)}
                       >
-                        <MessageCircle className="h-4 w-4" />
+                        <MessageCircle className="h-4 w-4 text-cyan" />
                       </Button>
                     </div>
                   </div>
