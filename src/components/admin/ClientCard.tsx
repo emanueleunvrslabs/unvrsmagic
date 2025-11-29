@@ -28,6 +28,7 @@ interface ClientCardProps {
     description?: string;
   }>;
   onCancel?: () => void;
+  onClientCreated?: () => void;
 }
 
 const contactSchema = z.object({
@@ -40,7 +41,7 @@ const projectSchema = z.object({
   projectName: z.string().trim().min(1, "Project name is required").max(200),
 });
 
-export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [], onCancel }: ClientCardProps) {
+export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [], onCancel, onClientCreated }: ClientCardProps) {
   const { toast } = useToast();
   const isCreationMode = client === null;
   const [isOpen, setIsOpen] = useState(false);
@@ -68,6 +69,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     postal_code: "",
   });
   const [createdClientId, setCreatedClientId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [newContact, setNewContact] = useState({
     name: "",
     email: "",
@@ -338,13 +340,18 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
   };
 
   const handleCreateOrUpdateClient = async (field?: string) => {
+    // Prevent duplicate saves
+    if (isSaving) return;
+    
     try {
       if (!newClientData.company_name.trim() && !createdClientId) {
         return; // Don't create client without company name
       }
 
+      setIsSaving(true);
+
       if (!createdClientId) {
-        // Create new client
+        // Create new client only once
         const { data: createdClient, error: clientError } = await supabase
           .from("clients")
           .insert({
@@ -364,6 +371,13 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
         
         if (onContactAdded) {
           onContactAdded();
+        }
+        
+        // Close the form after successful creation
+        if (onClientCreated) {
+          setTimeout(() => {
+            onClientCreated();
+          }, 300);
         }
       } else {
         // Update existing client
@@ -390,6 +404,8 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
         description: error instanceof Error ? error.message : "Failed to save client",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
