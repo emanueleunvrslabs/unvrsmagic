@@ -148,12 +148,12 @@ export function NewClientModal({ open, onOpenChange, onSuccess }: NewClientModal
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto glassmorphism-modal">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] glassmorphism-modal flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>New Client</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto flex-1 px-1">
           {/* Billing Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Billing Information</h3>
@@ -301,7 +301,7 @@ export function NewClientModal({ open, onOpenChange, onSuccess }: NewClientModal
             ))}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-shrink-0 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
