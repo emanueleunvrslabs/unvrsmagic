@@ -34,7 +34,7 @@ export function ProjectCard({ project, isAdded, onViewDetails }: ProjectCardProp
             </CardDescription>
           </div>
           {isAdded && (
-            <Badge variant="secondary" className="ml-2 shrink-0">
+            <Badge className="ml-2 shrink-0 border-green-500/30 bg-green-500/10 text-green-500 hover:bg-green-500/20">
               <Check className="h-3 w-3 mr-1" />
               Added
             </Badge>
