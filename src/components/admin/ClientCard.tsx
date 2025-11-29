@@ -1,4 +1,5 @@
 import "../labs/SocialMediaCard.css";
+import "./ClientCard.css";
 import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
@@ -334,7 +335,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
               contacts.length > 0 && (
                 <>
                   {contacts.map((contact) => {
-                    const longPressEvents = useLongPress({
+                    const { handlers: longPressEvents, isPressed } = useLongPress({
                       onLongPress: () => handleContactLongPress(contact),
                       onClick: () => handleContactClick(contact),
                       delay: 500
@@ -418,11 +419,23 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                             <span className="contact-name-card">{contact.name}</span>
                             <div className="contact-actions-card">
                               <button
-                                className="contact-btn-card"
+                                className={`contact-btn-card relative overflow-hidden transition-all duration-200 ${
+                                  isPressed ? 'scale-95' : 'scale-100'
+                                }`}
                                 {...longPressEvents}
                                 aria-label="Send email or long press to edit"
                               >
-                                <Mail className="contact-icon-card" size={18} />
+                                {isPressed && (
+                                  <div 
+                                    className="absolute inset-0 bg-purple-500/30 animate-pulse"
+                                    style={{
+                                      animation: 'progressFill 500ms linear forwards'
+                                    }}
+                                  />
+                                )}
+                                <Mail className={`contact-icon-card relative z-10 transition-colors ${
+                                  isPressed ? 'text-purple-400' : ''
+                                }`} size={18} />
                               </button>
                               <button
                                 className="contact-btn-card"
