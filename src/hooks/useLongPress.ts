@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 
 interface UseLongPressOptions {
   onLongPress: () => void;
@@ -9,13 +9,16 @@ interface UseLongPressOptions {
 export function useLongPress({ onLongPress, onClick, delay = 500 }: UseLongPressOptions) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isLongPress = useRef(false);
+  const [isPressed, setIsPressed] = useState(false);
 
   const start = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     isLongPress.current = false;
+    setIsPressed(true);
     
     timerRef.current = setTimeout(() => {
       isLongPress.current = true;
+      setIsPressed(false);
       onLongPress();
     }, delay);
   }, [onLongPress, delay]);
@@ -34,19 +37,26 @@ export function useLongPress({ onLongPress, onClick, delay = 500 }: UseLongPress
     }
     
     isLongPress.current = false;
+    setIsPressed(false);
   }, [onClick]);
 
+  const cancel = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    isLongPress.current = false;
+    setIsPressed(false);
+  }, []);
+
   return {
-    onMouseDown: start,
-    onMouseUp: clear,
-    onMouseLeave: (e: React.MouseEvent) => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-      isLongPress.current = false;
+    handlers: {
+      onMouseDown: start,
+      onMouseUp: clear,
+      onMouseLeave: cancel,
+      onTouchStart: start,
+      onTouchEnd: clear,
     },
-    onTouchStart: start,
-    onTouchEnd: clear,
+    isPressed,
   };
 }
