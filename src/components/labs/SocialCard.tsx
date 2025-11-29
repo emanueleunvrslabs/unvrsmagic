@@ -3,7 +3,6 @@ import "./SocialCard.css";
 export function SocialCard() {
   return (
     <div className="card">
-      <div className="heading">We're on Social Media</div>
       <div className="icons">
         <a href="https://www.instagram.com/uiverse.io/" className="instagram">
           <svg
