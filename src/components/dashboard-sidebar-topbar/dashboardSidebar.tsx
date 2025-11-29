@@ -37,6 +37,7 @@ import {
   Store,
   Upload,
   User,
+  Users,
   UserPlus,
   Wallet,
   Wand2,
@@ -450,6 +451,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       section: "Admin",
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
+        { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
         {
           id: "ai-social",
           label: "Ai Social",
