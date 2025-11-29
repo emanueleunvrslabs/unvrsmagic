@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useMarketplaceProjects } from "@/hooks/useMarketplaceProjects";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Navigate } from "react-router-dom";
 
@@ -29,17 +29,11 @@ export default function AdminProjects() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Gestione Progetti</h1>
-            <p className="text-muted-foreground mt-2">
-              Gestisci i progetti e la loro visibilità nel marketplace
-            </p>
-          </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuovo Progetto
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Gestione Progetti</h1>
+          <p className="text-muted-foreground mt-2">
+            Gestisci i progetti e la loro visibilità nel marketplace
+          </p>
         </div>
 
         <div className="space-y-4">
