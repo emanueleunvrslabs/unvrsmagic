@@ -43,7 +43,6 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
     <>
       <div 
         className={`social-media-card ${isOpen ? 'expanded' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
       >
         <img
           src="https://uiverse.io/astronaut.png"
@@ -61,11 +60,20 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
             onClick={(e) => {
               e.stopPropagation();
               setBillingOpen(!billingOpen);
+              setIsOpen(false);
             }}
           >
             <Receipt className="icon" strokeWidth={2} />
           </a>
-          <a href="#" className="discord-link" onClick={(e) => e.stopPropagation()}>
+          <a 
+            href="#" 
+            className="discord-link" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpen(!isOpen);
+              setBillingOpen(false);
+            }}
+          >
             <StickyNote className="icon" strokeWidth={2} />
           </a>
           <a 
