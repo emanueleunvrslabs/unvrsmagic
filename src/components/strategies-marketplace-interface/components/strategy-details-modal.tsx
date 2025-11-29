@@ -57,8 +57,22 @@ export function StrategyDetailsModal({
           <div className="space-y-4 md:col-span-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="rounded-lg border p-4">
-                <h3 className="mb-4 text-lg font-semibold">Risk Metrics</h3>
-                <RiskMetrics strategy={strategy} />
+                <h3 className="mb-4 text-lg font-semibold">Details</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Projects</span>
+                    <span className="text-sm font-medium">0</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Contact Persons</span>
+                    <span className="text-sm font-medium">0</span>
+                  </div>
+                  <Separator />
+                  <Button className="w-full gap-1" onClick={() => onPurchase?.(strategy.id)}>
+                    <ShoppingCart className="h-4 w-4" />
+                    <span>New Project</span>
+                  </Button>
+                </div>
               </div>
 
               <div className="rounded-lg border p-4">
@@ -73,27 +87,8 @@ export function StrategyDetailsModal({
             </div>
           </div>
 
-          {/* Right column - Strategy details */}
+          {/* Right column - Actions */}
           <div className="space-y-4">
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">Strategy Details</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Projects</span>
-                  <span className="text-sm font-medium">0</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Contact Persons</span>
-                  <span className="text-sm font-medium">0</span>
-                </div>
-                <Separator />
-                <Button className="w-full gap-1" onClick={() => onPurchase?.(strategy.id)}>
-                  <ShoppingCart className="h-4 w-4" />
-                  <span>New Project</span>
-                </Button>
-              </div>
-            </div>
-
             <div className="flex items-center justify-between rounded-lg border p-4">
               <Button variant="outline" size="sm" className="gap-1">
                 <Share2 className="h-4 w-4" />
