@@ -5,22 +5,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 backdrop-blur-base",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 backdrop-blur-[15px]",
   {
     variants: {
       variant: {
-        default: "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:border-primary/30 shadow-l1 hover:shadow-l2",
-        destructive: "bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:border-destructive/30 shadow-l1 hover:shadow-l2",
-        outline: "border border-border/50 bg-background/30 hover:bg-background/50 hover:border-border shadow-l1",
-        secondary: "bg-secondary/50 text-secondary-foreground border border-border/30 hover:bg-secondary/70 hover:border-border/50 shadow-l1",
-        ghost: "bg-transparent hover:bg-muted/30 border border-transparent hover:border-border/20",
+        default: "bg-white/5 text-primary border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)] hover:bg-white/10",
+        destructive: "bg-white/5 text-destructive border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)] hover:bg-destructive/10",
+        outline: "bg-white/5 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)] hover:bg-white/10",
+        secondary: "bg-white/5 text-secondary-foreground border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)] hover:bg-white/10",
+        ghost: "bg-transparent hover:bg-white/5 border border-transparent hover:border-white/10",
         link: "text-primary underline-offset-4 hover:underline bg-transparent border-transparent",
       },
       size: {
-        default: "h-10 px-4 py-2 rounded-[18px]",
-        sm: "h-9 px-3 rounded-[14px]",
-        lg: "h-11 px-8 rounded-[22px]",
-        icon: "h-10 w-10 rounded-[18px]",
+        default: "h-10 px-4 py-2 rounded-2xl",
+        sm: "h-9 px-3 rounded-2xl",
+        lg: "h-11 px-8 rounded-2xl",
+        icon: "h-10 w-10 rounded-2xl",
       },
     },
     defaultVariants: {
