@@ -1,6 +1,6 @@
 import "../labs/SocialMediaCard.css";
-import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt } from "lucide-react";
-import { useState } from "react";
+import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt, Trash2 } from "lucide-react";
+import { useState, useRef } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +38,9 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [showAddContact, setShowAddContact] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingContactId, setEditingContactId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const [selectedContact, setSelectedContact] = useState<{ 
     email: string; 
     name: string;
@@ -45,6 +48,11 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
     id: string;
   } | null>(null);
   const [newContact, setNewContact] = useState({
+    name: "",
+    email: "",
+    whatsappNumber: ""
+  });
+  const [editContact, setEditContact] = useState({
     name: "",
     email: "",
     whatsappNumber: ""
@@ -105,6 +113,104 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUpdateContact = async (contactId: string) => {
+    setSaving(true);
+
+    try {
+      const validated = contactSchema.parse(editContact);
+      const nameParts = validated.name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const { error } = await supabase
+        .from("client_contacts")
+        .update({
+          first_name: firstName,
+          last_name: lastName,
+          email: validated.email,
+          whatsapp_number: validated.whatsappNumber,
+        })
+        .eq("id", contactId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Contact updated successfully",
+      });
+
+      setEditingContactId(null);
+      if (onContactAdded) {
+        onContactAdded();
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to update contact",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteContact = async (contactId: string) => {
+    setDeleting(true);
+
+    try {
+      const { error } = await supabase
+        .from("client_contacts")
+        .delete()
+        .eq("id", contactId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Contact deleted successfully",
+      });
+
+      setEditingContactId(null);
+      if (onContactAdded) {
+        onContactAdded();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete contact",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleLongPressStart = (contact: any) => {
+    longPressTimer.current = setTimeout(() => {
+      setEditingContactId(contact.id);
+      setEditContact({
+        name: contact.name,
+        email: contact.email,
+        whatsappNumber: contact.phone
+      });
+    }, 500); // 500ms for long press
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
     }
   };
 
@@ -231,31 +337,113 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 <>
                   {contacts.map((contact) => (
                     <div key={contact.id} className="contact-item-card">
-                      <span className="contact-name-card">{contact.name}</span>
-                      <div className="contact-actions-card">
-                        <button
-                          className="contact-btn-card"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedContact(contact);
-                            setEmailModalOpen(true);
-                          }}
-                          aria-label="Send email"
-                        >
-                          <Mail className="contact-icon-card" size={18} />
-                        </button>
-                        <button
-                          className="contact-btn-card"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedContact(contact);
-                            setWhatsappModalOpen(true);
-                          }}
-                          aria-label="Send WhatsApp"
-                        >
-                          <MessageCircle className="contact-icon-card" size={18} />
-                        </button>
-                      </div>
+                      {editingContactId === contact.id ? (
+                        <div className="flex flex-col gap-3 w-full">
+                          <div className="space-y-1">
+                            <label className="text-xs text-muted-foreground">Name</label>
+                            <input 
+                              type="text"
+                              value={editContact.name}
+                              onChange={(e) => setEditContact({...editContact, name: e.target.value})}
+                              className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                              style={{ borderRadius: '16px' }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-muted-foreground">Email</label>
+                            <input 
+                              type="email"
+                              value={editContact.email}
+                              onChange={(e) => setEditContact({...editContact, email: e.target.value})}
+                              className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                              style={{ borderRadius: '16px' }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-muted-foreground">WhatsApp Number</label>
+                            <input 
+                              type="tel"
+                              value={editContact.whatsappNumber}
+                              onChange={(e) => setEditContact({...editContact, whatsappNumber: e.target.value})}
+                              className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                              style={{ borderRadius: '16px' }}
+                              onClick={(e) => e.stopPropagation()}
+                              placeholder="+1234567890"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              className="flex-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ borderRadius: '12px' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUpdateContact(contact.id);
+                              }}
+                              disabled={saving}
+                            >
+                              {saving ? "Saving..." : "Update"}
+                            </button>
+                            <button
+                              className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ borderRadius: '12px' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteContact(contact.id);
+                              }}
+                              disabled={deleting}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            <button
+                              className="bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-2 text-xs transition-colors"
+                              style={{ borderRadius: '12px' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingContactId(null);
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="contact-name-card">{contact.name}</span>
+                          <div className="contact-actions-card">
+                            <button
+                              className="contact-btn-card"
+                              onMouseDown={() => handleLongPressStart(contact)}
+                              onMouseUp={handleLongPressEnd}
+                              onMouseLeave={handleLongPressEnd}
+                              onTouchStart={() => handleLongPressStart(contact)}
+                              onTouchEnd={handleLongPressEnd}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!editingContactId) {
+                                  setSelectedContact(contact);
+                                  setEmailModalOpen(true);
+                                }
+                              }}
+                              aria-label="Send email or long press to edit"
+                            >
+                              <Mail className="contact-icon-card" size={18} />
+                            </button>
+                            <button
+                              className="contact-btn-card"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedContact(contact);
+                                setWhatsappModalOpen(true);
+                              }}
+                              aria-label="Send WhatsApp"
+                            >
+                              <MessageCircle className="contact-icon-card" size={18} />
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
                 </>
