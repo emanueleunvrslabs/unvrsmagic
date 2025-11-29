@@ -477,15 +477,15 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     <>
       <div className="client-card-wrapper">
         <div 
-          className={`social-media-card ${billingOpen || isOpen || projectsOpen ? 'expanded-lateral' : ''}`}
+          className={`social-media-card ${billingOpen || isOpen || projectsOpen ? 'expanded-lateral' : ''} group`}
         >
-          {!isCreationMode && (
+          {!isCreationMode && !billingOpen && !isOpen && !projectsOpen && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setShowDeleteConfirm(true);
               }}
-              className="absolute top-3 right-3 z-20 p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
+              className="absolute top-3 right-3 z-20 p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all opacity-0 group-hover:opacity-100"
               aria-label="Delete client"
             >
               <X size={16} strokeWidth={2.5} />
