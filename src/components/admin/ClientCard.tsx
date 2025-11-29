@@ -66,7 +66,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     street: "",
     city: "",
     postal_code: "",
-    country: "",
   });
   const [newContact, setNewContact] = useState({
     name: "",
@@ -379,7 +378,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
           street: newClientData.street || "",
           city: newClientData.city || "",
           postal_code: newClientData.postal_code || "",
-          country: newClientData.country || "",
+          country: "",
         })
         .select()
         .single();
@@ -853,19 +852,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     placeholder="Enter postal code"
                   />
                 </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Country</label>
-                <input 
-                  type="text" 
-                  value={isCreationMode ? newClientData.country : undefined}
-                  defaultValue={!isCreationMode ? client?.country : undefined}
-                  onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, country: e.target.value }) : undefined}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  style={{ borderRadius: '12px' }}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder="Enter country"
-                />
               </div>
               {isCreationMode && (
                 <div className="flex gap-2 mt-2">
