@@ -89,16 +89,14 @@ export default function AdminClients() {
           )}
         </div>
 
-        <div className="social-card-container mt-8">
-          <div className="social-card">
-            <div className="company-name-item-solo">
-              <span></span>
-              <span></span>
-              <span></span>
-              <div className="company-name-content">
-                <span className="company-name-text">Company Name</span>
-              </div>
+        <div className="social-cards-wrapper mt-8">
+          <div className="social-card company-name-card-simple">
+            <div className="company-name-content-simple">
+              <span className="company-name-text">Company Name</span>
             </div>
+          </div>
+
+          <div className="social-card icons-card">
             <ul>
               <li className="social-iso-pro">
                 <span></span>

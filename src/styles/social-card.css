@@ -1,8 +1,9 @@
 /* Social Card Styles */
-.social-card-container {
+.social-cards-wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  gap: 0.25rem;
 }
 
 .social-card {
@@ -12,7 +13,6 @@
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  gap: 0.25rem;
   backdrop-filter: blur(15px);
   box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.192),
     inset 0 0 5px rgba(255, 255, 255, 0.274), 0 5px 5px rgba(0, 0, 0, 0.164);
@@ -24,8 +24,33 @@
   background: rgba(173, 173, 173, 0.05);
 }
 
+/* Company Name Card - Simple without effects */
+.company-name-card-simple {
+  padding: 1rem 1.5rem;
+  min-width: 280px;
+}
+
+.company-name-content-simple {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.company-name-text {
+  color: rgb(255, 174, 0);
+  font-weight: 600;
+  font-size: 16px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Icons Card */
+.icons-card {
+  min-width: 280px;
+}
+
 .social-card ul {
-  padding: 0.5rem 1rem 1rem;
+  padding: 1rem;
   display: flex;
   list-style: none;
   gap: 1rem;
