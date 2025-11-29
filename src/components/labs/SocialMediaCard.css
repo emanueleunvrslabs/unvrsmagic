@@ -418,10 +418,17 @@
   height: 100%;
   opacity: 0;
   max-width: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   pointer-events: none;
   transition: max-width 0.4s ease-in-out, opacity 0.3s ease-in-out;
   flex-shrink: 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.billing-section-lateral::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .billing-section-lateral.open {
@@ -440,10 +447,17 @@
   height: 25em;
   opacity: 0;
   max-width: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   pointer-events: none;
   transition: max-width 0.4s ease-in-out, opacity 0.3s ease-in-out;
   flex-shrink: 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.contacts-section-lateral::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .contacts-section-lateral.open {
