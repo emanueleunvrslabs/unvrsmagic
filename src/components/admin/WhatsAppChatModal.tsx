@@ -148,7 +148,7 @@ export function WhatsAppChatModal({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -181,7 +181,7 @@ export function WhatsAppChatModal({
             </div>
           </div>
 
-          <ScrollArea className="chat-messages">
+          <ScrollArea className="chat-messages" ref={scrollRef}>
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -223,7 +223,7 @@ export function WhatsAppChatModal({
             <Textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="Type a message..."
               className="chat-input"
               rows={2}
