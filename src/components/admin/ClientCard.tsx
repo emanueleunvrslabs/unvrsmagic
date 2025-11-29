@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt, Trash2 } from "lucide-react";
+import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
@@ -55,6 +55,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
     email: string; 
     name: string;
@@ -432,6 +433,39 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     }
   };
 
+  const handleDeleteClient = async () => {
+    if (!client?.id) return;
+    
+    setDeleting(true);
+
+    try {
+      const { error } = await supabase
+        .from("clients")
+        .delete()
+        .eq("id", client.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Client deleted successfully",
+      });
+
+      if (onContactAdded) {
+        onContactAdded();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete client",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   const contacts = client?.client_contacts?.map(contact => ({
     id: contact.id,
     name: `${contact.first_name} ${contact.last_name}`,
@@ -445,6 +479,54 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
         <div 
           className={`social-media-card ${billingOpen || isOpen || projectsOpen ? 'expanded-lateral' : ''}`}
         >
+          {!isCreationMode && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteConfirm(true);
+              }}
+              className="absolute top-3 right-3 z-20 p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
+              aria-label="Delete client"
+            >
+              <X size={16} strokeWidth={2.5} />
+            </button>
+          )}
+          
+          {showDeleteConfirm && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[24px]">
+              <div className="bg-background/95 border border-red-500/30 rounded-[18px] p-6 max-w-sm mx-4 space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-white">Delete Client</h3>
+                  <p className="text-sm text-white/70">
+                    Are you sure you want to delete {client?.company_name}? This action cannot be undone.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowDeleteConfirm(false);
+                    }}
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-4 py-2 text-sm transition-colors rounded-[12px]"
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClient();
+                    }}
+                    className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-4 py-2 text-sm transition-colors rounded-[12px] disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={deleting}
+                  >
+                    {deleting ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="card-main-content">
             {isOpen && (
               <div className="absolute top-2 right-4 z-10">
