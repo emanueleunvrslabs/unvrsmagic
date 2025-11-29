@@ -33,8 +33,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
     id: string;
   } | null>(null);
   const [newContact, setNewContact] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     whatsappNumber: ""
   });
@@ -209,22 +208,11 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
           {showAddContact && (
             <div className="flex flex-col gap-3 w-full mt-3 pt-3 border-t border-white/10">
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">First Name</label>
+                <label className="text-xs text-muted-foreground">Name</label>
                 <input 
                   type="text"
-                  value={newContact.firstName}
-                  onChange={(e) => setNewContact({...newContact, firstName: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  style={{ borderRadius: '16px' }}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Last Name</label>
-                <input 
-                  type="text"
-                  value={newContact.lastName}
-                  onChange={(e) => setNewContact({...newContact, lastName: e.target.value})}
+                  value={newContact.name}
+                  onChange={(e) => setNewContact({...newContact, name: e.target.value})}
                   className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '16px' }}
                   onClick={(e) => e.stopPropagation()}
