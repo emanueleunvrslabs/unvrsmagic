@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Briefcase, Users, Settings, Mail, MessageCircle } from "lucide-react";
+import { Briefcase, FileText, StickyNote, Settings, Mail, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
@@ -60,12 +60,23 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               <span></span>
               <span></span>
               <span></span>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowContactsModal(true); }}>
+              <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Navigate to invoices */ }}>
                 <div className="social-svg-wrapper">
-                  <Users className="social-svg-icon" strokeWidth={2} />
+                  <FileText className="social-svg-icon" strokeWidth={2} />
                 </div>
               </a>
-              <div className="social-text">Contact</div>
+              <div className="social-text">Invoice</div>
+            </li>
+            <li className="social-iso-pro">
+              <span></span>
+              <span></span>
+              <span></span>
+              <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Navigate to notes */ }}>
+                <div className="social-svg-wrapper">
+                  <StickyNote className="social-svg-icon" strokeWidth={2} />
+                </div>
+              </a>
+              <div className="social-text">Note</div>
             </li>
             <li className="social-iso-pro">
               <span></span>
