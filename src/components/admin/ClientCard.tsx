@@ -45,49 +45,33 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
 
         <div className="social-card icons-card">
           <ul>
-            <li className="social-iso-pro">
-              <span></span>
-              <span></span>
-              <span></span>
+            <li>
               <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Navigate to projects */ }}>
                 <div className="social-svg-wrapper">
                   <Briefcase className="social-svg-icon" strokeWidth={2} />
                 </div>
               </a>
-              <div className="social-text">Projects</div>
             </li>
-            <li className="social-iso-pro">
-              <span></span>
-              <span></span>
-              <span></span>
+            <li>
               <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Navigate to invoices */ }}>
                 <div className="social-svg-wrapper">
                   <FileText className="social-svg-icon" strokeWidth={2} />
                 </div>
               </a>
-              <div className="social-text">Invoice</div>
             </li>
-            <li className="social-iso-pro">
-              <span></span>
-              <span></span>
-              <span></span>
+            <li>
               <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Navigate to notes */ }}>
                 <div className="social-svg-wrapper">
                   <StickyNote className="social-svg-icon" strokeWidth={2} />
                 </div>
               </a>
-              <div className="social-text">Note</div>
             </li>
-            <li className="social-iso-pro">
-              <span></span>
-              <span></span>
-              <span></span>
+            <li>
               <a href="#" onClick={(e) => { e.preventDefault(); onEdit(client); }}>
                 <div className="social-svg-wrapper">
                   <Settings className="social-svg-icon" strokeWidth={2} />
                 </div>
               </a>
-              <div className="social-text">Edit</div>
             </li>
           </ul>
         </div>

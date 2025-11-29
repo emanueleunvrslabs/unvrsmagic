@@ -21,7 +21,7 @@
 /* Company Name Card - Simple without effects */
 .company-name-card-simple {
   padding: 1rem 1.5rem;
-  min-width: 280px;
+  width: 280px;
 }
 
 .company-name-content-simple {
@@ -40,7 +40,7 @@
 
 /* Icons Card */
 .icons-card {
-  min-width: 280px;
+  width: 280px;
 }
 
 .social-card ul {
@@ -60,7 +60,6 @@
 }
 
 .social-svg-wrapper {
-  transition: all 0.3s;
   padding: 1rem;
   height: 60px;
   width: 60px;
@@ -80,24 +79,13 @@
 }
 
 .social-text {
-  opacity: 0;
-  border-radius: 5px;
-  padding: 5px;
-  transition: all 0.3s;
-  color: hsl(210 100% 64% / 0.8);
-  background-color: rgba(255, 255, 255, 0.3);
-  position: absolute;
-  z-index: 9999;
-  box-shadow: -5px 0 1px rgba(153, 153, 153, 0.2),
-    -10px 0 1px rgba(153, 153, 153, 0.2),
-    inset 0 0 20px rgba(255, 255, 255, 0.3),
-    inset 0 0 5px rgba(255, 255, 255, 0.5), 0 5px 5px rgba(0, 0, 0, 0.082);
+  display: none;
 }
 
 /* Contacts List Card */
 .contacts-list-card {
   padding: 1rem;
-  min-width: 280px;
+  width: 280px;
 }
 
 .contacts-list {
@@ -148,118 +136,4 @@
   color: hsl(210 100% 64% / 0.7);
   width: 20px;
   height: 20px;
-}
-
-/* Company Name Styles */
-.company-name-item-solo {
-  position: relative;
-  cursor: pointer;
-}
-
-.company-name-content {
-  transition: all 0.3s;
-  padding: 1rem 1.5rem;
-  min-height: 60px;
-  min-width: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 15px;
-  background-color: rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3),
-    inset 0 0 5px rgba(255, 255, 255, 0.5), 0 5px 5px rgba(0, 0, 0, 0.164);
-}
-
-.company-name-text {
-  color: hsl(0 0% 100%);
-  font-weight: 600;
-  font-size: 16px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.company-name-item-solo:hover .company-name-content {
-  transform: translate(5px, -5px);
-}
-
-.company-name-item-solo span {
-  opacity: 0;
-  position: absolute;
-  color: #1877f2;
-  border-color: #1877f2;
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3),
-    inset 0 0 5px rgba(255, 255, 255, 0.5), 0 5px 5px rgba(0, 0, 0, 0.164);
-  border-radius: 15px;
-  transition: all 0.3s;
-  min-height: 60px;
-  min-width: 120px;
-}
-
-.company-name-item-solo:hover span {
-  opacity: 1;
-}
-
-.company-name-item-solo:hover span:nth-child(1) {
-  opacity: 0.2;
-}
-
-.company-name-item-solo:hover span:nth-child(2) {
-  opacity: 0.4;
-  transform: translate(5px, -5px);
-}
-
-.company-name-item-solo:hover span:nth-child(3) {
-  opacity: 0.6;
-  transform: translate(10px, -10px);
-}
-
-/* Isometric projection */
-.social-iso-pro {
-  transition: 0.5s;
-  position: relative;
-}
-
-.social-iso-pro:hover a > .social-svg-wrapper {
-  transform: translate(15px, -15px);
-  border-radius: 100%;
-}
-
-.social-iso-pro:hover .social-text {
-  opacity: 1;
-  transform: translate(25px, -2px) skew(-5deg);
-}
-
-.social-iso-pro:hover .social-svg-wrapper {
-  transform: translate(5px, -5px);
-}
-
-.social-iso-pro span {
-  opacity: 0;
-  position: absolute;
-  color: #1877f2;
-  border-color: #1877f2;
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3),
-    inset 0 0 5px rgba(255, 255, 255, 0.5), 0 5px 5px rgba(0, 0, 0, 0.164);
-  border-radius: 50%;
-  transition: all 0.3s;
-  height: 60px;
-  width: 60px;
-}
-
-.social-iso-pro:hover span {
-  opacity: 1;
-}
-
-.social-iso-pro:hover span:nth-child(1) {
-  opacity: 0.2;
-}
-
-.social-iso-pro:hover span:nth-child(2) {
-  opacity: 0.4;
-  transform: translate(5px, -5px);
-}
-
-.social-iso-pro:hover span:nth-child(3) {
-  opacity: 0.6;
-  transform: translate(10px, -10px);
 }
