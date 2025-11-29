@@ -5,6 +5,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Loader2, UserPlus } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { NewClientModal } from "@/components/admin/NewClientModal";
+import { EditClientModal } from "@/components/admin/EditClientModal";
 import { ClientCard } from "@/components/admin/ClientCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 export default function AdminClients() {
   const { isOwner, loading: roleLoading } = useUserRole();
   const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
 
   const { data: clients, isLoading, refetch } = useQuery({
     queryKey: ["clients"],
@@ -28,6 +31,11 @@ export default function AdminClients() {
       return data;
     },
   });
+
+  const handleEditClient = (client: any) => {
+    setSelectedClient(client);
+    setEditModalOpen(true);
+  };
 
   if (roleLoading || isLoading) {
     return (
@@ -65,6 +73,7 @@ export default function AdminClients() {
               <ClientCard
                 key={client.id}
                 client={client}
+                onEdit={handleEditClient}
               />
             ))
           ) : (
@@ -80,6 +89,13 @@ export default function AdminClients() {
       <NewClientModal 
         open={modalOpen} 
         onOpenChange={setModalOpen}
+        onSuccess={refetch}
+      />
+
+      <EditClientModal
+        client={selectedClient}
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
         onSuccess={refetch}
       />
     </DashboardLayout>
