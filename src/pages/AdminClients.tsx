@@ -74,7 +74,7 @@ export default function AdminClients() {
           </Button>
         </div>
 
-        <div className="flex flex-wrap gap-6 justify-start mx-auto" style={{ maxWidth: 'fit-content' }}>
+        <div className="flex flex-wrap gap-6 justify-center mx-auto" style={{ maxWidth: 'fit-content' }}>
           {showNewClientForm && (
             <ClientCard
               client={null}
