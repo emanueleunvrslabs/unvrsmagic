@@ -39,6 +39,8 @@ import FileUpload from "./pages/FileUpload";
 import AiArtGenerateImage from "./pages/AiArt/GenerateImage";
 import AiArtGenerateVideo from "./pages/AiArt/GenerateVideo";
 
+import Labs from "./pages/Labs";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -79,6 +81,7 @@ const App = () => (
           <Route path="/ai-art/generate-image" element={<ProtectedRoute><AiArtGenerateImage /></ProtectedRoute>} />
           <Route path="/ai-art/generate-video" element={<ProtectedRoute><AiArtGenerateVideo /></ProtectedRoute>} />
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
+          <Route path="/labs" element={<ProtectedRoute><Labs /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
           {/* Redirects for removed pages */}

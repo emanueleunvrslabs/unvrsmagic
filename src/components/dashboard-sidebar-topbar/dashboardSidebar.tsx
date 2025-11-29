@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import unvrsLogo from "@/assets/unvrs-logo.jpeg";
 import {
   Activity,
+  Beaker,
   Bell,
   Bot,
   ChevronDown,
@@ -244,6 +245,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       setActiveItem("notifications");
     } else if (pathname === "/file-upload") {
       setActiveItem("file-upload");
+    } else if (pathname === "/labs") {
+      setActiveItem("labs");
     } else {
       // Extract the main path without subpaths
       const mainPath = pathname.split("/")[1];
@@ -514,6 +517,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
       { id: "file-upload", label: "Upload", icon: Upload, href: "/file-upload" },
       { id: "strategies-marketplace", label: "Strategies Marketplace", icon: Store, href: "/strategies-marketplace" },
+      { id: "labs", label: "Labs", icon: Beaker, href: "/labs" },
     ],
   });
 
