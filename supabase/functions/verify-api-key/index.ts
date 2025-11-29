@@ -372,6 +372,35 @@ serve(async (req) => {
         }
         break;
 
+      case "wasender":
+        try {
+          // WASender API - verify with a test endpoint
+          const response = await fetch("https://api.wasender.com/api/v1/account/info", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("WASender response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("WASender API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid WASender API key";
+            console.error("WASender verification failed:", response.status);
+          } else {
+            errorMessage = "Failed to verify WASender API key";
+            console.error("WASender unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify WASender API key";
+          console.error("WASender verification error:", error);
+        }
+        break;
+
       default:
         return new Response(
           JSON.stringify({ error: "Unsupported provider" }),
