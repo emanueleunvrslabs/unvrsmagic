@@ -138,19 +138,12 @@ export function StrategyDetailsModal({
               <h3 className="mb-4 text-lg font-semibold">Strategy Details</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Category</span>
-                  <Badge variant="secondary">{strategy.category}</Badge>
+                  <span className="text-sm">Projects</span>
+                  <span className="text-sm font-medium">0</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Rating</span>
-                  <div className="flex items-center">
-                    <StarRating rating={strategy.rating} size="sm" />
-                    <span className="ml-1 text-xs text-muted-foreground">({strategy.reviews})</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Users</span>
-                  <span className="text-sm font-medium">{formatNumber(strategy.purchases)}</span>
+                  <span className="text-sm">Contact Persons</span>
+                  <span className="text-sm font-medium">0</span>
                 </div>
                 <Separator />
                 <Button className="w-full gap-1" onClick={() => onPurchase?.(strategy.id)}>
