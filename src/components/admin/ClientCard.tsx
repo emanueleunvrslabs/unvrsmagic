@@ -285,7 +285,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                     type="text"
                     value={newContact.name}
                     onChange={(e) => setNewContact({...newContact, name: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '16px' }}
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -296,7 +296,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                     type="email"
                     value={newContact.email}
                     onChange={(e) => setNewContact({...newContact, email: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '16px' }}
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -307,7 +307,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                     type="tel"
                     value={newContact.whatsappNumber}
                     onChange={(e) => setNewContact({...newContact, whatsappNumber: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '16px' }}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="+1234567890"
@@ -330,7 +330,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                     type="text"
                     value={editContact.name}
                     onChange={(e) => setEditContact({...editContact, name: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '16px' }}
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -341,7 +341,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                     type="email"
                     value={editContact.email}
                     onChange={(e) => setEditContact({...editContact, email: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '16px' }}
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -352,7 +352,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                     type="tel"
                     value={editContact.whatsappNumber}
                     onChange={(e) => setEditContact({...editContact, whatsappNumber: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '16px' }}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="+1234567890"
@@ -446,7 +446,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 <input 
                   type="text" 
                   defaultValue={client.company_name}
-                  className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '16px' }}
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -456,7 +456,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 <input 
                   type="text" 
                   defaultValue={client.vat_number}
-                  className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '16px' }}
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -466,7 +466,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 <input 
                   type="text" 
                   defaultValue={client.street}
-                  className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ borderRadius: '16px' }}
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -477,7 +477,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                   <input 
                     type="text" 
                     defaultValue={client.city}
-                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '16px' }}
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -487,7 +487,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                   <input 
                     type="text" 
                     defaultValue={client.postal_code}
-                    className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '16px' }}
                     onClick={(e) => e.stopPropagation()}
                   />
