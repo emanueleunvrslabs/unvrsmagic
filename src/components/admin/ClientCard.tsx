@@ -38,6 +38,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [showAddContact, setShowAddContact] = useState(false);
+  const [showAddProject, setShowAddProject] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -229,6 +230,19 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                   }}
                 >
                   {showAddContact ? "Cancel" : "Add Contact"}
+                </button>
+              </div>
+            )}
+            {projectsOpen && (
+              <div className="absolute top-2 right-4 z-10">
+                <button
+                  className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAddProject(!showAddProject);
+                  }}
+                >
+                  {showAddProject ? "Cancel" : "Add Project"}
                 </button>
               </div>
             )}
@@ -440,9 +454,31 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
 
           {/* Collapsible Projects Section - Lateral */}
           <div className={`contacts-section-lateral ${projectsOpen ? 'open' : ''}`}>
-            <div className="flex flex-col gap-3 w-full items-center justify-center py-8">
-              <span className="text-white/70 text-sm">Add Project</span>
-            </div>
+            {showAddProject ? (
+              <div className="flex flex-col gap-3 w-full">
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Project Name</label>
+                  <input 
+                    type="text"
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="Enter project name"
+                  />
+                </div>
+                <button
+                  className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors"
+                  style={{ borderRadius: '12px' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Save Project
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 w-full items-center justify-center py-8">
+                <span className="text-white/70 text-sm">No projects assigned</span>
+              </div>
+            )}
           </div>
 
           {/* Collapsible Billing Section - Lateral */}
