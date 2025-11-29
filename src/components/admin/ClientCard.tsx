@@ -34,6 +34,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [billingOpen, setBillingOpen] = useState(false);
+  const [projectsOpen, setProjectsOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [showAddContact, setShowAddContact] = useState(false);
@@ -215,7 +216,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
     <>
       <div className="client-card-wrapper">
         <div 
-          className={`social-media-card ${billingOpen || isOpen ? 'expanded-lateral' : ''}`}
+          className={`social-media-card ${billingOpen || isOpen || projectsOpen ? 'expanded-lateral' : ''}`}
         >
           <div className="card-main-content">
             {isOpen && (
@@ -238,7 +239,15 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
             />
             <div className="card-heading">{client.company_name}</div>
             <div className="social-icons">
-              <button className="instagram-link" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className="instagram-link" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setProjectsOpen(!projectsOpen);
+                  setIsOpen(false);
+                  setBillingOpen(false);
+                }}
+              >
                 <Briefcase className="icon" strokeWidth={2} />
               </button>
               <button 
@@ -427,6 +436,13 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 </>
               )
             )}
+          </div>
+
+          {/* Collapsible Projects Section - Lateral */}
+          <div className={`contacts-section-lateral ${projectsOpen ? 'open' : ''}`}>
+            <div className="flex flex-col gap-3 w-full items-center justify-center py-8">
+              <span className="text-white/70 text-sm">Add Project</span>
+            </div>
           </div>
 
           {/* Collapsible Billing Section - Lateral */}
