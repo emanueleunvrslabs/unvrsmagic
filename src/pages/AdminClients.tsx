@@ -74,7 +74,7 @@ export default function AdminClients() {
           </Button>
         </div>
 
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-wrap gap-6">
           {showNewClientForm && (
             <ClientCard
               client={null}
