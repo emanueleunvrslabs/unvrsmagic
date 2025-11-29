@@ -98,7 +98,9 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                       }}
                       aria-label="Send email"
                     >
-                      <Mail className="contact-action-icon" />
+                      <div className="social-svg-wrapper">
+                        <Mail className="contact-action-icon" />
+                      </div>
                     </button>
                     <button
                       className="contact-action-btn"
@@ -113,7 +115,9 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                       }}
                       aria-label="Send WhatsApp message"
                     >
-                      <MessageCircle className="contact-action-icon" />
+                      <div className="social-svg-wrapper">
+                        <MessageCircle className="contact-action-icon" />
+                      </div>
                     </button>
                   </div>
                 </div>
