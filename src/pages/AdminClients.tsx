@@ -98,14 +98,19 @@ export default function AdminClients() {
                 <span></span>
                 <a href="#">
                   <svg
-                    viewBox="0 0 320 512"
+                    viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
                     className="social-svg"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"></path>
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                   </svg>
                 </a>
-                <div className="social-text">Facebook</div>
+                <div className="social-text">Projects</div>
               </li>
               <li className="social-iso-pro">
                 <span></span>
