@@ -184,6 +184,7 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Email subject"
                 disabled={loading}
+                className="focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
 
@@ -196,6 +197,7 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
                 placeholder="Email message"
                 rows={6}
                 disabled={loading}
+                className="focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </div>
