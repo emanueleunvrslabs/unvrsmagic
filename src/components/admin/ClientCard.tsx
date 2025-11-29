@@ -30,6 +30,10 @@ const contactSchema = z.object({
   whatsappNumber: z.string().trim().min(1, "WhatsApp number is required").max(20),
 });
 
+const projectSchema = z.object({
+  projectName: z.string().trim().min(1, "Project name is required").max(200),
+});
+
 export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +61,9 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
     name: "",
     email: "",
     whatsappNumber: ""
+  });
+  const [newProject, setNewProject] = useState({
+    projectName: ""
   });
 
   const handleSaveContact = async (e: React.MouseEvent) => {
@@ -194,6 +201,56 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
       });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleSaveProject = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSaving(true);
+
+    try {
+      // Validate input
+      const validated = projectSchema.parse(newProject);
+
+      // Insert project
+      const { error } = await supabase
+        .from("client_projects")
+        .insert({
+          client_id: client.id,
+          project_name: validated.projectName,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Project added successfully",
+      });
+
+      // Reset form
+      setNewProject({ projectName: "" });
+      setShowAddProject(false);
+      
+      // Trigger refresh
+      if (onContactAdded) {
+        onContactAdded();
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to add project",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -460,6 +517,8 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                   <label className="text-xs text-muted-foreground">Project Name</label>
                   <input 
                     type="text"
+                    value={newProject.projectName}
+                    onChange={(e) => setNewProject({projectName: e.target.value})}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
@@ -467,11 +526,12 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                   />
                 </div>
                 <button
-                  className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors"
+                  className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ borderRadius: '12px' }}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={handleSaveProject}
+                  disabled={saving}
                 >
-                  Save Project
+                  {saving ? "Saving..." : "Save Project"}
                 </button>
               </div>
             ) : (
