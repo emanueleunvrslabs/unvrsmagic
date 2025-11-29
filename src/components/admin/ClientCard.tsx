@@ -389,7 +389,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                 <>
                   {contacts.map((contact) => (
                     <div key={contact.id} className="social-icons">
-                      <span className="contact-name-card">{contact.name}</span>
+                      <span className="contact-name-card text-left flex-1">{contact.name}</span>
                       <button
                         className="instagram-link"
                         onClick={(e) => {
@@ -411,6 +411,16 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                         aria-label="Send WhatsApp"
                       >
                         <MessageCircle className="icon" strokeWidth={2} />
+                      </button>
+                      <button
+                        className="discord-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEditContact(contact);
+                        }}
+                        aria-label="Edit contact"
+                      >
+                        <Pencil className="icon" strokeWidth={2} />
                       </button>
                     </div>
                   ))}
