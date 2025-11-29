@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Loader2, UserPlus } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { NewClientModal } from "@/components/admin/NewClientModal";
+import { ClientCard } from "@/components/admin/ClientCard";
+import { ClientDetailsModal } from "@/components/admin/ClientDetailsModal";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminClients() {
   const { isOwner, loading: roleLoading } = useUserRole();
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const { data: clients, isLoading, refetch } = useQuery({
     queryKey: ["clients"],
@@ -28,6 +31,16 @@ export default function AdminClients() {
       return data;
     },
   });
+
+  const handleViewDetails = (client: any) => {
+    setSelectedClient(client);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedClient(null);
+  };
 
   if (roleLoading || isLoading) {
     return (
@@ -59,39 +72,21 @@ export default function AdminClients() {
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {clients && clients.length > 0 ? (
             clients.map((client) => (
-              <Card key={client.id}>
-                <CardHeader>
-                  <CardTitle>{client.company_name}</CardTitle>
-                  <CardDescription>
-                    VAT: {client.vat_number} • {client.street}, {client.city} {client.postal_code}, {client.country}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold">Contact Persons:</p>
-                    <div className="space-y-1">
-                      {client.client_contacts.map((contact: any) => (
-                        <div key={contact.id} className="text-sm text-muted-foreground">
-                          {contact.first_name} {contact.last_name} • {contact.email} • {contact.whatsapp_number}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <ClientCard
+                key={client.id}
+                client={client}
+                onViewDetails={handleViewDetails}
+              />
             ))
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Clients Yet</CardTitle>
-                <CardDescription>
-                  Start by adding your first client using the "New Client" button above
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="col-span-full text-center py-12">
+              <p className="text-muted-foreground">
+                No clients yet. Start by adding your first client using the "New Client" button above.
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -100,6 +95,12 @@ export default function AdminClients() {
         open={modalOpen} 
         onOpenChange={setModalOpen}
         onSuccess={refetch}
+      />
+
+      <ClientDetailsModal
+        client={selectedClient}
+        isOpen={isDetailsModalOpen}
+        onClose={handleCloseDetailsModal}
       />
     </DashboardLayout>
   );
