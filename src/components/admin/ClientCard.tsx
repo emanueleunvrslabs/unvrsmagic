@@ -96,8 +96,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               <input 
                 type="text" 
                 defaultValue={client.company_name}
-                className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                style={{ borderRadius: '16px' }}
+                className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                style={{ borderRadius: '24px' }}
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
@@ -106,8 +106,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               <input 
                 type="text" 
                 defaultValue={client.vat_number}
-                className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                style={{ borderRadius: '16px' }}
+                className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                style={{ borderRadius: '24px' }}
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
@@ -116,8 +116,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               <input 
                 type="text" 
                 defaultValue={client.street}
-                className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                style={{ borderRadius: '16px' }}
+                className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                style={{ borderRadius: '24px' }}
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
@@ -127,8 +127,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                 <input 
                   type="text" 
                   defaultValue={client.city}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  style={{ borderRadius: '16px' }}
+                  className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  style={{ borderRadius: '24px' }}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -137,8 +137,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
                 <input 
                   type="text" 
                   defaultValue={client.postal_code}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  style={{ borderRadius: '16px' }}
+                  className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  style={{ borderRadius: '24px' }}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -148,8 +148,8 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               <input 
                 type="text" 
                 defaultValue={client.country}
-                className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                style={{ borderRadius: '16px' }}
+                className="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                style={{ borderRadius: '24px' }}
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
