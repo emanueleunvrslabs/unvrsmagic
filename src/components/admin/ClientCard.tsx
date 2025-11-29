@@ -159,35 +159,46 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
         {/* Collapsible Contacts Section */}
         <div className={`contacts-section ${isOpen ? 'open' : ''}`}>
           {contacts.length > 0 ? (
-            contacts.map((contact) => (
-              <div key={contact.id} className="contact-item-card">
-                <span className="contact-name-card">{contact.name}</span>
-                <div className="contact-actions-card">
-                  <button
-                    className="contact-btn-card"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedContact(contact);
-                      setEmailModalOpen(true);
-                    }}
-                    aria-label="Send email"
-                  >
-                    <Mail className="contact-icon-card" size={18} />
-                  </button>
-                  <button
-                    className="contact-btn-card"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedContact(contact);
-                      setWhatsappModalOpen(true);
-                    }}
-                    aria-label="Send WhatsApp"
-                  >
-                    <MessageCircle className="contact-icon-card" size={18} />
-                  </button>
+            <>
+              {contacts.map((contact) => (
+                <div key={contact.id} className="contact-item-card">
+                  <span className="contact-name-card">{contact.name}</span>
+                  <div className="contact-actions-card">
+                    <button
+                      className="contact-btn-card"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedContact(contact);
+                        setEmailModalOpen(true);
+                      }}
+                      aria-label="Send email"
+                    >
+                      <Mail className="contact-icon-card" size={18} />
+                    </button>
+                    <button
+                      className="contact-btn-card"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedContact(contact);
+                        setWhatsappModalOpen(true);
+                      }}
+                      aria-label="Send WhatsApp"
+                    >
+                      <MessageCircle className="contact-icon-card" size={18} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+              <button
+                className="w-full text-center text-sm text-primary/70 hover:text-primary transition-colors py-2 mt-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Add contact functionality here
+                }}
+              >
+                Add Contact
+              </button>
+            </>
           ) : (
             <div className="contact-item-card">
               <span className="contact-name-card text-muted-foreground">No contacts available</span>
