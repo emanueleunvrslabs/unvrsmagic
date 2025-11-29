@@ -52,17 +52,19 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
           className={`social-media-card ${billingOpen || isOpen ? 'expanded-lateral' : ''}`}
         >
           <div className="card-main-content">
-            <div className="absolute top-4 right-4 z-10">
-              <button
-                className="text-xs text-primary/70 hover:text-primary transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAddContact(!showAddContact);
-                }}
-              >
-                {showAddContact ? "Cancel" : "Add Contact"}
-              </button>
-            </div>
+            {isOpen && (
+              <div className="absolute top-4 right-4 z-10">
+                <button
+                  className="text-xs text-primary/70 hover:text-primary transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAddContact(!showAddContact);
+                  }}
+                >
+                  {showAddContact ? "Cancel" : "Add Contact"}
+                </button>
+              </div>
+            )}
             <img
               src="https://uiverse.io/astronaut.png"
               alt="Astronaut"
