@@ -440,7 +440,7 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
 
           {/* Collapsible Billing Section - Lateral */}
           <div className={`billing-section-lateral ${billingOpen ? 'open' : ''}`}>
-            <div className="flex flex-col gap-3 w-full">
+            <div className="flex flex-col gap-3 max-w-md">
               <div className="space-y-1">
                 <label className="text-xs text-muted-foreground">Company Name</label>
                 <input 
