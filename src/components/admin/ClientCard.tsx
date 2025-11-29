@@ -218,8 +218,8 @@ export function ClientCard({ client, onEdit, onContactAdded }: ClientCardProps) 
                   />
                 </div>
                 <button
-                  className="w-full bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-4 py-3 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ borderRadius: '16px' }}
+                  className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ borderRadius: '12px' }}
                   onClick={handleSaveContact}
                   disabled={saving}
                 >
