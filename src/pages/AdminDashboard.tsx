@@ -1,20 +1,18 @@
-import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet, ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { it } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 5;
 
 const AdminDashboard = () => {
-  const [txPage, setTxPage] = useState(0);
   // Fetch total projects count
   const { data: projectsData, isLoading: loadingProjects } = useQuery({
     queryKey: ['admin-projects-count'],
@@ -106,25 +104,20 @@ const AdminDashboard = () => {
     }
   });
 
-  // Fetch credit transactions with pagination
+  // Fetch credit transactions (last 5)
   const { data: transactionsData, isLoading: loadingTransactions } = useQuery({
-    queryKey: ['admin-transactions', txPage],
+    queryKey: ['admin-transactions'],
     queryFn: async () => {
-      const from = txPage * ITEMS_PER_PAGE;
-      const to = from + ITEMS_PER_PAGE - 1;
-      
-      const { data, error, count } = await supabase
+      const { data, error } = await supabase
         .from('credit_transactions')
-        .select('id, amount, type, description, created_at', { count: 'exact' })
+        .select('id, amount, type, description, created_at')
         .order('created_at', { ascending: false })
-        .range(from, to);
+        .limit(ITEMS_PER_PAGE);
       
       if (error) throw error;
-      return { transactions: data || [], totalCount: count || 0 };
+      return data || [];
     }
   });
-
-  const totalPages = Math.ceil((transactionsData?.totalCount || 0) / ITEMS_PER_PAGE);
 
   // Fetch monthly spending data for chart
   const { data: monthlySpending, isLoading: loadingMonthly } = useQuery({
@@ -390,8 +383,8 @@ const AdminDashboard = () => {
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-              ) : transactionsData?.transactions && transactionsData.transactions.length > 0 ? (
-                <>
+              ) : transactionsData && transactionsData.length > 0 ? (
+                <div className="max-h-[400px] overflow-y-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -402,7 +395,7 @@ const AdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {transactionsData.transactions.map((tx) => (
+                      {transactionsData.map((tx) => (
                         <TableRow key={tx.id}>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -431,32 +424,7 @@ const AdminDashboard = () => {
                       ))}
                     </TableBody>
                   </Table>
-                  
-                  {/* Pagination Controls */}
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/30">
-                    <p className="text-sm text-muted-foreground">
-                      Page {txPage + 1} of {totalPages} ({transactionsData.totalCount} total)
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setTxPage(p => Math.max(0, p - 1))}
-                        disabled={txPage === 0}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setTxPage(p => Math.min(totalPages - 1, p + 1))}
-                        disabled={txPage >= totalPages - 1}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   No transactions yet
