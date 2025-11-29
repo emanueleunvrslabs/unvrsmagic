@@ -42,7 +42,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
   return (
     <>
       <div 
-        className={`social-media-card ${isOpen ? 'expanded' : ''}`}
+        className={`social-media-card ${(isOpen || billingOpen) ? 'expanded' : ''}`}
       >
         <img
           src="https://uiverse.io/astronaut.png"
