@@ -553,7 +553,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 className="instagram-link" 
                 onClick={(e) => {
                   e.stopPropagation();
-                  setProjectsOpen(!projectsOpen);
+                  setProjectsOpen(true);
                   setIsOpen(false);
                   setBillingOpen(false);
                 }}
@@ -564,7 +564,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 className="x-link" 
                 onClick={(e) => {
                   e.stopPropagation();
-                  setBillingOpen(!billingOpen);
+                  setBillingOpen(true);
                   setIsOpen(false);
                   setProjectsOpen(false);
                 }}
@@ -575,7 +575,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 className="discord-link" 
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsOpen(!isOpen);
+                  setIsOpen(true);
                   setBillingOpen(false);
                   setProjectsOpen(false);
                 }}
