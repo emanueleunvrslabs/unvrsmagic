@@ -419,6 +419,16 @@
   display: none;
 }
 
+/* Client Card Container */
+.client-card-container {
+  position: relative;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.client-card-container:has(.social-media-card.expanded-lateral) {
+  width: 100%;
+}
+
 /* Client Card Wrapper */
 .client-card-wrapper {
   position: relative;
@@ -468,11 +478,14 @@
    overflow-y: auto;
    overflow-x: hidden;
    pointer-events: none;
-   transform: translateX(8px);
-   transition: max-width 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1), transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+   transform: translateX(-20px);
+   transition: max-width 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+               opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+               transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
    flex-shrink: 0;
    scrollbar-width: none; /* Firefox */
    -ms-overflow-style: none; /* IE and Edge */
+   will-change: max-width, opacity, transform;
  }
  
  .contacts-section-lateral::-webkit-scrollbar {
