@@ -44,6 +44,7 @@
   row-gap: 1em;
   flex-shrink: 0;
   width: 19em;
+  height: 100%;
 }
 
 .social-media-card .astronaut-image {
