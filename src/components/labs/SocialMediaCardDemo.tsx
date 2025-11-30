@@ -7,7 +7,7 @@ export function SocialMediaCardDemo() {
       <div className="social-media-card labs-card group overflow-y-auto">
         <div className="card-main-content items-start justify-start gap-6 p-6" style={{ width: '100%', flexDirection: 'row' }}>
           {/* What's Included Card - Left */}
-          <div className="flex-1 p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)]">
+          <div className="flex-1 p-6 rounded-2xl border border-white/10">
             <h2 className="text-2xl font-semibold mb-4 text-white">What's Included</h2>
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ export function SocialMediaCardDemo() {
           </div>
 
           {/* Pricing Card - Right */}
-          <div className="flex-1 p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)]">
+          <div className="flex-1 p-6 rounded-2xl border border-white/10">
             <h2 className="text-2xl font-semibold mb-4 text-white">Pricing</h2>
             <div className="flex flex-col gap-4">
               {/* Image Pricing Card */}
