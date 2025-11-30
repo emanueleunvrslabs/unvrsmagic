@@ -729,8 +729,12 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 ) : (
                   contacts.length > 0 && (
                     <>
-                      {contacts.map((contact) => (
-                        <div key={contact.id} className="social-icons">
+                      {contacts.map((contact, index) => (
+                        <div 
+                          key={contact.id} 
+                          className="social-icons contact-item-stagger"
+                          style={{ animationDelay: `${index * 0.08}s` }}
+                        >
                           <span className="contact-name-card text-left flex-1">{contact.name}</span>
                           <button
                             className="instagram-link"
