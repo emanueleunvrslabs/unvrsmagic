@@ -76,28 +76,25 @@ export default function AdminClients() {
 
         <div className="flex flex-wrap gap-6 mx-auto" style={{ maxWidth: 'fit-content' }}>
           {showNewClientForm && (
-            <div className="w-full flex justify-center">
-              <ClientCard
-                client={null}
-                onEdit={() => {}}
-                onContactAdded={refetch}
-                clientProjects={[]}
-                onCancel={() => setShowNewClientForm(false)}
-                onClientCreated={() => setShowNewClientForm(false)}
-              />
-            </div>
+            <ClientCard
+              client={null}
+              onEdit={() => {}}
+              onContactAdded={refetch}
+              clientProjects={[]}
+              onCancel={() => setShowNewClientForm(false)}
+              onClientCreated={() => setShowNewClientForm(false)}
+            />
           )}
           
           {clients && clients.length > 0 ? (
             clients.map((client) => (
-              <div key={client.id} className="client-card-container">
-                <ClientCard
-                  client={client}
-                  onEdit={handleEditClient}
-                  onContactAdded={refetch}
-                  clientProjects={client.client_projects || []}
-                />
-              </div>
+              <ClientCard
+                key={client.id}
+                client={client}
+                onEdit={handleEditClient}
+                onContactAdded={refetch}
+                clientProjects={client.client_projects || []}
+              />
             ))
           ) : !showNewClientForm ? (
             <div className="text-center py-12 w-full">
