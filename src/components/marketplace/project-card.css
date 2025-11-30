@@ -37,15 +37,6 @@
   height: 100%;
 }
 
-.marketplace-project-card::after {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border-radius: 20px;
-  background: rgb(23, 23, 23, 0.7);
-  transition: all 0.4s ease-in-out;
-  z-index: -1;
-}
 
 .marketplace-project-card .card-heading {
   z-index: 2;
