@@ -553,9 +553,13 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 className="instagram-link" 
                 onClick={(e) => {
                   e.stopPropagation();
-                  setProjectsOpen(true);
-                  setIsOpen(false);
-                  setBillingOpen(false);
+                  if (projectsOpen) {
+                    setProjectsOpen(false);
+                  } else {
+                    setProjectsOpen(true);
+                    setIsOpen(false);
+                    setBillingOpen(false);
+                  }
                 }}
               >
                 <Briefcase className="icon" strokeWidth={2} />
@@ -564,9 +568,13 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 className="x-link" 
                 onClick={(e) => {
                   e.stopPropagation();
-                  setBillingOpen(true);
-                  setIsOpen(false);
-                  setProjectsOpen(false);
+                  if (billingOpen) {
+                    setBillingOpen(false);
+                  } else {
+                    setBillingOpen(true);
+                    setIsOpen(false);
+                    setProjectsOpen(false);
+                  }
                 }}
               >
                 <FileText className="icon" strokeWidth={2} />
@@ -575,9 +583,13 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 className="discord-link" 
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsOpen(true);
-                  setBillingOpen(false);
-                  setProjectsOpen(false);
+                  if (isOpen) {
+                    setIsOpen(false);
+                  } else {
+                    setIsOpen(true);
+                    setBillingOpen(false);
+                    setProjectsOpen(false);
+                  }
                 }}
               >
                 <Users className="icon" strokeWidth={2} />
