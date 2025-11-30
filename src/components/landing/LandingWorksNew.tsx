@@ -53,7 +53,7 @@ export function LandingWorksNew() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ delay: index * 0.08, duration: 0.4, ease: "easeOut" }}
-              className="group relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 transition-all cursor-pointer"
+              className="group relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 transition-[border-color] duration-300 ease-out cursor-pointer"
               onClick={() => window.location.href = `/project/${project.route.replace('/', '')}`}
             >
               <div className="aspect-video overflow-hidden bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center">
@@ -71,7 +71,7 @@ export function LandingWorksNew() {
               </div>
               <div className="p-6 relative">
                 <div className="absolute top-4 right-4">
-                  <div className="flex items-center gap-1 px-3 py-1.5 bg-transparent border border-white/30 text-white rounded-full hover:bg-white/10 hover:border-white/50 transition-all">
+                  <div className="flex items-center gap-1 px-3 py-1.5 bg-transparent border border-white/30 text-white rounded-full hover:bg-white/10 hover:border-white/50 transition-[background-color,border-color] duration-200 ease-out">
                     <span className="text-xs font-medium" style={{ fontFamily: "Orbitron, sans-serif" }}>View</span>
                     <ArrowUpRight size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                   </div>
