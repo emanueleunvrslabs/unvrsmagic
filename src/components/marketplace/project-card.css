@@ -37,6 +37,35 @@
   height: 100%;
 }
 
+.marketplace-project-card::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: -3px;
+  border-radius: 10px;
+  background: radial-gradient(#858585, transparent, transparent);
+  transform: translate(-5px, 250px);
+  transition: 0.4s ease-in-out;
+  z-index: -1;
+}
+
+.marketplace-project-card:hover::before {
+  width: 150%;
+  height: 100%;
+  margin-left: -25%;
+}
+
+.marketplace-project-card::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 20px;
+  background: rgb(23, 23, 23, 0.7);
+  transition: all 0.4s ease-in-out;
+  z-index: -1;
+}
+
 
 .marketplace-project-card .card-heading {
   z-index: 2;
