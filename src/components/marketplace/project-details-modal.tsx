@@ -114,187 +114,111 @@ export function ProjectDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] max-w-5xl overflow-auto">
+      <DialogContent className="max-h-[90vh] max-w-6xl overflow-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
+          <DialogTitle className="text-4xl font-bold text-left">
             {project.name}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-base text-left">
             {config.description}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-6 py-4 md:grid-cols-3">
-          {/* Left column - Project Information */}
-          <div className="space-y-4 md:col-span-2">
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">Project Information</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <Badge variant={isAdded ? "default" : "secondary"}>
-                    {isAdded ? (
-                      <>
-                        <Check className="h-3 w-3 mr-1" />
-                        Added to Dashboard
-                      </>
-                    ) : (
-                      "Available"
-                    )}
-                  </Badge>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Category</span>
-                  <Badge variant="outline">{config.category}</Badge>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Version</span>
-                  <span className="text-sm font-medium">Latest</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Project Features */}
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">What's Included</h3>
-              <ul className="space-y-3 text-sm">
-                {config.features.map((feature, index) => {
-                  const IconComponent = feature.icon;
-                  return (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="rounded-md bg-primary/10 p-1.5">
-                        <IconComponent className="h-4 w-4 text-primary" />
-                      </div>
-                      <span className="pt-0.5">{feature.text}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            {/* Getting Started */}
-            <div className="rounded-lg bg-muted/50 p-4">
-              <h3 className="mb-2 text-sm font-semibold">Getting Started</h3>
-              <p className="text-sm text-muted-foreground">
-                {!isAdded 
-                  ? "Click 'Add Now' to add this project to your personal workspace. It will appear in your sidebar navigation and you'll be able to access it anytime."
-                  : "This project is already added to your dashboard. You can access it from your sidebar navigation or click 'Open Project' to view it now."}
-              </p>
+        <div className="flex gap-6 py-4">
+          {/* What's Included Card - Left */}
+          <div className="flex-1 p-6 rounded-2xl border border-white/10">
+            <h2 className="text-2xl font-semibold mb-4">What's Included</h2>
+            <div className="flex flex-col gap-3">
+              {config.features.map((feature, index) => {
+                const IconComponent = feature.icon;
+                return (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                      <IconComponent className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <span className="text-white/90 text-sm">{feature.text}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Right column - Pricing */}
-          <div className="space-y-4">
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-4 text-lg font-semibold">Pricing</h3>
-              <div className="space-y-4">
-                {config.pricing.map((item, index) => (
-                  <div 
-                    key={index} 
-                    className={cn(
-                      "rounded-md border p-3",
-                      index === 0 && "border-2 border-primary bg-primary/5"
-                    )}
-                  >
-                    <div className="mb-2 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {item.type === "Image" && <Image className="h-4 w-4 text-primary" />}
-                        {item.type === "Video" && <Video className="h-4 w-4 text-primary" />}
-                        <span className="font-medium">{item.type}</span>
+          {/* Pricing Card - Right */}
+          <div className="flex-1 p-6 rounded-2xl border border-white/10">
+            <h2 className="text-2xl font-semibold mb-4">Pricing</h2>
+            <div className="flex flex-col gap-4">
+              {config.pricing.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="relative p-4 rounded-2xl border-2 border-blue-500/50 backdrop-blur-sm"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center">
+                        {item.type === "Image" && <Image className="w-5 h-5 text-blue-400" />}
+                        {item.type === "Video" && <Video className="w-5 h-5 text-blue-400" />}
+                        {item.type !== "Image" && item.type !== "Video" && <Check className="w-5 h-5 text-blue-400" />}
                       </div>
-                      <div className="text-right">
-                        <div className="text-xl font-bold">{item.price}</div>
-                        <div className="text-xs text-muted-foreground">{item.unit}</div>
-                      </div>
+                      <span className="text-xl font-semibold text-white">{item.type}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-white">{item.price}</div>
+                      <div className="text-sm text-white/60">{item.unit}</div>
+                    </div>
                   </div>
-                ))}
+                  <p className="text-sm text-white/70">{item.description}</p>
+                </div>
+              ))}
 
-                <Separator />
+              {/* Add to Dashboard Button */}
+              {!isAdded ? (
+                <Button 
+                  className="w-full py-3 px-4 rounded-xl bg-blue-600/20 border border-blue-500/30 backdrop-blur-sm text-blue-400 font-medium flex items-center justify-center gap-2 hover:bg-blue-600/30 transition-colors" 
+                  onClick={onAddProject}
+                  disabled={isLoading}
+                  variant="ghost"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Plus className="h-5 w-5" />
+                  )}
+                  <span>Add to Dashboard</span>
+                </Button>
+              ) : (
+                <Button 
+                  variant="ghost"
+                  className="w-full py-3 px-4 rounded-xl bg-blue-600/20 border border-blue-500/30 backdrop-blur-sm text-blue-400 font-medium flex items-center justify-center gap-2 hover:bg-blue-600/30 transition-colors"
+                  asChild
+                >
+                  <a href={project.route} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-5 w-5" />
+                    <span>Open Project</span>
+                  </a>
+                </Button>
+              )}
 
-                {/* Add Project Button */}
-                {!isAdded ? (
-                  <Button 
-                    className="w-full gap-2" 
-                    onClick={onAddProject}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                    <span>Add to Dashboard</span>
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="w-full gap-2"
-                    asChild
-                  >
-                    <a href={project.route} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4" />
-                      <span>Open Project</span>
-                    </a>
-                  </Button>
-                )}
+              {/* Usage-Based Billing Notice */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-500/40 backdrop-blur-sm">
+                <h3 className="text-lg font-semibold text-orange-400 mb-2">Usage-Based Billing</h3>
+                <p className="text-sm text-orange-200/80">
+                  You only pay for what you generate. Costs are calculated based on actual content created through the AI models.
+                </p>
               </div>
-            </div>
-
-            {/* Usage Note */}
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-              <h4 className="mb-2 text-sm font-semibold text-amber-400">Usage-Based Billing</h4>
-              <p className="text-xs text-muted-foreground">
-                You only pay for what you generate. Costs are calculated based on actual content created through the AI models.
-              </p>
             </div>
           </div>
         </div>
 
         <DialogFooter>
-          {isAdded ? (
-            <>
-              <Button
-                variant="outline"
-                className="gap-2"
-                asChild
-              >
-                <a href={project.route} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                  <span>Open Project</span>
-                </a>
-              </Button>
-              <Button
-                variant="destructive"
-                className="gap-2"
-                onClick={onRemoveProject}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : null}
-                <span>Remove from Dashboard</span>
-              </Button>
-            </>
-          ) : (
+          {isAdded && (
             <Button
+              variant="destructive"
               className="gap-2"
-              onClick={onAddProject}
+              onClick={onRemoveProject}
               disabled={isLoading}
             >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-              <span>Add to Dashboard</span>
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              <span>Remove from Dashboard</span>
             </Button>
           )}
         </DialogFooter>
