@@ -64,7 +64,7 @@ export function SocialMediaCardDemo() {
               <h2 className="text-2xl font-semibold mb-4 text-white">Pricing</h2>
               <div className="flex flex-col gap-4">
                 {/* Image Pricing Card */}
-                <div className="relative p-4 rounded-2xl border-2 border-blue-500/50 bg-blue-500/10 backdrop-blur-sm">
+                <div className="relative p-4 rounded-2xl border-2 border-blue-500/50 backdrop-blur-sm">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center">
