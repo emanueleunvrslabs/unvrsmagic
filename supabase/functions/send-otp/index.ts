@@ -94,11 +94,17 @@ serve(async (req) => {
       }),
     });
 
+    const wasenderData = await wasenderResponse.json();
+    
     if (!wasenderResponse.ok) {
-      throw new Error('Failed to send WhatsApp message');
+      console.error('WASender API error:', {
+        status: wasenderResponse.status,
+        statusText: wasenderResponse.statusText,
+        data: wasenderData
+      });
+      throw new Error(`Failed to send WhatsApp message: ${JSON.stringify(wasenderData)}`);
     }
 
-    const wasenderData = await wasenderResponse.json();
     console.log('OTP sent successfully via WhatsApp:', wasenderData);
 
     return new Response(
