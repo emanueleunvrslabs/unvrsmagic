@@ -17,7 +17,7 @@ export function SocialMediaCardDemo() {
                 <CreditCard className="w-5 h-5 text-blue-400" />
                 <h2 className="text-lg font-bold text-white">Credit Balance</h2>
               </div>
-              <p className="text-xs text-gray-400">Your available credits for content generation</p>
+              <p className="text-xs text-gray-400 whitespace-nowrap">Your available credits for content generation</p>
             </div>
           </div>
           
