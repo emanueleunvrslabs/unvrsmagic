@@ -7,16 +7,15 @@ export function SocialMediaCardDemo() {
   return (
     <div className="flex items-center justify-center min-h-screen p-8">
       <div 
-        className="flex items-center gap-6 p-6 rounded-lg border bg-card/50 backdrop-blur-md shadow-lg max-w-2xl w-full"
+        className={`social-media-card ${isOpen ? 'expanded-lateral' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <img
-          src="https://uiverse.io/astronaut.png"
-          alt="Astronaut"
-          className="w-32 h-32 rounded-lg object-cover flex-shrink-0"
-        />
-        <div className="flex-1">
-          {/* Content can be added here */}
+        <div className="card-main-content">
+          <img
+            src="https://uiverse.io/astronaut.png"
+            alt="Astronaut"
+            className="astronaut-image"
+          />
         </div>
       </div>
     </div>
