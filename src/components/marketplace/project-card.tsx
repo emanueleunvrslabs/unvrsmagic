@@ -1,10 +1,8 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight, Check, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
+import "./project-card.css";
 
 interface Project {
   id: string;
@@ -22,38 +20,31 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, isAdded, onViewDetails }: ProjectCardProps) {
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md flex flex-col h-full">
-      <CardHeader className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="line-clamp-1">
-              {project.name}
-            </CardTitle>
-            <CardDescription className="line-clamp-2 mt-1 min-h-[40px]">
-              {project.description || "No description available"}
-            </CardDescription>
-          </div>
-          {isAdded && (
-            <Badge className="ml-2 shrink-0 border-green-500/30 bg-green-500/10 text-green-500 hover:bg-green-500/20">
-              <Check className="h-3 w-3 mr-1" />
-              Added
-            </Badge>
-          )}
+    <div className="marketplace-project-card group">
+      {isAdded && (
+        <Badge className="absolute top-4 right-4 z-10 border-green-500/30 bg-green-500/10 text-green-500 hover:bg-green-500/20">
+          <Check className="h-3 w-3 mr-1" />
+          Added
+        </Badge>
+      )}
+      
+      <div className="card-main-content items-center justify-center">
+        <div className="card-heading text-4xl text-center">
+          {project.name}
         </div>
-      </CardHeader>
-
-      <CardContent className="p-4 pt-0 flex-1">
-      </CardContent>
-
-      <CardFooter className="flex items-center justify-between border-t p-4 mt-auto">
-        <div className="text-sm text-muted-foreground">
-          {isAdded ? "Already in your dashboard" : "Available to add"}
-        </div>
-        <Button className="gap-1" onClick={() => onViewDetails(project)}>
-          <span>Details</span>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </CardFooter>
-    </Card>
+        
+        <p className="text-white/60 text-xs mt-2 max-w-[280px] leading-relaxed text-center line-clamp-3">
+          {project.description || "No description available"}
+        </p>
+      </div>
+      
+      <button 
+        onClick={() => onViewDetails(project)}
+        className="absolute bottom-4 right-4 px-3 py-1.5 text-xs tracking-wide rounded-lg backdrop-blur-md bg-white/5 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)] transition-all hover:bg-white/10 hover:border-white/20"
+        style={{ color: 'hsl(270, 70%, 60%)' }}
+      >
+        Details
+      </button>
+    </div>
   );
 }
