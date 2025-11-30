@@ -5,22 +5,21 @@ import { CreditCard, TrendingUp, TrendingDown } from "lucide-react";
 export function SocialMediaCardDemo() {
   return (
     <div className="flex items-center justify-center min-h-screen p-8">
-      <div className="social-media-card expanded-lateral relative">
-        <button className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/5 backdrop-blur-md border border-white/10 text-blue-400 text-xs font-semibold hover:bg-white/10 transition-all z-10">
-          + Add Credits
-        </button>
+      <div className="social-media-card expanded-lateral">
+        <div className="flex items-start justify-between w-full px-6 pt-6 pb-4 absolute top-0 left-0 right-0 z-10">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <CreditCard className="w-5 h-5 text-blue-400" />
+              <h2 className="text-lg font-bold text-white">Credit Balance</h2>
+            </div>
+            <p className="text-xs text-gray-400 whitespace-nowrap">Your available credits for content generation</p>
+          </div>
+          <button className="px-3 py-1.5 rounded-lg bg-white/5 backdrop-blur-md border border-white/10 text-blue-400 text-xs font-semibold hover:bg-white/10 transition-all">
+            + Add Credits
+          </button>
+        </div>
         
         <div className="card-main-content">
-          <div className="w-full mb-4 px-2">
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <CreditCard className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-bold text-white">Credit Balance</h2>
-              </div>
-              <p className="text-xs text-gray-400 whitespace-nowrap">Your available credits for content generation</p>
-            </div>
-          </div>
-          
           <img
             src="https://uiverse.io/astronaut.png"
             alt="Astronaut"
