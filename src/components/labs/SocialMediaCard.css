@@ -405,7 +405,7 @@
 
 /* Labs-specific styling */
 .labs-card.social-media-card {
-  width: 30em;
+  width: 60em;
   height: auto;
   max-height: 90vh;
 }
