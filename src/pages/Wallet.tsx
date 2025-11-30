@@ -4,7 +4,7 @@ import { CreditCard } from "@/components/wallet/CreditCard";
 export default function Wallet() {
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-center min-h-screen p-8">
+      <div className="flex justify-center pt-16 p-8">
         <CreditCard />
       </div>
     </DashboardLayout>
