@@ -34,10 +34,12 @@ export function CreditCard() {
 
   return (
     <>
-      <div className="social-media-card expanded-lateral labs-card">
+      <div className="social-media-card expanded-lateral">
         <div className="flex items-start justify-between w-full px-6 pt-6 pb-4 absolute top-0 left-0 right-0 z-10">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-white">Credit Balance</h2>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <h2 className="text-lg font-bold text-white">Credit Balance</h2>
+            </div>
             <p className="text-xs text-gray-400 whitespace-nowrap">Your available credits for content generation</p>
           </div>
           <button 
@@ -59,9 +61,7 @@ export function CreditCard() {
         <div className="flex flex-col justify-center items-center p-8 pt-16 h-full w-full max-w-4xl">
           <div className="mb-12">
             <div className="flex items-baseline justify-center gap-2 mb-2">
-              <span className="text-6xl font-bold text-white">
-                {formatCurrency(credits?.balance || 0)}
-              </span>
+              <span className="text-6xl font-bold text-white">{formatCurrency(credits?.balance || 0)}</span>
             </div>
           </div>
           
@@ -70,9 +70,7 @@ export function CreditCard() {
               <TrendingUp className="w-6 h-6 text-green-500" />
               <div>
                 <p className="text-gray-400 text-sm">Purchased</p>
-                <p className="text-2xl font-semibold text-white">
-                  {formatCurrency(credits?.total_purchased || 0)}
-                </p>
+                <p className="text-2xl font-semibold text-white">{formatCurrency(credits?.total_purchased || 0)}</p>
               </div>
             </div>
             
@@ -80,9 +78,7 @@ export function CreditCard() {
               <TrendingDown className="w-6 h-6 text-red-500" />
               <div>
                 <p className="text-gray-400 text-sm">Spent</p>
-                <p className="text-2xl font-semibold text-white">
-                  {formatCurrency(credits?.total_spent || 0)}
-                </p>
+                <p className="text-2xl font-semibold text-white">{formatCurrency(credits?.total_spent || 0)}</p>
               </div>
             </div>
           </div>
