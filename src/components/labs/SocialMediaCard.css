@@ -444,7 +444,8 @@
   gap: 0.75rem;
   padding: 1em 1.5em 2em 1.5em;
   width: 18em;
-  height: 25em;
+  min-height: fit-content;
+  max-height: 25em;
   opacity: 0;
   max-width: 0;
   overflow-y: auto;
