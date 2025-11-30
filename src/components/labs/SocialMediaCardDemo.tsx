@@ -14,7 +14,7 @@ export function SocialMediaCardDemo() {
           </p>
         </div>
         
-        <div className="absolute bottom-4 right-4 text-[10px] tracking-wide" style={{ color: 'hsl(270, 70%, 60%)' }}>
+        <div className="absolute bottom-4 right-4 px-3 py-1.5 text-xs tracking-wide rounded-lg backdrop-blur-md bg-white/5 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)]" style={{ color: 'hsl(270, 70%, 60%)' }}>
           Details
         </div>
       </div>
