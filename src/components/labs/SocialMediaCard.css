@@ -516,6 +516,28 @@
   font-family: Montserrat, system-ui, -apple-system, sans-serif;
 }
 
+/* Staggered fade-in animation for contact items */
+@keyframes contactFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contacts-section-lateral.open .contact-item-stagger {
+  animation: contactFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  opacity: 0;
+}
+
+.contacts-section-lateral:not(.open) .contact-item-stagger {
+  animation: none;
+  opacity: 1;
+}
+
 .contact-actions-card {
   display: flex;
   gap: 0.5rem;
