@@ -528,32 +528,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
           )}
           
           <div className="card-main-content">
-            {isOpen && (
-              <div className="absolute top-2 right-4 z-10">
-                <button
-                  className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAddContact(!showAddContact);
-                  }}
-                >
-                  {showAddContact ? "Cancel" : "Add Contact"}
-                </button>
-              </div>
-            )}
-            {projectsOpen && (
-              <div className="absolute top-2 right-4 z-10">
-                <button
-                  className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAddProject(!showAddProject);
-                  }}
-                >
-                  {showAddProject ? "Cancel" : "Add Project"}
-                </button>
-              </div>
-            )}
             <img
               src="https://uiverse.io/astronaut.png"
               alt="Astronaut"
@@ -615,6 +589,17 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
 
           {/* Collapsible Contacts Section - Lateral */}
           <div className={`contacts-section-lateral ${isOpen ? 'open' : ''}`}>
+            <div className="flex justify-end mb-3">
+              <button
+                className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAddContact(!showAddContact);
+                }}
+              >
+                {showAddContact ? "Cancel" : "Add Contact"}
+              </button>
+            </div>
             {showAddContact ? (
               <div className="flex flex-col gap-3 w-full">
                 <div className="space-y-1">
@@ -765,6 +750,17 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
 
           {/* Collapsible Projects Section - Lateral */}
           <div className={`contacts-section-lateral ${projectsOpen ? 'open' : ''}`}>
+            <div className="flex justify-end mb-3">
+              <button
+                className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAddProject(!showAddProject);
+                }}
+              >
+                {showAddProject ? "Cancel" : "Add Project"}
+              </button>
+            </div>
             {showAddProject ? (
               <div className="flex flex-col gap-3 w-full">
                 <div className="space-y-1">
