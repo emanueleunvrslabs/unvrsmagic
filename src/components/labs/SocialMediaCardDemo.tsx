@@ -104,9 +104,9 @@ export function SocialMediaCardDemo() {
                 </button>
 
                 {/* Usage-Based Billing Notice */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-900/30 to-amber-800/20 border border-amber-700/30 backdrop-blur-sm">
-                  <h3 className="text-lg font-semibold text-amber-300 mb-2">Usage-Based Billing</h3>
-                  <p className="text-sm text-amber-100/70">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/30 backdrop-blur-sm">
+                  <h3 className="text-lg font-semibold text-blue-300 mb-2">Usage-Based Billing</h3>
+                  <p className="text-sm text-blue-100/70">
                     You only pay for what you generate. Costs are calculated based on actual content created through the AI models.
                   </p>
                 </div>
