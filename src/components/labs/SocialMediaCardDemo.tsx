@@ -81,7 +81,7 @@ export function SocialMediaCardDemo() {
                 </div>
 
                 {/* Video Pricing Card */}
-                <div className="relative p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
+                <div className="relative p-4 rounded-2xl border-2 border-blue-500/50 backdrop-blur-sm">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
