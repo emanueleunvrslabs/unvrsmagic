@@ -88,7 +88,7 @@
   box-shadow: 220px 118px #fff, 280px 176px #fff, 40px 50px #fff,
     60px 180px #fff, 120px 130px #fff, 180px 176px #fff, 220px 290px #fff,
     520px 250px #fff, 400px 220px #fff, 50px 350px #fff, 10px 230px #fff;
-  z-index: -1;
+  z-index: 1;
   transition: 1s ease;
   animation: 1s glowing-stars linear alternate infinite;
   animation-delay: 0s;
