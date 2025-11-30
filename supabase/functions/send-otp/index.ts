@@ -80,16 +80,17 @@ serve(async (req) => {
     
     const message = `Il tuo codice di verifica è: ${otp}\n\nQuesto codice scadrà tra 10 minuti.`;
     
-    const wasenderResponse = await fetch('https://api.wasender.it/api/v1/message/send-text', {
+    const wasenderResponse = await fetch('https://www.wasender.it/api/v1/messages/text', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${wasenderApiKey}`,
-        'X-API-Secret': wasenderApiSecret,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: phoneNumber,
-        text: message
+        receiver: phoneNumber,
+        message: {
+          text: message
+        }
       }),
     });
 
