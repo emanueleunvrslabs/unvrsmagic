@@ -32,7 +32,6 @@ export function SocialMediaCardDemo() {
           <div className="mb-12">
             <div className="flex items-baseline justify-center gap-2 mb-2">
               <span className="text-6xl font-bold text-white">0,00 €</span>
-              <span className="text-xl text-gray-400">available</span>
             </div>
           </div>
           
