@@ -13,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Plus, Check, Loader2, ExternalLink, Image, Video, Sparkles, Calendar, Share2, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
+import "./project-details-modal.css";
 
 interface Project {
   id: string;
@@ -114,8 +115,8 @@ export function ProjectDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] max-w-5xl overflow-auto">
-        <DialogHeader>
+      <DialogContent className="max-h-[90vh] max-w-5xl overflow-auto project-modal-content">
+        <DialogHeader className="project-modal-header">
           <DialogTitle className="text-2xl">
             {project.name}
           </DialogTitle>
