@@ -462,7 +462,7 @@
 
 .contacts-section-lateral.open {
   opacity: 1;
-  max-width: 18em;
+  max-width: 14em;
   pointer-events: auto;
 }
 
