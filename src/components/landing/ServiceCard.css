@@ -1,0 +1,106 @@
+/* Service Card Component - Based on Labs Card Design */
+
+.service-card {
+  position: relative;
+  width: 28em;
+  height: 16em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #171717;
+  color: white;
+  font-family: Montserrat, system-ui, -apple-system, sans-serif;
+  border-radius: 20px;
+  overflow: hidden;
+  z-index: 1;
+  backdrop-filter: blur(15px);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.192),
+    inset 0 0 5px rgba(255, 255, 255, 0.274), 0 5px 5px rgba(0, 0, 0, 0.164);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3),
+    inset 0 0 5px rgba(255, 255, 255, 0.4), 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.service-card::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: -3px;
+  border-radius: 10px;
+  background: radial-gradient(#858585, transparent, transparent);
+  transform: translate(-5px, 250px);
+  transition: 0.4s ease-in-out;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.service-card:hover::before {
+  width: 150%;
+  height: 100%;
+  margin-left: -3.5em;
+}
+
+.service-card::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 20px;
+  background: rgb(23, 23, 23, 0.7);
+  transition: all 0.4s ease-in-out;
+  z-index: -1;
+}
+
+.service-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2em;
+  gap: 1em;
+  z-index: 2;
+}
+
+.service-card-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0;
+  letter-spacing: 0.02em;
+  transition: 0.3s ease;
+}
+
+.service-card:hover .service-card-title {
+  letter-spacing: 0.04em;
+}
+
+.service-card-description {
+  font-size: 0.95em;
+  line-height: 1.5;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .service-card {
+    width: 100%;
+    max-width: 28em;
+    height: 14em;
+  }
+  
+  .service-card-title {
+    font-size: 1.2em;
+  }
+  
+  .service-card-description {
+    font-size: 0.85em;
+  }
+}
