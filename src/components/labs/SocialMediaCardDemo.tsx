@@ -7,9 +7,9 @@ export function SocialMediaCardDemo() {
       <div className="social-media-card labs-card group overflow-y-auto">
         <div className="card-main-content items-start justify-start gap-6 p-6" style={{ width: '100%', flexDirection: 'column' }}>
           {/* Title and Description */}
-          <div className="w-full text-center">
+          <div className="w-full">
             <h1 className="text-4xl font-bold text-white mb-3">AI Art</h1>
-            <p className="text-white/70 text-base max-w-3xl mx-auto">
+            <p className="text-white/70 text-base max-w-3xl">
               Create professional AI-generated images and videos with advanced controls. Perfect for artists, designers, and content creators who need high-quality visual content.
             </p>
           </div>
