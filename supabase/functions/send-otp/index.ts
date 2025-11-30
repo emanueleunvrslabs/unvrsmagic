@@ -72,13 +72,19 @@ serve(async (req) => {
 
     // Send OTP via Wasender WhatsApp API
     const wasenderApiKey = Deno.env.get('WASENDER_API_KEY');
+    const wasenderApiSecret = Deno.env.get('WASENDER_API_SECRET');
+    
+    if (!wasenderApiKey || !wasenderApiSecret) {
+      throw new Error('Wasender API credentials not configured');
+    }
     
     const message = `Il tuo codice di verifica è: ${otp}\n\nQuesto codice scadrà tra 10 minuti.`;
     
-    const wasenderResponse = await fetch('https://www.wasenderapi.com/api/send-message', {
+    const wasenderResponse = await fetch('https://api.wasender.it/api/v1/message/send-text', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${wasenderApiKey}`,
+        'X-API-Secret': wasenderApiSecret,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
