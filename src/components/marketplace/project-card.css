@@ -103,21 +103,21 @@
   top: -8.5%;
   left: -8.5%;
   position: absolute;
-  width: 2.5em;
-  height: 2.5em;
+  width: 1.5em;
+  height: 1.5em;
   border: none;
   outline: none;
   border-radius: 50%;
   background: #f9f9fb;
-  box-shadow: 0px 0px 40px rgba(193, 119, 241, 0.8),
-    0px 0px 40px rgba(135, 42, 211, 0.8), inset #9b40fc 0px 0px 40px -12px;
+  box-shadow: 0px 0px 20px rgba(193, 119, 241, 0.6),
+    0px 0px 20px rgba(135, 42, 211, 0.6), inset #9b40fc 0px 0px 20px -12px;
   transition: 0.4s ease-in-out;
   z-index: -1;
 }
 
 .marketplace-project-card:hover .card-heading::after {
-  box-shadow: 0px 0px 80px rgba(193, 119, 241, 1),
-    0px 0px 80px rgba(135, 42, 211, 1), inset #9b40fc 0px 0px 40px -12px;
+  box-shadow: 0px 0px 30px rgba(193, 119, 241, 0.8),
+    0px 0px 30px rgba(135, 42, 211, 0.8), inset #9b40fc 0px 0px 20px -12px;
 }
 
 @keyframes glowing-stars {
