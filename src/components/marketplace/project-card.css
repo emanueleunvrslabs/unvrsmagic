@@ -73,6 +73,10 @@
   font-size: 2rem;
 }
 
+.marketplace-project-card .card-heading::after {
+  display: none !important;
+}
+
 .marketplace-project-card:hover .card-heading {
   letter-spacing: 0.025em;
 }
