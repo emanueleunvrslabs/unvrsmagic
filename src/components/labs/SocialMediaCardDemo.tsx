@@ -6,6 +6,8 @@ export function SocialMediaCardDemo() {
   return (
     <div className="flex items-center justify-center min-h-screen p-8">
       <div className="social-media-card expanded-lateral">
+        <div className="card-main-content">
+        </div>
       </div>
     </div>
   );
