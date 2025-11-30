@@ -749,6 +749,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     </>
                   )
                 )}
+              </>
             )}
 
             {/* Projects content */}
