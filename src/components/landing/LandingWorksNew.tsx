@@ -48,12 +48,8 @@ export function LandingWorksNew() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
-            <motion.div
+            <div
               key={project.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ delay: index * 0.08, duration: 0.4, ease: "easeOut" }}
-              style={{ willChange: isInView ? 'auto' : 'transform, opacity' }}
               className="group relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 transition-[border-color] duration-300 ease-out cursor-pointer transform-gpu"
               onClick={() => window.location.href = `/project/${project.route.replace('/', '')}`}
             >
@@ -84,7 +80,7 @@ export function LandingWorksNew() {
                   {project.description || "Enterprise solution"}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

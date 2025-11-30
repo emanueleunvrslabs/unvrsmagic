@@ -49,12 +49,8 @@ export function LandingServicesNew() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
-            <motion.div
+            <div
               key={service.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
-              style={{ willChange: isInView ? 'auto' : 'transform, opacity' }}
               className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 hover:bg-white/10 transition-[background-color,border-color] duration-300 ease-out cursor-pointer transform-gpu"
             >
               <h2 className="text-2xl font-semibold text-white mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
@@ -66,7 +62,7 @@ export function LandingServicesNew() {
               <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 group-hover:border-white/40 transition-all">
                 <ArrowUpRight size={20} className="text-white/60 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
