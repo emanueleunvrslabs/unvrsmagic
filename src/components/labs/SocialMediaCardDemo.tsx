@@ -5,9 +5,9 @@ export function SocialMediaCardDemo() {
   return (
     <div className="flex items-center justify-center min-h-screen p-8">
       <div className="social-media-card labs-card group overflow-y-auto">
-        <div className="card-main-content items-start justify-start gap-6 p-6" style={{ width: '30em' }}>
-          {/* What's Included Section */}
-          <div className="w-full">
+        <div className="card-main-content items-start justify-start gap-6 p-6" style={{ width: '100%', flexDirection: 'row' }}>
+          {/* What's Included Section - Left */}
+          <div className="flex-1">
             <h2 className="text-2xl font-semibold mb-4 text-white">What's Included</h2>
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
@@ -49,8 +49,8 @@ export function SocialMediaCardDemo() {
             </div>
           </div>
 
-          {/* Pricing Section */}
-          <div className="w-full">
+          {/* Pricing Section - Right */}
+          <div className="flex-1">
             <h2 className="text-2xl font-semibold mb-4 text-white">Pricing</h2>
             <div className="flex flex-col gap-4">
               {/* Image Pricing Card */}
