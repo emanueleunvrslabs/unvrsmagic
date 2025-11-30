@@ -115,7 +115,7 @@ export function ProjectDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="project-details-modal max-h-[70vh] max-w-3xl overflow-auto">
+      <DialogContent className="project-details-modal max-h-[60vh] max-w-2xl overflow-auto">
         <DialogHeader>
           <DialogTitle className="text-3xl font-bold text-left">
             {project.name}
