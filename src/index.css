@@ -575,28 +575,3 @@ html {
   width: 100%;
   filter: drop-shadow(0 0 23px var(--animation-color));
 }
-
-/* Services Grid - New Card Layout */
-.services-grid-new {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2.5rem;
-  padding: 2rem 0;
-  justify-items: center;
-  width: 100%;
-}
-
-@media (max-width: 1200px) {
-  .services-grid-new {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .services-grid-new {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-}
-

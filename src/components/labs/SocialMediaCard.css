@@ -27,8 +27,9 @@
 }
 
 .social-media-card.expanded-lateral {
-  width: 28em;
-  height: 16em;
+  width: auto;
+  max-width: 52em;
+  height: 25em;
 }
 
 .card-main-content {

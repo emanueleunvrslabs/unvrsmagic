@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./HeroTextEffect.css";
 import logoTransp from "@/assets/Logo_transp.png";
-import { ServiceCard } from "./ServiceCard";
 
 const STORAGE_BASE = "https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object/public/uploads/9d8f65ef-58ef-47db-be8f-926f26411b39";
 
@@ -145,20 +144,17 @@ export function WebflowLanding() {
           <div className="space-4rem"></div>
         </div>
         <div className="w-layout-blockcontainer service-container w-container">
-          <div className="services-grid-new">
+          <div className="services-grid">
             {[
               { title: "CLOUD & AUTOMATION", desc: "Secure cloud solutions and advanced automations." },
               { title: "APP & WEB SOLUTIONS", desc: "From mobile apps to web platforms, intuitive digital experiences." },
               { title: "AI INTEGRATIONS", desc: "Connect your systems with AI to automate workflows." },
-              { title: "SOFTWARE DEVELOPMENT", desc: "Custom enterprise software to streamline operations." },
-              { title: "DATA ANALYTICS", desc: "Transform data into actionable insights with advanced analytics." },
-              { title: "CONSULTING & STRATEGY", desc: "Expert guidance to optimize your digital transformation journey." }
+              { title: "SOFTWARE DEVELOPMENT", desc: "Custom enterprise software to streamline operations." }
             ].map((service, i) => (
-              <ServiceCard
-                key={i}
-                title={service.title}
-                description={service.desc}
-              />
+              <div key={i} className="services-card-text">
+                <h2 className="services-title">{service.title}</h2>
+                <p className="services-intro-text">{service.desc}</p>
+              </div>
             ))}
           </div>
         </div>
