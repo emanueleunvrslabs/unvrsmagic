@@ -76,12 +76,14 @@
   transform: translate(-5px, 250px);
   transition: 0.4s ease-in-out;
   z-index: -1;
+  display: none;
 }
 
 .social-media-card:hover::before {
   width: 150%;
   height: 100%;
   margin-left: -4.25em;
+  display: none;
 }
 
 .social-media-card::after {
