@@ -54,7 +54,8 @@ export function LandingServicesNew() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
-              className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 hover:bg-white/10 transition-[background-color,border-color] duration-300 ease-out cursor-pointer"
+              style={{ willChange: isInView ? 'auto' : 'transform, opacity' }}
+              className="group relative p-8 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 hover:bg-white/10 transition-[background-color,border-color] duration-300 ease-out cursor-pointer transform-gpu"
             >
               <h2 className="text-2xl font-semibold text-white mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
                 {service.title}
