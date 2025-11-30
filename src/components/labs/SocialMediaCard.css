@@ -438,33 +438,33 @@
 }
 
 /* Contacts Section - Lateral */
-.contacts-section-lateral {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1em 0.25em 1.5em 0.75em;
-  width: fit-content;
-  height: 25em;
-  opacity: 0;
-  max-width: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  pointer-events: none;
-  transition: max-width 0.4s ease-in-out, opacity 0.3s ease-in-out;
-  flex-shrink: 0;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
-.contacts-section-lateral::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-.contacts-section-lateral.open {
-  opacity: 1;
-  max-width: 15em;
-  pointer-events: auto;
-}
+ .contacts-section-lateral {
+   display: flex;
+   flex-direction: column;
+   gap: 0.75rem;
+   padding: 1em 0.25em 1.5em 0.75em;
+   width: 15em;
+   height: 25em;
+   opacity: 0;
+   max-width: 0;
+   overflow-y: auto;
+   overflow-x: hidden;
+   pointer-events: none;
+   transition: max-width 0.4s ease-in-out, opacity 0.3s ease-in-out;
+   flex-shrink: 0;
+   scrollbar-width: none; /* Firefox */
+   -ms-overflow-style: none; /* IE and Edge */
+ }
+ 
+ .contacts-section-lateral::-webkit-scrollbar {
+   display: none; /* Chrome, Safari, Opera */
+ }
+ 
+ .contacts-section-lateral.open {
+   opacity: 1;
+   max-width: 15em;
+   pointer-events: auto;
+ }
 
 .contact-item-card {
   display: flex;
