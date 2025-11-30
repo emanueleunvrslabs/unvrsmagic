@@ -587,337 +587,343 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
             {/* Collapsible Contacts Section */}
           </div>
 
-          {/* Collapsible Contacts Section - Lateral */}
-          <div className={`contacts-section-lateral ${isOpen ? 'open' : ''}`}>
-            <div className="flex justify-end mb-3">
-              <button
-                className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAddContact(!showAddContact);
-                }}
-              >
-                {showAddContact ? "Cancel" : "Add Contact"}
-              </button>
-            </div>
-            {showAddContact ? (
-              <div className="flex flex-col gap-3 w-full">
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Name</label>
-                  <input 
-                    type="text"
-                    value={newContact.name}
-                    onChange={(e) => setNewContact({...newContact, name: e.target.value})}
-                    onBlur={handleAutoSaveContact}
-                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Email</label>
-                  <input 
-                    type="email"
-                    value={newContact.email}
-                    onChange={(e) => setNewContact({...newContact, email: e.target.value})}
-                    onBlur={handleAutoSaveContact}
-                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">WhatsApp Number</label>
-                  <input 
-                    type="tel"
-                    value={newContact.whatsappNumber}
-                    onChange={(e) => setNewContact({...newContact, whatsappNumber: e.target.value})}
-                    onBlur={handleAutoSaveContact}
-                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => e.stopPropagation()}
-                    placeholder="+1234567890"
-                  />
-                </div>
-              </div>
-            ) : editingContactId ? (
-              <div className="flex flex-col gap-3 w-full">
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Name</label>
-                  <input 
-                    type="text"
-                    value={editContact.name}
-                    onChange={(e) => setEditContact({...editContact, name: e.target.value})}
-                    onBlur={() => handleAutoUpdateContact(editingContactId!)}
-                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Email</label>
-                  <input 
-                    type="email"
-                    value={editContact.email}
-                    onChange={(e) => setEditContact({...editContact, email: e.target.value})}
-                    onBlur={() => handleAutoUpdateContact(editingContactId!)}
-                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">WhatsApp Number</label>
-                  <input 
-                    type="tel"
-                    value={editContact.whatsappNumber}
-                    onChange={(e) => setEditContact({...editContact, whatsappNumber: e.target.value})}
-                    onBlur={() => handleAutoUpdateContact(editingContactId!)}
-                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => e.stopPropagation()}
-                    placeholder="+1234567890"
-                  />
-                </div>
-                <div className="flex gap-2">
+          {/* Unified Lateral Panel */}
+          <div className={`contacts-section-lateral ${isOpen || projectsOpen || billingOpen ? 'open' : ''}`}>
+            {/* Contacts content */}
+            {isOpen && (
+              <>
+                <div className="flex justify-end mb-3">
                   <button
-                    className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ borderRadius: '12px' }}
+                    className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteContact(editingContactId);
-                    }}
-                    disabled={deleting}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <button
-                    className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-2 text-xs transition-colors"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingContactId(null);
+                      setShowAddContact(!showAddContact);
                     }}
                   >
-                    Cancel
+                    {showAddContact ? "Cancel" : "Add Contact"}
                   </button>
                 </div>
-              </div>
-            ) : (
-              contacts.length > 0 && (
-                <>
-                  {contacts.map((contact) => (
-                    <div key={contact.id} className="social-icons">
-                      <span className="contact-name-card text-left flex-1">{contact.name}</span>
+                {showAddContact ? (
+                  <div className="flex flex-col gap-3 w-full">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Name</label>
+                      <input 
+                        type="text"
+                        value={newContact.name}
+                        onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                        onBlur={handleAutoSaveContact}
+                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Email</label>
+                      <input 
+                        type="email"
+                        value={newContact.email}
+                        onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                        onBlur={handleAutoSaveContact}
+                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">WhatsApp Number</label>
+                      <input 
+                        type="tel"
+                        value={newContact.whatsappNumber}
+                        onChange={(e) => setNewContact({...newContact, whatsappNumber: e.target.value})}
+                        onBlur={handleAutoSaveContact}
+                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="+1234567890"
+                      />
+                    </div>
+                  </div>
+                ) : editingContactId ? (
+                  <div className="flex flex-col gap-3 w-full">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Name</label>
+                      <input 
+                        type="text"
+                        value={editContact.name}
+                        onChange={(e) => setEditContact({...editContact, name: e.target.value})}
+                        onBlur={() => handleAutoUpdateContact(editingContactId!)}
+                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Email</label>
+                      <input 
+                        type="email"
+                        value={editContact.email}
+                        onChange={(e) => setEditContact({...editContact, email: e.target.value})}
+                        onBlur={() => handleAutoUpdateContact(editingContactId!)}
+                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">WhatsApp Number</label>
+                      <input 
+                        type="tel"
+                        value={editContact.whatsappNumber}
+                        onChange={(e) => setEditContact({...editContact, whatsappNumber: e.target.value})}
+                        onBlur={() => handleAutoUpdateContact(editingContactId!)}
+                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="+1234567890"
+                      />
+                    </div>
+                    <div className="flex gap-2">
                       <button
-                        className="instagram-link"
+                        className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ borderRadius: '12px' }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedContact(contact);
-                          setEmailModalOpen(true);
+                          handleDeleteContact(editingContactId);
                         }}
-                        aria-label="Send email"
+                        disabled={deleting}
                       >
-                        <Mail className="icon" strokeWidth={2} />
+                        <Trash2 size={16} />
                       </button>
                       <button
-                        className="x-link"
+                        className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-2 text-xs transition-colors"
+                        style={{ borderRadius: '12px' }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedContact(contact);
-                          setWhatsappModalOpen(true);
+                          setEditingContactId(null);
                         }}
-                        aria-label="Send WhatsApp"
                       >
-                        <MessageCircle className="icon" strokeWidth={2} />
-                      </button>
-                      <button
-                        className="discord-link"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startEditContact(contact);
-                        }}
-                        aria-label="Edit contact"
-                      >
-                        <Pencil className="icon" strokeWidth={2} />
+                        Cancel
                       </button>
                     </div>
-                  ))}
-                </>
-              )
+                  </div>
+                ) : (
+                  contacts.length > 0 && (
+                    <>
+                      {contacts.map((contact) => (
+                        <div key={contact.id} className="social-icons">
+                          <span className="contact-name-card text-left flex-1">{contact.name}</span>
+                          <button
+                            className="instagram-link"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedContact(contact);
+                              setEmailModalOpen(true);
+                            }}
+                            aria-label="Send email"
+                          >
+                            <Mail className="icon" strokeWidth={2} />
+                          </button>
+                          <button
+                            className="x-link"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedContact(contact);
+                              setWhatsappModalOpen(true);
+                            }}
+                            aria-label="Send WhatsApp"
+                          >
+                            <MessageCircle className="icon" strokeWidth={2} />
+                          </button>
+                          <button
+                            className="discord-link"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditContact(contact);
+                            }}
+                            aria-label="Edit contact"
+                          >
+                            <Pencil className="icon" strokeWidth={2} />
+                          </button>
+                        </div>
+                      ))}
+                    </>
+                  )
+                )}
             )}
-          </div>
 
-          {/* Collapsible Projects Section - Lateral */}
-          <div className={`contacts-section-lateral ${projectsOpen ? 'open' : ''}`}>
-            <div className="flex justify-end mb-3">
-              <button
-                className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAddProject(!showAddProject);
-                }}
-              >
-                {showAddProject ? "Cancel" : "Add Project"}
-              </button>
-            </div>
-            {showAddProject ? (
-              <div className="flex flex-col gap-3 w-full">
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Project Name</label>
-                  <input 
-                    type="text"
-                    value={newProject.projectName}
-                    onChange={(e) => setNewProject({projectName: e.target.value})}
-                    onBlur={handleAutoSaveProject}
-                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => e.stopPropagation()}
-                    placeholder="Enter project name"
-                  />
-                </div>
-              </div>
-            ) : editingProjectId ? (
-              <div className="flex flex-col gap-3 w-full">
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Project Name</label>
-                  <input 
-                    type="text"
-                    value={editProject.projectName}
-                    onChange={(e) => setEditProject({projectName: e.target.value})}
-                    onBlur={() => handleAutoUpdateProject(editingProjectId!)}
-                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-                <div className="flex gap-2">
+            {/* Projects content */}
+            {projectsOpen && (
+              <>
+                <div className="flex justify-end mb-3">
                   <button
-                    className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ borderRadius: '12px' }}
+                    className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteProject(editingProjectId);
-                    }}
-                    disabled={deleting}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <button
-                    className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-2 text-xs transition-colors"
-                    style={{ borderRadius: '12px' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingProjectId(null);
+                      setShowAddProject(!showAddProject);
                     }}
                   >
-                    Cancel
+                    {showAddProject ? "Cancel" : "Add Project"}
                   </button>
                 </div>
-              </div>
-            ) : (
-              clientProjects.length > 0 ? (
-                <>
-                  {clientProjects.map((project) => (
-                    <div key={project.id} className="social-icons">
-                      <span className="contact-name-card text-left flex-1">{project.project_name}</span>
+                {showAddProject ? (
+                  <div className="flex flex-col gap-3 w-full">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Project Name</label>
+                      <input 
+                        type="text"
+                        value={newProject.projectName}
+                        onChange={(e) => setNewProject({projectName: e.target.value})}
+                        onBlur={handleAutoSaveProject}
+                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Enter project name"
+                      />
+                    </div>
+                  </div>
+                ) : editingProjectId ? (
+                  <div className="flex flex-col gap-3 w-full">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Project Name</label>
+                      <input 
+                        type="text"
+                        value={editProject.projectName}
+                        onChange={(e) => setEditProject({projectName: e.target.value})}
+                        onBlur={() => handleAutoUpdateProject(editingProjectId!)}
+                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="flex gap-2">
                       <button
-                        className="discord-link"
+                        className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ borderRadius: '12px' }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          startEditProject(project);
+                          handleDeleteProject(editingProjectId);
                         }}
-                        aria-label="Edit project"
+                        disabled={deleting}
                       >
-                        <Pencil className="icon" strokeWidth={2} />
+                        <Trash2 size={16} />
+                      </button>
+                      <button
+                        className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-2 text-xs transition-colors"
+                        style={{ borderRadius: '12px' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingProjectId(null);
+                        }}
+                      >
+                        Cancel
                       </button>
                     </div>
-                  ))}
-                </>
-              ) : (
-                <div className="flex flex-col gap-3 w-full items-center justify-center py-8">
-                  <span className="text-white/70 text-sm">No projects assigned</span>
-                </div>
-              )
+                  </div>
+                ) : (
+                  clientProjects.length > 0 ? (
+                    <>
+                      {clientProjects.map((project) => (
+                        <div key={project.id} className="social-icons">
+                          <span className="contact-name-card text-left flex-1">{project.project_name}</span>
+                          <button
+                            className="discord-link"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditProject(project);
+                            }}
+                            aria-label="Edit project"
+                          >
+                            <Pencil className="icon" strokeWidth={2} />
+                          </button>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="flex flex-col gap-3 w-full items-center justify-center py-8">
+                      <span className="text-white/70 text-sm">No projects assigned</span>
+                    </div>
+                  )
+                )}
+              </>
             )}
-          </div>
 
-          {/* Collapsible Billing Section - Lateral */}
-          <div className={`billing-section-lateral ${billingOpen ? 'open' : ''}`}>
-            <div className="flex flex-col gap-3 max-w-md">
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Company Name</label>
-                <input 
-                  type="text" 
-                  value={isCreationMode ? newClientData.company_name : undefined}
-                  defaultValue={!isCreationMode ? client?.company_name : undefined}
-                  onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, company_name: e.target.value }) : undefined}
-                  onBlur={isCreationMode ? () => handleCreateOrUpdateClient('company_name') : (e) => handleUpdateExistingClient('company_name', e.currentTarget.value)}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  style={{ borderRadius: '12px' }}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder="Enter company name"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">VAT Number</label>
-                <input 
-                  type="text" 
-                  value={isCreationMode ? newClientData.vat_number : undefined}
-                  defaultValue={!isCreationMode ? client?.vat_number : undefined}
-                  onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, vat_number: e.target.value }) : undefined}
-                  onBlur={isCreationMode ? () => handleCreateOrUpdateClient('vat_number') : (e) => handleUpdateExistingClient('vat_number', e.currentTarget.value)}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  style={{ borderRadius: '12px' }}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder="Enter VAT number"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Street</label>
-                <input 
-                  type="text" 
-                  value={isCreationMode ? newClientData.street : undefined}
-                  defaultValue={!isCreationMode ? client?.street : undefined}
-                  onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, street: e.target.value }) : undefined}
-                  onBlur={isCreationMode ? () => handleCreateOrUpdateClient('street') : (e) => handleUpdateExistingClient('street', e.currentTarget.value)}
-                  className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  style={{ borderRadius: '12px' }}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder="Enter street address"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+            {/* Billing content */}
+            {billingOpen && (
+              <div className="flex flex-col gap-3 max-w-md">
                 <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">City</label>
-                    <input 
+                  <label className="text-xs text-muted-foreground">Company Name</label>
+                  <input 
                     type="text" 
-                    value={isCreationMode ? newClientData.city : undefined}
-                    defaultValue={!isCreationMode ? client?.city : undefined}
-                    onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, city: e.target.value }) : undefined}
-                    onBlur={isCreationMode ? () => handleCreateOrUpdateClient('city') : (e) => handleUpdateExistingClient('city', e.currentTarget.value)}
+                    value={isCreationMode ? newClientData.company_name : undefined}
+                    defaultValue={!isCreationMode ? client?.company_name : undefined}
+                    onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, company_name: e.target.value }) : undefined}
+                    onBlur={isCreationMode ? () => handleCreateOrUpdateClient('company_name') : (e) => handleUpdateExistingClient('company_name', e.currentTarget.value)}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
-                    placeholder="Enter city"
+                    placeholder="Enter company name"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Postal Code</label>
-                    <input 
+                  <label className="text-xs text-muted-foreground">VAT Number</label>
+                  <input 
                     type="text" 
-                    value={isCreationMode ? newClientData.postal_code : undefined}
-                    defaultValue={!isCreationMode ? client?.postal_code : undefined}
-                    onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, postal_code: e.target.value }) : undefined}
-                    onBlur={isCreationMode ? () => handleCreateOrUpdateClient('postal_code') : (e) => handleUpdateExistingClient('postal_code', e.currentTarget.value)}
+                    value={isCreationMode ? newClientData.vat_number : undefined}
+                    defaultValue={!isCreationMode ? client?.vat_number : undefined}
+                    onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, vat_number: e.target.value }) : undefined}
+                    onBlur={isCreationMode ? () => handleCreateOrUpdateClient('vat_number') : (e) => handleUpdateExistingClient('vat_number', e.currentTarget.value)}
                     className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                     style={{ borderRadius: '12px' }}
                     onClick={(e) => e.stopPropagation()}
-                    placeholder="Enter postal code"
+                    placeholder="Enter VAT number"
                   />
                 </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Street</label>
+                  <input 
+                    type="text" 
+                    value={isCreationMode ? newClientData.street : undefined}
+                    defaultValue={!isCreationMode ? client?.street : undefined}
+                    onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, street: e.target.value }) : undefined}
+                    onBlur={isCreationMode ? () => handleCreateOrUpdateClient('street') : (e) => handleUpdateExistingClient('street', e.currentTarget.value)}
+                    className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    style={{ borderRadius: '12px' }}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="Enter street address"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">City</label>
+                    <input 
+                      type="text" 
+                      value={isCreationMode ? newClientData.city : undefined}
+                      defaultValue={!isCreationMode ? client?.city : undefined}
+                      onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, city: e.target.value }) : undefined}
+                      onBlur={isCreationMode ? () => handleCreateOrUpdateClient('city') : (e) => handleUpdateExistingClient('city', e.currentTarget.value)}
+                      className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      style={{ borderRadius: '12px' }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="Enter city"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Postal Code</label>
+                    <input 
+                      type="text" 
+                      value={isCreationMode ? newClientData.postal_code : undefined}
+                      defaultValue={!isCreationMode ? client?.postal_code : undefined}
+                      onChange={isCreationMode ? (e) => setNewClientData({ ...newClientData, postal_code: e.target.value }) : undefined}
+                      onBlur={isCreationMode ? () => handleCreateOrUpdateClient('postal_code') : (e) => handleUpdateExistingClient('postal_code', e.currentTarget.value)}
+                      className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      style={{ borderRadius: '12px' }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="Enter postal code"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
