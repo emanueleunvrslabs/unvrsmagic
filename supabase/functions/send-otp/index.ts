@@ -80,17 +80,16 @@ serve(async (req) => {
     
     const message = `Il tuo codice di verifica è: ${otp}\n\nQuesto codice scadrà tra 10 minuti.`;
     
-    const wasenderResponse = await fetch('https://www.wasender.it/api/v1/messages/text', {
+    // Official WaSenderAPI endpoint (see https://wasenderapi.com/api-docs)
+    const wasenderResponse = await fetch('https://www.wasenderapi.com/api/send-message', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${wasenderApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        receiver: phoneNumber,
-        message: {
-          text: message
-        }
+        to: phoneNumber,
+        text: message,
       }),
     });
 
@@ -100,7 +99,7 @@ serve(async (req) => {
       console.error('WASender API error:', {
         status: wasenderResponse.status,
         statusText: wasenderResponse.statusText,
-        data: wasenderData
+        data: wasenderData,
       });
       throw new Error(`Failed to send WhatsApp message: ${JSON.stringify(wasenderData)}`);
     }
