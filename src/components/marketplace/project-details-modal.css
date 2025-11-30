@@ -1,4 +1,4 @@
-/* Project Details Modal Glowing Stars Animation */
+/* Project Details Modal - Clean Style */
 
 .project-details-modal {
   position: relative;
@@ -7,65 +7,19 @@
 
 .project-details-modal::before {
   content: "";
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  opacity: 1;
-  box-shadow: 
-    -400px -200px #fff, -300px -100px #fff, -200px -150px #fff,
-    -100px -50px #fff, 0px -100px #fff, 100px -150px #fff, 200px -50px #fff,
-    300px -100px #fff, 400px -200px #fff, -350px 0px #fff, -250px 50px #fff,
-    -150px 100px #fff, -50px 150px #fff, 50px 100px #fff, 150px 50px #fff,
-    250px 0px #fff, 350px 100px #fff, 450px 50px #fff, -300px 200px #fff,
-    -200px 250px #fff, -100px 300px #fff, 0px 250px #fff, 100px 200px #fff,
-    200px 250px #fff, 300px 300px #fff, 400px 200px #fff;
-  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: -3px;
+  border-radius: 10px;
+  background: radial-gradient(#858585, transparent, transparent);
+  transform: translate(-5px, calc(100% - 50px));
+  transition: 0.4s ease-in-out;
+  z-index: -1;
   pointer-events: none;
-  animation: 1.5s glowing-stars linear alternate infinite;
-  animation-delay: 0s;
 }
 
-.project-details-modal::after {
-  content: "";
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  opacity: 1;
-  box-shadow: 
-    -350px -150px #fff, -250px -50px #fff, -150px -100px #fff,
-    -50px 0px #fff, 50px -50px #fff, 150px -100px #fff, 250px -150px #fff,
-    350px -100px #fff, -400px 50px #fff, -300px 100px #fff,
-    -200px 150px #fff, -100px 200px #fff, 0px 150px #fff, 100px 100px #fff,
-    200px 150px #fff, 300px 200px #fff, 400px 150px #fff, -350px 250px #fff,
-    -250px 300px #fff, -150px 350px #fff, -50px 300px #fff, 50px 250px #fff,
-    150px 300px #fff, 250px 350px #fff, 350px 300px #fff, 450px 250px #fff;
-  z-index: 1;
-  pointer-events: none;
-  animation: 1.5s glowing-stars linear alternate infinite;
-  animation-delay: 0.6s;
-}
-
-@keyframes glowing-stars {
-  0% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.3;
-  }
-}
-
-/* Ensure content stays above stars */
+/* Ensure content stays above effects */
 .project-details-modal > * {
   position: relative;
   z-index: 2;
