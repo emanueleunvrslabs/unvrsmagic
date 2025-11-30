@@ -1,7 +1,6 @@
 import "./SocialMediaCard.css";
 import { useState } from "react";
 import { CreditCard, TrendingUp, TrendingDown } from "lucide-react";
-import astronautFrontal from "@/assets/astronaut-frontal.png";
 
 export function SocialMediaCardDemo() {
   return (
@@ -22,7 +21,7 @@ export function SocialMediaCardDemo() {
         
         <div className="card-main-content">
           <img
-            src={astronautFrontal}
+            src="https://uiverse.io/astronaut.png"
             alt="Astronaut"
             className="astronaut-image"
           />
