@@ -3,7 +3,7 @@
 .social-media-card {
   position: relative;
   width: 19em;
-  height: 18em;
+  height: 25em;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -401,6 +401,11 @@
   100% {
     opacity: 0;
   }
+}
+
+/* Labs-specific styling */
+.labs-card.social-media-card {
+  height: 18em;
 }
 
 /* Client Card Wrapper */
