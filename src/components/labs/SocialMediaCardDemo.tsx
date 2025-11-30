@@ -21,7 +21,6 @@ export function SocialMediaCardDemo() {
           alt="Astronaut"
           className="astronaut-image"
         />
-        <div className="card-heading">Company Name S.r.l.</div>
         <div className="social-icons">
           <a href="#" className="instagram-link" onClick={(e) => e.stopPropagation()}>
             <Briefcase className="icon" strokeWidth={2} />
