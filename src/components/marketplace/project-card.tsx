@@ -22,10 +22,10 @@ export function ProjectCard({ project, isAdded, onViewDetails }: ProjectCardProp
   return (
     <div className="marketplace-project-card group">
       {isAdded && (
-        <Badge className="absolute top-4 right-4 z-10 border-green-500/30 bg-green-500/10 text-green-500 hover:bg-green-500/20">
-          <Check className="h-3 w-3 mr-1" />
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 text-xs tracking-wide rounded-lg backdrop-blur-md bg-white/5 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),inset_0_0_5px_rgba(255,255,255,0.15),0_5px_5px_rgba(0,0,0,0.164)] text-green-500">
+          <Check className="h-3 w-3" />
           Added
-        </Badge>
+        </div>
       )}
       
       <div className="card-main-content items-center justify-center">
