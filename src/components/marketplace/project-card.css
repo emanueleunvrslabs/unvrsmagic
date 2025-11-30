@@ -37,6 +37,15 @@
   height: 100%;
 }
 
+.marketplace-project-card .card-main-content::before,
+.marketplace-project-card .card-main-content::after {
+  display: none !important;
+}
+
+.marketplace-project-card .card-heading::before {
+  display: none !important;
+}
+
 .marketplace-project-card::before {
   content: "";
   position: absolute;
