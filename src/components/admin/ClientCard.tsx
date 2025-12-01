@@ -865,7 +865,8 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                           className="social-icons cursor-pointer hover:bg-white/5 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/project/${project.id}`);
+                            // Navigate using search params instead of direct navigation
+                            window.location.href = `/admin/clients?project=${project.id}`;
                           }}
                         >
                           <span className="contact-name-card text-left flex-1">{project.project_name}</span>
