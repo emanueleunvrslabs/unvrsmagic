@@ -8,6 +8,7 @@ import { Navigate, useSearchParams } from "react-router-dom";
 import { EditClientModal } from "@/components/admin/EditClientModal";
 import { ClientCard } from "@/components/admin/ClientCard";
 import { ContactsCard } from "@/components/admin/ContactsCard";
+import { ProjectsCard } from "@/components/admin/ProjectsCard";
 import { SendEmailModal } from "@/components/admin/SendEmailModal";
 import { WhatsAppChatModal } from "@/components/admin/WhatsAppChatModal";
 import { ProjectWorkflows } from "@/components/admin/ProjectWorkflows";
@@ -203,6 +204,8 @@ export default function AdminClients() {
     phone: contact.whatsapp_number
   })) || [];
 
+  const clientProjects = selectedClientData?.client_projects || [];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -252,20 +255,28 @@ export default function AdminClients() {
                   clientProjects={client.client_projects || []}
                 />
                 {selectedClientId && (
-                  <ContactsCard
-                    key={`contacts-${client.id}`}
-                    clientId={client.id}
-                    contacts={contacts}
-                    onContactAdded={refetch}
-                    onEmailClick={(contact) => {
-                      setSelectedContact(contact);
-                      setEmailModalOpen(true);
-                    }}
-                    onWhatsAppClick={(contact) => {
-                      setSelectedContact(contact);
-                      setWhatsappModalOpen(true);
-                    }}
-                  />
+                  <>
+                    <ProjectsCard
+                      key={`projects-${client.id}`}
+                      clientId={client.id}
+                      projects={clientProjects}
+                      onProjectUpdated={refetch}
+                    />
+                    <ContactsCard
+                      key={`contacts-${client.id}`}
+                      clientId={client.id}
+                      contacts={contacts}
+                      onContactAdded={refetch}
+                      onEmailClick={(contact) => {
+                        setSelectedContact(contact);
+                        setEmailModalOpen(true);
+                      }}
+                      onWhatsAppClick={(contact) => {
+                        setSelectedContact(contact);
+                        setWhatsappModalOpen(true);
+                      }}
+                    />
+                  </>
                 )}
               </>
             ))
