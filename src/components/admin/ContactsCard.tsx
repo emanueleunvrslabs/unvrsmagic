@@ -176,7 +176,7 @@ export function ContactsCard({
     <div className="client-card-wrapper">
       <div className="social-media-card expanded-lateral">
         <div className="contacts-section-lateral open">
-          <div className="flex justify-end mb-3">
+          <div className="flex justify-center mb-3">
             <button
               className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
               onClick={(e) => {
