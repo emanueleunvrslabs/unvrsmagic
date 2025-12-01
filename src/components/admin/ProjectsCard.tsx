@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { Briefcase, Trash2 } from "lucide-react";
+import { GitBranch, FileText, CheckSquare, Kanban, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -253,9 +253,40 @@ export function ProjectsCard({
                           e.stopPropagation();
                           handleProjectClick(project.id);
                         }}
-                        aria-label="View project"
+                        aria-label="Workflow"
+                        title="Workflow"
                       >
-                        <Briefcase className="icon" strokeWidth={2} />
+                        <GitBranch className="icon" strokeWidth={2} />
+                      </button>
+                      <button
+                        className="x-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        aria-label="Document"
+                        title="Document"
+                      >
+                        <FileText className="icon" strokeWidth={2} />
+                      </button>
+                      <button
+                        className="discord-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        aria-label="Todo"
+                        title="Todo"
+                      >
+                        <CheckSquare className="icon" strokeWidth={2} />
+                      </button>
+                      <button
+                        className="instagram-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        aria-label="Kanban"
+                        title="Kanban"
+                      >
+                        <Kanban className="icon" strokeWidth={2} />
                       </button>
                     </div>
                   </div>
