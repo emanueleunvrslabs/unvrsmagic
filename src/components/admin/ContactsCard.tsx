@@ -175,15 +175,6 @@ export function ContactsCard({
   return (
     <div className="client-card-wrapper">
       <div className="social-media-card expanded-lateral">
-        <div className="card-main-content">
-          <img
-            src="https://uiverse.io/astronaut.png"
-            alt="Astronaut"
-            className="astronaut-image"
-          />
-          <div className="card-heading">Contacts</div>
-        </div>
-
         <div className="contacts-section-lateral open">
           <div className="flex justify-end mb-3">
             <button
