@@ -7,6 +7,9 @@ import { Loader2, UserPlus, ArrowLeft } from "lucide-react";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { EditClientModal } from "@/components/admin/EditClientModal";
 import { ClientCard } from "@/components/admin/ClientCard";
+import { ContactsCard } from "@/components/admin/ContactsCard";
+import { SendEmailModal } from "@/components/admin/SendEmailModal";
+import { WhatsAppChatModal } from "@/components/admin/WhatsAppChatModal";
 import { ProjectWorkflows } from "@/components/admin/ProjectWorkflows";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +22,14 @@ export default function AdminClients() {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedProjectId = searchParams.get("project");
   const selectedClientId = searchParams.get("client");
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<{ 
+    email: string; 
+    name: string;
+    phone: string;
+    id: string;
+  } | null>(null);
 
   const { data: clients, isLoading, refetch } = useQuery({
     queryKey: ["clients"],
@@ -184,6 +195,14 @@ export default function AdminClients() {
     ? clients?.filter(c => c.id === selectedClientId)
     : clients;
 
+  const selectedClientData = filteredClients?.[0];
+  const contacts = selectedClientData?.client_contacts?.map(contact => ({
+    id: contact.id,
+    name: `${contact.first_name} ${contact.last_name}`,
+    email: contact.email,
+    phone: contact.whatsapp_number
+  })) || [];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -224,13 +243,31 @@ export default function AdminClients() {
           
           {filteredClients && filteredClients.length > 0 ? (
             filteredClients.map((client) => (
-              <ClientCard
-                key={client.id}
-                client={client}
-                onEdit={handleEditClient}
-                onContactAdded={refetch}
-                clientProjects={client.client_projects || []}
-              />
+              <>
+                <ClientCard
+                  key={client.id}
+                  client={client}
+                  onEdit={handleEditClient}
+                  onContactAdded={refetch}
+                  clientProjects={client.client_projects || []}
+                />
+                {selectedClientId && (
+                  <ContactsCard
+                    key={`contacts-${client.id}`}
+                    clientId={client.id}
+                    contacts={contacts}
+                    onContactAdded={refetch}
+                    onEmailClick={(contact) => {
+                      setSelectedContact(contact);
+                      setEmailModalOpen(true);
+                    }}
+                    onWhatsAppClick={(contact) => {
+                      setSelectedContact(contact);
+                      setWhatsappModalOpen(true);
+                    }}
+                  />
+                )}
+              </>
             ))
           ) : !showNewClientForm ? (
             <div className="text-center py-12 w-full">
@@ -247,6 +284,22 @@ export default function AdminClients() {
         open={editModalOpen}
         onOpenChange={setEditModalOpen}
         onSuccess={refetch}
+      />
+
+      <SendEmailModal
+        open={emailModalOpen}
+        onOpenChange={setEmailModalOpen}
+        recipientEmail={selectedContact?.email || ""}
+        recipientName={selectedContact?.name || ""}
+      />
+
+      <WhatsAppChatModal
+        open={whatsappModalOpen}
+        onOpenChange={setWhatsappModalOpen}
+        contactName={selectedContact?.name || ""}
+        contactPhone={selectedContact?.phone || ""}
+        clientId={selectedClientData?.id || ""}
+        contactId={selectedContact?.id || ""}
       />
     </DashboardLayout>
   );
