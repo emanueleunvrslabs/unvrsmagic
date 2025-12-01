@@ -166,6 +166,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const [mounted, setMounted] = useState(false);
   const [projects, setProjects] = useState<Array<{ id: string; name: string; status: string }>>([]);
   const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
+  const [clients, setClients] = useState<Array<{ id: string; company_name: string }>>([]);
   const { isOwner, isAdmin, isUser } = useUserRole();
   const { userProjects } = useUserProjects();
   const { allProjects } = useMarketplaceProjects();
@@ -321,6 +322,24 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     fetchExchanges();
   }, []);
 
+  // Load clients
+  useEffect(() => {
+    const fetchClients = async () => {
+      const { data } = await supabase
+        .from("clients")
+        .select("id, company_name")
+        .order("company_name", { ascending: true });
+      
+      if (data) {
+        setClients(data);
+      }
+    };
+
+    if (isOwner) {
+      fetchClients();
+    }
+  }, [isOwner]);
+
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -457,11 +476,27 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   // Admin section - only for owner
   if (isOwner) {
+    const clientsSubmenuItems = clients.map((client) => ({
+      id: `client-${client.id}`,
+      label: client.company_name,
+      icon: Users,
+      href: `/admin/clients?client=${client.id}`,
+    }));
+
     menuItems.push({
       section: "Admin",
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
-        { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
+        {
+          id: "admin-clients",
+          label: "Clients",
+          icon: Users,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "admin-clients-all", label: "All Clients", icon: Users, href: "/admin/clients" },
+            ...clientsSubmenuItems,
+          ],
+        },
         {
           id: "ai-social",
           label: "Ai Social",
