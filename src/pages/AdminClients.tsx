@@ -2,8 +2,8 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Loader2, UserPlus } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import { Loader2, UserPlus, ArrowLeft } from "lucide-react";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { EditClientModal } from "@/components/admin/EditClientModal";
 import { ClientCard } from "@/components/admin/ClientCard";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +14,8 @@ export default function AdminClients() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
   const [showNewClientForm, setShowNewClientForm] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedProjectId = searchParams.get("project");
 
   const { data: clients, isLoading, refetch } = useQuery({
     queryKey: ["clients"],
@@ -36,9 +38,20 @@ export default function AdminClients() {
     },
   });
 
+  // Find selected project and its client
+  const selectedProject = selectedProjectId
+    ? clients?.flatMap((c) => 
+        (c.client_projects || []).map(p => ({ ...p, client: c }))
+      ).find((p) => p.id === selectedProjectId)
+    : null;
+
   const handleEditClient = (client: any) => {
     setSelectedClient(client);
     setEditModalOpen(true);
+  };
+
+  const handleBackToClients = () => {
+    setSearchParams({});
   };
 
   if (roleLoading || isLoading) {
@@ -53,6 +66,68 @@ export default function AdminClients() {
 
   if (!isOwner) {
     return <Navigate to="/" replace />;
+  }
+
+  // Show project detail view
+  if (selectedProjectId && selectedProject) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToClients}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Clients
+            </Button>
+          </div>
+          
+          <div>
+            <h1 className="text-3xl font-bold">{selectedProject.project_name}</h1>
+            {selectedProject.description && (
+              <p className="text-muted-foreground mt-2">{selectedProject.description}</p>
+            )}
+          </div>
+
+          <div className="grid gap-6">
+            <div className="rounded-lg border border-border bg-card p-6">
+              <h2 className="text-xl font-semibold mb-4">Client Information</h2>
+              <div className="space-y-2">
+                <div>
+                  <span className="text-muted-foreground">Company: </span>
+                  <span className="font-medium">{selectedProject.client.company_name}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">VAT: </span>
+                  <span className="font-medium">{selectedProject.client.vat_number}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Address: </span>
+                  <span className="font-medium">
+                    {selectedProject.client.street}, {selectedProject.client.city} {selectedProject.client.postal_code}, {selectedProject.client.country}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-card p-6">
+              <h2 className="text-xl font-semibold mb-4">Project Details</h2>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium mb-2">Description</h3>
+                  <p className="text-muted-foreground">
+                    {selectedProject.description || "No description provided"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
   }
 
   return (

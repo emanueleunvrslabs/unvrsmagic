@@ -65,6 +65,13 @@ type MenuItem = {
     icon: React.ElementType;
     href?: string;
     status?: 'active' | 'archived';
+    hasSubmenu?: boolean;
+    submenuItems?: Array<{
+      id: string;
+      label: string;
+      icon: React.ElementType;
+      href?: string;
+    }>;
   }>;
 };
 
@@ -159,6 +166,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const [mounted, setMounted] = useState(false);
   const [projects, setProjects] = useState<Array<{ id: string; name: string; status: string }>>([]);
   const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
+  const [clients, setClients] = useState<Array<{ id: string; company_name: string; client_projects: Array<{ id: string; project_name: string }> }>>([]);
   const { isOwner, isAdmin, isUser } = useUserRole();
   const { userProjects } = useUserProjects();
   const { allProjects } = useMarketplaceProjects();
@@ -314,6 +322,31 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     fetchExchanges();
   }, []);
 
+  // Load clients with their projects
+  useEffect(() => {
+    const fetchClients = async () => {
+      const { data } = await supabase
+        .from("clients")
+        .select(`
+          id,
+          company_name,
+          client_projects (
+            id,
+            project_name
+          )
+        `)
+        .order("created_at", { ascending: false });
+      
+      if (data) {
+        setClients(data);
+      }
+    };
+
+    if (isOwner) {
+      fetchClients();
+    }
+  }, [isOwner]);
+
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -450,11 +483,49 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   // Admin section - only for owner
   if (isOwner) {
+    // Build clients submenu with nested projects
+    const clientsSubmenuItems = clients.flatMap((client) => {
+      const clientProjects = client.client_projects || [];
+      
+      // If client has projects, create a nested structure
+      if (clientProjects.length > 0) {
+        return {
+          id: `client-${client.id}`,
+          label: client.company_name,
+          icon: Users,
+          hasSubmenu: true,
+          submenuItems: clientProjects.map((project) => ({
+            id: `client-project-${project.id}`,
+            label: project.project_name,
+            icon: Folder,
+            href: `/admin/clients?project=${project.id}`,
+          })),
+        };
+      }
+      
+      // If no projects, just show client name
+      return {
+        id: `client-${client.id}`,
+        label: client.company_name,
+        icon: Users,
+        href: `/admin/clients?client=${client.id}`,
+      };
+    });
+
     menuItems.push({
       section: "Admin",
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
-        { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
+        {
+          id: "admin-clients",
+          label: "Clients",
+          icon: Users,
+          hasSubmenu: true,
+          submenuItems: [
+            { id: "admin-clients-all", label: "All Clients", icon: Users, href: "/admin/clients" },
+            ...clientsSubmenuItems,
+          ],
+        },
         {
           id: "ai-social",
           label: "Ai Social",
@@ -595,6 +666,63 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                               {item.submenuItems?.map((subItem) => {
                                 const SubIcon = subItem.icon;
                                 const isSubActive = activeItem === subItem.id;
+                                
+                                // Handle nested submenus
+                                if (subItem.hasSubmenu) {
+                                  const isNestedParentActive = subItem.submenuItems?.some((nestedItem) => activeItem === nestedItem.id) || activeItem === subItem.id;
+                                  
+                                  return (
+                                    <div key={subItem.id} className="space-y-1">
+                                      <Collapsible open={openSubmenus[subItem.id]} className="space-y-1">
+                                        <CollapsibleTrigger asChild>
+                                          <Button
+                                            variant={isNestedParentActive ? "secondary" : "ghost"}
+                                            className="w-full justify-between px-4 rounded-lg"
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              toggleSubmenu(subItem.id);
+                                            }}
+                                          >
+                                            <div className="flex items-center">
+                                              <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                              <span>{subItem.label}</span>
+                                            </div>
+                                            <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200", openSubmenus[subItem.id] ? "rotate-180" : "rotate-0")} />
+                                          </Button>
+                                        </CollapsibleTrigger>
+                                        <CollapsibleContent className="pl-6 space-y-1">
+                                          {subItem.submenuItems?.map((nestedItem) => {
+                                            const NestedIcon = nestedItem.icon;
+                                            const isNestedActive = activeItem === nestedItem.id;
+                                            return (
+                                              <Button
+                                                key={nestedItem.id}
+                                                variant={isNestedActive ? "secondary" : "ghost"}
+                                                className="w-full justify-start rounded-lg"
+                                                onClick={() => setActiveItem(nestedItem.id)}
+                                                asChild={!!nestedItem.href}
+                                              >
+                                                {nestedItem.href ? (
+                                                  <Link to={nestedItem.href} className="flex items-center w-full">
+                                                    <NestedIcon className="mr-2 h-4 w-4" />
+                                                    <span>{nestedItem.label}</span>
+                                                  </Link>
+                                                ) : (
+                                                  <div className="flex items-center w-full">
+                                                    <NestedIcon className="mr-2 h-4 w-4" />
+                                                    <span>{nestedItem.label}</span>
+                                                  </div>
+                                                )}
+                                              </Button>
+                                            );
+                                          })}
+                                        </CollapsibleContent>
+                                      </Collapsible>
+                                    </div>
+                                  );
+                                }
+                                
+                                // Regular submenu item without nesting
                                 return (
                                   <Button
                                     key={subItem.id}
