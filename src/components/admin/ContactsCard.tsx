@@ -305,8 +305,12 @@ export function ContactsCard({
                 {contacts.map((contact, index) => (
                   <div 
                     key={contact.id} 
-                    className="social-icons contact-item-stagger"
+                    className="social-icons contact-item-stagger cursor-pointer"
                     style={{ animationDelay: `${index * 0.08}s` }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEditContact(contact);
+                    }}
                   >
                     <span className="contact-name-card">{contact.name}</span>
                     <button
@@ -328,16 +332,6 @@ export function ContactsCard({
                       aria-label="Send WhatsApp"
                     >
                       <MessageCircle className="icon" strokeWidth={2} />
-                    </button>
-                    <button
-                      className="discord-link"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        startEditContact(contact);
-                      }}
-                      aria-label="Edit contact"
-                    >
-                      <Pencil className="icon" strokeWidth={2} />
                     </button>
                   </div>
                 ))}
