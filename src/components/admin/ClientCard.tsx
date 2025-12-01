@@ -1,6 +1,7 @@
 import "../labs/SocialMediaCard.css";
 import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt, Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
 import { useToast } from "@/hooks/use-toast";
@@ -43,6 +44,7 @@ const projectSchema = z.object({
 
 export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [], onCancel, onClientCreated }: ClientCardProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const isCreationMode = client === null;
   const [isOpen, setIsOpen] = useState(false);
   const [billingOpen, setBillingOpen] = useState(isCreationMode);
@@ -858,7 +860,14 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                   clientProjects.length > 0 ? (
                     <>
                       {clientProjects.map((project) => (
-                        <div key={project.id} className="social-icons">
+                        <div 
+                          key={project.id} 
+                          className="social-icons cursor-pointer hover:bg-white/5 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/project/${project.id}`);
+                          }}
+                        >
                           <span className="contact-name-card text-left flex-1">{project.project_name}</span>
                           <button
                             className="discord-link"
