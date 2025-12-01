@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { FileText, Pencil, Mail, MessageCircle, Receipt, Trash2, X } from "lucide-react";
+import { FileText, Pencil, Mail, MessageCircle, Receipt, Trash2, X, GitBranch, CheckSquare, Kanban } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SendEmailModal } from "./SendEmailModal";
@@ -419,7 +419,7 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
             
             <div className="social-icons">
               <button 
-                className="x-link" 
+                className="instagram-link" 
                 onClick={(e) => {
                   e.stopPropagation();
                   if (billingOpen) {
@@ -428,8 +428,45 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     setBillingOpen(true);
                   }
                 }}
+                title="Billing"
               >
                 <FileText className="icon" strokeWidth={2} />
+              </button>
+              <button 
+                className="x-link" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                title="Workflow"
+              >
+                <GitBranch className="icon" strokeWidth={2} />
+              </button>
+              <button 
+                className="discord-link" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                title="Invoice"
+              >
+                <Receipt className="icon" strokeWidth={2} />
+              </button>
+              <button 
+                className="instagram-link" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                title="Todo"
+              >
+                <CheckSquare className="icon" strokeWidth={2} />
+              </button>
+              <button 
+                className="x-link" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                title="Kanban"
+              >
+                <Kanban className="icon" strokeWidth={2} />
               </button>
             </div>
 
