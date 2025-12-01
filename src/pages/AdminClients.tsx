@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Loader2, UserPlus, ArrowLeft } from "lucide-react";
 import { Navigate, useSearchParams } from "react-router-dom";
@@ -92,39 +93,85 @@ export default function AdminClients() {
             )}
           </div>
 
-          <div className="grid gap-6">
-            <div className="rounded-lg border border-border bg-card p-6">
-              <h2 className="text-xl font-semibold mb-4">Client Information</h2>
-              <div className="space-y-2">
-                <div>
-                  <span className="text-muted-foreground">Company: </span>
-                  <span className="font-medium">{selectedProject.client.company_name}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">VAT: </span>
-                  <span className="font-medium">{selectedProject.client.vat_number}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Address: </span>
-                  <span className="font-medium">
-                    {selectedProject.client.street}, {selectedProject.client.city} {selectedProject.client.postal_code}, {selectedProject.client.country}
-                  </span>
-                </div>
-              </div>
-            </div>
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="workflow">Workflow</TabsTrigger>
+              <TabsTrigger value="invoice">Invoice</TabsTrigger>
+              <TabsTrigger value="document">Document</TabsTrigger>
+              <TabsTrigger value="todo">Todo</TabsTrigger>
+              <TabsTrigger value="kanban">Kanban</TabsTrigger>
+            </TabsList>
 
-            <div className="rounded-lg border border-border bg-card p-6">
-              <h2 className="text-xl font-semibold mb-4">Project Details</h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-2">Description</h3>
-                  <p className="text-muted-foreground">
-                    {selectedProject.description || "No description provided"}
-                  </p>
+            <TabsContent value="overview" className="space-y-6">
+              <div className="rounded-lg border border-border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Client Information</h2>
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-muted-foreground">Company: </span>
+                    <span className="font-medium">{selectedProject.client.company_name}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">VAT: </span>
+                    <span className="font-medium">{selectedProject.client.vat_number}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Address: </span>
+                    <span className="font-medium">
+                      {selectedProject.client.street}, {selectedProject.client.city} {selectedProject.client.postal_code}, {selectedProject.client.country}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+
+              <div className="rounded-lg border border-border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Project Details</h2>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium mb-2">Description</h3>
+                    <p className="text-muted-foreground">
+                      {selectedProject.description || "No description provided"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="workflow">
+              <div className="rounded-lg border border-border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Project Workflow</h2>
+                <p className="text-muted-foreground">Workflow management coming soon...</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="invoice">
+              <div className="rounded-lg border border-border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Invoices</h2>
+                <p className="text-muted-foreground">Invoice management coming soon...</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="document">
+              <div className="rounded-lg border border-border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Documents</h2>
+                <p className="text-muted-foreground">Document management coming soon...</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="todo">
+              <div className="rounded-lg border border-border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Todo List</h2>
+                <p className="text-muted-foreground">Todo management coming soon...</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="kanban">
+              <div className="rounded-lg border border-border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Kanban Board</h2>
+                <p className="text-muted-foreground">Kanban board coming soon...</p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </DashboardLayout>
     );
