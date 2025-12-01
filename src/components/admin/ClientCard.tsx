@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt, Trash2, X } from "lucide-react";
+import { FileText, Pencil, Mail, MessageCircle, Receipt, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SendEmailModal } from "./SendEmailModal";
@@ -38,24 +38,16 @@ const contactSchema = z.object({
   whatsappNumber: z.string().trim().min(1, "WhatsApp number is required").max(20),
 });
 
-const projectSchema = z.object({
-  projectName: z.string().trim().min(1, "Project name is required").max(200),
-});
-
 export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [], onCancel, onClientCreated }: ClientCardProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const isCreationMode = client === null;
-  const [isOpen, setIsOpen] = useState(false);
   const [billingOpen, setBillingOpen] = useState(isCreationMode);
-  const [projectsOpen, setProjectsOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [showAddContact, setShowAddContact] = useState(false);
-  const [showAddProject, setShowAddProject] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
-  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedContact, setSelectedContact] = useState<{ 
@@ -82,12 +74,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     name: "",
     email: "",
     whatsappNumber: ""
-  });
-  const [newProject, setNewProject] = useState({
-    projectName: ""
-  });
-  const [editProject, setEditProject] = useState({
-    projectName: ""
   });
 
   const handleAutoSaveContact = async () => {
@@ -212,125 +198,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     } finally {
       setDeleting(false);
     }
-  };
-
-  const handleAutoSaveProject = async () => {
-    if (!newProject.projectName.trim()) {
-      return;
-    }
-
-    try {
-      const validated = projectSchema.parse(newProject);
-
-      const clientId = isCreationMode ? createdClientId : client?.id;
-      if (!clientId) return;
-
-      const { error } = await supabase
-        .from("client_projects")
-        .insert({
-          client_id: clientId,
-          project_name: validated.projectName,
-        });
-
-      if (error) throw error;
-
-      setNewProject({ projectName: "" });
-      setShowAddProject(false);
-      
-      if (onContactAdded) {
-        onContactAdded();
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation Error",
-          description: error.errors[0].message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to add project",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleAutoUpdateProject = async (projectId: string) => {
-    if (!editProject.projectName.trim()) {
-      return;
-    }
-
-    try {
-      const validated = projectSchema.parse(editProject);
-
-      const { error } = await supabase
-        .from("client_projects")
-        .update({
-          project_name: validated.projectName,
-        })
-        .eq("id", projectId);
-
-      if (error) throw error;
-
-      setEditingProjectId(null);
-      if (onContactAdded) {
-        onContactAdded();
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation Error",
-          description: error.errors[0].message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to update project",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleDeleteProject = async (projectId: string) => {
-    setDeleting(true);
-
-    try {
-      const { error } = await supabase
-        .from("client_projects")
-        .delete()
-        .eq("id", projectId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Project deleted successfully",
-      });
-
-      setEditingProjectId(null);
-      if (onContactAdded) {
-        onContactAdded();
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete project",
-        variant: "destructive",
-      });
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const startEditProject = (project: any) => {
-    setEditingProjectId(project.id);
-    setEditProject({
-      projectName: project.project_name,
-    });
   };
 
   const startEditContact = (contact: any) => {
@@ -479,9 +346,9 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     <>
       <div className="client-card-wrapper">
         <div 
-          className={`social-media-card ${billingOpen || isOpen || projectsOpen ? 'expanded-lateral' : ''} group`}
+          className={`social-media-card ${billingOpen ? 'expanded-lateral' : ''} group`}
         >
-          {!isCreationMode && !billingOpen && !isOpen && !projectsOpen && (
+          {!isCreationMode && !billingOpen && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -552,21 +419,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
             
             <div className="social-icons">
               <button 
-                className="instagram-link" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (projectsOpen) {
-                    setProjectsOpen(false);
-                  } else {
-                    setProjectsOpen(true);
-                    setIsOpen(false);
-                    setBillingOpen(false);
-                  }
-                }}
-              >
-                <Briefcase className="icon" strokeWidth={2} />
-              </button>
-              <button 
                 className="x-link" 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -574,27 +426,10 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                     setBillingOpen(false);
                   } else {
                     setBillingOpen(true);
-                    setIsOpen(false);
-                    setProjectsOpen(false);
                   }
                 }}
               >
                 <FileText className="icon" strokeWidth={2} />
-              </button>
-              <button 
-                className="discord-link" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isOpen) {
-                    setIsOpen(false);
-                  } else {
-                    setIsOpen(true);
-                    setBillingOpen(false);
-                    setProjectsOpen(false);
-                  }
-                }}
-              >
-                <Users className="icon" strokeWidth={2} />
               </button>
             </div>
 
@@ -602,9 +437,9 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
           </div>
 
           {/* Unified Lateral Panel */}
-          <div className={`contacts-section-lateral ${isOpen || projectsOpen || billingOpen ? 'open' : ''}`}>
-            {/* Contacts content */}
-            {isOpen && (
+          <div className={`contacts-section-lateral ${billingOpen ? 'open' : ''}`}>
+            {/* Billing content */}
+            {billingOpen && (
               <>
                 <div className="flex justify-end mb-3">
                   <button
@@ -773,120 +608,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                         </div>
                       ))}
                     </>
-                  )
-                )}
-              </>
-            )}
-
-            {/* Projects content */}
-            {projectsOpen && (
-              <>
-                <div className="flex justify-end mb-3">
-                  <button
-                    className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowAddProject(!showAddProject);
-                    }}
-                  >
-                    {showAddProject ? "Cancel" : "Add Project"}
-                  </button>
-                </div>
-                {showAddProject ? (
-                  <div className="flex flex-col gap-3 w-full">
-                    <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">Project Name</label>
-                      <input 
-                        type="text"
-                        value={newProject.projectName}
-                        onChange={(e) => setNewProject({projectName: e.target.value})}
-                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        style={{ borderRadius: '12px' }}
-                        onClick={(e) => e.stopPropagation()}
-                        placeholder="Enter project name"
-                      />
-                    </div>
-                    <button
-                      className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-1.5 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ borderRadius: '12px' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAutoSaveProject();
-                      }}
-                      disabled={isSaving || !newProject.projectName}
-                    >
-                      {isSaving ? "Saving..." : "Save"}
-                    </button>
-                  </div>
-                ) : editingProjectId ? (
-                  <div className="flex flex-col gap-3 w-full">
-                    <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">Project Name</label>
-                      <input 
-                        type="text"
-                        value={editProject.projectName}
-                        onChange={(e) => setEditProject({projectName: e.target.value})}
-                        onBlur={() => handleAutoUpdateProject(editingProjectId!)}
-                        className="w-full bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        style={{ borderRadius: '12px' }}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-2 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ borderRadius: '12px' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteProject(editingProjectId);
-                        }}
-                        disabled={deleting}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                      <button
-                        className="flex-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-2 text-xs transition-colors"
-                        style={{ borderRadius: '12px' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingProjectId(null);
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  clientProjects.length > 0 ? (
-                    <>
-                      {clientProjects.map((project) => (
-                        <div 
-                          key={project.id} 
-                          className="social-icons cursor-pointer hover:bg-white/5 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Navigate using search params instead of direct navigation
-                            window.location.href = `/admin/clients?project=${project.id}`;
-                          }}
-                        >
-                          <span className="contact-name-card text-left flex-1">{project.project_name}</span>
-                          <button
-                            className="discord-link"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              startEditProject(project);
-                            }}
-                            aria-label="Edit project"
-                          >
-                            <Pencil className="icon" strokeWidth={2} />
-                          </button>
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <div className="flex flex-col gap-3 w-full items-center justify-center py-8">
-                      <span className="text-white/70 text-sm">No projects assigned</span>
-                    </div>
                   )
                 )}
               </>
