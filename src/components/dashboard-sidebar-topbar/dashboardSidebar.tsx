@@ -600,7 +600,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
       {/* Sidebar */}
       <aside
-        className={cn("fixed flex h-full flex-col border-r border-border bg-card transition-all duration-300 ease-in-out z-40", collapsed ? "w-[72px] max-sm:left-[-72px]" : " sm:left-0 w-[240px]")}
+        className={cn("fixed flex h-full flex-col border-r border-border bg-card transition-all duration-300 ease-in-out z-40", collapsed ? "w-[72px] max-sm:left-[-72px]" : "sm:left-0 w-auto min-w-[240px] max-w-[400px]")}
       >
         {/* Collapse toggle button */}
         <button
@@ -614,13 +614,13 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
         {/* Header */}
         <div className={cn("flex h-16 items-center py-4 transition-all duration-300", collapsed ? "justify-center px-2" : "px-3")}>
-          <div className="flex items-center gap-2 overflow-hidden">
+          <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-md overflow-hidden flex-shrink-0">
               <img src={unvrsLogo} alt="UNVRS Labs" className="h-8 w-8 object-cover" />
             </div>
             <div className={cn(
-              "flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
-              collapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+              "flex flex-col transition-all duration-300 ease-in-out",
+              collapsed ? "hidden" : "block"
             )}>
               <span className="text-lg font-semibold tracking-tight whitespace-nowrap">UNVRS MAGIC AI</span>
             </div>
@@ -647,20 +647,20 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                         <div key={item.id} className="space-y-1">
                           <Collapsible open={openSubmenus[item.id]} className="space-y-1">
                             <CollapsibleTrigger asChild>
-                              <Button
-                                variant={isParentActive ? "secondary" : "ghost"}
-                                className="w-full justify-between px-4 rounded-lg"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  toggleSubmenu(item.id);
-                                }}
-                              >
-                                <div className="flex items-center">
-                                  <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
-                                  <span>{item.label}</span>
-                                </div>
-                                <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200", openSubmenus[item.id] ? "rotate-180" : "rotate-0")} />
-                              </Button>
+                          <Button
+                            variant={isParentActive ? "secondary" : "ghost"}
+                            className="w-full justify-between px-4 rounded-lg whitespace-nowrap"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              toggleSubmenu(item.id);
+                            }}
+                          >
+                            <div className="flex items-center min-w-0">
+                              <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
+                              <span className="truncate">{item.label}</span>
+                            </div>
+                            <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200 ml-2", openSubmenus[item.id] ? "rotate-180" : "rotate-0")} />
+                          </Button>
                             </CollapsibleTrigger>
                             <CollapsibleContent className="pl-6 space-y-1">
                               {item.submenuItems?.map((subItem) => {
@@ -677,17 +677,17 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                                         <CollapsibleTrigger asChild>
                                           <Button
                                             variant={isNestedParentActive ? "secondary" : "ghost"}
-                                            className="w-full justify-between px-4 rounded-lg"
+                                            className="w-full justify-between px-4 rounded-lg whitespace-nowrap"
                                             onClick={(e) => {
                                               e.preventDefault();
                                               toggleSubmenu(subItem.id);
                                             }}
                                           >
-                                            <div className="flex items-center">
+                                            <div className="flex items-center min-w-0">
                                               <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                                              <span>{subItem.label}</span>
+                                              <span className="truncate">{subItem.label}</span>
                                             </div>
-                                            <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200", openSubmenus[subItem.id] ? "rotate-180" : "rotate-0")} />
+                                            <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200 ml-2", openSubmenus[subItem.id] ? "rotate-180" : "rotate-0")} />
                                           </Button>
                                         </CollapsibleTrigger>
                                         <CollapsibleContent className="pl-6 space-y-1">
@@ -727,31 +727,31 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                                   <Button
                                     key={subItem.id}
                                     variant={isSubActive ? "secondary" : "ghost"}
-                                    className="w-full justify-start rounded-lg"
+                                    className="w-full justify-start rounded-lg whitespace-nowrap"
                                     onClick={() => setActiveItem(subItem.id)}
                                     asChild={!!subItem.href}
                                   >
                                     {subItem.href ? (
-                                      <Link to={subItem.href} className="flex items-center w-full">
+                                      <Link to={subItem.href} className="flex items-center w-full min-w-0">
                                         {subItem.status && (
                                           <div className={cn(
                                             "w-2 h-2 rounded-full mr-2 flex-shrink-0",
                                             subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
                                           )} />
                                         )}
-                                        <SubIcon className="mr-2 h-4 w-4" />
-                                        <span>{subItem.label}</span>
+                                        <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                        <span className="truncate">{subItem.label}</span>
                                       </Link>
                                     ) : (
-                                      <div className="flex items-center w-full">
+                                      <div className="flex items-center w-full min-w-0">
                                         {subItem.status && (
                                           <div className={cn(
                                             "w-2 h-2 rounded-full mr-2 flex-shrink-0",
                                             subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
                                           )} />
                                         )}
-                                        <SubIcon className="mr-2 h-4 w-4" />
-                                        <span>{subItem.label}</span>
+                                        <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                        <span className="truncate">{subItem.label}</span>
                                       </div>
                                     )}
                                   </Button>
