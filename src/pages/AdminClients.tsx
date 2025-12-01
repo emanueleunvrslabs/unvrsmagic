@@ -188,25 +188,17 @@ export default function AdminClients() {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {selectedClientId && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBackToClients}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to All Clients
-              </Button>
-            )}
-            <div>
-              <h1 className="text-3xl font-bold">Client Management</h1>
-              <p className="text-muted-foreground mt-2">
-                Manage your clients and their access to projects
-              </p>
-            </div>
-          </div>
+          {selectedClientId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToClients}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to All Clients
+            </Button>
+          )}
           {!selectedClientId && (
             <Button 
               onClick={() => setShowNewClientForm(true)} 
