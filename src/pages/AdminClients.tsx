@@ -18,6 +18,7 @@ export default function AdminClients() {
   const [showNewClientForm, setShowNewClientForm] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedProjectId = searchParams.get("project");
+  const selectedClientId = searchParams.get("client");
 
   const { data: clients, isLoading, refetch } = useQuery({
     queryKey: ["clients"],
@@ -178,27 +179,47 @@ export default function AdminClients() {
     );
   }
 
+  // Filter clients if a specific client is selected
+  const filteredClients = selectedClientId
+    ? clients?.filter(c => c.id === selectedClientId)
+    : clients;
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Client Management</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your clients and their access to projects
-            </p>
+          <div className="flex items-center gap-4">
+            {selectedClientId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToClients}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to All Clients
+              </Button>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold">Client Management</h1>
+              <p className="text-muted-foreground mt-2">
+                Manage your clients and their access to projects
+              </p>
+            </div>
           </div>
-          <Button 
-            onClick={() => setShowNewClientForm(true)} 
-            className="gap-2 px-5 py-6 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
-          >
-            <UserPlus className="h-4 w-4" />
-            New Client
-          </Button>
+          {!selectedClientId && (
+            <Button 
+              onClick={() => setShowNewClientForm(true)} 
+              className="gap-2 px-5 py-6 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
+            >
+              <UserPlus className="h-4 w-4" />
+              New Client
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-6 mx-auto" style={{ maxWidth: 'fit-content' }}>
-          {showNewClientForm && (
+          {showNewClientForm && !selectedClientId && (
             <ClientCard
               client={null}
               onEdit={() => {}}
@@ -209,8 +230,8 @@ export default function AdminClients() {
             />
           )}
           
-          {clients && clients.length > 0 ? (
-            clients.map((client) => (
+          {filteredClients && filteredClients.length > 0 ? (
+            filteredClients.map((client) => (
               <ClientCard
                 key={client.id}
                 client={client}
@@ -222,7 +243,7 @@ export default function AdminClients() {
           ) : !showNewClientForm ? (
             <div className="text-center py-12 w-full">
               <p className="text-muted-foreground">
-                No clients yet. Start by adding your first client using the "New Client" button above.
+                {selectedClientId ? "Client not found." : "No clients yet. Start by adding your first client using the \"New Client\" button above."}
               </p>
             </div>
           ) : null}
