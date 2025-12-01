@@ -7,6 +7,7 @@ import { Loader2, UserPlus, ArrowLeft } from "lucide-react";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { EditClientModal } from "@/components/admin/EditClientModal";
 import { ClientCard } from "@/components/admin/ClientCard";
+import { ProjectWorkflows } from "@/components/admin/ProjectWorkflows";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -138,10 +139,10 @@ export default function AdminClients() {
             </TabsContent>
 
             <TabsContent value="workflow">
-              <div className="rounded-lg border border-border bg-card p-6">
-                <h2 className="text-xl font-semibold mb-4">Project Workflow</h2>
-                <p className="text-muted-foreground">Workflow management coming soon...</p>
-              </div>
+              <ProjectWorkflows 
+                projectId={selectedProjectId} 
+                projectName={selectedProject.project_name} 
+              />
             </TabsContent>
 
             <TabsContent value="invoice">

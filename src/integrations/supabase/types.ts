@@ -690,6 +690,59 @@ export type Database = {
           },
         ]
       }
+      client_project_workflows: {
+        Row: {
+          active: boolean | null
+          client_project_id: string | null
+          content_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          platforms: string[] | null
+          prompt_template: string
+          schedule_config: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          client_project_id?: string | null
+          content_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          platforms?: string[] | null
+          prompt_template: string
+          schedule_config?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          client_project_id?: string | null
+          content_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          platforms?: string[] | null
+          prompt_template?: string
+          schedule_config?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_project_workflows_client_project_id_fkey"
+            columns: ["client_project_id"]
+            isOneToOne: false
+            referencedRelation: "client_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_projects: {
         Row: {
           client_id: string
