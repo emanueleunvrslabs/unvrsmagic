@@ -305,7 +305,7 @@ export function ContactsCard({
                 {contacts.map((contact, index) => (
                   <div 
                     key={contact.id} 
-                    className="social-icons contact-item-stagger"
+                    className="social-icons contact-item-stagger justify-center"
                     style={{ animationDelay: `${index * 0.08}s` }}
                   >
                     <span className="contact-name-card text-left flex-1">{contact.name}</span>
