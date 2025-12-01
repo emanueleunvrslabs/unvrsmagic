@@ -305,7 +305,7 @@ export function ContactsCard({
                 {contacts.map((contact, index) => (
                   <div 
                     key={contact.id} 
-                    className="social-icons contact-item-stagger cursor-pointer"
+                    className="social-icons contact-item-stagger cursor-pointer justify-between"
                     style={{ animationDelay: `${index * 0.08}s` }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -313,26 +313,28 @@ export function ContactsCard({
                     }}
                   >
                     <span className="contact-name-card">{contact.name}</span>
-                    <button
-                      className="instagram-link"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEmailClick(contact);
-                      }}
-                      aria-label="Send email"
-                    >
-                      <Mail className="icon" strokeWidth={2} />
-                    </button>
-                    <button
-                      className="x-link"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onWhatsAppClick(contact);
-                      }}
-                      aria-label="Send WhatsApp"
-                    >
-                      <MessageCircle className="icon" strokeWidth={2} />
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        className="instagram-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEmailClick(contact);
+                        }}
+                        aria-label="Send email"
+                      >
+                        <Mail className="icon" strokeWidth={2} />
+                      </button>
+                      <button
+                        className="x-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onWhatsAppClick(contact);
+                        }}
+                        aria-label="Send WhatsApp"
+                      >
+                        <MessageCircle className="icon" strokeWidth={2} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </>
