@@ -675,45 +675,58 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                                     <div key={subItem.id} className="space-y-1">
                                       <Collapsible open={openSubmenus[subItem.id]} className="space-y-1">
                                         <CollapsibleTrigger asChild>
-                                          <Button
-                                            variant={isNestedParentActive ? "secondary" : "ghost"}
-                                            className="w-full justify-between px-4 rounded-lg whitespace-nowrap"
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              toggleSubmenu(subItem.id);
-                                            }}
-                                          >
-                                            <div className="flex items-center min-w-0">
-                                              <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                                              <span className="truncate">{subItem.label}</span>
-                                            </div>
-                                            <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200 ml-2", openSubmenus[subItem.id] ? "rotate-180" : "rotate-0")} />
-                                          </Button>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button
+                                                variant={isNestedParentActive ? "secondary" : "ghost"}
+                                                className="w-full justify-between px-4 rounded-lg whitespace-nowrap"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  toggleSubmenu(subItem.id);
+                                                }}
+                                              >
+                                                <div className="flex items-center min-w-0">
+                                                  <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                                  <span className="truncate">{subItem.label}</span>
+                                                </div>
+                                                <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200 ml-2", openSubmenus[subItem.id] ? "rotate-180" : "rotate-0")} />
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="right" className="bg-popover text-popover-foreground border border-border z-[9999]">
+                                              {subItem.label}
+                                            </TooltipContent>
+                                          </Tooltip>
                                         </CollapsibleTrigger>
                                         <CollapsibleContent className="pl-6 space-y-1">
                                           {subItem.submenuItems?.map((nestedItem) => {
                                             const NestedIcon = nestedItem.icon;
                                             const isNestedActive = activeItem === nestedItem.id;
                                             return (
-                                              <Button
-                                                key={nestedItem.id}
-                                                variant={isNestedActive ? "secondary" : "ghost"}
-                                                className="w-full justify-start rounded-lg"
-                                                onClick={() => setActiveItem(nestedItem.id)}
-                                                asChild={!!nestedItem.href}
-                                              >
-                                                {nestedItem.href ? (
-                                                  <Link to={nestedItem.href} className="flex items-center w-full">
-                                                    <NestedIcon className="mr-2 h-4 w-4" />
-                                                    <span>{nestedItem.label}</span>
-                                                  </Link>
-                                                ) : (
-                                                  <div className="flex items-center w-full">
-                                                    <NestedIcon className="mr-2 h-4 w-4" />
-                                                    <span>{nestedItem.label}</span>
-                                                  </div>
-                                                )}
-                                              </Button>
+                                              <Tooltip key={nestedItem.id}>
+                                                <TooltipTrigger asChild>
+                                                  <Button
+                                                    variant={isNestedActive ? "secondary" : "ghost"}
+                                                    className="w-full justify-start rounded-lg whitespace-nowrap"
+                                                    onClick={() => setActiveItem(nestedItem.id)}
+                                                    asChild={!!nestedItem.href}
+                                                  >
+                                                    {nestedItem.href ? (
+                                                      <Link to={nestedItem.href} className="flex items-center w-full min-w-0">
+                                                        <NestedIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                                        <span className="truncate">{nestedItem.label}</span>
+                                                      </Link>
+                                                    ) : (
+                                                      <div className="flex items-center w-full min-w-0">
+                                                        <NestedIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                                        <span className="truncate">{nestedItem.label}</span>
+                                                      </div>
+                                                    )}
+                                                  </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="right" className="bg-popover text-popover-foreground border border-border z-[9999]">
+                                                  {nestedItem.label}
+                                                </TooltipContent>
+                                              </Tooltip>
                                             );
                                           })}
                                         </CollapsibleContent>
@@ -724,37 +737,43 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                                 
                                 // Regular submenu item without nesting
                                 return (
-                                  <Button
-                                    key={subItem.id}
-                                    variant={isSubActive ? "secondary" : "ghost"}
-                                    className="w-full justify-start rounded-lg whitespace-nowrap"
-                                    onClick={() => setActiveItem(subItem.id)}
-                                    asChild={!!subItem.href}
-                                  >
-                                    {subItem.href ? (
-                                      <Link to={subItem.href} className="flex items-center w-full min-w-0">
-                                        {subItem.status && (
-                                          <div className={cn(
-                                            "w-2 h-2 rounded-full mr-2 flex-shrink-0",
-                                            subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
-                                          )} />
+                                  <Tooltip key={subItem.id}>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant={isSubActive ? "secondary" : "ghost"}
+                                        className="w-full justify-start rounded-lg whitespace-nowrap"
+                                        onClick={() => setActiveItem(subItem.id)}
+                                        asChild={!!subItem.href}
+                                      >
+                                        {subItem.href ? (
+                                          <Link to={subItem.href} className="flex items-center w-full min-w-0">
+                                            {subItem.status && (
+                                              <div className={cn(
+                                                "w-2 h-2 rounded-full mr-2 flex-shrink-0",
+                                                subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
+                                              )} />
+                                            )}
+                                            <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                            <span className="truncate">{subItem.label}</span>
+                                          </Link>
+                                        ) : (
+                                          <div className="flex items-center w-full min-w-0">
+                                            {subItem.status && (
+                                              <div className={cn(
+                                                "w-2 h-2 rounded-full mr-2 flex-shrink-0",
+                                                subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
+                                              )} />
+                                            )}
+                                            <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                            <span className="truncate">{subItem.label}</span>
+                                          </div>
                                         )}
-                                        <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                                        <span className="truncate">{subItem.label}</span>
-                                      </Link>
-                                    ) : (
-                                      <div className="flex items-center w-full min-w-0">
-                                        {subItem.status && (
-                                          <div className={cn(
-                                            "w-2 h-2 rounded-full mr-2 flex-shrink-0",
-                                            subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
-                                          )} />
-                                        )}
-                                        <SubIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                                        <span className="truncate">{subItem.label}</span>
-                                      </div>
-                                    )}
-                                  </Button>
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="bg-popover text-popover-foreground border border-border z-[9999]">
+                                      {subItem.label}
+                                    </TooltipContent>
+                                  </Tooltip>
                                 );
                               })}
                             </CollapsibleContent>
