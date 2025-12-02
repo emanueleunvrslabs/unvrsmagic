@@ -429,6 +429,16 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         };
       }
       
+      // Special handling for Delibere Arera - no submenu, direct link
+      if (up.project.route === '/delibere-arera') {
+        return {
+          id: `user-project-${up.project_id}`,
+          label: up.project.name,
+          icon: FileText,
+          href: "/delibere-arera",
+        };
+      }
+      
       // Generic handling for other projects
       return {
         id: `user-project-${up.project_id}`,
