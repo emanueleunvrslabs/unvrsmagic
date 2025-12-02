@@ -68,8 +68,31 @@ export default function DelibereArera() {
   const [autoSendEmail, setAutoSendEmail] = useState("");
   const [isSavingEmail, setIsSavingEmail] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [hasExistingPreference, setHasExistingPreference] = useState(false);
   
   const isAdminUser = isOwner || isAdmin;
+
+  // Load existing email preferences
+  useEffect(() => {
+    const loadEmailPreferences = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("arera_email_preferences")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data) {
+        setAutoSendEmail(data.email);
+        setSelectedCategories(data.categories || []);
+        setHasExistingPreference(true);
+      }
+    };
+
+    loadEmailPreferences();
+  }, []);
 
   const handleSaveAutoSendEmail = async () => {
     if (!autoSendEmail || !autoSendEmail.includes("@")) {
@@ -84,11 +107,52 @@ export default function DelibereArera() {
     
     setIsSavingEmail(true);
     try {
-      // TODO: Save email and categories to database
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { error } = await supabase
+        .from("arera_email_preferences")
+        .upsert({
+          user_id: user.id,
+          email: autoSendEmail,
+          categories: selectedCategories,
+          active: true,
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+
+      setHasExistingPreference(true);
       toast.success(`Email configurata: ${autoSendEmail} per ${selectedCategories.length} categorie`);
       setIsAutoSendModalOpen(false);
     } catch (error) {
-      toast.error("Errore nel salvataggio dell'email");
+      console.error("Error saving email preferences:", error);
+      toast.error("Errore nel salvataggio delle preferenze");
+    } finally {
+      setIsSavingEmail(false);
+    }
+  };
+
+  const handleDeleteEmailPreference = async () => {
+    setIsSavingEmail(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { error } = await supabase
+        .from("arera_email_preferences")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setAutoSendEmail("");
+      setSelectedCategories([]);
+      setHasExistingPreference(false);
+      toast.success("Preferenze email eliminate");
+      setIsAutoSendModalOpen(false);
+    } catch (error) {
+      console.error("Error deleting email preferences:", error);
+      toast.error("Errore nell'eliminazione delle preferenze");
     } finally {
       setIsSavingEmail(false);
     }
@@ -436,7 +500,17 @@ export default function DelibereArera() {
               )}
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            {hasExistingPreference && (
+              <Button 
+                variant="destructive" 
+                onClick={handleDeleteEmailPreference} 
+                disabled={isSavingEmail}
+                className="sm:mr-auto"
+              >
+                Disattiva
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setIsAutoSendModalOpen(false)}>
               Annulla
             </Button>
