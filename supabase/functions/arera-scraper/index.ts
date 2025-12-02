@@ -106,6 +106,8 @@ serve(async (req) => {
     const results = [];
 
     for (const delibera of newDelibere) { // Process all new delibere
+      let insertedRecord: any = null;
+
       try {
         console.log(`Processing: ${delibera.code}`);
 
@@ -127,6 +129,8 @@ serve(async (req) => {
           console.error(`Insert error for ${delibera.code}:`, insertError);
           continue;
         }
+
+        insertedRecord = inserted;
 
         // Fetch detail page via Firecrawl
         const detailHtml = await fetchDetailPage(delibera.detailUrl, firecrawlKey);
@@ -176,16 +180,18 @@ serve(async (req) => {
         }
 
         // Update record
-        await supabase
-          .from("arera_delibere")
-          .update({
-            description,
-            summary,
-            category,
-            files: uploadedFiles,
-            status: "completed",
-          })
-          .eq("id", inserted.id);
+        if (insertedRecord?.id) {
+          await supabase
+            .from("arera_delibere")
+            .update({
+              description,
+              summary,
+              category,
+              files: uploadedFiles,
+              status: "completed",
+            })
+            .eq("id", insertedRecord.id);
+        }
 
         results.push({
           code: delibera.code,
@@ -196,11 +202,24 @@ serve(async (req) => {
 
       } catch (error) {
         console.error(`Error processing ${delibera.code}:`, error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+        // Mark this deliberation as failed in the database
+        if (insertedRecord?.id) {
+          await supabase
+            .from("arera_delibere")
+            .update({
+              status: "error",
+              error_message: errorMessage,
+            })
+            .eq("id", insertedRecord.id);
+        }
+
         results.push({
           code: delibera.code,
           category: "unknown",
           status: "error",
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: errorMessage,
         });
       }
     }
