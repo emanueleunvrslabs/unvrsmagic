@@ -50,7 +50,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
             
             <div className="social-icons">
               <button 
-                className={`instagram-link ${activePanel === 'workflow' ? 'ring-2 ring-primary/50' : ''}`}
+                className="instagram-link"
                 onClick={(e) => {
                   e.stopPropagation();
                   togglePanel('workflow');
@@ -60,7 +60,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                 <GitBranch className="icon" strokeWidth={2} />
               </button>
               <button 
-                className={`x-link ${activePanel === 'invoice' ? 'ring-2 ring-primary/50' : ''}`}
+                className="x-link"
                 onClick={(e) => {
                   e.stopPropagation();
                   togglePanel('invoice');
@@ -70,7 +70,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                 <Receipt className="icon" strokeWidth={2} />
               </button>
               <button 
-                className={`discord-link ${activePanel === 'documents' ? 'ring-2 ring-primary/50' : ''}`}
+                className="discord-link"
                 onClick={(e) => {
                   e.stopPropagation();
                   togglePanel('documents');
@@ -80,7 +80,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                 <FileText className="icon" strokeWidth={2} />
               </button>
               <button 
-                className={`instagram-link ${activePanel === 'todo' ? 'ring-2 ring-primary/50' : ''}`}
+                className="instagram-link"
                 onClick={(e) => {
                   e.stopPropagation();
                   togglePanel('todo');
@@ -90,7 +90,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                 <CheckSquare className="icon" strokeWidth={2} />
               </button>
               <button 
-                className={`x-link ${activePanel === 'kanban' ? 'ring-2 ring-primary/50' : ''}`}
+                className="x-link"
                 onClick={(e) => {
                   e.stopPropagation();
                   togglePanel('kanban');
