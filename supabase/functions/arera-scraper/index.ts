@@ -1,0 +1,375 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const ARERA_BASE_URL = "https://www.arera.it";
+const ARERA_LIST_URL = `${ARERA_BASE_URL}/atti-e-provvedimenti?tipologia=Delibera&orderby=`;
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    console.log("Starting ARERA scraper...");
+
+    // Get owner's Anthropic API key
+    const { data: ownerRole } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "owner")
+      .single();
+
+    if (!ownerRole) {
+      throw new Error("Owner not found");
+    }
+
+    const { data: apiKeyData } = await supabase
+      .from("api_keys")
+      .select("api_key")
+      .eq("user_id", ownerRole.user_id)
+      .eq("provider", "anthropic")
+      .single();
+
+    if (!apiKeyData) {
+      throw new Error("Anthropic API key not configured");
+    }
+
+    const anthropicKey = apiKeyData.api_key;
+
+    // Fetch ARERA delibere list page
+    console.log("Fetching ARERA list page...");
+    const listResponse = await fetch(ARERA_LIST_URL, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
+      },
+    });
+
+    if (!listResponse.ok) {
+      throw new Error(`Failed to fetch ARERA page: ${listResponse.status}`);
+    }
+
+    const html = await listResponse.text();
+    console.log("HTML fetched, length:", html.length);
+
+    // Parse delibere from HTML
+    const delibere = parseDelibereList(html);
+    console.log(`Found ${delibere.length} delibere`);
+
+    // Get existing delibere codes
+    const { data: existingDelibere } = await supabase
+      .from("arera_delibere")
+      .select("delibera_code");
+
+    const existingCodes = new Set(existingDelibere?.map((d) => d.delibera_code) || []);
+
+    // Filter new delibere
+    const newDelibere = delibere.filter((d) => !existingCodes.has(d.code));
+    console.log(`New delibere to process: ${newDelibere.length}`);
+
+    const results = [];
+
+    for (const delibera of newDelibere.slice(0, 10)) { // Process max 10 at a time
+      try {
+        console.log(`Processing: ${delibera.code}`);
+
+        // Insert initial record
+        const { data: inserted, error: insertError } = await supabase
+          .from("arera_delibere")
+          .insert({
+            user_id: ownerRole.user_id,
+            delibera_code: delibera.code,
+            publication_date: delibera.date,
+            title: delibera.title,
+            detail_url: delibera.detailUrl,
+            status: "processing",
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error(`Insert error for ${delibera.code}:`, insertError);
+          continue;
+        }
+
+        // Fetch detail page
+        const detailHtml = await fetchDetailPage(delibera.detailUrl);
+        const { description, files } = parseDetailPage(detailHtml);
+
+        // Download files and upload to storage
+        const uploadedFiles = [];
+        for (const file of files.slice(0, 5)) { // Max 5 files per delibera
+          try {
+            const fileData = await downloadFile(file.url);
+            if (fileData) {
+              const fileName = `${delibera.code.replace(/\//g, "-")}/${file.name}`;
+              const { data: uploadData, error: uploadError } = await supabase.storage
+                .from("arera-files")
+                .upload(fileName, fileData, {
+                  contentType: file.type || "application/pdf",
+                  upsert: true,
+                });
+
+              if (!uploadError) {
+                const { data: publicUrl } = supabase.storage
+                  .from("arera-files")
+                  .getPublicUrl(fileName);
+
+                uploadedFiles.push({
+                  name: file.name,
+                  url: publicUrl.publicUrl,
+                  originalUrl: file.url,
+                });
+              }
+            }
+          } catch (fileError) {
+            console.error(`Error downloading file ${file.name}:`, fileError);
+          }
+        }
+
+        // Generate summary with Anthropic
+        let summary = "";
+        if (description) {
+          summary = await generateSummary(anthropicKey, delibera.title, description);
+        }
+
+        // Update record
+        await supabase
+          .from("arera_delibere")
+          .update({
+            description,
+            summary,
+            files: uploadedFiles,
+            status: "completed",
+          })
+          .eq("id", inserted.id);
+
+        results.push({
+          code: delibera.code,
+          status: "completed",
+          filesCount: uploadedFiles.length,
+        });
+
+      } catch (error) {
+        console.error(`Error processing ${delibera.code}:`, error);
+        results.push({
+          code: delibera.code,
+          status: "error",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        totalFound: delibere.length,
+        newProcessed: results.length,
+        results,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+
+  } catch (error) {
+    console.error("Scraper error:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+
+function parseDelibereList(html: string): Array<{
+  code: string;
+  date: string;
+  title: string;
+  detailUrl: string;
+}> {
+  const delibere: Array<{ code: string; date: string; title: string; detailUrl: string }> = [];
+  
+  // Pattern per estrarre delibere dalla lista ARERA
+  // La struttura tipica è: <a href="/atti-e-provvedimenti/dettaglio/XX/YYY">Codice Delibera</a>
+  const itemPattern = /<article[^>]*class="[^"]*item[^"]*"[^>]*>([\s\S]*?)<\/article>/gi;
+  const linkPattern = /<a[^>]*href="([^"]*dettaglio[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
+  const datePattern = /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/;
+  const codePattern = /(\d+\/\d{4}\/[A-Z]\/[a-z]+)/i;
+
+  let match;
+  
+  // Try to find article items first
+  while ((match = itemPattern.exec(html)) !== null) {
+    const itemHtml = match[1];
+    
+    // Find link with detail URL
+    const linkMatch = /<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/i.exec(itemHtml);
+    if (linkMatch) {
+      const href = linkMatch[1];
+      const text = linkMatch[2].trim();
+      
+      // Extract code from text or href
+      const codeMatch = codePattern.exec(text) || codePattern.exec(href);
+      const dateMatch = datePattern.exec(itemHtml);
+      
+      if (codeMatch) {
+        delibere.push({
+          code: codeMatch[1],
+          date: dateMatch ? formatDate(dateMatch[1]) : new Date().toISOString().split("T")[0],
+          title: text || codeMatch[1],
+          detailUrl: href.startsWith("http") ? href : `${ARERA_BASE_URL}${href}`,
+        });
+      }
+    }
+  }
+
+  // Fallback: try different patterns
+  if (delibere.length === 0) {
+    // Pattern per link diretti alle delibere
+    const directLinkPattern = /<a[^>]*href="(\/atti-e-provvedimenti\/dettaglio\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+    
+    while ((match = directLinkPattern.exec(html)) !== null) {
+      const href = match[1];
+      const text = match[2].trim();
+      const codeMatch = codePattern.exec(text) || codePattern.exec(href);
+      
+      if (codeMatch && !delibere.find(d => d.code === codeMatch[1])) {
+        delibere.push({
+          code: codeMatch[1],
+          date: new Date().toISOString().split("T")[0],
+          title: text,
+          detailUrl: `${ARERA_BASE_URL}${href}`,
+        });
+      }
+    }
+  }
+
+  return delibere;
+}
+
+function formatDate(dateStr: string): string {
+  const parts = dateStr.split(/[\/\-]/);
+  if (parts.length === 3) {
+    const [day, month, year] = parts;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+  return new Date().toISOString().split("T")[0];
+}
+
+async function fetchDetailPage(url: string): Promise<string> {
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch detail page: ${response.status}`);
+  }
+  
+  return response.text();
+}
+
+function parseDetailPage(html: string): { description: string; files: Array<{ name: string; url: string; type?: string }> } {
+  let description = "";
+  const files: Array<{ name: string; url: string; type?: string }> = [];
+
+  // Extract description from content area
+  const contentMatch = /<div[^>]*class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i.exec(html);
+  if (contentMatch) {
+    description = contentMatch[1]
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 5000);
+  }
+
+  // Extract PDF/document links
+  const filePattern = /<a[^>]*href="([^"]*\.(pdf|doc|docx|xls|xlsx))"[^>]*>([^<]*)<\/a>/gi;
+  let fileMatch;
+  
+  while ((fileMatch = filePattern.exec(html)) !== null) {
+    const url = fileMatch[1].startsWith("http") ? fileMatch[1] : `${ARERA_BASE_URL}${fileMatch[1]}`;
+    const name = fileMatch[3].trim() || `document.${fileMatch[2]}`;
+    
+    if (!files.find(f => f.url === url)) {
+      files.push({
+        name,
+        url,
+        type: `application/${fileMatch[2]}`,
+      });
+    }
+  }
+
+  return { description, files };
+}
+
+async function downloadFile(url: string): Promise<Uint8Array | null> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
+    });
+    
+    if (!response.ok) {
+      console.error(`Failed to download file: ${response.status}`);
+      return null;
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    return new Uint8Array(arrayBuffer);
+  } catch (error) {
+    console.error("Download error:", error);
+    return null;
+  }
+}
+
+async function generateSummary(apiKey: string, title: string, description: string): Promise<string> {
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 500,
+        messages: [
+          {
+            role: "user",
+            content: `Sei un esperto di regolamentazione energetica italiana. Analizza questa delibera ARERA e crea un sommario in esattamente 3 bullet points concisi in italiano.
+
+Titolo: ${title}
+
+Contenuto: ${description.slice(0, 3000)}
+
+Rispondi SOLO con i 3 bullet points, senza introduzioni o conclusioni. Ogni bullet point deve iniziare con "• " e essere su una riga separata.`,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Anthropic API error:", await response.text());
+      return "";
+    }
+
+    const data = await response.json();
+    return data.content?.[0]?.text || "";
+  } catch (error) {
+    console.error("Summary generation error:", error);
+    return "";
+  }
+}

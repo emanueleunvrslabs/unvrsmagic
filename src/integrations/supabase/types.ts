@@ -652,6 +652,54 @@ export type Database = {
         }
         Relationships: []
       }
+      arera_delibere: {
+        Row: {
+          created_at: string
+          delibera_code: string
+          description: string | null
+          detail_url: string | null
+          error_message: string | null
+          files: Json | null
+          id: string
+          publication_date: string | null
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delibera_code: string
+          description?: string | null
+          detail_url?: string | null
+          error_message?: string | null
+          files?: Json | null
+          id?: string
+          publication_date?: string | null
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delibera_code?: string
+          description?: string | null
+          detail_url?: string | null
+          error_message?: string | null
+          files?: Json | null
+          id?: string
+          publication_date?: string | null
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_contacts: {
         Row: {
           client_id: string
