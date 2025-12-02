@@ -186,7 +186,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
       {/* Separate Panel Card */}
       {activePanel && (
         <div className="client-card-wrapper">
-          <div className="social-media-card group">
+          <div className="social-media-card group" style={{ width: '28em' }}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -198,7 +198,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
               <X size={16} strokeWidth={2.5} />
             </button>
 
-            <div className="card-main-content !justify-start !pt-12 h-full">
+            <div className="card-main-content !justify-start !pt-12 h-full" style={{ width: '28em' }}>
               {activePanel === 'workflow' && (
                 <div className="flex flex-col gap-4 w-full h-full">
                   <div className="flex-1">
@@ -234,22 +234,29 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                               )}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => handleToggleActive(workflow.id, workflow.active)}
-                                  className={`p-1.5 rounded ${workflow.active ? 'text-green-400 hover:bg-green-400/10' : 'text-white/40 hover:bg-white/10'}`}
-                                  title={workflow.active ? 'Pause' : 'Activate'}
-                                >
-                                  {workflow.active ? <Pause size={14} /> : <Play size={14} />}
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteWorkflow(workflow.id)}
-                                  className="p-1.5 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10"
-                                  title="Delete"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => console.log('Run workflow:', workflow.id)}
+                              className="p-1.5 rounded text-primary/70 hover:text-primary hover:bg-primary/10"
+                              title="Run Now"
+                            >
+                              <Play size={14} fill="currentColor" />
+                            </button>
+                            <button
+                              onClick={() => handleToggleActive(workflow.id, workflow.active)}
+                              className={`p-1.5 rounded ${workflow.active ? 'text-green-400 hover:bg-green-400/10' : 'text-white/40 hover:bg-white/10'}`}
+                              title={workflow.active ? 'Pause' : 'Activate'}
+                            >
+                              {workflow.active ? <Pause size={14} /> : <Play size={14} />}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteWorkflow(workflow.id)}
+                              className="p-1.5 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10"
+                              title="Delete"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                             </div>
                           ))}
                         </div>
