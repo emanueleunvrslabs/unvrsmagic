@@ -104,10 +104,17 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
 
         {/* Lateral Panel */}
         <div className={`contacts-section-lateral ${activePanel ? 'open' : ''}`}>
-          {activePanel === 'workflow' && (
-            <div className="flex flex-col gap-3 w-full">
-              <h3 className="text-sm font-semibold text-white/90">Workflow</h3>
-              <p className="text-xs text-white/60">Manage project workflows and automation.</p>
+        {activePanel === 'workflow' && (
+            <div className="flex flex-col gap-4 w-full min-w-[15em]">
+              <h3 className="text-base font-semibold text-white/90 border-b border-white/10 pb-2">Workflow</h3>
+              <div className="flex flex-col gap-3">
+                <p className="text-xs text-white/60">Manage project workflows and automation.</p>
+                <div className="flex flex-col gap-2">
+                  <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-xs text-white/70">No workflows configured yet</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
           
