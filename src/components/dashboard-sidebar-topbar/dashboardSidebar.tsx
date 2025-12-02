@@ -520,6 +520,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         },
         { id: "delibere-arera", label: "Delibere Arera", icon: FileText, href: "/delibere-arera" },
         { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
+        { id: "file-upload", label: "Upload", icon: Upload, href: "/file-upload" },
         { id: "labs", label: "Labs", icon: Beaker, href: "/labs" },
       ],
     });
@@ -530,7 +531,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     section: "Preferences",
     items: [
       { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
-      { id: "file-upload", label: "Upload", icon: Upload, href: "/file-upload" },
     ],
   });
 
