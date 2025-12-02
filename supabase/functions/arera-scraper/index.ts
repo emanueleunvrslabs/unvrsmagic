@@ -227,7 +227,11 @@ serve(async (req) => {
 
     // Send emails for new deliberations based on user preferences
     if (results.length > 0) {
-      await sendEmailNotifications(supabase, results.filter(r => r.status === "completed"));
+      await sendEmailNotifications(
+        supabase,
+        anthropicKey,
+        results.filter(r => r.status === "completed"),
+      );
     }
 
     return new Response(
@@ -601,10 +605,65 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
+// Determine if a delibera is relevant for wholesale energy/gas sellers and tariff changes
+async function isRelevantForWholesaleTariffs(
+  apiKey: string,
+  title: string,
+  content: string,
+): Promise<boolean> {
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 50,
+        messages: [
+          {
+            role: "user",
+            content:
+`Sei un esperto di regolazione energetica italiana.
+Devi decidere se questa delibera interessa direttamente VENDITORI GROSSISTI di energia elettrica e gas (trader, grossisti, fornitori all'ingrosso) e in particolare se riguarda corrispettivi, prezzi o condizioni economiche/tariffarie applicate ai venditori o al mercato all'ingrosso.
+
+NON considerare rilevanti le delibere che riguardano solo:
+- distributori di rete,
+- operatori di trasmissione,
+- gestori di distribuzione,
+- aspetti organizzativi interni, ricorsi, contenziosi, adempimenti puramente formali.
+
+Titolo: ${title}
+
+Testo: ${content.slice(0, 2000)}
+
+Rispondi SOLO con una parola: "SI" se è rilevante per venditori grossisti e tariffe, altrimenti "NO".`,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Anthropic relevance API error:", await response.text());
+      return false;
+    }
+
+    const data = await response.json();
+    const text = (data.content?.[0]?.text || "").trim().toUpperCase();
+    return text.startsWith("SI");
+  } catch (error) {
+    console.error("Wholesale relevance detection error:", error);
+    return false;
+  }
+}
+
 // Send email notifications to users based on their category preferences
 async function sendEmailNotifications(
-  supabase: any, 
-  newDelibere: Array<{ code: string; category: string; status: string; filesCount?: number }>
+  supabase: any,
+  anthropicKey: string,
+  newDelibere: Array<{ code: string; category: string; status: string; filesCount?: number }>,
 ): Promise<void> {
   console.log(`Sending email notifications for ${newDelibere.length} new delibere...`);
   
@@ -656,6 +715,26 @@ async function sendEmailNotifications(
       return;
     }
 
+    // Pre-filter delibere relevant for wholesale sellers and tariff changes
+    const relevanceMap = new Map<string, boolean>();
+    for (const d of fullDelibere) {
+      const sector = (d.category || "generale") as string;
+      // Siamo interessati solo a elettricità e gas
+      if (sector !== "elettricita" && sector !== "gas") {
+        relevanceMap.set(d.delibera_code, false);
+        continue;
+      }
+      const content = `${d.title}\n\n${d.summary || d.description || ""}`;
+      const isRelevant = await isRelevantForWholesaleTariffs(
+        anthropicKey,
+        d.title as string,
+        content,
+      );
+      relevanceMap.set(d.delibera_code, isRelevant);
+      // Piccola pausa per evitare rate limiting
+      await new Promise(r => setTimeout(r, 200));
+    }
+
     // Send an email per delibera to each user based on their category preferences
     const categoryLabels: Record<string, string> = {
       elettricita: "Elettricità",
@@ -669,10 +748,12 @@ async function sendEmailNotifications(
     for (const pref of preferences) {
       const userCategories: string[] = pref.categories || [];
 
-      // All delibere matching at least one of the user's categories
+      // All delibere matching at least one of the user's categories AND relevant for wholesale
       const matchingDelibere = fullDelibere.filter((d: any) => {
         const cat = (d.category || "generale") as string;
-        return userCategories.includes(cat);
+        if (!userCategories.includes(cat)) return false;
+        const isRelevant = relevanceMap.get(d.delibera_code) ?? false;
+        return isRelevant;
       });
 
       if (matchingDelibere.length === 0) {
