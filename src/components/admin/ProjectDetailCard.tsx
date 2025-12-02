@@ -200,7 +200,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
 
             <div className="card-main-content !justify-start !pt-12 h-full" style={{ width: '32em' }}>
               {activePanel === 'workflow' && (
-                <div className="flex flex-col gap-4 w-full h-full">
+                <div className="flex flex-col w-full h-full relative pb-14">
                   {isCreatingWorkflow ? (
                     <WorkflowInlineForm
                       projectId={project.id}
@@ -272,7 +272,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                       
                       <Button
                         onClick={() => setIsCreatingWorkflow(true)}
-                        className="bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 w-full mt-auto"
+                        className="bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 w-full absolute bottom-0 left-0 right-0"
                       >
                         <Plus className="mr-2 h-4 w-4" />
                         New Workflow
