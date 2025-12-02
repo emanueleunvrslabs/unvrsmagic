@@ -7,7 +7,8 @@ const corsHeaders = {
 };
 
 const ARERA_BASE_URL = "https://www.arera.it";
-const ARERA_LIST_URL = `${ARERA_BASE_URL}/atti-e-provvedimenti?tipologia=Delibera&orderby=`;
+const ARERA_LIST_BASE_URL = `${ARERA_BASE_URL}/atti-e-provvedimenti?tipologia=Delibera&orderby=`;
+const MAX_PAGES = 5;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -49,33 +50,57 @@ serve(async (req) => {
       throw new Error("Firecrawl API key not configured");
     }
 
-    // Fetch ARERA delibere list page using Firecrawl
-    console.log("Fetching ARERA list page via Firecrawl...");
-    const firecrawlResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${firecrawlKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: ARERA_LIST_URL,
-        formats: ["html"],
-      }),
-    });
+    // Fetch ARERA delibere from multiple pages using Firecrawl
+    console.log(`Fetching ARERA delibere from up to ${MAX_PAGES} pages via Firecrawl...`);
+    
+    let allDelibere: Array<{ code: string; date: string; title: string; detailUrl: string }> = [];
+    
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const pageUrl = page === 1 
+        ? ARERA_LIST_BASE_URL 
+        : `${ARERA_LIST_BASE_URL}&page=${page}`;
+      
+      console.log(`Fetching page ${page}: ${pageUrl}`);
+      
+      const firecrawlResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${firecrawlKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: pageUrl,
+          formats: ["html"],
+        }),
+      });
 
-    if (!firecrawlResponse.ok) {
-      const errText = await firecrawlResponse.text();
-      console.error("Firecrawl error:", errText);
-      throw new Error(`Failed to fetch ARERA page via Firecrawl: ${firecrawlResponse.status}`);
+      if (!firecrawlResponse.ok) {
+        const errText = await firecrawlResponse.text();
+        console.error(`Firecrawl error on page ${page}:`, errText);
+        break; // Stop pagination on error
+      }
+
+      const firecrawlData = await firecrawlResponse.json();
+      const html = firecrawlData.data?.html || "";
+      console.log(`Page ${page} HTML length:`, html.length);
+
+      // Parse delibere from this page
+      const pageDelibere = parseDelibereList(html);
+      console.log(`Found ${pageDelibere.length} delibere on page ${page}`);
+      
+      if (pageDelibere.length === 0) {
+        console.log(`No more delibere found, stopping at page ${page}`);
+        break; // Stop if no more results
+      }
+      
+      allDelibere = [...allDelibere, ...pageDelibere];
     }
-
-    const firecrawlData = await firecrawlResponse.json();
-    const html = firecrawlData.data?.html || "";
-    console.log("HTML fetched via Firecrawl, length:", html.length);
-
-    // Parse delibere from HTML
-    const delibere = parseDelibereList(html);
-    console.log(`Found ${delibere.length} delibere`);
+    
+    // Remove duplicates based on code
+    const uniqueDelibere = allDelibere.filter((d, i, arr) => 
+      arr.findIndex(x => x.code === d.code) === i
+    );
+    console.log(`Total unique delibere found: ${uniqueDelibere.length}`);
 
     // Get existing delibere codes
     const { data: existingDelibere } = await supabase
@@ -85,7 +110,7 @@ serve(async (req) => {
     const existingCodes = new Set(existingDelibere?.map((d) => d.delibera_code) || []);
 
     // Filter new delibere
-    const newDelibere = delibere.filter((d) => !existingCodes.has(d.code));
+    const newDelibere = uniqueDelibere.filter((d) => !existingCodes.has(d.code));
     console.log(`New delibere to process: ${newDelibere.length}`);
 
     const results = [];
@@ -184,7 +209,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        totalFound: delibere.length,
+        totalFound: uniqueDelibere.length,
         newProcessed: results.length,
         results,
       }),
