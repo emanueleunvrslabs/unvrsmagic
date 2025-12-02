@@ -21,6 +21,7 @@ const AI_PROVIDERS = [
   { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models", requiresOwnerId: false },
   { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresOwnerId: true },
   { id: "fal", name: "Fal", placeholder: "Enter API key", description: "Fal AI models", requiresOwnerId: false },
+  { id: "firecrawl", name: "Firecrawl", placeholder: "fc-...", description: "Web scraping API", requiresOwnerId: false },
   { id: "heygen", name: "HeyGen", placeholder: "Enter API key", description: "AI Avatar & Streaming", requiresOwnerId: false },
   { id: "restream", name: "Restream", placeholder: "Enter API key", description: "Multi-platform streaming (WHIP)", requiresOwnerId: false },
   { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false },
@@ -41,6 +42,9 @@ const apiKeySchemas = {
   }),
   fal: z.string().trim().min(20, {
     message: "Fal API key must be at least 20 characters"
+  }),
+  firecrawl: z.string().trim().regex(/^fc-[A-Za-z0-9-_]{20,}$/, {
+    message: "Firecrawl API key must start with 'fc-' followed by at least 20 characters"
   }),
   heygen: z.string().trim().min(20, {
     message: "HeyGen API key must be at least 20 characters"
@@ -65,6 +69,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     anthropic: "",
     qwen: "",
     fal: "",
+    firecrawl: "",
     heygen: "",
     restream: "",
     gamma: "",

@@ -21,7 +21,7 @@ serve(async (req) => {
 
     console.log("Starting ARERA scraper...");
 
-    // Get owner's Anthropic API key
+    // Get owner's API keys (Anthropic for summarization, Firecrawl for scraping)
     const { data: ownerRole } = await supabase
       .from("user_roles")
       .select("user_id")
@@ -32,35 +32,46 @@ serve(async (req) => {
       throw new Error("Owner not found");
     }
 
-    const { data: apiKeyData } = await supabase
+    const { data: apiKeys } = await supabase
       .from("api_keys")
-      .select("api_key")
+      .select("api_key, provider")
       .eq("user_id", ownerRole.user_id)
-      .eq("provider", "anthropic")
-      .single();
+      .in("provider", ["anthropic", "firecrawl"]);
 
-    if (!apiKeyData) {
+    const anthropicKey = apiKeys?.find(k => k.provider === "anthropic")?.api_key;
+    const firecrawlKey = apiKeys?.find(k => k.provider === "firecrawl")?.api_key;
+
+    if (!anthropicKey) {
       throw new Error("Anthropic API key not configured");
     }
 
-    const anthropicKey = apiKeyData.api_key;
-
-    // Fetch ARERA delibere list page
-    console.log("Fetching ARERA list page...");
-    const listResponse = await fetch(ARERA_LIST_URL, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
-      },
-    });
-
-    if (!listResponse.ok) {
-      throw new Error(`Failed to fetch ARERA page: ${listResponse.status}`);
+    if (!firecrawlKey) {
+      throw new Error("Firecrawl API key not configured");
     }
 
-    const html = await listResponse.text();
-    console.log("HTML fetched, length:", html.length);
+    // Fetch ARERA delibere list page using Firecrawl
+    console.log("Fetching ARERA list page via Firecrawl...");
+    const firecrawlResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${firecrawlKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: ARERA_LIST_URL,
+        formats: ["html"],
+      }),
+    });
+
+    if (!firecrawlResponse.ok) {
+      const errText = await firecrawlResponse.text();
+      console.error("Firecrawl error:", errText);
+      throw new Error(`Failed to fetch ARERA page via Firecrawl: ${firecrawlResponse.status}`);
+    }
+
+    const firecrawlData = await firecrawlResponse.json();
+    const html = firecrawlData.data?.html || "";
+    console.log("HTML fetched via Firecrawl, length:", html.length);
 
     // Parse delibere from HTML
     const delibere = parseDelibereList(html);
@@ -102,8 +113,8 @@ serve(async (req) => {
           continue;
         }
 
-        // Fetch detail page
-        const detailHtml = await fetchDetailPage(delibera.detailUrl);
+        // Fetch detail page via Firecrawl
+        const detailHtml = await fetchDetailPage(delibera.detailUrl, firecrawlKey);
         const { description, files } = parseDetailPage(detailHtml);
 
         // Download files and upload to storage
@@ -264,19 +275,25 @@ function formatDate(dateStr: string): string {
   return new Date().toISOString().split("T")[0];
 }
 
-async function fetchDetailPage(url: string): Promise<string> {
-  const response = await fetch(url, {
+async function fetchDetailPage(url: string, firecrawlKey: string): Promise<string> {
+  const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
+    method: "POST",
     headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Authorization": `Bearer ${firecrawlKey}`,
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      url: url,
+      formats: ["html"],
+    }),
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to fetch detail page: ${response.status}`);
+    throw new Error(`Failed to fetch detail page via Firecrawl: ${response.status}`);
   }
   
-  return response.text();
+  const data = await response.json();
+  return data.data?.html || "";
 }
 
 function parseDetailPage(html: string): { description: string; files: Array<{ name: string; url: string; type?: string }> } {
