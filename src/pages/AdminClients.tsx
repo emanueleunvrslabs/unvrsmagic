@@ -76,7 +76,7 @@ export default function AdminClients() {
                 Back to Clients
               </Button>
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-start">
               <ProjectDetailCard
                 project={selectedProject}
                 onClose={() => setSelectedProject(null)}
