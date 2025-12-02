@@ -70,7 +70,7 @@ export default function AdminClients() {
               <Button
                 variant="ghost"
                 onClick={() => setSelectedProject(null)}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className="gap-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 backdrop-blur-md"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Clients
