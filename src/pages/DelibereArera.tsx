@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { DeliberaCard } from "@/components/arera/DeliberaCard";
+import { useUserRole } from "@/hooks/useUserRole";
 import "@/components/labs/SocialMediaCard.css";
 
 interface DeliberaFile {
@@ -41,6 +42,9 @@ export default function DelibereArera() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const { isOwner, isAdmin } = useUserRole();
+  
+  const isAdminUser = isOwner || isAdmin;
 
   useEffect(() => {
     loadDelibere();
@@ -187,57 +191,63 @@ export default function DelibereArera() {
             <div>
               <h1 className="text-3xl font-bold">Delibere ARERA</h1>
               <p className="text-muted-foreground mt-1">
-                Gestione automatica delibere ARERA con sommari AI
+                {isAdminUser 
+                  ? "Gestione automatica delibere ARERA con sommari AI"
+                  : "Consulta le delibere ARERA con sommari AI"}
               </p>
             </div>
           </div>
-          <Button onClick={handleSync} disabled={isSyncing} className="gap-2">
-            <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-            {isSyncing ? "Sincronizzazione..." : "Sincronizza"}
-          </Button>
+          {isAdminUser && (
+            <Button onClick={handleSync} disabled={isSyncing} className="gap-2">
+              <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+              {isSyncing ? "Sincronizzazione..." : "Sincronizza"}
+            </Button>
+          )}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
-            <div className="flex items-center gap-3 p-5">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <FileText className="h-5 w-5 text-primary" />
+        {/* Stats - Admin only */}
+        {isAdminUser && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+              <div className="flex items-center gap-3 p-5">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Totale Delibere</p>
+                  <p className="text-2xl font-bold text-white">{delibere.length}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-400">Totale Delibere</p>
-                <p className="text-2xl font-bold text-white">{delibere.length}</p>
+            </div>
+            <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+              <div className="flex items-center gap-3 p-5">
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <Download className="h-5 w-5 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">File Scaricati</p>
+                  <p className="text-2xl font-bold text-white">
+                    {delibere.reduce((acc, d) => acc + (d.files?.length || 0), 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+              <div className="flex items-center gap-3 p-5">
+                <div className="p-2 rounded-lg bg-yellow-500/10">
+                  <Clock className={`h-5 w-5 text-yellow-400 ${processingCount > 0 ? 'animate-pulse' : ''}`} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">In Elaborazione</p>
+                  <p className="text-2xl font-bold text-white">{processingCount}</p>
+                </div>
               </div>
             </div>
           </div>
-          <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
-            <div className="flex items-center gap-3 p-5">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <Download className="h-5 w-5 text-green-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">File Scaricati</p>
-                <p className="text-2xl font-bold text-white">
-                  {delibere.reduce((acc, d) => acc + (d.files?.length || 0), 0)}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
-            <div className="flex items-center gap-3 p-5">
-              <div className="p-2 rounded-lg bg-yellow-500/10">
-                <Clock className={`h-5 w-5 text-yellow-400 ${processingCount > 0 ? 'animate-pulse' : ''}`} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">In Elaborazione</p>
-                <p className="text-2xl font-bold text-white">{processingCount}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
 
-        {/* Real-time Log Panel - Show when syncing or has logs */}
-        {(isSyncing || logs.length > 0) && (
+        {/* Real-time Log Panel - Admin only, show when syncing or has logs */}
+        {isAdminUser && (isSyncing || logs.length > 0) && (
           <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
             <div className="flex items-center gap-2 px-5 pt-5 pb-3">
               <Terminal className={`h-5 w-5 text-primary ${isSyncing ? 'animate-pulse' : ''}`} />
