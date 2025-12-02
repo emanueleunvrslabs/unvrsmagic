@@ -220,19 +220,21 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
 
       {/* Image Upload */}
       {needsImageUpload && (
-        <div className="flex flex-wrap gap-1">
-          {uploadedImages.map((img, i) => (
-            <div key={i} className="relative w-10 h-10">
-              <img src={img} alt="" className="w-full h-full object-cover rounded" />
-              <button onClick={() => setUploadedImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5">
-                <X className="w-2 h-2 text-white" />
-              </button>
-            </div>
-          ))}
-          <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-10 h-10 border border-dashed border-white/20 rounded flex items-center justify-center bg-white/5 hover:bg-white/10">
+        <div className="flex items-center gap-2">
+          <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-10 h-10 border border-dashed border-white/20 rounded flex items-center justify-center bg-white/5 hover:bg-white/10 flex-shrink-0">
             {isUploading ? <Loader2 className="h-3 w-3 animate-spin text-white/60" /> : <Upload className="h-3 w-3 text-white/60" />}
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" multiple={generationMode !== "reference-to-video"} onChange={handleImageUpload} className="hidden" />
+          <div className="flex flex-wrap gap-1 flex-1">
+            {uploadedImages.map((img, i) => (
+              <div key={i} className="relative w-10 h-10">
+                <img src={img} alt="" className="w-full h-full object-cover rounded" />
+                <button onClick={() => setUploadedImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5">
+                  <X className="w-2 h-2 text-white" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
