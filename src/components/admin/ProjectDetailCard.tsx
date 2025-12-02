@@ -1,8 +1,18 @@
 import "../labs/SocialMediaCard.css";
-import { GitBranch, Receipt, FileText, CheckSquare, Kanban, X, Plus } from "lucide-react";
-import { useState } from "react";
+import { GitBranch, Receipt, FileText, CheckSquare, Kanban, X, Plus, Play, Pause, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ClientWorkflowDialog } from "./ClientWorkflowDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+interface Workflow {
+  id: string;
+  name: string;
+  content_type: string;
+  active: boolean;
+  schedule_config: any;
+}
 
 interface ProjectDetailCardProps {
   project: {
@@ -16,6 +26,30 @@ interface ProjectDetailCardProps {
 export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) {
   const [activePanel, setActivePanel] = useState<string | null>(null);
   const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchWorkflows = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('client_project_workflows')
+      .select('id, name, content_type, active, schedule_config')
+      .eq('client_project_id', project.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching workflows:', error);
+    } else {
+      setWorkflows(data || []);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    if (activePanel === 'workflow') {
+      fetchWorkflows();
+    }
+  }, [activePanel, project.id]);
 
   const togglePanel = (panel: string) => {
     if (activePanel === panel) {
@@ -23,6 +57,46 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
     } else {
       setActivePanel(panel);
     }
+  };
+
+  const handleToggleActive = async (workflowId: string, currentActive: boolean) => {
+    const { error } = await supabase
+      .from('client_project_workflows')
+      .update({ active: !currentActive })
+      .eq('id', workflowId);
+
+    if (error) {
+      toast({ title: "Error updating workflow", variant: "destructive" });
+    } else {
+      fetchWorkflows();
+    }
+  };
+
+  const handleDeleteWorkflow = async (workflowId: string) => {
+    const { error } = await supabase
+      .from('client_project_workflows')
+      .delete()
+      .eq('id', workflowId);
+
+    if (error) {
+      toast({ title: "Error deleting workflow", variant: "destructive" });
+    } else {
+      toast({ title: "Workflow deleted" });
+      fetchWorkflows();
+    }
+  };
+
+  const getModeLabel = (config: any) => {
+    const mode = config?.mode || config?.generationMode;
+    const labels: Record<string, string> = {
+      'text-to-image': 'Text to Image',
+      'image-to-image': 'Image to Image',
+      'text-to-video': 'Text to Video',
+      'image-to-video': 'Image to Video',
+      'reference-to-video': 'Reference to Video',
+      'first-last-frame': 'First/Last Frame'
+    };
+    return labels[mode] || mode || 'Unknown';
   };
 
   return (
@@ -128,9 +202,54 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                 <div className="flex flex-col gap-4 w-full">
                   <div className="card-heading text-lg">Workflow</div>
                   <p className="text-xs text-white/60">Manage project workflows and automation.</p>
-                  <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-xs text-white/70">No workflows configured yet</span>
-                  </div>
+                  
+                  {isLoading ? (
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <span className="text-xs text-white/70">Loading...</span>
+                    </div>
+                  ) : workflows.length === 0 ? (
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <span className="text-xs text-white/70">No workflows configured yet</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
+                      {workflows.map((workflow) => (
+                        <div 
+                          key={workflow.id}
+                          className="p-3 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between gap-2"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm text-white/90 truncate">{workflow.name}</div>
+                            <div className="flex gap-1 mt-1">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary/80 border border-primary/30">
+                                {workflow.content_type}
+                              </span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60 border border-white/20">
+                                {getModeLabel(workflow.schedule_config)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleToggleActive(workflow.id, workflow.active)}
+                              className={`p-1.5 rounded ${workflow.active ? 'text-green-400 hover:bg-green-400/10' : 'text-white/40 hover:bg-white/10'}`}
+                              title={workflow.active ? 'Pause' : 'Activate'}
+                            >
+                              {workflow.active ? <Pause size={14} /> : <Play size={14} />}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteWorkflow(workflow.id)}
+                              className="p-1.5 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10"
+                              title="Delete"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
                   <Button
                     onClick={() => setIsWorkflowDialogOpen(true)}
                     className="bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 w-full"
@@ -191,6 +310,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
       onOpenChange={setIsWorkflowDialogOpen}
       projectId={project.id}
       projectName={project.project_name}
+      onWorkflowCreated={fetchWorkflows}
     />
   </>
   );
