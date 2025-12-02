@@ -2,7 +2,7 @@ import "../labs/SocialMediaCard.css";
 import { GitBranch, Receipt, FileText, CheckSquare, Kanban, X, Plus, Play, Pause, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ClientWorkflowDialog } from "./ClientWorkflowDialog";
+import { WorkflowInlineForm } from "./WorkflowInlineForm";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -25,7 +25,7 @@ interface ProjectDetailCardProps {
 
 export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) {
   const [activePanel, setActivePanel] = useState<string | null>(null);
-  const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
+  const [isCreatingWorkflow, setIsCreatingWorkflow] = useState(false);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -201,75 +201,88 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
             <div className="card-main-content !justify-start !pt-12 h-full" style={{ width: '28em' }}>
               {activePanel === 'workflow' && (
                 <div className="flex flex-col gap-4 w-full h-full">
-                  <div className="flex-1">
-                    <div className="card-heading text-lg">Workflow</div>
-                    <p className="text-xs text-white/60 mt-2">Manage project workflows and automation.</p>
-                    
-                    <div className="mt-4">
-                      {isLoading ? (
-                        <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                          <span className="text-xs text-white/70">Loading...</span>
-                        </div>
-                      ) : workflows.length === 0 ? (
-                        <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                          <span className="text-xs text-white/70">No workflows configured yet</span>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
-                          {workflows.map((workflow) => (
-                            <div 
-                              key={workflow.id}
-                              className="p-3 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between gap-2"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <div className="text-sm text-white/90 truncate">{workflow.name}</div>
-                                <div className="flex gap-1 mt-1">
-                              <span className="text-[10px] px-2 py-0.5 rounded-xl bg-primary/20 text-primary/80 border border-primary/30">
-                                {workflow.content_type}
-                              </span>
-                              {getModeLabel(workflow.schedule_config) && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-xl bg-white/10 text-white/60 border border-white/20">
-                                  {getModeLabel(workflow.schedule_config)}
-                                </span>
-                              )}
-                                </div>
-                              </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => console.log('Run workflow:', workflow.id)}
-                              className="px-2.5 py-1 text-[10px] rounded-xl bg-primary/20 text-primary/80 border border-primary/30 hover:bg-primary/30 transition-colors"
-                            >
-                              Run Now
-                            </button>
-                            <button
-                              onClick={() => handleToggleActive(workflow.id, workflow.active)}
-                              className={`p-1.5 rounded transition-colors ${workflow.active ? 'text-green-400 hover:bg-green-400/10' : 'text-white/40 hover:bg-white/10'}`}
-                              title={workflow.active ? 'Pause scheduling' : 'Activate scheduling'}
-                            >
-                              {workflow.active ? <Pause size={14} /> : <Play size={14} />}
-                            </button>
-                            <button
-                              onClick={() => handleDeleteWorkflow(workflow.id)}
-                              className="p-1.5 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10 transition-colors"
-                              title="Delete workflow"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
+                  {isCreatingWorkflow ? (
+                    <WorkflowInlineForm
+                      projectId={project.id}
+                      onCancel={() => setIsCreatingWorkflow(false)}
+                      onWorkflowCreated={() => {
+                        setIsCreatingWorkflow(false);
+                        fetchWorkflows();
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <div className="flex-1">
+                        <div className="card-heading text-lg">Workflow</div>
+                        <p className="text-xs text-white/60 mt-2">Manage project workflows and automation.</p>
+                        
+                        <div className="mt-4">
+                          {isLoading ? (
+                            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                              <span className="text-xs text-white/70">Loading...</span>
                             </div>
-                          ))}
+                          ) : workflows.length === 0 ? (
+                            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                              <span className="text-xs text-white/70">No workflows configured yet</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
+                              {workflows.map((workflow) => (
+                                <div 
+                                  key={workflow.id}
+                                  className="p-3 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between gap-2"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm text-white/90 truncate">{workflow.name}</div>
+                                    <div className="flex gap-1 mt-1">
+                                      <span className="text-[10px] px-2 py-0.5 rounded-xl bg-primary/20 text-primary/80 border border-primary/30">
+                                        {workflow.content_type}
+                                      </span>
+                                      {getModeLabel(workflow.schedule_config) && (
+                                        <span className="text-[10px] px-2 py-0.5 rounded-xl bg-white/10 text-white/60 border border-white/20">
+                                          {getModeLabel(workflow.schedule_config)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => console.log('Run workflow:', workflow.id)}
+                                      className="px-2.5 py-1 text-[10px] rounded-xl bg-primary/20 text-primary/80 border border-primary/30 hover:bg-primary/30 transition-colors"
+                                    >
+                                      Run Now
+                                    </button>
+                                    <button
+                                      onClick={() => handleToggleActive(workflow.id, workflow.active)}
+                                      className={`p-1.5 rounded transition-colors ${workflow.active ? 'text-green-400 hover:bg-green-400/10' : 'text-white/40 hover:bg-white/10'}`}
+                                      title={workflow.active ? 'Pause scheduling' : 'Activate scheduling'}
+                                    >
+                                      {workflow.active ? <Pause size={14} /> : <Play size={14} />}
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteWorkflow(workflow.id)}
+                                      className="p-1.5 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                                      title="Delete workflow"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <Button
-                    onClick={() => setIsWorkflowDialogOpen(true)}
-                    className="bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 w-full mt-auto"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Workflow
-                  </Button>
+                      </div>
+                      
+                      <Button
+                        onClick={() => setIsCreatingWorkflow(true)}
+                        className="bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 w-full mt-auto"
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Workflow
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
               
@@ -317,14 +330,6 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
         </div>
       )}
     </div>
-    
-    <ClientWorkflowDialog
-      open={isWorkflowDialogOpen}
-      onOpenChange={setIsWorkflowDialogOpen}
-      projectId={project.id}
-      projectName={project.project_name}
-      onWorkflowCreated={fetchWorkflows}
-    />
   </>
   );
 }
