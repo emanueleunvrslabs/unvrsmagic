@@ -19,7 +19,16 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Starting ARERA scraper...");
+    // Parse request body for action
+    let action = "sync";
+    try {
+      const body = await req.json();
+      action = body.action || "sync";
+    } catch {
+      // No body or invalid JSON, default to sync
+    }
+
+    console.log(`Starting ARERA scraper with action: ${action}`);
 
     // Get owner's API keys (Anthropic for summarization, Firecrawl for scraping)
     const { data: ownerRole } = await supabase
@@ -43,6 +52,11 @@ serve(async (req) => {
 
     if (!anthropicKey) {
       throw new Error("Anthropic API key not configured");
+    }
+
+    // Handle recategorize action
+    if (action === "recategorize") {
+      return await handleRecategorize(supabase, anthropicKey);
     }
 
     if (!firecrawlKey) {
@@ -428,5 +442,123 @@ SOMMARIO:
   } catch (error) {
     console.error("Summary/category generation error:", error);
     return { summary: "", category: "generale" };
+  }
+}
+
+// Handle recategorization of existing deliberations
+async function handleRecategorize(supabase: any, anthropicKey: string): Promise<Response> {
+  console.log("Starting recategorization of existing deliberations...");
+  
+  // Get all deliberations that need categorization (either null category or 'generale')
+  const { data: delibere, error } = await supabase
+    .from("arera_delibere")
+    .select("id, delibera_code, title, description, summary")
+    .or("category.is.null,category.eq.generale")
+    .eq("status", "completed");
+  
+  if (error) {
+    console.error("Error fetching deliberations:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to fetch deliberations" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+  
+  console.log(`Found ${delibere?.length || 0} deliberations to recategorize`);
+  
+  let updated = 0;
+  const results: Array<{ code: string; category: string; status: string }> = [];
+  
+  for (const delibera of (delibere || [])) {
+    try {
+      // Use title and description to detect category
+      const content = `${delibera.title}\n\n${delibera.description || delibera.summary || ""}`;
+      
+      const category = await detectCategory(anthropicKey, delibera.title, content);
+      
+      // Update the deliberation with the detected category
+      const { error: updateError } = await supabase
+        .from("arera_delibere")
+        .update({ category })
+        .eq("id", delibera.id);
+      
+      if (!updateError) {
+        updated++;
+        results.push({ code: delibera.delibera_code, category, status: "success" });
+        console.log(`Updated ${delibera.delibera_code}: category = ${category}`);
+      } else {
+        results.push({ code: delibera.delibera_code, category: "error", status: "failed" });
+      }
+      
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 500));
+      
+    } catch (error) {
+      console.error(`Error recategorizing ${delibera.delibera_code}:`, error);
+      results.push({ code: delibera.delibera_code, category: "error", status: "failed" });
+    }
+  }
+  
+  return new Response(
+    JSON.stringify({
+      success: true,
+      total: delibere?.length || 0,
+      updated,
+      results,
+    }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+
+// Detect category only (without generating summary)
+async function detectCategory(apiKey: string, title: string, content: string): Promise<string> {
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 100,
+        messages: [
+          {
+            role: "user",
+            content: `Sei un esperto di regolamentazione energetica italiana. Analizza questa delibera ARERA e determina la categoria principale.
+
+Categorie disponibili:
+- elettricita: Regolazione, distribuzione, trasmissione, tariffe, continuità del servizio elettrico
+- gas: Norme, regolamentazioni e tariffe gas naturale, distribuzione, rete, concessioni
+- acqua: Servizio idrico integrato, tariffe qualità servizio idrico
+- rifiuti: Gestione rifiuti urbani, tariffazione, qualità servizio, ciclo rifiuti
+- teleriscaldamento: Riscaldamento a rete e sue regolamentazioni
+- generale: Aspetti interni ARERA, regolamenti generali, organizzazione, bilancio, procedure trasversali
+
+Titolo: ${title}
+
+Contenuto: ${content.slice(0, 2000)}
+
+Rispondi con UNA SOLA PAROLA: il nome della categoria (elettricita, gas, acqua, rifiuti, teleriscaldamento, o generale).`,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Anthropic API error:", await response.text());
+      return "generale";
+    }
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text?.toLowerCase().trim() || "generale";
+    
+    // Validate category
+    const validCategories = ["elettricita", "gas", "acqua", "rifiuti", "teleriscaldamento", "generale"];
+    return validCategories.includes(text) ? text : "generale";
+  } catch (error) {
+    console.error("Category detection error:", error);
+    return "generale";
   }
 }
