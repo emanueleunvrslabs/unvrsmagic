@@ -590,6 +590,17 @@ Rispondi con UNA SOLA PAROLA: il nome della categoria (elettricita, gas, acqua, 
   }
 }
 
+// Helper to safely convert ArrayBuffer to base64 without exceeding call stack
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
 // Send email notifications to users based on their category preferences
 async function sendEmailNotifications(
   supabase: any, 
@@ -701,7 +712,7 @@ async function sendEmailNotifications(
               continue;
             }
             const buffer = await resp.arrayBuffer();
-            const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+            const base64 = arrayBufferToBase64(buffer);
             attachments.push({
               filename: file.name || `${d.delibera_code}.pdf`,
               content: base64,
