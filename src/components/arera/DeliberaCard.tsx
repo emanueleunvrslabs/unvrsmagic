@@ -118,7 +118,7 @@ export function DeliberaCard({ delibera }: DeliberaCardProps) {
             {delibera.files.map((file, index) => (
               <a
                 key={index}
-                href={file.originalUrl || file.url}
+                href={file.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
