@@ -91,7 +91,7 @@ serve(async (req) => {
 
     const results = [];
 
-    for (const delibera of newDelibere.slice(0, 10)) { // Process max 10 at a time
+    for (const delibera of newDelibere) { // Process all new delibere
       try {
         console.log(`Processing: ${delibera.code}`);
 
