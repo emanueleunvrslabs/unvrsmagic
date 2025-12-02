@@ -6,7 +6,6 @@ import { WhatsAppChatModal } from "./WhatsAppChatModal";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
-import { ProjectDetailCard } from "./ProjectDetailCard";
 
 interface Client {
   id: string;
@@ -30,6 +29,7 @@ interface ClientCardProps {
   }>;
   onCancel?: () => void;
   onClientCreated?: () => void;
+  onProjectSelect?: (project: { id: string; project_name: string; description?: string }) => void;
 }
 
 const contactSchema = z.object({
@@ -42,7 +42,7 @@ const projectSchema = z.object({
   projectName: z.string().trim().min(1, "Project name is required").max(200),
 });
 
-export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [], onCancel, onClientCreated }: ClientCardProps) {
+export function ClientCard({ client, onEdit, onContactAdded, clientProjects = [], onCancel, onClientCreated, onProjectSelect }: ClientCardProps) {
   const { toast } = useToast();
   const isCreationMode = client === null;
   const [isOpen, setIsOpen] = useState(false);
@@ -88,11 +88,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
   const [editProject, setEditProject] = useState({
     projectName: ""
   });
-  const [selectedProject, setSelectedProject] = useState<{
-    id: string;
-    project_name: string;
-    description?: string;
-  } | null>(null);
 
   const handleAutoSaveContact = async () => {
     if (!newContact.name.trim() || !newContact.email.trim() || !newContact.whatsappNumber.trim()) {
@@ -869,7 +864,9 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                             className="contact-name-card text-left flex-1 hover:text-primary transition-colors cursor-pointer bg-transparent border-none"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedProject(project);
+                              if (onProjectSelect) {
+                                onProjectSelect(project);
+                              }
                               setProjectsOpen(false);
                             }}
                           >
@@ -995,13 +992,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
             contactId={selectedContact.id}
           />
         </>
-      )}
-
-      {selectedProject && (
-        <ProjectDetailCard
-          project={selectedProject}
-          onClose={() => setSelectedProject(null)}
-        />
       )}
     </>
   );
