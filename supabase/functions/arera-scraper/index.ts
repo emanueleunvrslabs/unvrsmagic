@@ -316,25 +316,44 @@ function parseDetailPage(html: string): { description: string; files: Array<{ na
   return { description, files };
 }
 
-async function downloadFile(url: string): Promise<Uint8Array | null> {
-  try {
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-    });
-    
-    if (!response.ok) {
-      console.error(`Failed to download file: ${response.status}`);
+async function downloadFile(url: string, retries = 2): Promise<Uint8Array | null> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "application/pdf,*/*",
+          "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        console.error(`Failed to download file (attempt ${attempt + 1}): ${response.status}`);
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); // Backoff
+          continue;
+        }
+        return null;
+      }
+      
+      const arrayBuffer = await response.arrayBuffer();
+      return new Uint8Array(arrayBuffer);
+    } catch (error) {
+      console.error(`Download error (attempt ${attempt + 1}):`, error);
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); // Backoff
+        continue;
+      }
       return null;
     }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    return new Uint8Array(arrayBuffer);
-  } catch (error) {
-    console.error("Download error:", error);
-    return null;
   }
+  return null;
 }
 
 async function generateSummary(apiKey: string, title: string, description: string): Promise<string> {
