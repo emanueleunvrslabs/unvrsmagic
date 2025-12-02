@@ -221,25 +221,25 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
 
       {/* Image Upload */}
       {needsImageUpload && (
-        <div className="flex items-center gap-2">
-          <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-10 h-10 border border-dashed border-white/20 rounded flex items-center justify-center bg-white/5 hover:bg-white/10 flex-shrink-0">
-            {isUploading ? <Loader2 className="h-3 w-3 animate-spin text-white/60" /> : <Upload className="h-3 w-3 text-white/60" />}
+        <div className="flex items-center gap-3">
+          <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-16 h-16 border border-dashed border-white/20 rounded-lg flex items-center justify-center bg-white/5 hover:bg-white/10 flex-shrink-0">
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin text-white/60" /> : <Upload className="h-4 w-4 text-white/60" />}
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" multiple={generationMode !== "reference-to-video"} onChange={handleImageUpload} className="hidden" />
-          <div className="flex flex-wrap gap-1 flex-1">
+          <div className="flex flex-wrap gap-2 flex-1">
             {uploadedImages.map((img, i) => (
-              <div key={i} className="relative w-10 h-10 group">
+              <div key={i} className="relative w-16 h-16 group">
                 <img 
                   src={img} 
                   alt="" 
-                  className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                  className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" 
                   onClick={() => setPreviewImage(img)}
                 />
                 <button 
                   onClick={(e) => { e.stopPropagation(); setUploadedImages(prev => prev.filter((_, idx) => idx !== i)); }} 
                   className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5"
                 >
-                  <X className="w-2 h-2 text-white" />
+                  <X className="w-3 h-3 text-white" />
                 </button>
               </div>
             ))}
@@ -249,41 +249,41 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
 
       {/* First/Last Frame */}
       {needsFirstLastFrame && (
-        <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] text-white/60">First:</span>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs text-white/60">First:</span>
             {firstFrameImage ? (
-              <div className="relative w-8 h-8">
+              <div className="relative w-16 h-16">
                 <img 
                   src={firstFrameImage} 
                   alt="" 
-                  className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                  className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" 
                   onClick={() => setPreviewImage(firstFrameImage)}
                 />
-                <button onClick={() => setFirstFrameImage("")} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5"><X className="w-2 h-2 text-white" /></button>
+                <button onClick={() => setFirstFrameImage("")} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5"><X className="w-3 h-3 text-white" /></button>
               </div>
             ) : (
-              <button onClick={() => firstFrameInputRef.current?.click()} className="w-8 h-8 border border-dashed border-white/20 rounded flex items-center justify-center bg-white/5">
-                <Upload className="h-2 w-2 text-white/60" />
+              <button onClick={() => firstFrameInputRef.current?.click()} className="w-16 h-16 border border-dashed border-white/20 rounded-lg flex items-center justify-center bg-white/5 hover:bg-white/10">
+                <Upload className="h-4 w-4 text-white/60" />
               </button>
             )}
             <input ref={firstFrameInputRef} type="file" accept="image/*" onChange={(e) => handleFrameUpload(e, 'first')} className="hidden" />
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] text-white/60">Last:</span>
+          <div className="flex flex-col gap-2">
+            <span className="text-xs text-white/60">Last:</span>
             {lastFrameImage ? (
-              <div className="relative w-8 h-8">
+              <div className="relative w-16 h-16">
                 <img 
                   src={lastFrameImage} 
                   alt="" 
-                  className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                  className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" 
                   onClick={() => setPreviewImage(lastFrameImage)}
                 />
-                <button onClick={() => setLastFrameImage("")} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5"><X className="w-2 h-2 text-white" /></button>
+                <button onClick={() => setLastFrameImage("")} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5"><X className="w-3 h-3 text-white" /></button>
               </div>
             ) : (
-              <button onClick={() => lastFrameInputRef.current?.click()} className="w-8 h-8 border border-dashed border-white/20 rounded flex items-center justify-center bg-white/5">
-                <Upload className="h-2 w-2 text-white/60" />
+              <button onClick={() => lastFrameInputRef.current?.click()} className="w-16 h-16 border border-dashed border-white/20 rounded-lg flex items-center justify-center bg-white/5 hover:bg-white/10">
+                <Upload className="h-4 w-4 text-white/60" />
               </button>
             )}
             <input ref={lastFrameInputRef} type="file" accept="image/*" onChange={(e) => handleFrameUpload(e, 'last')} className="hidden" />
