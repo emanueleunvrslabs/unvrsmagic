@@ -92,45 +92,73 @@ serve(async (req) => {
     const delibere = parseDelibereList(html);
     console.log(`Found ${delibere.length} delibere`);
 
-    // Get existing delibere codes
+    // Get existing delibere codes and statuses
     const { data: existingDelibere } = await supabase
       .from("arera_delibere")
-      .select("delibera_code");
+      .select("id, delibera_code, status, error_message");
 
-    const existingCodes = new Set(existingDelibere?.map((d) => d.delibera_code) || []);
+    const existingMap = new Map(
+      (existingDelibere || []).map((d: any) => [d.delibera_code, d])
+    );
 
-    // Filter new delibere
-    const newDelibere = delibere.filter((d) => !existingCodes.has(d.code));
-    console.log(`New delibere to process: ${newDelibere.length}`);
+    // Filter delibere to process:
+    // - new codes (not in DB)
+    // - codes that previously failed with status = 'error' (auto retry)
+    const newDelibere = delibere.filter((d) => {
+      const existing = existingMap.get(d.code);
+      return !existing || existing.status === "error";
+    });
+
+    console.log(`Delibere to process (new + retry): ${newDelibere.length}`);
 
     const results = [];
 
-    for (const delibera of newDelibere) { // Process all new delibere
+    for (const delibera of newDelibere) { // Process all new or failed delibere
       let insertedRecord: any = null;
 
       try {
         console.log(`Processing: ${delibera.code}`);
 
-        // Insert initial record
-        const { data: inserted, error: insertError } = await supabase
-          .from("arera_delibere")
-          .insert({
-            user_id: ownerRole.user_id,
-            delibera_code: delibera.code,
-            publication_date: delibera.date,
-            title: delibera.title,
-            detail_url: delibera.detailUrl,
-            status: "processing",
-          })
-          .select()
-          .single();
+        const existing = existingMap.get(delibera.code);
 
-        if (insertError) {
-          console.error(`Insert error for ${delibera.code}:`, insertError);
-          continue;
+        if (existing && existing.status === "error") {
+          // Retry a previously failed deliberation: reset status and error, reuse same row
+          const { error: resetError } = await supabase
+            .from("arera_delibere")
+            .update({
+              status: "processing",
+              error_message: null,
+            })
+            .eq("id", existing.id);
+
+          if (resetError) {
+            console.error(`Error resetting status for ${delibera.code}:`, resetError);
+            continue;
+          }
+
+          insertedRecord = existing;
+        } else {
+          // Insert initial record for a brand new deliberation
+          const { data: inserted, error: insertError } = await supabase
+            .from("arera_delibere")
+            .insert({
+              user_id: ownerRole.user_id,
+              delibera_code: delibera.code,
+              publication_date: delibera.date,
+              title: delibera.title,
+              detail_url: delibera.detailUrl,
+              status: "processing",
+            })
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error(`Insert error for ${delibera.code}:`, insertError);
+            continue;
+          }
+
+          insertedRecord = inserted;
         }
-
-        insertedRecord = inserted;
 
         // Fetch detail page via Firecrawl
         const detailHtml = await fetchDetailPage(delibera.detailUrl, firecrawlKey);
