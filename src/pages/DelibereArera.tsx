@@ -1,8 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { FileText, RefreshCw, Download, Clock, Terminal } from "lucide-react";
+import { FileText, RefreshCw, Download, Clock, Terminal, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -43,8 +53,29 @@ export default function DelibereArera() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const { isOwner, isAdmin } = useUserRole();
+  const [isAutoSendModalOpen, setIsAutoSendModalOpen] = useState(false);
+  const [autoSendEmail, setAutoSendEmail] = useState("");
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
   
   const isAdminUser = isOwner || isAdmin;
+
+  const handleSaveAutoSendEmail = async () => {
+    if (!autoSendEmail || !autoSendEmail.includes("@")) {
+      toast.error("Inserisci un indirizzo email valido");
+      return;
+    }
+    
+    setIsSavingEmail(true);
+    try {
+      // TODO: Save email to database
+      toast.success(`Email configurata: ${autoSendEmail}`);
+      setIsAutoSendModalOpen(false);
+    } catch (error) {
+      toast.error("Errore nel salvataggio dell'email");
+    } finally {
+      setIsSavingEmail(false);
+    }
+  };
 
   useEffect(() => {
     loadDelibere();
@@ -198,7 +229,8 @@ export default function DelibereArera() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setIsAutoSendModalOpen(true)} className="gap-2">
+              <Mail className="h-4 w-4" />
               Invio automatico
             </Button>
             {isAdminUser && (
@@ -308,6 +340,38 @@ export default function DelibereArera() {
           )}
         </div>
       </div>
+
+      {/* Modal Invio Automatico */}
+      <Dialog open={isAutoSendModalOpen} onOpenChange={setIsAutoSendModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invio automatico delibere</DialogTitle>
+            <DialogDescription>
+              Inserisci l'indirizzo email dove vuoi ricevere automaticamente le nuove delibere ARERA.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="esempio@email.com"
+                value={autoSendEmail}
+                onChange={(e) => setAutoSendEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAutoSendModalOpen(false)}>
+              Annulla
+            </Button>
+            <Button onClick={handleSaveAutoSendEmail} disabled={isSavingEmail}>
+              {isSavingEmail ? "Salvataggio..." : "Salva"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
