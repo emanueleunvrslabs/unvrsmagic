@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { DashboardLayout } from "@/components/dashboard-layout";
 import {
   AlertCircle,
   CheckCircle2,
@@ -310,7 +311,8 @@ const DelibereAreraPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <DashboardLayout>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
@@ -533,6 +535,7 @@ const DelibereAreraPage = () => {
         </DialogContent>
       </Dialog>
     </div>
+  </DashboardLayout>
   );
 };
 
