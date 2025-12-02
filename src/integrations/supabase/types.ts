@@ -654,6 +654,7 @@ export type Database = {
       }
       arera_delibere: {
         Row: {
+          category: string | null
           created_at: string
           delibera_code: string
           description: string | null
@@ -669,6 +670,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           delibera_code: string
           description?: string | null
@@ -684,6 +686,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           delibera_code?: string
           description?: string | null

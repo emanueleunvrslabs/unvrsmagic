@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,15 @@ import { it } from "date-fns/locale";
 import { DeliberaCard } from "@/components/arera/DeliberaCard";
 import { useUserRole } from "@/hooks/useUserRole";
 import "@/components/labs/SocialMediaCard.css";
+
+const DELIBERA_CATEGORIES = [
+  { id: 'elettricita', label: 'Elettricità', description: 'Regolazione, distribuzione, trasmissione, tariffe energia elettrica' },
+  { id: 'gas', label: 'Gas', description: 'Norme, regolamentazioni e tariffe gas naturale' },
+  { id: 'acqua', label: 'Acqua', description: 'Servizio idrico integrato, tariffe, qualità' },
+  { id: 'rifiuti', label: 'Rifiuti', description: 'Gestione rifiuti urbani, tariffazione, qualità servizio' },
+  { id: 'teleriscaldamento', label: 'Teleriscaldamento', description: 'Riscaldamento a rete e regolamentazioni' },
+  { id: 'generale', label: 'Generale', description: 'Aspetti amministrativi, organizzazione, regolamenti generali' },
+] as const;
 
 interface DeliberaFile {
   name: string;
@@ -38,6 +48,7 @@ interface Delibera {
   files: DeliberaFile[];
   status: string;
   created_at: string;
+  category?: string;
 }
 
 interface LogEntry {
@@ -56,6 +67,7 @@ export default function DelibereArera() {
   const [isAutoSendModalOpen, setIsAutoSendModalOpen] = useState(false);
   const [autoSendEmail, setAutoSendEmail] = useState("");
   const [isSavingEmail, setIsSavingEmail] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   
   const isAdminUser = isOwner || isAdmin;
 
@@ -65,15 +77,36 @@ export default function DelibereArera() {
       return;
     }
     
+    if (selectedCategories.length === 0) {
+      toast.error("Seleziona almeno una categoria");
+      return;
+    }
+    
     setIsSavingEmail(true);
     try {
-      // TODO: Save email to database
-      toast.success(`Email configurata: ${autoSendEmail}`);
+      // TODO: Save email and categories to database
+      toast.success(`Email configurata: ${autoSendEmail} per ${selectedCategories.length} categorie`);
       setIsAutoSendModalOpen(false);
     } catch (error) {
       toast.error("Errore nel salvataggio dell'email");
     } finally {
       setIsSavingEmail(false);
+    }
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const toggleAllCategories = () => {
+    if (selectedCategories.length === DELIBERA_CATEGORIES.length) {
+      setSelectedCategories([]);
+    } else {
+      setSelectedCategories(DELIBERA_CATEGORIES.map(c => c.id));
     }
   };
 
@@ -343,14 +376,14 @@ export default function DelibereArera() {
 
       {/* Modal Invio Automatico */}
       <Dialog open={isAutoSendModalOpen} onOpenChange={setIsAutoSendModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Invio automatico delibere</DialogTitle>
             <DialogDescription>
-              Inserisci l'indirizzo email dove vuoi ricevere automaticamente le nuove delibere ARERA.
+              Inserisci l'email e seleziona le categorie di delibere che vuoi ricevere automaticamente.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-5 py-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -360,6 +393,46 @@ export default function DelibereArera() {
                 value={autoSendEmail}
                 onChange={(e) => setAutoSendEmail(e.target.value)}
               />
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Categorie</Label>
+                <button
+                  type="button"
+                  onClick={toggleAllCategories}
+                  className="text-xs text-primary hover:underline"
+                >
+                  {selectedCategories.length === DELIBERA_CATEGORIES.length ? 'Deseleziona tutte' : 'Seleziona tutte'}
+                </button>
+              </div>
+              <div className="space-y-2 rounded-lg border border-border/50 p-3 bg-background/50">
+                {DELIBERA_CATEGORIES.map((category) => (
+                  <div 
+                    key={category.id} 
+                    className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => toggleCategory(category.id)}
+                  >
+                    <Checkbox
+                      id={category.id}
+                      checked={selectedCategories.includes(category.id)}
+                      onCheckedChange={() => toggleCategory(category.id)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor={category.id} className="text-sm font-medium cursor-pointer">
+                        {category.label}
+                      </label>
+                      <p className="text-xs text-muted-foreground">{category.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {selectedCategories.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {selectedCategories.length} categorie selezionate
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>

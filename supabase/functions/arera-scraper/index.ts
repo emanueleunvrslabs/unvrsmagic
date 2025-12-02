@@ -152,10 +152,13 @@ serve(async (req) => {
           }
         }
 
-        // Generate summary with Anthropic
+        // Generate summary and detect category with Anthropic
         let summary = "";
+        let category = "generale";
         if (description) {
-          summary = await generateSummary(anthropicKey, delibera.title, description);
+          const aiResult = await generateSummaryAndCategory(anthropicKey, delibera.title, description);
+          summary = aiResult.summary;
+          category = aiResult.category;
         }
 
         // Update record
@@ -164,6 +167,7 @@ serve(async (req) => {
           .update({
             description,
             summary,
+            category,
             files: uploadedFiles,
             status: "completed",
           })
@@ -356,7 +360,7 @@ async function downloadFile(url: string, retries = 2): Promise<Uint8Array | null
   return null;
 }
 
-async function generateSummary(apiKey: string, title: string, description: string): Promise<string> {
+async function generateSummaryAndCategory(apiKey: string, title: string, description: string): Promise<{ summary: string; category: string }> {
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -367,17 +371,32 @@ async function generateSummary(apiKey: string, title: string, description: strin
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 500,
+        max_tokens: 600,
         messages: [
           {
             role: "user",
-            content: `Sei un esperto di regolamentazione energetica italiana. Analizza questa delibera ARERA e crea un sommario in esattamente 3 bullet points concisi in italiano.
+            content: `Sei un esperto di regolamentazione energetica italiana. Analizza questa delibera ARERA.
+
+COMPITO 1 - CATEGORIA: Determina la categoria principale tra queste opzioni:
+- elettricita: Regolazione, distribuzione, trasmissione, tariffe, continuità del servizio elettrico
+- gas: Norme, regolamentazioni e tariffe gas naturale, distribuzione, rete, concessioni
+- acqua: Servizio idrico integrato, tariffe qualità servizio idrico
+- rifiuti: Gestione rifiuti urbani, tariffazione, qualità servizio, ciclo rifiuti
+- teleriscaldamento: Riscaldamento a rete e sue regolamentazioni
+- generale: Aspetti interni ARERA, regolamenti generali, organizzazione, bilancio, procedure trasversali
+
+COMPITO 2 - SOMMARIO: Crea un sommario in esattamente 3 bullet points concisi in italiano.
 
 Titolo: ${title}
 
 Contenuto: ${description.slice(0, 3000)}
 
-Rispondi SOLO con i 3 bullet points, senza introduzioni o conclusioni. Ogni bullet point deve iniziare con "• " e essere su una riga separata.`,
+Rispondi in questo formato esatto:
+CATEGORIA: [nome_categoria]
+SOMMARIO:
+• [bullet 1]
+• [bullet 2]
+• [bullet 3]`,
           },
         ],
       }),
@@ -385,13 +404,29 @@ Rispondi SOLO con i 3 bullet points, senza introduzioni o conclusioni. Ogni bull
 
     if (!response.ok) {
       console.error("Anthropic API error:", await response.text());
-      return "";
+      return { summary: "", category: "generale" };
     }
 
     const data = await response.json();
-    return data.content?.[0]?.text || "";
+    const text = data.content?.[0]?.text || "";
+    
+    // Parse response
+    const categoryMatch = text.match(/CATEGORIA:\s*(\w+)/i);
+    const category = categoryMatch ? categoryMatch[1].toLowerCase() : "generale";
+    
+    // Validate category
+    const validCategories = ["elettricita", "gas", "acqua", "rifiuti", "teleriscaldamento", "generale"];
+    const finalCategory = validCategories.includes(category) ? category : "generale";
+    
+    // Extract summary (everything after "SOMMARIO:")
+    const summaryMatch = text.match(/SOMMARIO:\s*([\s\S]*)/i);
+    const summary = summaryMatch ? summaryMatch[1].trim() : "";
+    
+    console.log(`Category detected: ${finalCategory} for delibera: ${title.slice(0, 50)}`);
+    
+    return { summary, category: finalCategory };
   } catch (error) {
-    console.error("Summary generation error:", error);
-    return "";
+    console.error("Summary/category generation error:", error);
+    return { summary: "", category: "generale" };
   }
 }
