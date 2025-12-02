@@ -393,22 +393,22 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
       {/* Image Preview Modal */}
       {previewImage && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
           onClick={() => setPreviewImage(null)}
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         >
-          <div className="relative max-w-[90vw] max-h-[90vh]">
-            <img 
-              src={previewImage} 
-              alt="Preview" 
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
-            />
-            <button 
-              onClick={() => setPreviewImage(null)}
-              className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <img 
+            src={previewImage} 
+            alt="Preview" 
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button 
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
       )}
     </div>
