@@ -32,6 +32,7 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [firstFrameImage, setFirstFrameImage] = useState("");
   const [lastFrameImage, setLastFrameImage] = useState("");
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const firstFrameInputRef = useRef<HTMLInputElement>(null);
   const lastFrameInputRef = useRef<HTMLInputElement>(null);
@@ -227,9 +228,17 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
           <input ref={fileInputRef} type="file" accept="image/*" multiple={generationMode !== "reference-to-video"} onChange={handleImageUpload} className="hidden" />
           <div className="flex flex-wrap gap-1 flex-1">
             {uploadedImages.map((img, i) => (
-              <div key={i} className="relative w-10 h-10">
-                <img src={img} alt="" className="w-full h-full object-cover rounded" />
-                <button onClick={() => setUploadedImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5">
+              <div key={i} className="relative w-10 h-10 group">
+                <img 
+                  src={img} 
+                  alt="" 
+                  className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                  onClick={() => setPreviewImage(img)}
+                />
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setUploadedImages(prev => prev.filter((_, idx) => idx !== i)); }} 
+                  className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5"
+                >
                   <X className="w-2 h-2 text-white" />
                 </button>
               </div>
@@ -245,7 +254,12 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
             <span className="text-[10px] text-white/60">First:</span>
             {firstFrameImage ? (
               <div className="relative w-8 h-8">
-                <img src={firstFrameImage} alt="" className="w-full h-full object-cover rounded" />
+                <img 
+                  src={firstFrameImage} 
+                  alt="" 
+                  className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                  onClick={() => setPreviewImage(firstFrameImage)}
+                />
                 <button onClick={() => setFirstFrameImage("")} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5"><X className="w-2 h-2 text-white" /></button>
               </div>
             ) : (
@@ -259,7 +273,12 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
             <span className="text-[10px] text-white/60">Last:</span>
             {lastFrameImage ? (
               <div className="relative w-8 h-8">
-                <img src={lastFrameImage} alt="" className="w-full h-full object-cover rounded" />
+                <img 
+                  src={lastFrameImage} 
+                  alt="" 
+                  className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                  onClick={() => setPreviewImage(lastFrameImage)}
+                />
                 <button onClick={() => setLastFrameImage("")} className="absolute -top-1 -right-1 bg-red-500/80 rounded-full p-0.5"><X className="w-2 h-2 text-white" /></button>
               </div>
             ) : (
@@ -370,6 +389,28 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
           {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : "Create"}
         </Button>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <img 
+              src={previewImage} 
+              alt="Preview" 
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            />
+            <button 
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
