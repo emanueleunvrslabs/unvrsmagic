@@ -242,11 +242,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         setActiveItem("ai-art-generate-video");
       }
       setOpenSubmenus((prev) => ({ ...prev, "ai-art": true }));
-    } else if (pathname.startsWith("/delibere-arera")) {
-      if (pathname === "/delibere-arera") {
-        setActiveItem("delibere-arera-dashboard");
-      }
-      setOpenSubmenus((prev) => ({ ...prev, "delibere-arera": true }));
+    } else if (pathname === "/delibere-arera") {
+      setActiveItem("delibere-arera");
     } else if (pathname === "/notifications") {
       setActiveItem("notifications");
     } else if (pathname === "/file-upload") {
@@ -511,15 +508,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
           ],
         },
-        {
-          id: "delibere-arera",
-          label: "Delibere Arera",
-          icon: FileText,
-          hasSubmenu: true,
-          submenuItems: [
-            { id: "delibere-arera-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/delibere-arera" },
-          ],
-        },
+        { id: "delibere-arera", label: "Delibere Arera", icon: FileText, href: "/delibere-arera" },
         { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
       ],
     });
