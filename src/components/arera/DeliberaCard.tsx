@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { FileText, Calendar, Download, ExternalLink } from "lucide-react";
+import { FileText, Calendar, Download, ExternalLink, Zap, Flame, Droplets, Trash2, Thermometer, Building } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
@@ -20,8 +20,27 @@ interface DeliberaCardProps {
     detail_url: string | null;
     files: DeliberaFile[];
     status: string;
+    category?: string;
   };
 }
+
+const getCategoryConfig = (category: string | undefined) => {
+  switch (category) {
+    case 'elettricita':
+      return { label: 'Elettricità', icon: Zap, color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' };
+    case 'gas':
+      return { label: 'Gas', icon: Flame, color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' };
+    case 'acqua':
+      return { label: 'Acqua', icon: Droplets, color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' };
+    case 'rifiuti':
+      return { label: 'Rifiuti', icon: Trash2, color: 'bg-green-500/10 text-green-400 border-green-500/20' };
+    case 'teleriscaldamento':
+      return { label: 'Teleriscaldamento', icon: Thermometer, color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' };
+    case 'generale':
+    default:
+      return { label: 'Generale', icon: Building, color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' };
+  }
+};
 
 export function DeliberaCard({ delibera }: DeliberaCardProps) {
   const getStatusBadge = (status: string) => {
@@ -70,6 +89,16 @@ export function DeliberaCard({ delibera }: DeliberaCardProps) {
           <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-primary/10 text-primary border-primary/20 font-semibold">
             {delibera.delibera_code}
           </span>
+          {(() => {
+            const categoryConfig = getCategoryConfig(delibera.category);
+            const CategoryIcon = categoryConfig.icon;
+            return (
+              <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm ${categoryConfig.color}`}>
+                <CategoryIcon className="h-3 w-3" />
+                {categoryConfig.label}
+              </span>
+            );
+          })()}
           {getStatusBadge(delibera.status)}
           {delibera.publication_date && (
             <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
