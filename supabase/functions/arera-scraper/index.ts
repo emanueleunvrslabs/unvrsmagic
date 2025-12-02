@@ -209,61 +209,43 @@ function parseDelibereList(html: string): Array<{
 }> {
   const delibere: Array<{ code: string; date: string; title: string; detailUrl: string }> = [];
   
-  // Pattern per estrarre delibere dalla lista ARERA
-  // La struttura tipica è: <a href="/atti-e-provvedimenti/dettaglio/XX/YYY">Codice Delibera</a>
-  const itemPattern = /<article[^>]*class="[^"]*item[^"]*"[^>]*>([\s\S]*?)<\/article>/gi;
-  const linkPattern = /<a[^>]*href="([^"]*dettaglio[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
-  const datePattern = /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/;
-  const codePattern = /(\d+\/\d{4}\/[A-Z]\/[a-z]+)/i;
+  // Pattern per blocchi delibera ARERA - struttura:
+  // <a id="atto" href="https://www.arera.it/atti-e-provvedimenti/dettaglio/25/520-25">
+  //   <p class="data-atto">25/11/2025</p>
+  //   <h3 class="sigla-atto">520/2025/C/rif</h3>
+  //   <p class="testo-atto">Titolo della delibera</p>
+  // </a>
+  
+  const attoPattern = /<a[^>]*id="atto"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+  const datePattern = /<p[^>]*class="data-atto"[^>]*>([^<]+)<\/p>/i;
+  const codePattern = /<h3[^>]*class="sigla-atto"[^>]*>([^<]+)<\/h3>/i;
+  const titlePattern = /<p[^>]*class="testo-atto"[^>]*>([^<]+)<\/p>/i;
 
   let match;
   
-  // Try to find article items first
-  while ((match = itemPattern.exec(html)) !== null) {
-    const itemHtml = match[1];
+  while ((match = attoPattern.exec(html)) !== null) {
+    const href = match[1];
+    const blockHtml = match[2];
     
-    // Find link with detail URL
-    const linkMatch = /<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/i.exec(itemHtml);
-    if (linkMatch) {
-      const href = linkMatch[1];
-      const text = linkMatch[2].trim();
+    const dateMatch = datePattern.exec(blockHtml);
+    const codeMatch = codePattern.exec(blockHtml);
+    const titleMatch = titlePattern.exec(blockHtml);
+    
+    if (codeMatch) {
+      const code = codeMatch[1].trim();
+      const date = dateMatch ? formatDate(dateMatch[1].trim()) : new Date().toISOString().split("T")[0];
+      const title = titleMatch ? titleMatch[1].trim() : code;
       
-      // Extract code from text or href
-      const codeMatch = codePattern.exec(text) || codePattern.exec(href);
-      const dateMatch = datePattern.exec(itemHtml);
-      
-      if (codeMatch) {
-        delibere.push({
-          code: codeMatch[1],
-          date: dateMatch ? formatDate(dateMatch[1]) : new Date().toISOString().split("T")[0],
-          title: text || codeMatch[1],
-          detailUrl: href.startsWith("http") ? href : `${ARERA_BASE_URL}${href}`,
-        });
-      }
+      delibere.push({
+        code,
+        date,
+        title,
+        detailUrl: href.startsWith("http") ? href : `${ARERA_BASE_URL}${href}`,
+      });
     }
   }
 
-  // Fallback: try different patterns
-  if (delibere.length === 0) {
-    // Pattern per link diretti alle delibere
-    const directLinkPattern = /<a[^>]*href="(\/atti-e-provvedimenti\/dettaglio\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
-    
-    while ((match = directLinkPattern.exec(html)) !== null) {
-      const href = match[1];
-      const text = match[2].trim();
-      const codeMatch = codePattern.exec(text) || codePattern.exec(href);
-      
-      if (codeMatch && !delibere.find(d => d.code === codeMatch[1])) {
-        delibere.push({
-          code: codeMatch[1],
-          date: new Date().toISOString().split("T")[0],
-          title: text,
-          detailUrl: `${ARERA_BASE_URL}${href}`,
-        });
-      }
-    }
-  }
-
+  console.log(`Parser found ${delibere.length} delibere blocks`);
   return delibere;
 }
 
