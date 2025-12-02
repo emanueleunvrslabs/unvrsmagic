@@ -234,25 +234,24 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                               )}
                                 </div>
                               </div>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-2">
                             <button
                               onClick={() => console.log('Run workflow:', workflow.id)}
-                              className="p-1.5 rounded text-primary/70 hover:text-primary hover:bg-primary/10"
-                              title="Run Now"
+                              className="px-2 py-1 text-[10px] rounded bg-primary/20 text-primary/80 border border-primary/30 hover:bg-primary/30 transition-colors"
                             >
-                              <Play size={14} fill="currentColor" />
+                              Run Now
                             </button>
                             <button
                               onClick={() => handleToggleActive(workflow.id, workflow.active)}
-                              className={`p-1.5 rounded ${workflow.active ? 'text-green-400 hover:bg-green-400/10' : 'text-white/40 hover:bg-white/10'}`}
-                              title={workflow.active ? 'Pause' : 'Activate'}
+                              className={`p-1.5 rounded transition-colors ${workflow.active ? 'text-green-400 hover:bg-green-400/10' : 'text-white/40 hover:bg-white/10'}`}
+                              title={workflow.active ? 'Pause scheduling' : 'Activate scheduling'}
                             >
                               {workflow.active ? <Pause size={14} /> : <Play size={14} />}
                             </button>
                             <button
                               onClick={() => handleDeleteWorkflow(workflow.id)}
-                              className="p-1.5 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10"
-                              title="Delete"
+                              className="p-1.5 rounded text-red-400/60 hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                              title="Delete workflow"
                             >
                               <Trash2 size={14} />
                             </button>
