@@ -685,42 +685,13 @@ async function sendEmailNotifications(
 
         const emailHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto;">
-            <h2 style="color: #1e293b; margin-bottom: 4px;">${d.delibera_code}</h2>
-            <span style="display:inline-block;margin-bottom:12px;padding:2px 8px;border-radius:4px;background:#3b82f6;color:white;font-size:12px;">
-              ${categoryLabels[cat] || cat}
-            </span>
-            <h3 style="color:#0f172a;font-size:18px;margin:0 0 12px 0;">${d.title}</h3>
-            ${d.summary ? `<div style="color:#475569;font-size:14px;white-space:pre-wrap;margin-bottom:12px;">${d.summary}</div>` : ""}
-            ${d.detail_url ? `<a href="${d.detail_url}" style="color:#2563eb;font-size:13px;">Apri la delibera sul sito ARERA →</a>` : ""}
-            <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;"/>
-            <p style="color:#94a3b8;font-size:12px;">
-              Email inviata automaticamente da UNVRS MAGIC AI per le categorie selezionate: 
-              <strong>${userCategories.map(c => categoryLabels[c] || c).join(", ")}</strong>
-            </p>
+            <h2 style="color:#0f172a;font-size:18px;margin:0 0 12px 0;">${d.title}</h2>
+            ${d.summary ? `<div style="color:#475569;font-size:14px;white-space:pre-wrap;margin-bottom:16px;">${d.summary}</div>` : ""}
+            ${d.detail_url ? `<a href="${d.detail_url}" style="color:#2563eb;font-size:14px;">Apri la delibera originale sul sito ARERA →</a>` : ""}
           </div>
         `;
 
-        // Prepare attachments from stored files
-        const attachments: Array<{ filename: string; content: string }> = [];
-        const files = (d.files || []) as Array<{ name: string; url: string }>;
-
-        for (const file of files) {
-          try {
-            const resp = await fetch(file.url);
-            if (!resp.ok) {
-              console.error(`Failed to fetch attachment ${file.url}:`, resp.status);
-              continue;
-            }
-            const buffer = await resp.arrayBuffer();
-            const base64 = arrayBufferToBase64(buffer);
-            attachments.push({
-              filename: file.name || `${d.delibera_code}.pdf`,
-              content: base64,
-            });
-          } catch (attError) {
-            console.error(`Error downloading attachment ${file.url}:`, attError);
-          }
-        }
+        // No attachments: email now only contains the summary and original ARERA link.
 
         // Send email via Resend (one per delibera)
         try {
@@ -736,7 +707,6 @@ async function sendEmailNotifications(
               // Subject must be the original title of the delibera
               subject: d.title as string,
               html: emailHtml,
-              attachments: attachments.length > 0 ? attachments : undefined,
             }),
           });
 
