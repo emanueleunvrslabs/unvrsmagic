@@ -188,28 +188,26 @@ export default function DelibereArera() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FileText className="h-8 w-8 text-primary" />
-            <div className="flex items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold">Delibere ARERA</h1>
-                <p className="text-muted-foreground mt-1">
-                  {isAdminUser 
-                    ? "Gestione automatica delibere ARERA con sommari AI"
-                    : "Consulta le delibere ARERA con sommari AI"}
-                </p>
-              </div>
-              {isAdminUser && (
-                <Button variant="outline" size="sm" className="gap-2">
-                  Invio automatico
-                </Button>
-              )}
+            <div>
+              <h1 className="text-3xl font-bold">Delibere ARERA</h1>
+              <p className="text-muted-foreground mt-1">
+                {isAdminUser 
+                  ? "Gestione automatica delibere ARERA con sommari AI"
+                  : "Consulta le delibere ARERA con sommari AI"}
+              </p>
             </div>
           </div>
-          {isAdminUser && (
-            <Button onClick={handleSync} disabled={isSyncing} className="gap-2">
-              <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Sincronizzazione..." : "Sincronizza"}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm">
+              Invio automatico
             </Button>
-          )}
+            {isAdminUser && (
+              <Button onClick={handleSync} disabled={isSyncing} className="gap-2">
+                <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+                {isSyncing ? "Sincronizzazione..." : "Sincronizza"}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Stats - Admin only */}
