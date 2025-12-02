@@ -625,99 +625,99 @@ async function sendEmailNotifications(
       return;
     }
 
-    // Group delibere by category
-    const delibereByCategory: Record<string, any[]> = {};
-    for (const delibera of fullDelibere) {
-      const cat = delibera.category || "generale";
-      if (!delibereByCategory[cat]) {
-        delibereByCategory[cat] = [];
-      }
-      delibereByCategory[cat].push(delibera);
-    }
+    // Send an email per delibera to each user based on their category preferences
+    const categoryLabels: Record<string, string> = {
+      elettricita: "Elettricità",
+      gas: "Gas",
+      acqua: "Acqua",
+      rifiuti: "Rifiuti",
+      teleriscaldamento: "Teleriscaldamento",
+      generale: "Generale",
+    };
 
-    // Send emails to each user based on their category preferences
     for (const pref of preferences) {
-      const userCategories = pref.categories || [];
-      const matchingDelibere: any[] = [];
+      const userCategories: string[] = pref.categories || [];
 
-      for (const cat of userCategories) {
-        if (delibereByCategory[cat]) {
-          matchingDelibere.push(...delibereByCategory[cat]);
-        }
-      }
+      // All delibere matching at least one of the user's categories
+      const matchingDelibere = fullDelibere.filter((d: any) => {
+        const cat = (d.category || "generale") as string;
+        return userCategories.includes(cat);
+      });
 
       if (matchingDelibere.length === 0) {
         console.log(`No matching delibere for user ${pref.email}`);
         continue;
       }
 
-      // Build email HTML
-      const categoryLabels: Record<string, string> = {
-        elettricita: "Elettricità",
-        gas: "Gas",
-        acqua: "Acqua",
-        rifiuti: "Rifiuti",
-        teleriscaldamento: "Teleriscaldamento",
-        generale: "Generale",
-      };
+      for (const d of matchingDelibere) {
+        const cat = (d.category || "generale") as string;
 
-      const delibereHtml = matchingDelibere.map(d => `
-        <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3b82f6;">
-          <div style="display: flex; gap: 10px; margin-bottom: 8px;">
-            <span style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
-              ${d.delibera_code}
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto;">
+            <h2 style="color: #1e293b; margin-bottom: 4px;">${d.delibera_code}</h2>
+            <span style="display:inline-block;margin-bottom:12px;padding:2px 8px;border-radius:4px;background:#3b82f6;color:white;font-size:12px;">
+              ${categoryLabels[cat] || cat}
             </span>
-            <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
-              ${categoryLabels[d.category] || d.category}
-            </span>
+            <h3 style="color:#0f172a;font-size:18px;margin:0 0 12px 0;">${d.title}</h3>
+            ${d.summary ? `<div style="color:#475569;font-size:14px;white-space:pre-wrap;margin-bottom:12px;">${d.summary}</div>` : ""}
+            ${d.detail_url ? `<a href="${d.detail_url}" style="color:#2563eb;font-size:13px;">Apri la delibera sul sito ARERA →</a>` : ""}
+            <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;"/>
+            <p style="color:#94a3b8;font-size:12px;">
+              Email inviata automaticamente da UNVRS MAGIC AI per le categorie selezionate: 
+              <strong>${userCategories.map(c => categoryLabels[c] || c).join(", ")}</strong>
+            </p>
           </div>
-          <h3 style="margin: 0 0 10px 0; color: #1e293b; font-size: 16px;">${d.title}</h3>
-          ${d.summary ? `<div style="color: #64748b; font-size: 14px; white-space: pre-wrap;">${d.summary}</div>` : ""}
-          ${d.detail_url ? `<a href="${d.detail_url}" style="color: #3b82f6; font-size: 13px; margin-top: 10px; display: inline-block;">Visualizza su ARERA →</a>` : ""}
-        </div>
-      `).join("");
+        `;
 
-      const emailHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto;">
-          <h2 style="color: #1e293b;">Nuove Delibere ARERA</h2>
-          <p style="color: #64748b;">
-            Sono state pubblicate ${matchingDelibere.length} nuove delibere nelle categorie che hai selezionato:
-            <strong>${userCategories.map((c: string) => categoryLabels[c] || c).join(", ")}</strong>
-          </p>
-          <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;" />
-          ${delibereHtml}
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;" />
-          <p style="color: #94a3b8; font-size: 12px;">
-            Questa email è stata inviata automaticamente da UNVRS MAGIC AI.<br/>
-            Puoi modificare le tue preferenze accedendo alla piattaforma.
-          </p>
-        </div>
-      `;
+        // Prepare attachments from stored files
+        const attachments: Array<{ filename: string; content: string }> = [];
+        const files = (d.files || []) as Array<{ name: string; url: string }>;
 
-      // Send email via Resend
-      try {
-        const resendResponse = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${resendKey.api_key}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: "UNVRS LABS <emanuele@unvrslabs.dev>",
-            to: [pref.email],
-            subject: `${matchingDelibere.length} Nuove Delibere ARERA - ${new Date().toLocaleDateString("it-IT")}`,
-            html: emailHtml,
-          }),
-        });
-
-        if (resendResponse.ok) {
-          console.log(`Email sent successfully to ${pref.email}`);
-        } else {
-          const errorData = await resendResponse.text();
-          console.error(`Failed to send email to ${pref.email}:`, errorData);
+        for (const file of files) {
+          try {
+            const resp = await fetch(file.url);
+            if (!resp.ok) {
+              console.error(`Failed to fetch attachment ${file.url}:`, resp.status);
+              continue;
+            }
+            const buffer = await resp.arrayBuffer();
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+            attachments.push({
+              filename: file.name || `${d.delibera_code}.pdf`,
+              content: base64,
+            });
+          } catch (attError) {
+            console.error(`Error downloading attachment ${file.url}:`, attError);
+          }
         }
-      } catch (emailError) {
-        console.error(`Error sending email to ${pref.email}:`, emailError);
+
+        // Send email via Resend (one per delibera)
+        try {
+          const resendResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${resendKey.api_key}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: "UNVRS LABS <emanuele@unvrslabs.dev>",
+              to: [pref.email],
+              // Subject must be the original title of the delibera
+              subject: d.title as string,
+              html: emailHtml,
+              attachments: attachments.length > 0 ? attachments : undefined,
+            }),
+          });
+
+          if (resendResponse.ok) {
+            console.log(`Email sent successfully to ${pref.email} for delibera ${d.delibera_code}`);
+          } else {
+            const errorData = await resendResponse.text();
+            console.error(`Failed to send email to ${pref.email} for delibera ${d.delibera_code}:`, errorData);
+          }
+        } catch (emailError) {
+          console.error(`Error sending email to ${pref.email} for delibera ${d.delibera_code}:`, emailError);
+        }
       }
     }
   } catch (error) {
