@@ -221,11 +221,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                             <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                               <span className="text-xs text-white/70">Loading...</span>
                             </div>
-                          ) : workflows.length === 0 ? (
-                            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                              <span className="text-xs text-white/70">No workflows configured yet</span>
-                            </div>
-                          ) : (
+                          ) : workflows.length > 0 && (
                             <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
                               {workflows.map((workflow) => (
                                 <div 
