@@ -118,7 +118,7 @@ export function DeliberaCard({ delibera }: DeliberaCardProps) {
             href={delibera.detail_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-1.5 rounded-lg bg-white/5 backdrop-blur-md border border-white/10 text-blue-400 text-xs font-semibold hover:bg-white/10 transition-all flex items-center gap-1.5 flex-shrink-0"
+            className="px-3 py-1.5 rounded-lg bg-white/5 backdrop-blur-md text-blue-400 text-xs font-semibold hover:bg-white/10 transition-all flex items-center gap-1.5 flex-shrink-0"
           >
             <ExternalLink className="h-3 w-3" />
             ARERA
@@ -133,7 +133,7 @@ export function DeliberaCard({ delibera }: DeliberaCardProps) {
       
       {/* Summary */}
       {delibera.summary && (
-        <div className="mx-5 mb-3 p-3 rounded-lg bg-white/5 border border-white/10">
+        <div className="mx-5 mb-3 p-3 rounded-lg bg-white/5">
           <p className="text-xs text-gray-400 mb-1">AI Summary</p>
           <p className="text-xs text-white/80 whitespace-pre-line">{delibera.summary}</p>
         </div>
