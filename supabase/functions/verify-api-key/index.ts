@@ -162,6 +162,36 @@ serve(async (req) => {
         }
         break;
 
+      case "firecrawl":
+        try {
+          // Firecrawl API - verify with scrape endpoint (will fail but auth will be checked)
+          const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url: "https://example.com"
+            }),
+          });
+
+          console.log("Firecrawl response status:", response.status);
+
+          // 401/403 = invalid key, 200/400/402 = key is valid
+          if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid Firecrawl API key";
+            console.error("Firecrawl verification failed:", response.status);
+          } else {
+            isValid = true;
+            console.log("Firecrawl API key is valid");
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Firecrawl API key";
+          console.error("Firecrawl verification error:", error);
+        }
+        break;
+
       case "gamma":
         try {
           // Gamma - test with generations endpoint (will fail but auth will be checked)
