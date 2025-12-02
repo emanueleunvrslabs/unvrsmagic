@@ -1,348 +1,373 @@
-import { useState, useEffect, useRef } from "react";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { FileText, RefreshCw, Download, Clock, Terminal, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useEffect, useRef, useState } from "react";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { it } from "date-fns/locale";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Download,
+  FileText,
+  RefreshCw,
+  Send,
+} from "lucide-react";
 import { DeliberaCard } from "@/components/arera/DeliberaCard";
-import { useUserRole } from "@/hooks/useUserRole";
-import "@/components/labs/SocialMediaCard.css";
 
-const DELIBERA_CATEGORIES = [
-  { id: 'elettricita', label: 'Elettricità', description: 'Regolazione, distribuzione, trasmissione, tariffe energia elettrica' },
-  { id: 'gas', label: 'Gas', description: 'Norme, regolamentazioni e tariffe gas naturale' },
-  { id: 'acqua', label: 'Acqua', description: 'Servizio idrico integrato, tariffe, qualità' },
-  { id: 'rifiuti', label: 'Rifiuti', description: 'Gestione rifiuti urbani, tariffazione, qualità servizio' },
-  { id: 'teleriscaldamento', label: 'Teleriscaldamento', description: 'Riscaldamento a rete e regolamentazioni' },
-  { id: 'generale', label: 'Generale', description: 'Aspetti amministrativi, organizzazione, regolamenti generali' },
-] as const;
-
-interface DeliberaFile {
-  name: string;
-  url: string;
-  originalUrl?: string;
-}
-
-interface Delibera {
+interface AreraDelibera {
   id: string;
   delibera_code: string;
   publication_date: string | null;
   title: string;
   description: string | null;
   summary: string | null;
+  category: string | null;
   detail_url: string | null;
-  files: DeliberaFile[];
+  files: Array<{ name: string; url: string; originalUrl?: string }> | null;
   status: string;
+  error_message: string | null;
   created_at: string;
-  category?: string;
 }
 
 interface LogEntry {
-  timestamp: Date;
+  type: "info" | "success" | "error";
   message: string;
-  type: 'info' | 'success' | 'error' | 'processing';
+  timestamp: Date;
 }
 
-export default function DelibereArera() {
-  const [delibere, setDelibere] = useState<Delibera[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const DelibereAreraPage = () => {
+  const { toast } = useToast();
+
+  const [user, setUser] = useState<any | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+
   const [isSyncing, setIsSyncing] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const logsEndRef = useRef<HTMLDivElement>(null);
-  const { isOwner, isAdmin } = useUserRole();
   const [isAutoSendModalOpen, setIsAutoSendModalOpen] = useState(false);
   const [autoSendEmail, setAutoSendEmail] = useState("");
-  const [isSavingEmail, setIsSavingEmail] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [hasExistingPreference, setHasExistingPreference] = useState(false);
-  
-  const isAdminUser = isOwner || isAdmin;
+  const [autoSendCategories, setAutoSendCategories] = useState<string[]>([]);
+  const [isSavingAutoSend, setIsSavingAutoSend] = useState(false);
 
-  // Load existing email preferences
-  useEffect(() => {
-    const loadEmailPreferences = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+  const logsEndRef = useRef<HTMLDivElement | null>(null);
 
-      const { data } = await supabase
-        .from("arera_email_preferences")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
+  const { data: delibere = [], isLoading, refetch } = useQuery<AreraDelibera[]>({
+    queryKey: ["arera-delibere"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("arera_delibere")
+          .select("*")
+          .order("publication_date", { ascending: false });
 
-      if (data) {
-        setAutoSendEmail(data.email);
-        setSelectedCategories(data.categories || []);
-        setHasExistingPreference(true);
-      }
-    };
-
-    loadEmailPreferences();
-  }, []);
-
-  const handleSaveAutoSendEmail = async () => {
-    if (!autoSendEmail || !autoSendEmail.includes("@")) {
-      toast.error("Inserisci un indirizzo email valido");
-      return;
-    }
-    
-    if (selectedCategories.length === 0) {
-      toast.error("Seleziona almeno una categoria");
-      return;
-    }
-    
-    setIsSavingEmail(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const { error } = await supabase
-        .from("arera_email_preferences")
-        .upsert({
-          user_id: user.id,
-          email: autoSendEmail,
-          categories: selectedCategories,
-          active: true,
-        }, { onConflict: 'user_id' });
-
-      if (error) throw error;
-
-      setHasExistingPreference(true);
-      toast.success(`Email configurata: ${autoSendEmail} per ${selectedCategories.length} categorie`);
-      setIsAutoSendModalOpen(false);
-    } catch (error) {
-      console.error("Error saving email preferences:", error);
-      toast.error("Errore nel salvataggio delle preferenze");
-    } finally {
-      setIsSavingEmail(false);
-    }
-  };
-
-  const handleDeleteEmailPreference = async () => {
-    setIsSavingEmail(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const { error } = await supabase
-        .from("arera_email_preferences")
-        .delete()
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-
-      setAutoSendEmail("");
-      setSelectedCategories([]);
-      setHasExistingPreference(false);
-      toast.success("Preferenze email eliminate");
-      setIsAutoSendModalOpen(false);
-    } catch (error) {
-      console.error("Error deleting email preferences:", error);
-      toast.error("Errore nell'eliminazione delle preferenze");
-    } finally {
-      setIsSavingEmail(false);
-    }
-  };
-
-  const toggleCategory = (categoryId: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
-    );
-  };
-
-  const toggleAllCategories = () => {
-    if (selectedCategories.length === DELIBERA_CATEGORIES.length) {
-      setSelectedCategories([]);
-    } else {
-      setSelectedCategories(DELIBERA_CATEGORIES.map(c => c.id));
-    }
-  };
-
-  useEffect(() => {
-    loadDelibere();
-    
-    // Subscribe to realtime changes on arera_delibere table
-    const channel = supabase
-      .channel('arera-delibere-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'arera_delibere'
-        },
-        (payload) => {
-          console.log('Realtime update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            const newDelibera = payload.new as any;
-            addLog(`📄 Nuova delibera: ${newDelibera.delibera_code} - ${newDelibera.title?.slice(0, 50)}...`, 'info');
-            
-            setDelibere(prev => {
-              const typed = {
-                ...newDelibera,
-                files: (newDelibera.files as unknown as DeliberaFile[]) || []
-              };
-              return [typed, ...prev];
-            });
-          } else if (payload.eventType === 'UPDATE') {
-            const updated = payload.new as any;
-            
-            if (updated.status === 'completed') {
-              addLog(`✅ Completata: ${updated.delibera_code} - ${(updated.files as any[])?.length || 0} file scaricati`, 'success');
-            } else if (updated.status === 'error') {
-              addLog(`❌ Errore: ${updated.delibera_code} - ${updated.error_message || 'Errore sconosciuto'}`, 'error');
-            } else if (updated.status === 'processing') {
-              addLog(`⏳ Elaborazione: ${updated.delibera_code}...`, 'processing');
-            }
-            
-            if (updated.summary && !payload.old?.summary) {
-              addLog(`🤖 Sommario AI generato per ${updated.delibera_code}`, 'success');
-            }
-            
-            setDelibere(prev => prev.map(d => 
-              d.id === updated.id 
-                ? { ...updated, files: (updated.files as unknown as DeliberaFile[]) || [] }
-                : d
-            ));
-          }
+        if (error) {
+          console.error("Error fetching delibere:", error);
+          toast({
+            title: "Errore",
+            description:
+              "Impossibile caricare le delibere ARERA. Riprova più tardi.",
+            variant: "destructive",
+          });
+          return [];
         }
-      )
-      .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
+        return data as unknown as AreraDelibera[];
+      } catch (err) {
+        console.error("Unexpected error fetching delibere:", err);
+        toast({
+          title: "Errore",
+          description:
+            "Si è verificato un errore imprevisto nel caricamento delle delibere.",
+          variant: "destructive",
+        });
+        return [];
+      }
+    },
+    enabled: true,
+  });
+
+  const completedCount = delibere.filter((d) => d.status === "completed").length;
+  const processingCount = delibere.filter((d) => d.status === "processing").length;
+  const errorCount = delibere.filter((d) => d.status === "error").length;
+
+  useEffect(() => {
+    const loadAuth = async () => {
+      setAuthLoading(true);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setUser(user ?? null);
+
+      if (user) {
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        setIsAdminUser(
+          roleData?.role === "owner" || roleData?.role === "admin",
+        );
+      } else {
+        setIsAdminUser(false);
+      }
+
+      setAuthLoading(false);
     };
+
+    loadAuth();
   }, []);
 
-  // Auto-scroll logs to bottom
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [logs]);
 
-  const addLog = (message: string, type: LogEntry['type'] = 'info') => {
-    setLogs(prev => [...prev, { timestamp: new Date(), message, type }]);
-  };
-
-  const loadDelibere = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("arera_delibere")
-        .select("*")
-        .order("publication_date", { ascending: false });
-
-      if (error) throw error;
-      
-      // Type assertion for files field
-      const typedDelibere = (data || []).map(d => ({
-        ...d,
-        files: (d.files as unknown as DeliberaFile[]) || []
-      }));
-      
-      setDelibere(typedDelibere);
-    } catch (error) {
-      console.error("Error loading delibere:", error);
-      toast.error("Errore nel caricamento delle delibere");
-    } finally {
-      setIsLoading(false);
-    }
+  const appendLog = (entry: LogEntry) => {
+    setLogs((prev) => [...prev, entry]);
   };
 
   const handleSync = async () => {
+    if (!isAdminUser) return;
+
     setIsSyncing(true);
-    setLogs([]); // Clear previous logs
-    addLog('🚀 Avvio sincronizzazione ARERA...', 'info');
-    
+    setLogs([]);
+
+    appendLog({
+      type: "info",
+      message: "Avvio sincronizzazione con il sito ARERA...",
+      timestamp: new Date(),
+    });
+
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/arera-scraper`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const projectUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string;
+
+      const functionUrl = `${projectUrl}/functions/v1/arera-scraper`;
+
+      const response = await fetch(functionUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+        },
+        body: JSON.stringify({ action: "sync" }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Sync error:", errorText);
+        appendLog({
+          type: "error",
+          message: `Errore nella chiamata alla funzione di sincronizzazione: ${response.status}`,
+          timestamp: new Date(),
+        });
+        toast({
+          title: "Errore nella sincronizzazione",
+          description:
+            "Si è verificato un errore durante la sincronizzazione delle delibere.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       const result = await response.json();
 
-      if (!response.ok) {
-        addLog(`❌ Errore: ${result.error || 'Sync failed'}`, 'error');
-        throw new Error(result.error || "Sync failed");
+      appendLog({
+        type: "success",
+        message: `Sincronizzazione completata. Trovate ${result.totalFound} delibere, elaborate ${result.newProcessed}.`,
+        timestamp: new Date(),
+      });
+
+      if (Array.isArray(result.results)) {
+        result.results.forEach((r: any) => {
+          appendLog({
+            type: r.status === "completed" ? "success" : "error",
+            message:
+              r.status === "completed"
+                ? `Delibera ${r.code} elaborata con successo (categoria: ${r.category || "n.d."})`
+                : `Errore elaborando la delibera ${r.code}: ${r.error || "Errore sconosciuto"}`,
+            timestamp: new Date(),
+          });
+        });
       }
 
-      addLog(`🎉 Sincronizzazione completata: ${result.newProcessed} nuove delibere elaborate`, 'success');
-      toast.success(`Sincronizzazione completata: ${result.newProcessed} nuove delibere`);
-      loadDelibere();
+      toast({
+        title: "Sincronizzazione completata",
+        description: "Le delibere ARERA sono state aggiornate.",
+      });
+
+      refetch();
     } catch (error) {
-      console.error("Sync error:", error);
-      toast.error("Errore durante la sincronizzazione");
+      console.error("Unexpected sync error:", error);
+      appendLog({
+        type: "error",
+        message: "Errore imprevisto durante la sincronizzazione.",
+        timestamp: new Date(),
+      });
+      toast({
+        title: "Errore imprevisto",
+        description:
+          "Si è verificato un errore imprevisto durante la sincronizzazione.",
+        variant: "destructive",
+      });
     } finally {
       setIsSyncing(false);
     }
   };
 
-  const getLogColor = (type: LogEntry['type']) => {
-    switch (type) {
-      case 'success': return 'text-green-400';
-      case 'error': return 'text-red-400';
-      case 'processing': return 'text-yellow-400';
-      default: return 'text-blue-400';
+  const handleSaveAutoSend = async () => {
+    if (!user) return;
+
+    if (!autoSendEmail) {
+      toast({
+        title: "Email mancante",
+        description: "Inserisci un indirizzo email valido.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSavingAutoSend(true);
+
+    try {
+      const { error } = await supabase.from("arera_email_preferences").upsert({
+        user_id: user.id,
+        email: autoSendEmail,
+        categories: autoSendCategories,
+        active: autoSendCategories.length > 0,
+      });
+
+      if (error) {
+        console.error("Error saving email preferences:", error);
+        toast({
+          title: "Errore",
+          description:
+            "Impossibile salvare le preferenze di invio automatico. Riprova.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Preferenze salvate",
+        description: "Le impostazioni di invio automatico sono state aggiornate.",
+      });
+
+      setIsAutoSendModalOpen(false);
+    } catch (err) {
+      console.error("Unexpected error saving preferences:", err);
+      toast({
+        title: "Errore",
+        description:
+          "Si è verificato un errore imprevisto nel salvataggio delle preferenze.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingAutoSend(false);
     }
   };
 
-  const processingCount = delibere.filter((d) => d.status === "processing").length;
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
+        <AlertCircle className="h-10 w-10 text-muted-foreground" />
+        <div>
+          <h2 className="text-xl font-semibold mb-2">
+            Effettua l'accesso per visualizzare le delibere ARERA
+          </h2>
+          <p className="text-muted-foreground max-w-md">
+            Le delibere ARERA sono disponibili solo agli utenti autenticati.
+            Accedi per continuare.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <FileText className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold">Delibere ARERA</h1>
-              <p className="text-muted-foreground mt-1">
-                {isAdminUser 
-                  ? "Gestione automatica delibere ARERA con sommari AI"
-                  : "Consulta le delibere ARERA con sommari AI"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsAutoSendModalOpen(true)} className="gap-2">
-              <Mail className="h-4 w-4" />
-              Invio automatico
-            </Button>
-            {isAdminUser && (
-              <Button onClick={handleSync} disabled={isSyncing} className="gap-2">
-                <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-                {isSyncing ? "Sincronizzazione..." : "Sincronizza"}
-              </Button>
-            )}
-          </div>
+    <div className="space-y-6">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Delibere ARERA
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+            Raccolta automatica giornaliera delle delibere ARERA con
+            categorizzazione intelligente e invio automatico via email.
+          </p>
         </div>
 
-        {/* Stats - Admin only */}
+        <div className="flex flex-wrap gap-3 items-center">
+          {isAdminUser && (
+            <Button
+              variant="outline"
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="gap-2"
+            >
+              {isSyncing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Sincronizzazione in corso...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  Sincronizza
+                </>
+              )}
+            </Button>
+          )}
+
+          <Button
+            variant="outline"
+            onClick={() => setIsAutoSendModalOpen(true)}
+            className="gap-2"
+          >
+            <Send className="h-4 w-4" />
+            Invio automatico
+          </Button>
+        </div>
+      </header>
+
+      <div className="space-y-6">
         {isAdminUser && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+            <div
+              className="social-media-card"
+              style={{
+                width: "100%",
+                height: "auto",
+                minHeight: "auto",
+                flexDirection: "column",
+                cursor: "default",
+              }}
+            >
               <div className="flex items-center gap-3 p-5">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <FileText className="h-5 w-5 text-primary" />
@@ -353,7 +378,16 @@ export default function DelibereArera() {
                 </div>
               </div>
             </div>
-            <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+            <div
+              className="social-media-card"
+              style={{
+                width: "100%",
+                height: "auto",
+                minHeight: "auto",
+                flexDirection: "column",
+                cursor: "default",
+              }}
+            >
               <div className="flex items-center gap-3 p-5">
                 <div className="p-2 rounded-lg bg-green-500/10">
                   <Download className="h-5 w-5 text-green-400" />
@@ -361,55 +395,38 @@ export default function DelibereArera() {
                 <div>
                   <p className="text-sm text-gray-400">File Scaricati</p>
                   <p className="text-2xl font-bold text-white">
-                    {delibere.reduce((acc, d) => acc + (d.files?.length || 0), 0)}
+                    {delibere.reduce(
+                      (acc, d) => acc + (d.files?.length || 0),
+                      0,
+                    )}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+            <div
+              className="social-media-card"
+              style={{
+                width: "100%",
+                height: "auto",
+                minHeight: "auto",
+                flexDirection: "column",
+                cursor: "default",
+              }}
+            >
               <div className="flex items-center gap-3 p-5">
                 <div className="p-2 rounded-lg bg-yellow-500/10">
-                  <Clock className={`h-5 w-5 text-yellow-400 ${processingCount > 0 ? 'animate-pulse' : ''}`} />
+                  <Clock
+                    className={`h-5 w-5 text-yellow-400 ${
+                      processingCount > 0 ? "animate-pulse" : ""
+                    }`}
+                  />
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">In Elaborazione</p>
-                  <p className="text-2xl font-bold text-white">{processingCount}</p>
+                  <p className="text-2xl font-bold text-white">
+                    {processingCount}
+                  </p>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Real-time Log Panel - Admin only, show when syncing or has logs */}
-        {isAdminUser && (isSyncing || logs.length > 0) && (
-          <div
-            className="social-media-card"
-            style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}
-          >
-            <div className="p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Terminal className={`h-5 w-5 text-primary ${isSyncing ? 'animate-pulse' : ''}`} />
-                <h3 className="text-lg font-semibold text-white">Log di Elaborazione</h3>
-                {isSyncing && (
-                  <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20 animate-pulse">
-                    In corso...
-                  </span>
-                )}
-              </div>
-              <div className="h-[200px] w-full rounded-lg bg-black/40 border border-white/10 p-3 font-mono text-sm overflow-auto">
-                {logs.length === 0 ? (
-                  <p className="text-gray-400">In attesa di eventi...</p>
-                ) : (
-                  logs.map((log, index) => (
-                    <div key={index} className={`py-1 ${getLogColor(log.type)}`}>
-                      <span className="text-gray-500 mr-2">
-                        [{format(log.timestamp, 'HH:mm:ss')}]
-                      </span>
-                      {log.message}
-                    </div>
-                  ))
-                )}
-                <div ref={logsEndRef} />
               </div>
             </div>
           </div>
@@ -421,7 +438,9 @@ export default function DelibereArera() {
             <Card className="bg-card/30 backdrop-blur-sm border-border/50">
               <CardContent className="py-8 text-center">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-                <p className="mt-2 text-muted-foreground">Caricamento delibere...</p>
+                <p className="mt-2 text-muted-foreground">
+                  Caricamento delibere...
+                </p>
               </CardContent>
             </Card>
           ) : delibere.length === 0 ? (
@@ -429,7 +448,8 @@ export default function DelibereArera() {
               <CardContent className="py-8 text-center">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground/50" />
                 <p className="mt-4 text-muted-foreground">
-                  Nessuna delibera presente. Clicca "Sincronizza" per scaricare le delibere ARERA.
+                  Nessuna delibera presente. Clicca "Sincronizza" per scaricare le
+                  delibere ARERA.
                 </p>
               </CardContent>
             </Card>
@@ -447,7 +467,8 @@ export default function DelibereArera() {
           <DialogHeader>
             <DialogTitle>Invio automatico delibere</DialogTitle>
             <DialogDescription>
-              Inserisci l'email e seleziona le categorie di delibere che vuoi ricevere automaticamente.
+              Inserisci l'email e seleziona le categorie di delibere che vuoi
+              ricevere automaticamente.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-4">
@@ -461,68 +482,58 @@ export default function DelibereArera() {
                 onChange={(e) => setAutoSendEmail(e.target.value)}
               />
             </div>
-            
+
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Categorie</Label>
-                <button
-                  type="button"
-                  onClick={toggleAllCategories}
-                  className="text-xs text-primary hover:underline"
-                >
-                  {selectedCategories.length === DELIBERA_CATEGORIES.length ? 'Deseleziona tutte' : 'Seleziona tutte'}
-                </button>
-              </div>
-              <div className="space-y-2 rounded-lg border border-border/50 p-3 bg-background/50">
-                {DELIBERA_CATEGORIES.map((category) => (
-                  <div 
-                    key={category.id} 
-                    className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => toggleCategory(category.id)}
+              <Label>Categorie da ricevere</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: "elettricita", label: "Elettricità" },
+                  { value: "gas", label: "Gas" },
+                  { value: "acqua", label: "Acqua" },
+                  { value: "rifiuti", label: "Rifiuti" },
+                  { value: "teleriscaldamento", label: "Teleriscaldamento" },
+                  { value: "generale", label: "Generale" },
+                ].map((cat) => (
+                  <label
+                    key={cat.value}
+                    className="flex items-center space-x-2 text-sm text-muted-foreground cursor-pointer"
                   >
                     <Checkbox
-                      id={category.id}
-                      checked={selectedCategories.includes(category.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      onCheckedChange={() => toggleCategory(category.id)}
-                      className="mt-0.5"
+                      checked={autoSendCategories.includes(cat.value)}
+                      onCheckedChange={(checked) => {
+                        setAutoSendCategories((prev) =>
+                          checked
+                            ? [...prev, cat.value]
+                            : prev.filter((c) => c !== cat.value),
+                        );
+                      }}
                     />
-                    <div className="flex-1">
-                      <label htmlFor={category.id} className="text-sm font-medium cursor-pointer">
-                        {category.label}
-                      </label>
-                      <p className="text-xs text-muted-foreground">{category.description}</p>
-                    </div>
-                  </div>
+                    <span>{cat.label}</span>
+                  </label>
                 ))}
               </div>
-              {selectedCategories.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {selectedCategories.length} categorie selezionate
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                Se non selezioni nessuna categoria, l'invio automatico verrà
+                disattivato.
+              </p>
             </div>
           </div>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            {hasExistingPreference && (
-              <Button 
-                variant="destructive" 
-                onClick={handleDeleteEmailPreference} 
-                disabled={isSavingEmail}
-                className="sm:mr-auto"
-              >
-                Disattiva
-              </Button>
-            )}
-            <Button variant="outline" onClick={() => setIsAutoSendModalOpen(false)}>
+
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsAutoSendModalOpen(false)}
+            >
               Annulla
             </Button>
-            <Button onClick={handleSaveAutoSendEmail} disabled={isSavingEmail}>
-              {isSavingEmail ? "Salvataggio..." : "Salva"}
+            <Button onClick={handleSaveAutoSend} disabled={isSavingAutoSend}>
+              {isSavingAutoSend ? "Salvataggio..." : "Salva preferenze"}
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </div>
   );
-}
+};
+
+export default DelibereAreraPage;
