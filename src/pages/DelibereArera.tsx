@@ -68,7 +68,6 @@ export default function DelibereArera() {
   const [autoSendEmail, setAutoSendEmail] = useState("");
   const [isSavingEmail, setIsSavingEmail] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [isRecategorizing, setIsRecategorizing] = useState(false);
   
   const isAdminUser = isOwner || isAdmin;
 
@@ -92,40 +91,6 @@ export default function DelibereArera() {
       toast.error("Errore nel salvataggio dell'email");
     } finally {
       setIsSavingEmail(false);
-    }
-  };
-
-  const handleRecategorize = async () => {
-    setIsRecategorizing(true);
-    addLog('🏷️ Avvio ri-categorizzazione delibere...', 'info');
-    
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/arera-scraper`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ action: "recategorize" }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        addLog(`❌ Errore: ${result.error || 'Recategorization failed'}`, 'error');
-        throw new Error(result.error || "Recategorization failed");
-      }
-
-      addLog(`🎉 Ri-categorizzazione completata: ${result.updated} delibere aggiornate`, 'success');
-      toast.success(`Ri-categorizzazione completata: ${result.updated} delibere aggiornate`);
-      loadDelibere();
-    } catch (error) {
-      console.error("Recategorize error:", error);
-      toast.error("Errore durante la ri-categorizzazione");
-    } finally {
-      setIsRecategorizing(false);
     }
   };
 
@@ -302,21 +267,10 @@ export default function DelibereArera() {
               Invio automatico
             </Button>
             {isAdminUser && (
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={handleRecategorize} 
-                  disabled={isRecategorizing || isSyncing} 
-                  className="gap-2"
-                >
-                  <FileText className={`h-4 w-4 ${isRecategorizing ? "animate-pulse" : ""}`} />
-                  {isRecategorizing ? "Ri-categorizzando..." : "Ri-categorizza"}
-                </Button>
-                <Button onClick={handleSync} disabled={isSyncing || isRecategorizing} className="gap-2">
-                  <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-                  {isSyncing ? "Sincronizzazione..." : "Sincronizza"}
-                </Button>
-              </>
+              <Button onClick={handleSync} disabled={isSyncing} className="gap-2">
+                <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+                {isSyncing ? "Sincronizzazione..." : "Sincronizza"}
+              </Button>
             )}
           </div>
         </div>
