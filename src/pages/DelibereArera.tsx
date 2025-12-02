@@ -188,13 +188,20 @@ export default function DelibereArera() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FileText className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold">Delibere ARERA</h1>
-              <p className="text-muted-foreground mt-1">
-                {isAdminUser 
-                  ? "Gestione automatica delibere ARERA con sommari AI"
-                  : "Consulta le delibere ARERA con sommari AI"}
-              </p>
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-3xl font-bold">Delibere ARERA</h1>
+                <p className="text-muted-foreground mt-1">
+                  {isAdminUser 
+                    ? "Gestione automatica delibere ARERA con sommari AI"
+                    : "Consulta le delibere ARERA con sommari AI"}
+                </p>
+              </div>
+              {isAdminUser && (
+                <Button variant="outline" size="sm" className="gap-2">
+                  Invio automatico
+                </Button>
+              )}
             </div>
           </div>
           {isAdminUser && (
