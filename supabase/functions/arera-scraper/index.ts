@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const ARERA_BASE_URL = "https://www.arera.it";
-const ARERA_LIST_URL = `${ARERA_BASE_URL}/atti-e-provvedimenti?anno=&numero=&tipologia=Delibera&keyword=&settore=&orderby=&orderbydir=&numelements=50`;
+const ARERA_LIST_URL = `${ARERA_BASE_URL}/atti-e-provvedimenti?anno=&numero=&tipologia=Delibera&keyword=&settore=&orderby=&orderbydir=&numelements=25`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
