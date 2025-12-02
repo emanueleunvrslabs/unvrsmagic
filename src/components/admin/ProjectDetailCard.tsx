@@ -186,7 +186,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
       {/* Separate Panel Card */}
       {activePanel && (
         <div className="client-card-wrapper">
-          <div className="social-media-card group" style={{ width: '28em' }}>
+          <div className="social-media-card group" style={{ width: '32em', height: 'auto', minHeight: '25em' }}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -198,7 +198,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
               <X size={16} strokeWidth={2.5} />
             </button>
 
-            <div className="card-main-content !justify-start !pt-12 h-full" style={{ width: '28em' }}>
+            <div className="card-main-content !justify-start !pt-12 h-full" style={{ width: '32em' }}>
               {activePanel === 'workflow' && (
                 <div className="flex flex-col gap-4 w-full h-full">
                   {isCreatingWorkflow ? (
