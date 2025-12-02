@@ -1,6 +1,8 @@
 import "../labs/SocialMediaCard.css";
-import { GitBranch, Receipt, FileText, CheckSquare, Kanban, X } from "lucide-react";
+import { GitBranch, Receipt, FileText, CheckSquare, Kanban, X, Plus } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ClientWorkflowDialog } from "./ClientWorkflowDialog";
 
 interface ProjectDetailCardProps {
   project: {
@@ -13,6 +15,7 @@ interface ProjectDetailCardProps {
 
 export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) {
   const [activePanel, setActivePanel] = useState<string | null>(null);
+  const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
 
   const togglePanel = (panel: string) => {
     if (activePanel === panel) {
@@ -23,6 +26,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
   };
 
   return (
+    <>
     <div className="flex gap-4 items-start">
       {/* Main Project Card */}
       <div className="client-card-wrapper">
@@ -127,6 +131,13 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                   <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                     <span className="text-xs text-white/70">No workflows configured yet</span>
                   </div>
+                  <Button
+                    onClick={() => setIsWorkflowDialogOpen(true)}
+                    className="bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 w-full"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Workflow
+                  </Button>
                 </div>
               )}
               
@@ -174,5 +185,13 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
         </div>
       )}
     </div>
+    
+    <ClientWorkflowDialog
+      open={isWorkflowDialogOpen}
+      onOpenChange={setIsWorkflowDialogOpen}
+      projectId={project.id}
+      projectName={project.project_name}
+    />
+  </>
   );
 }
