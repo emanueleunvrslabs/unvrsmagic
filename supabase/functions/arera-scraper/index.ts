@@ -124,7 +124,10 @@ serve(async (req) => {
           try {
             const fileData = await downloadFile(file.url);
             if (fileData) {
-              const fileName = `${delibera.code.replace(/\//g, "-")}/${file.name}`;
+              // Extract extension from original URL or default to pdf
+              const urlExtension = file.url.split('.').pop()?.toLowerCase() || 'pdf';
+              const extension = ['pdf', 'doc', 'docx', 'xls', 'xlsx'].includes(urlExtension) ? urlExtension : 'pdf';
+              const fileName = `${delibera.code.replace(/\//g, "-")}/${file.name}.${extension}`;
               const { data: uploadData, error: uploadError } = await supabase.storage
                 .from("arera-files")
                 .upload(fileName, fileData, {
