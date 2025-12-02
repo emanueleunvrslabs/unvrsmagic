@@ -175,7 +175,7 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
   const isVideoMode = contentType === "video";
 
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-3 w-full pb-14">
       <div className="text-sm font-semibold text-white/90">New Workflow</div>
       
       {/* Name */}
@@ -380,9 +380,9 @@ export function WorkflowInlineForm({ projectId, onCancel, onWorkflowCreated }: W
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex gap-2 mt-2">
-        <Button onClick={onCancel} variant="ghost" className="flex-1 h-8 text-xs text-white/60 hover:text-white hover:bg-white/10">
+      {/* Actions - positioned at bottom */}
+      <div className="flex gap-2 absolute bottom-4 left-4 right-4">
+        <Button onClick={onCancel} variant="ghost" className="flex-1 h-8 text-xs text-white/60 hover:text-white hover:bg-white/10 border border-white/10">
           Cancel
         </Button>
         <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-8 text-xs bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30">
