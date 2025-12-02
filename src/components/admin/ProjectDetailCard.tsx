@@ -88,6 +88,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
 
   const getModeLabel = (config: any) => {
     const mode = config?.mode || config?.generationMode;
+    if (!mode) return null;
     const labels: Record<string, string> = {
       'text-to-image': 'Text to Image',
       'image-to-image': 'Image to Image',
@@ -96,7 +97,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
       'reference-to-video': 'Reference to Video',
       'first-last-frame': 'First/Last Frame'
     };
-    return labels[mode] || mode || 'Unknown';
+    return labels[mode] || mode;
   };
 
   return (
@@ -223,12 +224,14 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                               <div className="flex-1 min-w-0">
                                 <div className="text-sm text-white/90 truncate">{workflow.name}</div>
                                 <div className="flex gap-1 mt-1">
-                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary/80 border border-primary/30">
-                                    {workflow.content_type}
-                                  </span>
-                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60 border border-white/20">
-                                    {getModeLabel(workflow.schedule_config)}
-                                  </span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary/80 border border-primary/30">
+                                {workflow.content_type}
+                              </span>
+                              {getModeLabel(workflow.schedule_config) && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60 border border-white/20">
+                                  {getModeLabel(workflow.schedule_config)}
+                                </span>
+                              )}
                                 </div>
                               </div>
                               <div className="flex items-center gap-1">
