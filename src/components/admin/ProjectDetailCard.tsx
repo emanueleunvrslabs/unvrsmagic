@@ -197,7 +197,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
               <X size={16} strokeWidth={2.5} />
             </button>
 
-            <div className="card-main-content">
+            <div className="card-main-content !justify-start !pt-12">
               {activePanel === 'workflow' && (
                 <div className="flex flex-col gap-4 w-full">
                   <div className="card-heading text-lg">Workflow</div>
