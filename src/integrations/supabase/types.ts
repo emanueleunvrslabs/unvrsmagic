@@ -703,6 +703,36 @@ export type Database = {
         }
         Relationships: []
       }
+      arera_email_preferences: {
+        Row: {
+          active: boolean
+          categories: string[]
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          categories?: string[]
+          created_at?: string
+          email: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          categories?: string[]
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_contacts: {
         Row: {
           client_id: string
