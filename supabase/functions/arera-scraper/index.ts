@@ -627,13 +627,20 @@ async function isRelevantForWholesaleTariffs(
             role: "user",
             content:
 `Sei un esperto di regolazione energetica italiana.
-Devi decidere se questa delibera interessa direttamente VENDITORI GROSSISTI di energia elettrica e gas (trader, grossisti, fornitori all'ingrosso) e in particolare se riguarda corrispettivi, prezzi o condizioni economiche/tariffarie applicate ai venditori o al mercato all'ingrosso.
+Devi decidere se questa delibera interessa direttamente VENDITORI GROSSISTI e trader di energia elettrica e gas (non i clienti finali retail, non solo distributori/TSO) e in particolare se riguarda corrispettivi, prezzi o condizioni economiche/tariffarie applicate ai venditori o al mercato all'ingrosso.
 
-NON considerare rilevanti le delibere che riguardano solo:
+Esempi di delibere RILEVANTI:
+- delibere che fissano o modificano corrispettivi a carico delle imprese di vendita/venditori grossisti;
+- delibere che definiscono o aggiornano tariffe, prezzi o partite economiche su mercati all'ingrosso di energia elettrica o gas;
+- delibere simili a quelle indicate come riferimento dall'utente, che trattano cambi tariffari per fornitori/venditori grossisti.
+
+NON considerare rilevanti le delibere che riguardano SOLO:
 - distributori di rete,
 - operatori di trasmissione,
 - gestori di distribuzione,
 - aspetti organizzativi interni, ricorsi, contenziosi, adempimenti puramente formali.
+
+In caso di dubbio MA se vi è qualsiasi impatto economico su venditori grossisti o imprese di vendita, rispondi SI.
 
 Titolo: ${title}
 
