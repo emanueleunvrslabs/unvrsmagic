@@ -382,24 +382,27 @@ export default function DelibereArera() {
 
         {/* Real-time Log Panel - Admin only, show when syncing or has logs */}
         {isAdminUser && (isSyncing || logs.length > 0) && (
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-            <CardContent className="p-5">
+          <div
+            className="social-media-card"
+            style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}
+          >
+            <div className="p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Terminal className={`h-5 w-5 text-primary ${isSyncing ? 'animate-pulse' : ''}`} />
-                <h3 className="text-lg font-semibold">Log di Elaborazione</h3>
+                <h3 className="text-lg font-semibold text-white">Log di Elaborazione</h3>
                 {isSyncing && (
                   <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20 animate-pulse">
                     In corso...
                   </span>
                 )}
               </div>
-              <div className="h-[200px] w-full rounded-lg bg-background/50 border border-border/50 p-3 font-mono text-sm overflow-auto">
+              <div className="h-[200px] w-full rounded-lg bg-black/40 border border-white/10 p-3 font-mono text-sm overflow-auto">
                 {logs.length === 0 ? (
-                  <p className="text-muted-foreground">In attesa di eventi...</p>
+                  <p className="text-gray-400">In attesa di eventi...</p>
                 ) : (
                   logs.map((log, index) => (
                     <div key={index} className={`py-1 ${getLogColor(log.type)}`}>
-                      <span className="text-muted-foreground mr-2">
+                      <span className="text-gray-500 mr-2">
                         [{format(log.timestamp, 'HH:mm:ss')}]
                       </span>
                       {log.message}
@@ -408,8 +411,8 @@ export default function DelibereArera() {
                 )}
                 <div ref={logsEndRef} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Delibere List */}
