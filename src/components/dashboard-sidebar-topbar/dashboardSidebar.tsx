@@ -59,6 +59,7 @@ type MenuItem = {
   icon: React.ElementType;
   href?: string;
   hasSubmenu?: boolean;
+  isSpacer?: boolean;
   submenuItems?: Array<{
     id: string;
     label: string;
@@ -468,6 +469,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
         { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
+        { id: "spacer-1", isSpacer: true, label: "", icon: LayoutDashboard },
         {
           id: "ai-social",
           label: "Ai Social",
@@ -578,6 +580,11 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                 {!collapsed && <div className="mb-2 px-2 text-xs font-medium text-muted-foreground">{section.section}</div>}
                 <div className="space-y-1">
                   {section.items.map((item) => {
+                    // Handle spacer items
+                    if ('isSpacer' in item && item.isSpacer) {
+                      return <div key={item.id} className="h-4" />;
+                    }
+                    
                     const Icon = item.icon;
                     const isActive = activeItem === item.id;
 
