@@ -224,11 +224,11 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                               <div className="flex-1 min-w-0">
                                 <div className="text-sm text-white/90 truncate">{workflow.name}</div>
                                 <div className="flex gap-1 mt-1">
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-primary/80 border border-primary/30">
+                              <span className="text-[10px] px-2 py-0.5 rounded-xl bg-primary/20 text-primary/80 border border-primary/30">
                                 {workflow.content_type}
                               </span>
                               {getModeLabel(workflow.schedule_config) && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60 border border-white/20">
+                                <span className="text-[10px] px-2 py-0.5 rounded-xl bg-white/10 text-white/60 border border-white/20">
                                   {getModeLabel(workflow.schedule_config)}
                                 </span>
                               )}
@@ -237,7 +237,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => console.log('Run workflow:', workflow.id)}
-                              className="px-2.5 py-1 text-[10px] rounded-full bg-primary/20 text-primary/80 border border-primary/30 hover:bg-primary/30 transition-colors"
+                              className="px-2.5 py-1 text-[10px] rounded-xl bg-primary/20 text-primary/80 border border-primary/30 hover:bg-primary/30 transition-colors"
                             >
                               Run Now
                             </button>
