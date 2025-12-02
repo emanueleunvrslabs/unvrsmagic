@@ -521,6 +521,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           ],
         },
         { id: "delibere-arera", label: "Delibere Arera", icon: FileText, href: "/delibere-arera" },
+        { id: "spacer-2", isSpacer: true, label: "", icon: LayoutDashboard },
         { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
         { id: "file-upload", label: "Upload", icon: Upload, href: "/file-upload" },
         { id: "labs", label: "Labs", icon: Beaker, href: "/labs" },
