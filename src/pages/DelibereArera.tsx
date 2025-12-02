@@ -309,71 +309,88 @@ export default function DelibereArera() {
             </Card>
           ) : (
             delibere.map((delibera) => (
-              <Card key={delibera.id} className={`bg-card/30 backdrop-blur-sm border-border/50 ${delibera.status === 'processing' ? 'border-yellow-500/50 animate-pulse' : ''}`}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-                          {delibera.delibera_code}
-                        </Badge>
-                        {getStatusBadge(delibera.status)}
-                      </div>
-                      <CardTitle className="text-lg font-semibold line-clamp-2">
-                        {delibera.title}
-                      </CardTitle>
+              <Card key={delibera.id} className="bg-muted/30">
+                <CardContent className="p-4">
+                  <div>
+                    <h3 className="font-medium">{delibera.title}</h3>
+                    <div className="flex flex-wrap gap-2 mt-2 items-center">
+                      {/* Code Badge */}
+                      <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-primary/10 text-primary border-primary/20">
+                        {delibera.delibera_code}
+                      </span>
+                      
+                      {/* Status Badge */}
+                      {delibera.status === "completed" && (
+                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-green-500/10 text-green-400 border-green-500/20">
+                          ✓ Completata
+                        </span>
+                      )}
+                      {delibera.status === "processing" && (
+                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20 animate-pulse">
+                          ⏳ In elaborazione
+                        </span>
+                      )}
+                      {delibera.status === "error" && (
+                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-red-500/10 text-red-400 border-red-500/20">
+                          ✗ Errore
+                        </span>
+                      )}
+                      
+                      {/* Date Badge */}
                       {delibera.publication_date && (
-                        <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          {format(new Date(delibera.publication_date), "d MMMM yyyy", { locale: it })}
-                        </div>
+                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(delibera.publication_date), "d MMM yyyy", { locale: it })}
+                        </span>
+                      )}
+                      
+                      {/* Files Badge */}
+                      {delibera.files && delibera.files.length > 0 && (
+                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-purple-500/10 text-purple-400 border-purple-500/20">
+                          <Download className="h-3 w-3" />
+                          {delibera.files.length} file
+                        </span>
+                      )}
+                      
+                      {/* External Link */}
+                      {delibera.detail_url && (
+                        <a
+                          href={delibera.detail_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-white/5 text-white/70 border-white/10 hover:bg-white/10 transition-colors ml-auto"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          ARERA
+                        </a>
                       )}
                     </div>
-                    {delibera.detail_url && (
-                      <a
-                        href={delibera.detail_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:text-primary/80 transition-colors"
-                      >
-                        <ExternalLink className="h-5 w-5" />
-                      </a>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Summary */}
-                  {delibera.summary && (
-                    <div className="bg-background/50 rounded-lg p-4 border border-border/30">
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Sommario AI</p>
-                      <div className="text-sm whitespace-pre-line">
-                        {delibera.summary}
+                    
+                    {/* Summary */}
+                    {delibera.summary && (
+                      <div className="mt-3 p-3 rounded-lg bg-white/5 border border-white/10">
+                        <p className="text-xs text-white/70 whitespace-pre-line line-clamp-3">{delibera.summary}</p>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Files */}
-                  {delibera.files && delibera.files.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-2">
-                        File allegati ({delibera.files.length})
-                      </p>
-                      <div className="flex flex-wrap gap-2">
+                    )}
+                    
+                    {/* Files List */}
+                    {delibera.files && delibera.files.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
                         {delibera.files.map((file, index) => (
                           <a
                             key={index}
                             href={file.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
+                            className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                           >
-                            <Download className="h-3.5 w-3.5" />
-                            {file.name.length > 30 ? `${file.name.slice(0, 30)}...` : file.name}
+                            <FileText className="h-3 w-3" />
+                            {file.name.length > 25 ? `${file.name.slice(0, 25)}...` : file.name}
                           </a>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))
