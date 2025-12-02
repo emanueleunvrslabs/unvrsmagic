@@ -897,17 +897,6 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
             {/* Billing content */}
             {billingOpen && (
               <div className="flex flex-col gap-3 max-w-md">
-                <div className="flex justify-end mb-1">
-                  <button
-                    className="text-xs text-purple-400/70 hover:text-purple-400 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // TODO: New invoice functionality
-                    }}
-                  >
-                    New Invoice
-                  </button>
-                </div>
                 <div className="space-y-1">
                   <label className="text-xs text-muted-foreground">Company Name</label>
                   <input 
