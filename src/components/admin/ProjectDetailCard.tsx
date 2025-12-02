@@ -186,7 +186,7 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
       {/* Separate Panel Card */}
       {activePanel && (
         <div className="client-card-wrapper">
-          <div className="social-media-card group" style={{ width: '32em', height: 'auto', minHeight: '25em' }}>
+          <div className="social-media-card group relative" style={{ width: '32em', height: 'auto', minHeight: '25em' }}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -198,9 +198,9 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
               <X size={16} strokeWidth={2.5} />
             </button>
 
-            <div className="card-main-content !justify-start !pt-12 h-full" style={{ width: '32em' }}>
+            <div className="card-main-content !justify-start !pt-12 pb-16" style={{ width: '32em' }}>
               {activePanel === 'workflow' && (
-                <div className="flex flex-col w-full h-full relative pb-14">
+                <div className="flex flex-col w-full">
                   {isCreatingWorkflow ? (
                     <WorkflowInlineForm
                       projectId={project.id}
@@ -270,13 +270,6 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                         </div>
                       </div>
                       
-                      <Button
-                        onClick={() => setIsCreatingWorkflow(true)}
-                        className="bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 w-full absolute bottom-0 left-0 right-0"
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        New Workflow
-                      </Button>
                     </>
                   )}
                 </div>
@@ -322,6 +315,17 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
                 </div>
               )}
             </div>
+
+            {/* New Workflow Button - positioned at bottom of card */}
+            {activePanel === 'workflow' && !isCreatingWorkflow && (
+              <Button
+                onClick={() => setIsCreatingWorkflow(true)}
+                className="bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 absolute bottom-4 left-4 right-4"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                New Workflow
+              </Button>
+            )}
           </div>
         </div>
       )}
