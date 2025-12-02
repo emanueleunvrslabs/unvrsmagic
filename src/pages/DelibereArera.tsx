@@ -2,14 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { FileText, RefreshCw, Download, Clock, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { DeliberaCard } from "@/components/arera/DeliberaCard";
+import "@/components/labs/SocialMediaCard.css";
 
 interface DeliberaFile {
   name: string;
@@ -167,19 +166,6 @@ export default function DelibereArera() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/30">Completata</Badge>;
-      case "processing":
-        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-400 border-yellow-500/30">In elaborazione</Badge>;
-      case "error":
-        return <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30">Errore</Badge>;
-      default:
-        return <Badge variant="outline" className="bg-gray-500/10 text-gray-400 border-gray-500/30">In attesa</Badge>;
-    }
-  };
-
   const getLogColor = (type: LogEntry['type']) => {
     switch (type) {
       case 'success': return 'text-green-400';
@@ -213,71 +199,63 @@ export default function DelibereArera() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-card/30 backdrop-blur-sm border-border/50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Totale Delibere</p>
-                  <p className="text-2xl font-bold">{delibere.length}</p>
-                </div>
+          <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+            <div className="flex items-center gap-3 p-5">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <FileText className="h-5 w-5 text-primary" />
               </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card/30 backdrop-blur-sm border-border/50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <Download className="h-5 w-5 text-green-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">File Scaricati</p>
-                  <p className="text-2xl font-bold">
-                    {delibere.reduce((acc, d) => acc + (d.files?.length || 0), 0)}
-                  </p>
-                </div>
+              <div>
+                <p className="text-sm text-gray-400">Totale Delibere</p>
+                <p className="text-2xl font-bold text-white">{delibere.length}</p>
               </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card/30 backdrop-blur-sm border-border/50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-yellow-500/10">
-                  <Clock className={`h-5 w-5 text-yellow-400 ${processingCount > 0 ? 'animate-pulse' : ''}`} />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">In Elaborazione</p>
-                  <p className="text-2xl font-bold">{processingCount}</p>
-                </div>
+            </div>
+          </div>
+          <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+            <div className="flex items-center gap-3 p-5">
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <Download className="h-5 w-5 text-green-400" />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <p className="text-sm text-gray-400">File Scaricati</p>
+                <p className="text-2xl font-bold text-white">
+                  {delibere.reduce((acc, d) => acc + (d.files?.length || 0), 0)}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+            <div className="flex items-center gap-3 p-5">
+              <div className="p-2 rounded-lg bg-yellow-500/10">
+                <Clock className={`h-5 w-5 text-yellow-400 ${processingCount > 0 ? 'animate-pulse' : ''}`} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">In Elaborazione</p>
+                <p className="text-2xl font-bold text-white">{processingCount}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Real-time Log Panel - Show when syncing or has logs */}
         {(isSyncing || logs.length > 0) && (
-          <Card className="bg-card/30 backdrop-blur-sm border-border/50">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Terminal className={`h-5 w-5 text-primary ${isSyncing ? 'animate-pulse' : ''}`} />
-                <CardTitle className="text-lg">Log di Elaborazione</CardTitle>
-                {isSyncing && (
-                  <Badge variant="outline" className="bg-yellow-500/10 text-yellow-400 border-yellow-500/30 animate-pulse">
-                    In corso...
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[200px] w-full rounded-lg bg-background/50 border border-border/30 p-3 font-mono text-sm">
+          <div className="social-media-card" style={{ width: '100%', height: 'auto', minHeight: 'auto', flexDirection: 'column', cursor: 'default' }}>
+            <div className="flex items-center gap-2 px-5 pt-5 pb-3">
+              <Terminal className={`h-5 w-5 text-primary ${isSyncing ? 'animate-pulse' : ''}`} />
+              <h3 className="text-lg font-semibold text-white">Log di Elaborazione</h3>
+              {isSyncing && (
+                <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-yellow-500/10 text-yellow-400 border-yellow-500/20 animate-pulse">
+                  In corso...
+                </span>
+              )}
+            </div>
+            <div className="px-5 pb-5">
+              <div className="h-[200px] w-full rounded-lg bg-black/30 border border-white/10 p-3 font-mono text-sm overflow-auto">
                 {logs.length === 0 ? (
-                  <p className="text-muted-foreground">In attesa di eventi...</p>
+                  <p className="text-gray-400">In attesa di eventi...</p>
                 ) : (
                   logs.map((log, index) => (
                     <div key={index} className={`py-1 ${getLogColor(log.type)}`}>
-                      <span className="text-muted-foreground mr-2">
+                      <span className="text-gray-500 mr-2">
                         [{format(log.timestamp, 'HH:mm:ss')}]
                       </span>
                       {log.message}
@@ -285,9 +263,9 @@ export default function DelibereArera() {
                   ))
                 )}
                 <div ref={logsEndRef} />
-              </ScrollArea>
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Delibere List */}
