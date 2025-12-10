@@ -160,13 +160,14 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   // Build menu sections
   const menuSections: MenuSection[] = [];
 
-  // Main items for all users
+  // Main items for all users - Search is separate with notifications
+  const topItems: MenuItem[] = [
+    { id: "marketplace", label: "Marketplace", icon: Store, href: "/marketplace" },
+    { id: "wallet", label: "Wallet", icon: Wallet, href: "/wallet" },
+  ];
+
   menuSections.push({
-    items: [
-      { id: "search", label: "Search", icon: Search, href: "/search" },
-      { id: "marketplace", label: "Marketplace", icon: Store, href: "/marketplace" },
-      { id: "wallet", label: "Wallet", icon: Wallet, href: "/wallet" },
-    ],
+    items: topItems,
   });
 
   // Admin section - only for owner
@@ -399,62 +400,82 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   return (
     <aside className="fixed left-4 top-4 bottom-4 w-[260px] bg-white/5 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl flex flex-col z-50 border border-white/10">
+      {/* Search & Notifications Row */}
+      <div className="px-2 pt-4 pb-2">
+        <div className="flex items-center gap-2">
+          <Link
+            to="/search"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 text-[15px] transition-all duration-150 rounded-lg flex-1",
+              isItemActive("/search")
+                ? "bg-[#0a84ff] text-white"
+                : "text-white/85 hover:bg-white/10"
+            )}
+          >
+            <Search className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+            <span className="font-normal">Search</span>
+          </Link>
+          
+          {/* Notifications */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="relative p-2 rounded-lg hover:bg-white/10 transition-all duration-200">
+                <Bell className="h-5 w-5 text-white/70" strokeWidth={1.5} />
+                <Badge className="absolute -right-0.5 -top-0.5 h-4 w-4 p-0 text-[9px] flex items-center justify-center bg-[#0a84ff] border-0">
+                  3
+                </Badge>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              side="bottom" 
+              className="w-[280px] mt-2 bg-black/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/10 rounded-xl shadow-2xl"
+            >
+              <DropdownMenuLabel className="text-white/90 text-[15px] font-medium px-3 py-2">Notifications</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+                <div className="flex w-full justify-between">
+                  <span className="font-medium text-sm text-white/90">Bot Action</span>
+                  <span className="text-xs text-white/50">2 min ago</span>
+                </div>
+                <span className="text-xs text-white/60">BTC signal triggered at $65,000</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+                <div className="flex w-full justify-between">
+                  <span className="font-medium text-sm text-white/90">Trade Alert</span>
+                  <span className="text-xs text-white/50">15 min ago</span>
+                </div>
+                <span className="text-xs text-white/60">ETH trade completed: +2.3%</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+                <div className="flex w-full justify-between">
+                  <span className="font-medium text-sm text-white/90">System Notice</span>
+                  <span className="text-xs text-white/50">1 hour ago</span>
+                </div>
+                <span className="text-xs text-white/60">New AI model update available</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium text-[#0a84ff] focus:bg-white/10 focus:text-[#0a84ff] rounded-lg mx-1 py-2">
+                View all notifications
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        
+        {/* Divider */}
+        <div className="h-px bg-white/10 mt-3" />
+      </div>
+
       {/* Menu */}
-      <nav className="flex-1 overflow-y-auto pt-4 px-2">
+      <nav className="flex-1 overflow-y-auto px-2">
         {menuSections.map((section, idx) => renderSection(section, idx))}
       </nav>
 
-      {/* User Profile & Notifications */}
-      <div className="p-3 flex items-center gap-2">
-        {/* Notifications */}
+      {/* User Profile */}
+      <div className="p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="relative p-2 rounded-lg hover:bg-white/10 transition-all duration-200">
-              <Bell className="h-5 w-5 text-white/70" strokeWidth={1.5} />
-              <Badge className="absolute -right-0.5 -top-0.5 h-4 w-4 p-0 text-[9px] flex items-center justify-center bg-[#0a84ff] border-0">
-                3
-              </Badge>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="start" 
-            side="top" 
-            className="w-[280px] mb-2 bg-black/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/10 rounded-xl shadow-2xl"
-          >
-            <DropdownMenuLabel className="text-white/90 text-[15px] font-medium px-3 py-2">Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
-              <div className="flex w-full justify-between">
-                <span className="font-medium text-sm text-white/90">Bot Action</span>
-                <span className="text-xs text-white/50">2 min ago</span>
-              </div>
-              <span className="text-xs text-white/60">BTC signal triggered at $65,000</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
-              <div className="flex w-full justify-between">
-                <span className="font-medium text-sm text-white/90">Trade Alert</span>
-                <span className="text-xs text-white/50">15 min ago</span>
-              </div>
-              <span className="text-xs text-white/60">ETH trade completed: +2.3%</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
-              <div className="flex w-full justify-between">
-                <span className="font-medium text-sm text-white/90">System Notice</span>
-                <span className="text-xs text-white/50">1 hour ago</span>
-              </div>
-              <span className="text-xs text-white/60">New AI model update available</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium text-[#0a84ff] focus:bg-white/10 focus:text-[#0a84ff] rounded-lg mx-1 py-2">
-              View all notifications
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* User Profile */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 flex-1 text-left">
+            <button className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 w-full text-left">
               <Avatar className="h-9 w-9">
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-sm font-medium">
