@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { File, CheckSquare, Kanban, Mail, MessageCircle } from "lucide-react";
+import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 import { useSearchParams } from "react-router-dom";
@@ -14,6 +14,12 @@ interface MockClient {
   id: string;
   company_name: string;
   city: string;
+}
+
+interface Contact {
+  name: string;
+  email: string;
+  whatsapp: string;
 }
 
 const mockClients: MockClient[] = [
@@ -47,6 +53,8 @@ export function AppleTVClientsDemo() {
     postalCode: "",
     country: ""
   });
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState({
     name: "",
     email: "",
@@ -80,7 +88,9 @@ export function AppleTVClientsDemo() {
 
       toast.success("Client created successfully");
       setNewClient({ companyName: "", vatNumber: "", street: "", city: "", postalCode: "", country: "" });
+      setContacts([]);
       setNewContact({ name: "", email: "", whatsapp: "" });
+      setShowAddContact(false);
       setSearchParams({});
     } catch (error) {
       console.error("Error creating client:", error);
@@ -171,43 +181,112 @@ export function AppleTVClientsDemo() {
           </div>
 
           {/* Right Card - Contacts */}
-          <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]">
-            <h3 className="text-white/90 text-lg font-semibold mb-6">Contacts</h3>
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label className="text-white/70 text-sm">Name</Label>
-                <Input
-                  placeholder="Enter contact name"
-                  value={newContact.name}
-                  onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-white/70 text-sm">Email</Label>
-                <Input
-                  type="email"
-                  placeholder="Enter email address"
-                  value={newContact.email}
-                  onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-white/70 text-sm">WhatsApp</Label>
-                <Input
-                  placeholder="Enter WhatsApp number"
-                  value={newContact.whatsapp}
-                  onChange={(e) => setNewContact({ ...newContact, whatsapp: e.target.value })}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-                />
-              </div>
+          <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)] flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-white/90 text-lg font-semibold">Contacts</h3>
+              {!showAddContact && (
+                <button
+                  onClick={() => setShowAddContact(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 text-sm font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Contact
+                </button>
+              )}
+            </div>
+
+            {/* Contacts List */}
+            <div className="flex-1 space-y-3 overflow-y-auto max-h-[280px]">
+              {contacts.length === 0 && !showAddContact && (
+                <div className="flex flex-col items-center justify-center py-8 text-white/40">
+                  <User className="w-12 h-12 mb-3 opacity-50" />
+                  <p className="text-sm">No contacts added yet</p>
+                </div>
+              )}
+              
+              {contacts.map((contact, index) => (
+                <div
+                  key={index}
+                  className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between group"
+                >
+                  <div className="flex-1">
+                    <p className="text-white/90 font-medium">{contact.name}</p>
+                    <p className="text-white/50 text-sm">{contact.email}</p>
+                    <p className="text-white/50 text-sm">{contact.whatsapp}</p>
+                  </div>
+                  <button
+                    onClick={() => setContacts(contacts.filter((_, i) => i !== index))}
+                    className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Add Contact Form */}
+              {showAddContact && (
+                <div className="space-y-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="space-y-2">
+                    <Label className="text-white/70 text-sm">Name</Label>
+                    <Input
+                      placeholder="Enter contact name"
+                      value={newContact.name}
+                      onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/70 text-sm">Email</Label>
+                    <Input
+                      type="email"
+                      placeholder="Enter email address"
+                      value={newContact.email}
+                      onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/70 text-sm">WhatsApp</Label>
+                    <Input
+                      placeholder="Enter WhatsApp number"
+                      value={newContact.whatsapp}
+                      onChange={(e) => setNewContact({ ...newContact, whatsapp: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-10"
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => {
+                        setShowAddContact(false);
+                        setNewContact({ name: "", email: "", whatsapp: "" });
+                      }}
+                      className="flex-1 p-2 rounded-full bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80 transition-all text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (newContact.name && newContact.email && newContact.whatsapp) {
+                          setContacts([...contacts, { ...newContact }]);
+                          setNewContact({ name: "", email: "", whatsapp: "" });
+                          setShowAddContact(false);
+                        } else {
+                          toast.error("Please fill all contact fields");
+                        }
+                      }}
+                      className="flex-1 p-2 rounded-full bg-white/10 border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all text-sm font-medium"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Create Button */}
             <button 
               onClick={handleCreateClient}
-              className="w-full p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium mt-8"
+              className="w-full p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium mt-6"
             >
               Create Client
             </button>
