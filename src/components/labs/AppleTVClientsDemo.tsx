@@ -84,9 +84,6 @@ export function AppleTVClientsDemo() {
                     <div className="labs-shooting-star labs-shooting-star-2" />
                     <div className="labs-shooting-star labs-shooting-star-3" />
                     
-                    {/* Purple Glow */}
-                    <div className="labs-glow" />
-                    
                     {/* Content */}
                     <div className="absolute inset-0 flex items-center justify-between p-8 z-10">
                       <div>
