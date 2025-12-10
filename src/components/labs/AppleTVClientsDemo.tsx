@@ -47,6 +47,11 @@ export function AppleTVClientsDemo() {
     postalCode: "",
     country: ""
   });
+  const [newContact, setNewContact] = useState({
+    name: "",
+    email: "",
+    whatsapp: ""
+  });
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: "center",
@@ -75,6 +80,7 @@ export function AppleTVClientsDemo() {
 
       toast.success("Client created successfully");
       setNewClient({ companyName: "", vatNumber: "", street: "", city: "", postalCode: "", country: "" });
+      setNewContact({ name: "", email: "", whatsapp: "" });
       setSearchParams({});
     } catch (error) {
       console.error("Error creating client:", error);
@@ -100,10 +106,10 @@ export function AppleTVClientsDemo() {
   if (isNewClientView) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {/* Card Container - iOS 26 Glassmorphism */}
+        <div className="w-full max-w-4xl grid grid-cols-2 gap-6">
+          {/* Left Card - Bill Information */}
           <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]">
-            {/* Content */}
+            <h3 className="text-white/90 text-lg font-semibold mb-6">Bill Information</h3>
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label className="text-white/70 text-sm">Company Name</Label>
@@ -161,13 +167,50 @@ export function AppleTVClientsDemo() {
                   className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
                 />
               </div>
-              <button 
-                onClick={handleCreateClient}
-                className="w-full p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium mt-2"
-              >
-                Create Client
-              </button>
             </div>
+          </div>
+
+          {/* Right Card - Contacts */}
+          <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]">
+            <h3 className="text-white/90 text-lg font-semibold mb-6">Contacts</h3>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">Name</Label>
+                <Input
+                  placeholder="Enter contact name"
+                  value={newContact.name}
+                  onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">Email</Label>
+                <Input
+                  type="email"
+                  placeholder="Enter email address"
+                  value={newContact.email}
+                  onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">WhatsApp</Label>
+                <Input
+                  placeholder="Enter WhatsApp number"
+                  value={newContact.whatsapp}
+                  onChange={(e) => setNewContact({ ...newContact, whatsapp: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                />
+              </div>
+            </div>
+            
+            {/* Create Button */}
+            <button 
+              onClick={handleCreateClient}
+              className="w-full p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium mt-8"
+            >
+              Create Client
+            </button>
           </div>
         </div>
       </div>
