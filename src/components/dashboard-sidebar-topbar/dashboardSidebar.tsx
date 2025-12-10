@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import "./dashboardSidebar.css";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -400,7 +401,16 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   };
 
   return (
-    <aside className="fixed left-4 top-4 bottom-4 w-[260px] bg-white/5 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl flex flex-col z-50 border border-white/10">
+    <aside className="space-sidebar fixed left-4 top-4 bottom-4 w-[260px] rounded-2xl flex flex-col z-50 border border-white/10">
+      {/* Shooting Stars */}
+      <div className="shooting-stars-container">
+        <div className="shooting-star" />
+        <div className="shooting-star" />
+        <div className="shooting-star" />
+      </div>
+      {/* Purple Glow */}
+      <div className="space-glow" />
+      
       {/* Search Row */}
       <div className="px-2 pt-4 pb-2">
         <Link
