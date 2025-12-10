@@ -616,3 +616,143 @@
   animation: 1s glowing-stars linear alternate infinite;
   animation-delay: 0.4s;
 }
+
+/* Labs Client Card - Apple TV Style */
+.labs-client-card {
+  background-color: #171717;
+  backdrop-filter: blur(15px);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1),
+    inset 0 0 5px rgba(255, 255, 255, 0.15), 
+    0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.labs-client-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: rgba(23, 23, 23, 0.85);
+  z-index: 1;
+}
+
+/* Stars Layers */
+.labs-stars-layer {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  opacity: 1;
+  box-shadow: 120px 30px #fff, 280px 50px #fff, 40px 80px #fff,
+    350px 40px #fff, 180px 100px #fff, 420px 70px #fff, 
+    500px 30px #fff, 60px 45px #fff, 320px 85px #fff;
+  z-index: 2;
+  animation: 1s glowing-stars linear alternate infinite;
+  animation-delay: 0s;
+}
+
+.labs-stars-layer-2 {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  opacity: 1;
+  box-shadow: 80px 60px #fff, 220px 35px #fff, 160px 75px #fff,
+    400px 55px #fff, 480px 85px #fff, 30px 25px #fff,
+    260px 90px #fff, 540px 45px #fff;
+  z-index: 2;
+  animation: 1s glowing-stars linear alternate infinite;
+  animation-delay: 0.4s;
+}
+
+.labs-stars-layer-3 {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  opacity: 1;
+  box-shadow: 200px 20px #fff, 380px 65px #fff, 100px 50px #fff,
+    450px 35px #fff, 560px 75px #fff, 140px 95px #fff;
+  z-index: 2;
+  animation: 1s glowing-stars linear alternate infinite;
+  animation-delay: 0.8s;
+}
+
+/* Shooting Stars */
+.labs-shooting-star {
+  position: absolute;
+  width: 4em;
+  height: 1px;
+  background: linear-gradient(90deg, #ffffff, transparent);
+  z-index: 3;
+  opacity: 0;
+}
+
+.labs-shooting-star-1 {
+  top: 20%;
+  right: -10%;
+  rotate: -45deg;
+  animation: 4s labs-shooting-star ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.labs-shooting-star-2 {
+  top: 40%;
+  right: -5%;
+  rotate: -45deg;
+  animation: 4s labs-shooting-star ease-in-out infinite;
+  animation-delay: 2.5s;
+}
+
+.labs-shooting-star-3 {
+  top: 60%;
+  right: -15%;
+  rotate: -45deg;
+  animation: 4s labs-shooting-star ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+@keyframes labs-shooting-star {
+  0% {
+    transform: translateX(0) translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-40em) translateY(20em);
+    opacity: 1;
+  }
+  60% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50em) translateY(25em);
+    opacity: 0;
+  }
+}
+
+/* Purple Glow */
+.labs-glow {
+  position: absolute;
+  top: -50%;
+  left: -30%;
+  width: 3em;
+  height: 3em;
+  border-radius: 50%;
+  background: #f9f9fb;
+  box-shadow: 0px 0px 60px rgba(193, 119, 241, 0.6),
+    0px 0px 80px rgba(135, 42, 211, 0.5), 
+    inset #9b40fc 0px 0px 40px -12px;
+  z-index: 2;
+  opacity: 0.8;
+}

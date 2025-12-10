@@ -8,18 +8,17 @@ interface MockClient {
   id: string;
   company_name: string;
   city: string;
-  color: string;
 }
 
 const mockClients: MockClient[] = [
-  { id: "1", company_name: "Acme Corporation", city: "Milano", color: "from-purple-600 to-blue-600" },
-  { id: "2", company_name: "Tech Solutions", city: "Roma", color: "from-pink-600 to-rose-600" },
-  { id: "3", company_name: "Global Industries", city: "Torino", color: "from-cyan-600 to-teal-600" },
-  { id: "4", company_name: "Future Systems", city: "Napoli", color: "from-orange-600 to-amber-600" },
-  { id: "5", company_name: "Digital Ventures", city: "Firenze", color: "from-green-600 to-emerald-600" },
-  { id: "6", company_name: "Smart Services", city: "Bologna", color: "from-indigo-600 to-violet-600" },
-  { id: "7", company_name: "Innovation Hub", city: "Venezia", color: "from-red-600 to-pink-600" },
-  { id: "8", company_name: "Cloud Partners", city: "Genova", color: "from-blue-600 to-cyan-600" },
+  { id: "1", company_name: "Acme Corporation", city: "Milano" },
+  { id: "2", company_name: "Tech Solutions", city: "Roma" },
+  { id: "3", company_name: "Global Industries", city: "Torino" },
+  { id: "4", company_name: "Future Systems", city: "Napoli" },
+  { id: "5", company_name: "Digital Ventures", city: "Firenze" },
+  { id: "6", company_name: "Smart Services", city: "Bologna" },
+  { id: "7", company_name: "Innovation Hub", city: "Venezia" },
+  { id: "8", company_name: "Cloud Partners", city: "Genova" },
 ];
 
 const actionItems = [
@@ -52,8 +51,6 @@ export function AppleTVClientsDemo() {
     };
   }, [emblaApi, onSelect]);
 
-  const selectedClient = mockClients[selectedIndex];
-
   return (
     <div className="h-full flex flex-col pt-8">
       {/* Carousel Gallery */}
@@ -70,39 +67,44 @@ export function AppleTVClientsDemo() {
                   <div
                     onClick={() => emblaApi?.scrollTo(index)}
                     className={cn(
-                      "relative aspect-[16/9] rounded-3xl overflow-hidden cursor-pointer",
+                      "labs-client-card relative aspect-[16/9] rounded-[20px] overflow-hidden cursor-pointer",
                       "transition-all duration-500 ease-out",
                       isSelected
                         ? "scale-100 opacity-100"
                         : "scale-90 opacity-40 hover:opacity-60"
                     )}
                   >
-                    {/* Gradient Background */}
-                    <div className={cn(
-                      "absolute inset-0 bg-gradient-to-br",
-                      client.color
-                    )} />
+                    {/* Stars Layer */}
+                    <div className="labs-stars-layer" />
+                    <div className="labs-stars-layer-2" />
+                    <div className="labs-stars-layer-3" />
+                    
+                    {/* Shooting Stars */}
+                    <div className="labs-shooting-star labs-shooting-star-1" />
+                    <div className="labs-shooting-star labs-shooting-star-2" />
+                    <div className="labs-shooting-star labs-shooting-star-3" />
+                    
+                    {/* Purple Glow */}
+                    <div className="labs-glow" />
                     
                     {/* Content */}
-                    <div className="absolute inset-0 flex flex-col justify-end p-6">
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <h2 className="text-3xl font-bold text-white tracking-tight">
-                            {client.company_name}
-                          </h2>
-                          <p className="text-white/70 text-base mt-1">{client.city}</p>
-                        </div>
-                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <span className="text-3xl font-bold text-white">
-                            {client.company_name[0]}
-                          </span>
-                        </div>
+                    <div className="absolute inset-0 flex items-center justify-between p-8 z-10">
+                      <div>
+                        <h2 className="text-3xl font-bold text-white tracking-tight">
+                          {client.company_name}
+                        </h2>
+                        <p className="text-white/60 text-lg mt-2">{client.city}</p>
+                      </div>
+                      <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                        <span className="text-4xl font-bold text-white/80">
+                          {client.company_name[0]}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Glow effect for selected */}
+                    {/* Selected Glow */}
                     {isSelected && (
-                      <div className="absolute inset-0 ring-2 ring-white/30 rounded-3xl shadow-[0_0_60px_rgba(255,255,255,0.2)]" />
+                      <div className="absolute inset-0 ring-1 ring-white/20 rounded-[20px] shadow-[0_0_60px_rgba(155,64,252,0.3)]" />
                     )}
                   </div>
                 </div>
