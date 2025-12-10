@@ -41,6 +41,7 @@ import AiArtGenerateVideo from "./pages/AiArt/GenerateVideo";
 
 import Labs from "./pages/Labs";
 import DelibereArera from "./pages/DelibereArera";
+import Search from "./pages/Search";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => (
           <Route path="/nkmt/dashboard" element={<ProtectedRoute><NKMTDashboard /></ProtectedRoute>} />
           <Route path="/nkmt" element={<Navigate to="/nkmt/dashboard" replace />} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationCenter /></ProtectedRoute>} />
+          <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
           <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
           <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
           <Route path="/file-upload" element={<ProtectedRoute><FileUpload /></ProtectedRoute>} />
