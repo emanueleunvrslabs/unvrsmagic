@@ -89,6 +89,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>({});
+  const [profileOpen, setProfileOpen] = useState(false);
   const { isOwner, isAdmin, isUser } = useUserRole();
   const { userProjects } = useUserProjects();
 
@@ -424,51 +425,58 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         {menuSections.map((section, idx) => renderSection(section, idx))}
       </nav>
 
-      {/* User Profile */}
-      <div className="p-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 w-full text-left">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src="" />
-                <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-sm font-medium">
-                  {userProfile?.full_name?.[0] || userProfile?.phone_number?.[0] || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-[14px] text-white/90 font-normal flex-1">
-                {userProfile?.full_name || userProfile?.phone_number || "User"}
-              </span>
-              <ChevronDown className="h-4 w-4 text-white/50" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="start" 
-            side="top" 
-            className="w-[230px] mb-2 bg-black/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/10 rounded-xl shadow-2xl"
-          >
-            <DropdownMenuLabel className="text-white/90 text-[15px] font-medium px-3 py-2">My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem asChild className="focus:bg-white/10 rounded-lg mx-1 px-3 py-2">
-              <Link to="/settings?tab=profile" className="cursor-pointer text-white/85">
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </Link>
-            </DropdownMenuItem>
+      {/* User Profile - Collapsible */}
+      <div className="p-3 border-t border-white/10">
+        <button 
+          onClick={() => setProfileOpen(!profileOpen)}
+          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 w-full text-left"
+        >
+          <Avatar className="h-9 w-9">
+            <AvatarImage src="" />
+            <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-sm font-medium">
+              {userProfile?.full_name?.[0] || userProfile?.phone_number?.[0] || "U"}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-[14px] text-white/90 font-normal flex-1 truncate">
+            {userProfile?.full_name || userProfile?.phone_number || "User"}
+          </span>
+          <ChevronDown className={cn(
+            "h-4 w-4 text-white/50 transition-transform duration-200",
+            profileOpen && "rotate-180"
+          )} />
+        </button>
+        
+        {/* Collapsible Content */}
+        <div className={cn(
+          "overflow-hidden transition-all duration-200 ease-out",
+          profileOpen ? "max-h-48 opacity-100 mt-2" : "max-h-0 opacity-0"
+        )}>
+          <div className="space-y-1 pl-2">
+            <Link
+              to="/settings?tab=profile"
+              className="flex items-center gap-3 px-3 py-2 text-[14px] text-white/70 hover:text-white/90 hover:bg-white/10 rounded-lg transition-all"
+            >
+              <User className="h-4 w-4" />
+              Profile
+            </Link>
             {isOwner && (
-              <DropdownMenuItem asChild className="focus:bg-white/10 rounded-lg mx-1 px-3 py-2">
-                <Link to="/settings?tab=security" className="cursor-pointer text-white/85">
-                  <Zap className="mr-2 h-4 w-4" />
-                  AI Model API
-                </Link>
-              </DropdownMenuItem>
+              <Link
+                to="/settings?tab=security"
+                className="flex items-center gap-3 px-3 py-2 text-[14px] text-white/70 hover:text-white/90 hover:bg-white/10 rounded-lg transition-all"
+              >
+                <Zap className="h-4 w-4" />
+                AI Model API
+              </Link>
             )}
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 focus:text-red-400 focus:bg-white/10 rounded-lg mx-1 px-3 py-2">
-              <LogOut className="mr-2 h-4 w-4" />
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-3 py-2 text-[14px] text-red-400 hover:text-red-300 hover:bg-white/10 rounded-lg transition-all w-full text-left"
+            >
+              <LogOut className="h-4 w-4" />
               Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </button>
+          </div>
+        </div>
       </div>
     </aside>
   );
