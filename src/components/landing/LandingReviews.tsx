@@ -3,109 +3,109 @@ import { Star } from "lucide-react";
 
 const reviews = [
   {
-    name: "Marco Rossi",
+    name: "Henrik Johansson",
     role: "CEO Tech Solutions",
     rating: 5,
     text: "UNVRS LABS transformed our digital infrastructure with cutting-edge AI solutions. Their expertise and professionalism exceeded all expectations.",
-    avatar: "MR"
+    avatar: "HJ"
   },
   {
-    name: "Sofia Bianchi",
+    name: "Amélie Dubois",
     role: "Product Manager",
     rating: 5,
     text: "The custom software they built streamlined our operations completely. Exceptional attention to detail and outstanding support throughout the project.",
-    avatar: "SB"
+    avatar: "AD"
   },
   {
-    name: "Luca Ferrari",
+    name: "Takeshi Nakamura",
     role: "CTO StartupHub",
     rating: 5,
     text: "Their cloud architecture expertise helped us scale from startup to enterprise. Innovative solutions that grew with our business needs perfectly.",
-    avatar: "LF"
+    avatar: "TN"
   },
   {
-    name: "Elena Russo",
+    name: "Katarina Novak",
     role: "Digital Director",
     rating: 5,
     text: "Outstanding mobile app development with exceptional UX design. The team delivered beyond what we imagined was possible for our platform.",
-    avatar: "ER"
+    avatar: "KN"
   },
   {
-    name: "Andrea Conti",
+    name: "Miguel Fernández",
     role: "Operations Lead",
     rating: 5,
     text: "Their DevOps implementation revolutionized our deployment process. Reduced our release cycle by 70% while improving quality and stability.",
-    avatar: "AC"
+    avatar: "MF"
   },
   {
-    name: "Giulia Romano",
+    name: "Ingrid Larsen",
     role: "Innovation Officer",
     rating: 5,
     text: "Strategic consulting that transformed our digital roadmap. Their insights and technical guidance were invaluable for our company's growth.",
-    avatar: "GR"
+    avatar: "IL"
   },
   {
-    name: "Francesco Marino",
+    name: "Alexander Chen",
     role: "Founder & CEO",
     rating: 5,
     text: "Working with UNVRS LABS was a game-changer for our business. They understood our vision and delivered solutions that exceeded our wildest expectations.",
-    avatar: "FM"
+    avatar: "AC"
   },
   {
-    name: "Valentina Costa",
+    name: "Priya Sharma",
     role: "Head of Digital",
     rating: 5,
     text: "Impressive technical expertise combined with excellent project management. They delivered on time, on budget, and with outstanding quality throughout.",
-    avatar: "VC"
+    avatar: "PS"
   },
   {
-    name: "Davide Ricci",
+    name: "James O'Brien",
     role: "VP Engineering",
     rating: 5,
     text: "Their AI integration capabilities are world-class. They helped us implement machine learning models that transformed our product offering completely.",
-    avatar: "DR"
+    avatar: "JO"
   },
   {
-    name: "Chiara Moretti",
-    role: "CMO Marketing Pro",
+    name: "Yuki Tanaka",
+    role: "CMO Digital Agency",
     rating: 5,
     text: "The mobile app they created for our marketing campaigns was flawless. Beautiful design, smooth performance, and incredible user engagement metrics.",
-    avatar: "CM"
+    avatar: "YT"
   },
   {
-    name: "Roberto Gallo",
+    name: "Sebastian Müller",
     role: "Tech Lead",
     rating: 5,
     text: "Their development team is incredibly talented and responsive. They solved complex technical challenges with elegant, scalable solutions every time.",
-    avatar: "RG"
+    avatar: "SM"
   },
   {
-    name: "Alessia Bruno",
+    name: "Isabella Santos",
     role: "Business Owner",
     rating: 5,
     text: "From concept to launch, they guided us through every step. The custom software solution they built transformed how we operate our entire business.",
-    avatar: "AB"
+    avatar: "IS"
   },
   {
-    name: "Matteo Villa",
+    name: "Erik Lindqvist",
     role: "CTO Enterprise Co",
     rating: 5,
     text: "Their cloud migration strategy was flawless. Zero downtime, seamless transition, and immediate performance improvements across all our systems.",
-    avatar: "MV"
+    avatar: "EL"
   },
   {
-    name: "Serena De Luca",
+    name: "Clara Beaumont",
     role: "Product Director",
     rating: 5,
     text: "Exceptional collaboration and communication throughout the project. They anticipated our needs and delivered innovative solutions at every turn.",
-    avatar: "SD"
+    avatar: "CB"
   },
   {
-    name: "Paolo Rizzo",
+    name: "Raj Patel",
     role: "COO Digital Ventures",
     rating: 5,
     text: "The automation solutions they implemented saved us countless hours. Their DevOps expertise has been transformative for our operational efficiency.",
-    avatar: "PR"
+    avatar: "RP"
   },
 ];
 
