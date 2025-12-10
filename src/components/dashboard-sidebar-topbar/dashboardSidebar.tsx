@@ -19,6 +19,7 @@ import {
   ChevronRight,
   CircleDollarSign,
   FileText,
+  FlaskConical,
   Gauge,
   Home,
   Image,
@@ -294,6 +295,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     defaultOpen: true,
     items: [
       { id: "upload", label: "Upload", icon: Upload, href: "/file-upload" },
+      { id: "labs", label: "Labs", icon: FlaskConical, href: "/labs" },
     ],
   });
 

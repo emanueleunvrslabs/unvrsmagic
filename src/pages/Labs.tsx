@@ -1,10 +1,10 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { SocialMediaCardDemo } from "@/components/labs/SocialMediaCardDemo";
+import { AppleTVClientsDemo } from "@/components/labs/AppleTVClientsDemo";
 
 export default function LabsPage() {
   return (
     <DashboardLayout>
-      <SocialMediaCardDemo />
+      <AppleTVClientsDemo />
     </DashboardLayout>
   );
 }
