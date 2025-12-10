@@ -11,7 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import {
+  Bell,
   ChevronDown,
   CircleDollarSign,
   FileText,
@@ -269,11 +271,53 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         {menuSections.map((section, idx) => renderSection(section, idx))}
       </nav>
 
-      {/* User Profile */}
-      <div className="p-3">
+      {/* User Profile & Notifications */}
+      <div className="p-3 flex items-center gap-2">
+        {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 w-full text-left">
+            <button className="relative p-2 rounded-lg hover:bg-white/10 transition-all duration-200">
+              <Bell className="h-5 w-5 text-white/70" strokeWidth={1.5} />
+              <Badge className="absolute -right-0.5 -top-0.5 h-4 w-4 p-0 text-[9px] flex items-center justify-center bg-[#0a84ff] border-0">
+                3
+              </Badge>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="top" className="w-[280px] mb-2">
+            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="flex flex-col items-start py-2 cursor-default">
+              <div className="flex w-full justify-between">
+                <span className="font-medium text-sm">Bot Action</span>
+                <span className="text-xs text-muted-foreground">2 min ago</span>
+              </div>
+              <span className="text-xs text-muted-foreground">BTC signal triggered at $65,000</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex flex-col items-start py-2 cursor-default">
+              <div className="flex w-full justify-between">
+                <span className="font-medium text-sm">Trade Alert</span>
+                <span className="text-xs text-muted-foreground">15 min ago</span>
+              </div>
+              <span className="text-xs text-muted-foreground">ETH trade completed: +2.3%</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex flex-col items-start py-2 cursor-default">
+              <div className="flex w-full justify-between">
+                <span className="font-medium text-sm">System Notice</span>
+                <span className="text-xs text-muted-foreground">1 hour ago</span>
+              </div>
+              <span className="text-xs text-muted-foreground">New AI model update available</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium">
+              View all notifications
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* User Profile */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 flex-1 text-left">
               <Avatar className="h-9 w-9">
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-sm font-medium">
