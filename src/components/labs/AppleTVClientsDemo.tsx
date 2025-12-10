@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { File, CheckSquare, Kanban, Mail, MessageCircle } from "lucide-react";
+import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 import "./SocialMediaCard.css";
@@ -31,6 +31,7 @@ const actionItems = [
 
 export function AppleTVClientsDemo() {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState("clients");
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: "center",
@@ -52,7 +53,47 @@ export function AppleTVClientsDemo() {
   }, [emblaApi, onSelect]);
 
   return (
-    <div className="h-full flex flex-col pt-8">
+    <div className="h-full flex flex-col">
+      {/* Top Menu Bar */}
+      <div className="flex justify-center pt-6 pb-4">
+        <div className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/15">
+          <button
+            onClick={() => setActiveTab("new")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
+              activeTab === "new"
+                ? "bg-white/20 text-white"
+                : "text-white/60 hover:text-white/80"
+            )}
+          >
+            <Plus className="w-4 h-4" />
+            New Client
+          </button>
+          <button
+            onClick={() => setActiveTab("clients")}
+            className={cn(
+              "px-4 py-2 rounded-full text-sm font-medium transition-all",
+              activeTab === "clients"
+                ? "bg-white/20 text-white"
+                : "text-white/60 hover:text-white/80"
+            )}
+          >
+            Clients
+          </button>
+          <button
+            onClick={() => setActiveTab("search")}
+            className={cn(
+              "p-2 rounded-full transition-all",
+              activeTab === "search"
+                ? "bg-white/20 text-white"
+                : "text-white/60 hover:text-white/80"
+            )}
+          >
+            <Search className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
       {/* Carousel Gallery */}
       <div className="flex-1 flex flex-col justify-center max-h-[55%]">
         <div className="overflow-hidden" ref={emblaRef}>
