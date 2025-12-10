@@ -101,8 +101,8 @@ export function AppleTVClientsDemo() {
     return (
       <div className="h-full flex flex-col items-center justify-center p-8">
         <div className="w-full max-w-md">
-          {/* Card Container */}
-          <div className="relative rounded-[20px] overflow-hidden p-8 bg-white/5 backdrop-blur-xl border border-white/10">
+          {/* Card Container - iOS 26 Glassmorphism */}
+          <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]">
             {/* Content */}
             <div className="space-y-5">
               <div className="space-y-2">
