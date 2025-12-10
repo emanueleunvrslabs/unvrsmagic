@@ -82,13 +82,12 @@ export default function AdminClients() {
         ) : (
           <>
             <div className="flex justify-end">
-              <Button 
+              <button 
                 onClick={() => setShowNewClientForm(true)} 
-                className="gap-2 px-5 py-6 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
+                className="p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
               >
-                <UserPlus className="h-4 w-4" />
-                New Client
-              </Button>
+                <UserPlus className="h-5 w-5" />
+              </button>
             </div>
 
             <div className="flex flex-wrap gap-6 mx-auto" style={{ maxWidth: 'fit-content' }}>
