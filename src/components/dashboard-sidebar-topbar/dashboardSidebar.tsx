@@ -3,49 +3,42 @@
 import type React from "react";
 import { createPortal } from "react-dom";
 
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import unvrsLogo from "@/assets/unvrs-logo.jpeg";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Activity,
-  Beaker,
-  Bell,
   Bot,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   CircleDollarSign,
-  Cog,
-  Coins,
-  Cpu,
   CreditCard,
   Database,
   FileText,
   Folder,
   Gauge,
-  HelpCircle,
   Image,
   Layers,
   LayoutDashboard,
-  LineChart,
   Menu,
   PieChart,
   Radio,
   Repeat,
+  Search,
   Settings,
   Store,
   Upload,
   User,
   Users,
-  UserPlus,
   Wallet,
   Wand2,
   XIcon,
   Zap,
+  Home,
+  Cpu,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,7 +80,7 @@ function FloatingSubmenu({ item, isVisible, position, activeItem, setActiveItem 
 
   return createPortal(
     <div
-      className="fixed bg-popover border border-border rounded-lg shadow-xl py-1 min-w-[200px] max-w-[250px] transition-all duration-200 z-[9999]"
+      className="fixed bg-sidebar/95 backdrop-blur-xl border border-sidebar-border rounded-xl shadow-2xl py-2 min-w-[220px] transition-all duration-200 z-[9999]"
       style={{
         left: position.x,
         top: position.y,
@@ -95,43 +88,26 @@ function FloatingSubmenu({ item, isVisible, position, activeItem, setActiveItem 
         visibility: isVisible ? "visible" : "hidden",
       }}
     >
-      <div className="px-3 py-2 text-xs font-semibold text-muted-foreground border-b border-border bg-muted/50">{item.label}</div>
-      <div className="py-1">
+      <div className="px-4 py-2 text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider">{item.label}</div>
+      <div className="px-2">
         {item.submenuItems?.map((subItem) => {
           const SubIcon = subItem.icon;
           const isSubActive = activeItem === subItem.id;
           return (
-            <Button
+            <Link
               key={subItem.id}
-              variant="ghost"
-              className={cn("w-full justify-start px-3 py-2 h-auto rounded-lg text-sm hover:bg-accent hover:text-accent-foreground", isSubActive && "bg-accent text-accent-foreground font-medium")}
+              to={subItem.href || "#"}
               onClick={() => setActiveItem(subItem.id)}
-              asChild={!!subItem.href}
-            >
-              {subItem.href ? (
-                <Link to={subItem.href} className="flex items-center w-full">
-                  {subItem.status && (
-                    <div className={cn(
-                      "w-2 h-2 rounded-full mr-2 flex-shrink-0",
-                      subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
-                    )} />
-                  )}
-                  <SubIcon className="mr-3 h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{subItem.label}</span>
-                </Link>
-              ) : (
-                <div className="flex items-center w-full">
-                  {subItem.status && (
-                    <div className={cn(
-                      "w-2 h-2 rounded-full mr-2 flex-shrink-0",
-                      subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
-                    )} />
-                  )}
-                  <SubIcon className="mr-3 h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{subItem.label}</span>
-                </div>
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                isSubActive 
+                  ? "bg-primary/20 text-primary" 
+                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
               )}
-            </Button>
+            >
+              <SubIcon className="h-[18px] w-[18px]" />
+              <span className="font-medium">{subItem.label}</span>
+            </Link>
           );
         })}
       </div>
@@ -157,10 +133,10 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     "ai-art": false,
     "delibere-arera": false,
   });
-  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [projects, setProjects] = useState<Array<{ id: string; name: string; status: string }>>([]);
   const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
+  const [userProfile, setUserProfile] = useState<{ full_name: string | null; phone_number: string } | null>(null);
   const { isOwner, isAdmin, isUser } = useUserRole();
   const { userProjects } = useUserProjects();
   const { allProjects } = useMarketplaceProjects();
@@ -175,7 +151,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     if (pathname === "/") {
       setActiveItem("dashboard");
     } else if (pathname === "/settings") {
-      // Get tab from URL params
       const searchParams = new URLSearchParams(location.search);
       const tab = searchParams.get('tab');
       if (tab === 'profile') {
@@ -189,7 +164,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       }
       setOpenSubmenus((prev) => ({ ...prev, "settings": true }));
     } else if (pathname.startsWith("/nkmt")) {
-      // Handle NKMT agents and exchanges
       if (pathname === "/nkmt/dashboard") {
         setActiveItem("nkmt-dashboard");
       } else if (pathname === "/nkmt/bitget" || pathname === "/nkmt/binance" || pathname === "/nkmt/okx") {
@@ -216,7 +190,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       }
       setOpenSubmenus((prev) => ({ ...prev, "nkmt": true }));
     } else if (pathname.startsWith("/ai-social")) {
-      // Handle Ai Social routes
       if (pathname === "/ai-social") {
         setActiveItem("ai-social-dashboard");
       } else if (pathname === "/ai-social/generate-image") {
@@ -236,7 +209,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       }
       setOpenSubmenus((prev) => ({ ...prev, "ai-social": true }));
     } else if (pathname.startsWith("/ai-art")) {
-      // Handle AI Art routes
       if (pathname === "/ai-art/generate-image") {
         setActiveItem("ai-art-generate-image");
       } else if (pathname === "/ai-art/generate-video") {
@@ -251,8 +223,15 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       setActiveItem("file-upload");
     } else if (pathname === "/labs") {
       setActiveItem("labs");
+    } else if (pathname === "/admin/dashboard") {
+      setActiveItem("admin-dashboard");
+    } else if (pathname === "/admin/clients") {
+      setActiveItem("admin-clients");
+    } else if (pathname === "/marketplace") {
+      setActiveItem("marketplace");
+    } else if (pathname === "/wallet") {
+      setActiveItem("wallet");
     } else {
-      // Extract the main path without subpaths
       const mainPath = pathname.split("/")[1];
       if (mainPath) {
         setActiveItem(mainPath);
@@ -272,10 +251,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         setCollapsed(true);
       }
     };
-
-    // Set initial state
     handleResize();
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -292,7 +268,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         setProjects(data);
       }
     };
-
     fetchProjects();
   }, []);
 
@@ -308,14 +283,31 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         .eq("user_id", user.id);
       
       if (data) {
-        // Remove duplicates
         const uniqueExchanges = Array.from(new Set(data.map(item => item.exchange)))
           .map(exchange => ({ exchange }));
         setExchanges(uniqueExchanges);
       }
     };
-
     fetchExchanges();
+  }, []);
+
+  // Load user profile
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, phone_number")
+        .eq("user_id", user.id)
+        .single();
+      
+      if (data) {
+        setUserProfile(data);
+      }
+    };
+    fetchUserProfile();
   }, []);
 
   const toggleSidebar = () => {
@@ -335,20 +327,16 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     }
 
     const rect = element.getBoundingClientRect();
-    
-    // Calculate estimated submenu height (approximately 50px per item + header)
     const estimatedMenuHeight = (item.submenuItems?.length || 0) * 50 + 60;
     const viewportHeight = window.innerHeight;
     
-    // Adjust y position to keep menu on screen
     let yPos = rect.top;
     if (yPos + estimatedMenuHeight > viewportHeight) {
-      // Position menu to align with bottom of viewport with some padding
       yPos = Math.max(10, viewportHeight - estimatedMenuHeight - 10);
     }
     
     const position = {
-      x: rect.right + 8, // 8px gap from the sidebar
+      x: rect.right + 8,
       y: yPos,
     };
 
@@ -358,7 +346,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const handleSubmenuLeave = () => {
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredSubmenu(null);
-    }, 150); // Small delay to allow moving to submenu
+    }, 150);
   };
 
   // Build menu items based on role
@@ -366,9 +354,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   // User section - for all users
   if (isUser || isAdmin || isOwner) {
-    // Only show user-added projects for regular users (not owner/admin)
     const userProjectItems = (isOwner || isAdmin) ? [] : userProjects.map((up) => {
-      // Special handling for NKMT project
       if (up.project.route === '/nkmt') {
         return {
           id: `user-project-${up.project_id}`,
@@ -397,7 +383,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         };
       }
       
-      // Special handling for Ai Social project
       if (up.project.route === '/ai-social') {
         return {
           id: `user-project-${up.project_id}`,
@@ -416,7 +401,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         };
       }
       
-      // Special handling for AI Art project
       if (up.project.route === '/ai-art') {
         return {
           id: `user-project-${up.project_id}`,
@@ -430,7 +414,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         };
       }
       
-      // Special handling for Delibere Arera - no submenu, direct link
       if (up.project.route === '/delibere-arera') {
         return {
           id: `user-project-${up.project_id}`,
@@ -440,7 +423,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         };
       }
       
-      // Generic handling for other projects
       return {
         id: `user-project-${up.project_id}`,
         label: up.project.name,
@@ -453,11 +435,11 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     });
 
     menuItems.push({
-      section: "User",
+      section: "",
       items: [
         { id: "marketplace", label: "Marketplace", icon: Store, href: "/marketplace" },
         { id: "wallet", label: "Wallet", icon: Wallet, href: "/wallet" },
-        { id: "spacer-user-1", isSpacer: true, label: "", icon: LayoutDashboard },
+        ...(userProjectItems.length > 0 ? [{ id: "spacer-user-1", isSpacer: true, label: "", icon: LayoutDashboard }] : []),
         ...userProjectItems,
       ],
     });
@@ -468,7 +450,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     menuItems.push({
       section: "Admin",
       items: [
-        { id: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
+        { id: "admin-dashboard", label: "Dashboard", icon: Home, href: "/admin/dashboard" },
         { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
         { id: "spacer-1", isSpacer: true, label: "", icon: LayoutDashboard },
         {
@@ -496,6 +478,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "ai-art-generate-video", label: "Generate Videos", icon: Gauge, href: "/ai-art/generate-video" },
           ],
         },
+        { id: "delibere-arera", label: "Delibere Arera", icon: FileText, href: "/delibere-arera" },
         {
           id: "nkmt",
           label: "NKMT",
@@ -521,192 +504,233 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "nkmt-reviewer", label: "Reviewer", icon: FileText, href: "/nkmt/reviewer" },
           ],
         },
-        { id: "delibere-arera", label: "Delibere Arera", icon: FileText, href: "/delibere-arera" },
-        { id: "spacer-2", isSpacer: true, label: "", icon: LayoutDashboard },
-        { id: "admin-projects", label: "Project Management", icon: Settings, href: "/admin/projects" },
-        { id: "file-upload", label: "Upload", icon: Upload, href: "/file-upload" },
-        { id: "labs", label: "Labs", icon: Beaker, href: "/labs" },
       ],
     });
   }
 
-  // Preferences section - for all users
-  menuItems.push({
-    section: "Preferences",
-    items: [
-      { id: "notifications", label: "Notifications", icon: Bell, href: "/notifications" },
-    ],
-  });
+  // Admin users - only for admin role
+  if (isAdmin && !isOwner) {
+    menuItems.push({
+      section: "Admin",
+      items: [
+        { id: "admin-dashboard", label: "Dashboard", icon: Home, href: "/admin/dashboard" },
+        { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
+      ],
+    });
+  }
 
-  const footerItems: MenuItem[] = [];
+  // Footer items
+  const footerItems = [
+    { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
+    { id: "file-upload", label: "Upload", icon: Upload, href: "/file-upload" },
+  ];
+
+  if (!mounted) return null;
+
+  // Apple TV style menu item component
+  const MenuItemComponent = ({ item, isActive, collapsed: isCollapsed }: { item: MenuItem; isActive: boolean; collapsed: boolean }) => {
+    const Icon = item.icon;
+    
+    if (isCollapsed) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link
+              to={item.href || "#"}
+              className={cn(
+                "flex items-center justify-center h-11 w-11 rounded-xl transition-all duration-200 mx-auto",
+                isActive 
+                  ? "bg-primary/20 text-primary" 
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+              )}
+            >
+              <Icon className="h-5 w-5" />
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="font-medium">
+            {item.label}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+    
+    return (
+      <Link
+        to={item.href || "#"}
+        className={cn(
+          "flex items-center gap-3 h-11 px-3 rounded-xl transition-all duration-200",
+          isActive 
+            ? "bg-primary/20 text-primary" 
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+        )}
+      >
+        <Icon className="h-5 w-5 flex-shrink-0" />
+        <span className="font-medium text-[15px]">{item.label}</span>
+      </Link>
+    );
+  };
+
+  // Apple TV style collapsible menu
+  const CollapsibleMenuComponent = ({ item, isCollapsed }: { item: MenuItem; isCollapsed: boolean }) => {
+    const Icon = item.icon;
+    const isParentActive = item.submenuItems?.some((subItem) => activeItem === subItem.id) || activeItem === item.id;
+    
+    if (isCollapsed) {
+      return (
+        <div className="relative">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className={cn(
+                  "flex items-center justify-center h-11 w-11 rounded-xl transition-all duration-200 mx-auto",
+                  isParentActive 
+                    ? "bg-primary/20 text-primary" 
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                )}
+                onMouseEnter={(e) => handleSubmenuHover(item, e.currentTarget)}
+                onMouseLeave={handleSubmenuLeave}
+              >
+                <Icon className="h-5 w-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="font-medium">
+              {item.label}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      );
+    }
+    
+    return (
+      <Collapsible open={openSubmenus[item.id]} className="space-y-1">
+        <CollapsibleTrigger asChild>
+          <button
+            onClick={() => toggleSubmenu(item.id)}
+            className={cn(
+              "flex items-center justify-between w-full h-11 px-3 rounded-xl transition-all duration-200",
+              isParentActive 
+                ? "text-sidebar-foreground" 
+                : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <Icon className="h-5 w-5 flex-shrink-0" />
+              <span className="font-medium text-[15px]">{item.label}</span>
+            </div>
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              openSubmenus[item.id] ? "rotate-180" : "rotate-0"
+            )} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-0.5 ml-2">
+          {item.submenuItems?.map((subItem) => {
+            const SubIcon = subItem.icon;
+            const isSubActive = activeItem === subItem.id;
+            return (
+              <Link
+                key={subItem.id}
+                to={subItem.href || "#"}
+                onClick={() => setActiveItem(subItem.id)}
+                className={cn(
+                  "flex items-center gap-3 h-10 px-3 rounded-xl transition-all duration-200",
+                  isSubActive 
+                    ? "bg-primary/20 text-primary" 
+                    : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                )}
+              >
+                <SubIcon className="h-[18px] w-[18px] flex-shrink-0" />
+                <span className="text-sm font-medium">{subItem.label}</span>
+              </Link>
+            );
+          })}
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
 
   return (
     <>
-      {!collapsed && <div className="fixed inset-0 bg-black/50 z-40 " onClick={() => setCollapsed(true)} />}
-
-      {/* Sidebar */}
       <aside
-        className={cn("fixed flex h-full flex-col border-r border-border bg-card transition-all duration-300 ease-in-out z-40", collapsed ? "w-[72px] max-sm:left-[-72px]" : " sm:left-0 w-[240px]")}
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 ease-in-out",
+          collapsed ? "w-[72px]" : "w-[260px]"
+        )}
       >
         {/* Collapse toggle button */}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-10 max-sm:-mt-2 sm:-right-3 top-6 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm hover:text-foreground"
+          className="absolute -right-3 top-6 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground/60 shadow-sm hover:text-sidebar-foreground transition-colors max-sm:-right-10"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <ChevronRight className="h-4 w-4 max-sm:hidden" /> : <ChevronLeft className="h-4 w-4 max-sm:hidden" />}
           {collapsed ? <Menu className="h-4 w-4 max-sm:block hidden" /> : <XIcon className="h-4 w-4 max-sm:block hidden" />}
         </button>
 
-        {/* Header */}
-        <div className={cn("flex h-16 items-center py-4 transition-all duration-300", collapsed ? "justify-center px-2" : "px-3")}>
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md overflow-hidden flex-shrink-0">
-              <img src={unvrsLogo} alt="UNVRS Labs" className="h-8 w-8 object-cover" />
-            </div>
-            <div className={cn(
-              "flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
-              collapsed ? "w-0 opacity-0" : "w-auto opacity-100"
-            )}>
-              <span className="text-lg font-semibold tracking-tight whitespace-nowrap">UNVRS MAGIC AI</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Wrap the entire sidebar content in a TooltipProvider */}
         <TooltipProvider delayDuration={0}>
+          {/* Search/Header area */}
+          <div className={cn("px-3 pt-6 pb-4", collapsed && "px-2")}>
+            {collapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center justify-center h-11 w-11 rounded-xl bg-primary/20 text-primary mx-auto">
+                    <Search className="h-5 w-5" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="font-medium">
+                  Search
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <div className="flex items-center gap-3 h-11 px-3 rounded-xl bg-primary/20 text-primary">
+                <Search className="h-5 w-5 flex-shrink-0" />
+                <span className="font-medium text-[15px]">Search</span>
+              </div>
+            )}
+          </div>
+
           {/* Menu sections */}
-          <div className="flex-1 overflow-auto py-2">
-            {menuItems.map((section) => (
-              <div key={section.section} className="px-3 py-2">
-                {!collapsed && <div className="mb-2 px-2 text-xs font-medium text-muted-foreground">{section.section}</div>}
+          <div className="flex-1 overflow-auto px-3 space-y-6">
+            {menuItems.map((section, sectionIndex) => (
+              <div key={section.section || `section-${sectionIndex}`}>
+                {/* Section header - Apple TV style */}
+                {section.section && !collapsed && (
+                  <div className="flex items-center justify-between px-3 mb-2">
+                    <span className="text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider">
+                      {section.section}
+                    </span>
+                    <ChevronDown className="h-3.5 w-3.5 text-sidebar-foreground/40" />
+                  </div>
+                )}
+                
                 <div className="space-y-1">
                   {section.items.map((item) => {
                     // Handle spacer items
                     if ('isSpacer' in item && item.isSpacer) {
-                      return <div key={item.id} className="h-4" />;
+                      return <div key={item.id} className="h-3" />;
                     }
                     
-                    const Icon = item.icon;
                     const isActive = activeItem === item.id;
 
                     // Handle items with submenus
-                    if (item.hasSubmenu && !collapsed) {
-                      const isParentActive = item.submenuItems?.some((subItem) => activeItem === subItem.id) || activeItem === item.id;
-
+                    if (item.hasSubmenu) {
                       return (
-                        <div key={item.id} className="space-y-1">
-                          <Collapsible open={openSubmenus[item.id]} className="space-y-1">
-                            <CollapsibleTrigger asChild>
-                              <Button
-                                variant={isParentActive ? "secondary" : "ghost"}
-                                className="w-full justify-between px-4 rounded-lg"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  toggleSubmenu(item.id);
-                                }}
-                              >
-                                <div className="flex items-center">
-                                  <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
-                                  <span>{item.label}</span>
-                                </div>
-                                <ChevronDown className={cn("h-4 w-4 flex-shrink-0 transition-transform duration-200", openSubmenus[item.id] ? "rotate-180" : "rotate-0")} />
-                              </Button>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="pl-6 space-y-1">
-                              {item.submenuItems?.map((subItem) => {
-                                const SubIcon = subItem.icon;
-                                const isSubActive = activeItem === subItem.id;
-                                return (
-                                  <Button
-                                    key={subItem.id}
-                                    variant={isSubActive ? "secondary" : "ghost"}
-                                    className="w-full justify-start rounded-lg"
-                                    onClick={() => setActiveItem(subItem.id)}
-                                    asChild={!!subItem.href}
-                                  >
-                                    {subItem.href ? (
-                                      <Link to={subItem.href} className="flex items-center w-full">
-                                        {subItem.status && (
-                                          <div className={cn(
-                                            "w-2 h-2 rounded-full mr-2 flex-shrink-0",
-                                            subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
-                                          )} />
-                                        )}
-                                        <SubIcon className="mr-2 h-4 w-4" />
-                                        <span>{subItem.label}</span>
-                                      </Link>
-                                    ) : (
-                                      <div className="flex items-center w-full">
-                                        {subItem.status && (
-                                          <div className={cn(
-                                            "w-2 h-2 rounded-full mr-2 flex-shrink-0",
-                                            subItem.status === 'active' ? "bg-green-500" : "bg-gray-400"
-                                          )} />
-                                        )}
-                                        <SubIcon className="mr-2 h-4 w-4" />
-                                        <span>{subItem.label}</span>
-                                      </div>
-                                    )}
-                                  </Button>
-                                );
-                              })}
-                            </CollapsibleContent>
-                          </Collapsible>
-                        </div>
+                        <CollapsibleMenuComponent 
+                          key={item.id} 
+                          item={item} 
+                          isCollapsed={collapsed} 
+                        />
                       );
                     }
 
-                    // Handle items with submenus when collapsed - with floating submenu
-                    if (collapsed && item.hasSubmenu) {
-                      const isParentActive = item.submenuItems?.some((subItem) => activeItem === subItem.id) || activeItem === item.id;
-
-                      return (
-                        <div key={item.id} className="relative">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant={isParentActive ? "secondary" : "ghost"}
-                                className="w-full justify-center px-2 rounded-lg"
-                                onClick={() => setActiveItem(item.id)}
-                                onMouseEnter={(e) => handleSubmenuHover(item, e.currentTarget)}
-                                onMouseLeave={handleSubmenuLeave}
-                              >
-                                <Icon className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="font-normal">
-                              {item.label}
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      );
-                    }
-
-                    // Regular menu items (existing code remains the same)
+                    // Regular menu items
                     return (
-                      <Tooltip key={item.id}>
-                        <TooltipTrigger asChild>
-                          {item.href ? (
-                            <Button variant={isActive ? "secondary" : "ghost"} className={cn("w-full justify-start rounded-lg", collapsed ? "px-2 justify-center" : "px-4")} asChild>
-                              <Link to={item.href}>
-                                <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
-                                {!collapsed && <span>{item.label}</span>}
-                              </Link>
-                            </Button>
-                          ) : (
-                            <Button variant={isActive ? "secondary" : "ghost"} className={cn("w-full justify-start rounded-lg", collapsed ? "px-2 justify-center" : "px-2")} onClick={() => setActiveItem(item.id)}>
-                              <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
-                              {!collapsed && <span>{item.label}</span>}
-                            </Button>
-                          )}
-                        </TooltipTrigger>
-                        {collapsed && (
-                          <TooltipContent side="right" className="font-normal">
-                            {item.label}
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
+                      <MenuItemComponent 
+                        key={item.id} 
+                        item={item} 
+                        isActive={isActive} 
+                        collapsed={collapsed} 
+                      />
                     );
                   })}
                 </div>
@@ -714,43 +738,78 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             ))}
           </div>
 
-          {/* Footer */}
-          {footerItems.length > 0 && (
-            <div className="mt-auto p-3">
-              <div className="space-y-1">
-                {footerItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeItem === item.id;
-
-                  // Regular footer item (no submenu in Settings anymore)
+          {/* Footer with settings and user profile */}
+          <div className="mt-auto px-3 pb-4 space-y-3">
+            {/* Footer items */}
+            <div className="space-y-1">
+              {footerItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeItem === item.id;
+                
+                if (collapsed) {
                   return (
                     <Tooltip key={item.id}>
                       <TooltipTrigger asChild>
-                        {'href' in item && item.href ? (
-                          <Button variant="ghost" className={cn("w-full justify-start rounded-lg", collapsed ? "px-2 justify-center" : "px-2")} asChild>
-                            <Link to={item.href}>
-                              <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
-                              {!collapsed && <span>{item.label}</span>}
-                            </Link>
-                          </Button>
-                        ) : (
-                          <Button variant="ghost" className={cn("w-full justify-start rounded-lg", collapsed ? "px-2 justify-center" : "px-2")} onClick={() => setActiveItem(item.id)}>
-                            <Icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
-                            {!collapsed && <span>{item.label}</span>}
-                          </Button>
-                        )}
+                        <Link
+                          to={item.href}
+                          className={cn(
+                            "flex items-center justify-center h-11 w-11 rounded-xl transition-all duration-200 mx-auto",
+                            isActive 
+                              ? "bg-primary/20 text-primary" 
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                          )}
+                        >
+                          <Icon className="h-5 w-5" />
+                        </Link>
                       </TooltipTrigger>
-                      {collapsed && (
-                        <TooltipContent side="right" className="font-normal">
-                          {item.label}
-                        </TooltipContent>
-                      )}
+                      <TooltipContent side="right" className="font-medium">
+                        {item.label}
+                      </TooltipContent>
                     </Tooltip>
                   );
-                })}
-              </div>
+                }
+                
+                return (
+                  <Link
+                    key={item.id}
+                    to={item.href}
+                    className={cn(
+                      "flex items-center gap-3 h-11 px-3 rounded-xl transition-all duration-200",
+                      isActive 
+                        ? "bg-primary/20 text-primary" 
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    )}
+                  >
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <span className="font-medium text-[15px]">{item.label}</span>
+                  </Link>
+                );
+              })}
             </div>
-          )}
+
+            {/* User profile - Apple TV style */}
+            {userProfile && (
+              <div className={cn(
+                "flex items-center gap-3 p-2 rounded-xl",
+                collapsed ? "justify-center" : ""
+              )}>
+                <Avatar className="h-9 w-9 flex-shrink-0">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground text-sm font-medium">
+                    {userProfile.full_name 
+                      ? userProfile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                      : 'U'
+                    }
+                  </AvatarFallback>
+                </Avatar>
+                {!collapsed && (
+                  <span className="text-sm font-medium text-sidebar-foreground truncate">
+                    {userProfile.full_name || userProfile.phone_number}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </TooltipProvider>
       </aside>
 
