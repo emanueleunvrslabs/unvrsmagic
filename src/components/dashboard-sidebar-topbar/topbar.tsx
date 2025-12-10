@@ -106,7 +106,12 @@ export function Topbar() {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-end bg-background px-4 lg:h-16 lg:px-6">
       {/* Right section */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        {/* Notifications - iOS 26 style */}
+        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all">
+          <Bell className="h-5 w-5 text-foreground" />
+        </button>
+
         {/* Wallet Connection - only show if connected */}
         {isConnected && (
           <DropdownMenu>
