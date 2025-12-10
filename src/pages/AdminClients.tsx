@@ -65,22 +65,20 @@ export default function AdminClients() {
     <DashboardLayout>
       <div className="space-y-6">
         {selectedProject ? (
-          <>
-            <div className="flex items-center justify-start -mt-12 mb-4">
-              <button
-                onClick={() => setSelectedProject(null)}
-                className="p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex justify-start">
+          <div className="relative">
+            <button
+              onClick={() => setSelectedProject(null)}
+              className="absolute -top-2 left-0 z-10 p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="flex justify-start pt-12">
               <ProjectDetailCard
                 project={selectedProject}
                 onClose={() => setSelectedProject(null)}
               />
             </div>
-          </>
+          </div>
         ) : (
           <>
             <div className="flex items-center justify-between">
