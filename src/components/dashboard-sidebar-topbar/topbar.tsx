@@ -132,63 +132,59 @@ export function Topbar() {
               </a>
               <div className="social-text">Twitter</div>
             </li>
+            {/* Notifications inside social card */}
             <li className="iso-pro">
               <span></span>
               <span></span>
               <span></span>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg" className="social-svg">
-                  <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"></path>
-                </svg>
-              </a>
-              <div className="social-text">Instagram</div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="relative">
+                    <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg" className="social-svg">
+                      <path d="M224 512c35.32 0 63.97-28.65 63.97-64H160.03c0 35.35 28.65 64 63.97 64zm215.39-149.71c-19.32-20.76-55.47-51.99-55.47-154.29 0-77.7-54.48-139.9-127.94-155.16V32c0-17.67-14.32-32-31.98-32s-31.98 14.33-31.98 32v20.84C118.56 68.1 64.08 130.3 64.08 208c0 102.3-36.15 133.53-55.47 154.29-6 6.45-8.66 14.16-8.61 21.71.11 16.4 12.98 32 32.1 32h383.8c19.12 0 32-15.6 32.1-32 .05-7.55-2.61-15.27-8.61-21.71z"></path>
+                    </svg>
+                    <span className="absolute -right-1 -top-1 h-4 w-4 text-[9px] flex items-center justify-center bg-[#0a84ff] text-white rounded-full border-0">
+                      3
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-[300px] bg-black/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/10 rounded-xl shadow-2xl"
+                >
+                  <DropdownMenuLabel className="text-white/90 text-[15px] font-medium px-3 py-2">Notifications</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+                    <div className="flex w-full justify-between">
+                      <span className="font-medium text-sm text-white/90">Bot Action</span>
+                      <span className="text-xs text-white/50">2 min ago</span>
+                    </div>
+                    <span className="text-xs text-white/60">BTC signal triggered at $65,000</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+                    <div className="flex w-full justify-between">
+                      <span className="font-medium text-sm text-white/90">Trade Alert</span>
+                      <span className="text-xs text-white/50">15 min ago</span>
+                    </div>
+                    <span className="text-xs text-white/60">ETH trade completed: +2.3%</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+                    <div className="flex w-full justify-between">
+                      <span className="font-medium text-sm text-white/90">System Notice</span>
+                      <span className="text-xs text-white/50">1 hour ago</span>
+                    </div>
+                    <span className="text-xs text-white/60">New AI model update available</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium text-[#0a84ff] focus:bg-white/10 focus:text-[#0a84ff] rounded-lg mx-1 py-2">
+                    View all notifications
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="social-text">Notifications</div>
             </li>
           </ul>
         </div>
-
-        {/* Notifications - iOS 26 style */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all">
-              <Bell className="h-5 w-5 text-foreground" />
-              <span className="absolute -right-0.5 -top-0.5 h-4 w-4 text-[9px] flex items-center justify-center bg-[#0a84ff] text-white rounded-full border-0">
-                3
-              </span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="end" 
-            className="w-[300px] bg-black/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/10 rounded-xl shadow-2xl"
-          >
-            <DropdownMenuLabel className="text-white/90 text-[15px] font-medium px-3 py-2">Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
-              <div className="flex w-full justify-between">
-                <span className="font-medium text-sm text-white/90">Bot Action</span>
-                <span className="text-xs text-white/50">2 min ago</span>
-              </div>
-              <span className="text-xs text-white/60">BTC signal triggered at $65,000</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
-              <div className="flex w-full justify-between">
-                <span className="font-medium text-sm text-white/90">Trade Alert</span>
-                <span className="text-xs text-white/50">15 min ago</span>
-              </div>
-              <span className="text-xs text-white/60">ETH trade completed: +2.3%</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
-              <div className="flex w-full justify-between">
-                <span className="font-medium text-sm text-white/90">System Notice</span>
-                <span className="text-xs text-white/50">1 hour ago</span>
-              </div>
-              <span className="text-xs text-white/60">New AI model update available</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium text-[#0a84ff] focus:bg-white/10 focus:text-[#0a84ff] rounded-lg mx-1 py-2">
-              View all notifications
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
 
         {/* Wallet Connection - only show if connected */}
         {isConnected && (
