@@ -81,13 +81,7 @@ export default function AdminClients() {
           </>
         ) : (
           <>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold">Client Management</h1>
-                <p className="text-muted-foreground mt-2">
-                  Manage your clients and their access to projects
-                </p>
-              </div>
+            <div className="flex justify-end">
               <Button 
                 onClick={() => setShowNewClientForm(true)} 
                 className="gap-2 px-5 py-6 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
