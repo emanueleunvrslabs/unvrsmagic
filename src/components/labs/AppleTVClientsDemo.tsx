@@ -100,69 +100,80 @@ export function AppleTVClientsDemo() {
   if (isNewClientView) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-6">
-          <div className="space-y-2">
-            <Label className="text-white/70 text-sm">Company Name</Label>
-            <Input
-              placeholder="Enter company name"
-              value={newClient.companyName}
-              onChange={(e) => setNewClient({ ...newClient, companyName: e.target.value })}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-white/70 text-sm">VAT Number</Label>
-            <Input
-              placeholder="Enter VAT number"
-              value={newClient.vatNumber}
-              onChange={(e) => setNewClient({ ...newClient, vatNumber: e.target.value })}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-white/70 text-sm">Street</Label>
-            <Input
-              placeholder="Enter street address"
-              value={newClient.street}
-              onChange={(e) => setNewClient({ ...newClient, street: e.target.value })}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-white/70 text-sm">City</Label>
-              <Input
-                placeholder="Enter city"
-                value={newClient.city}
-                onChange={(e) => setNewClient({ ...newClient, city: e.target.value })}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-              />
+        <div className="w-full max-w-md">
+          {/* Card Container */}
+          <div className="labs-client-card relative rounded-[20px] overflow-hidden p-8">
+            {/* Stars Layer */}
+            <div className="labs-stars-layer" />
+            <div className="labs-stars-layer-2" />
+            <div className="labs-stars-layer-3" />
+            
+            {/* Content */}
+            <div className="relative z-10 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">Company Name</Label>
+                <Input
+                  placeholder="Enter company name"
+                  value={newClient.companyName}
+                  onChange={(e) => setNewClient({ ...newClient, companyName: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">VAT Number</Label>
+                <Input
+                  placeholder="Enter VAT number"
+                  value={newClient.vatNumber}
+                  onChange={(e) => setNewClient({ ...newClient, vatNumber: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">Street</Label>
+                <Input
+                  placeholder="Enter street address"
+                  value={newClient.street}
+                  onChange={(e) => setNewClient({ ...newClient, street: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-white/70 text-sm">City</Label>
+                  <Input
+                    placeholder="Enter city"
+                    value={newClient.city}
+                    onChange={(e) => setNewClient({ ...newClient, city: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white/70 text-sm">Postal Code</Label>
+                  <Input
+                    placeholder="Enter postal code"
+                    value={newClient.postalCode}
+                    onChange={(e) => setNewClient({ ...newClient, postalCode: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">Country</Label>
+                <Input
+                  placeholder="Enter country"
+                  value={newClient.country}
+                  onChange={(e) => setNewClient({ ...newClient, country: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+                />
+              </div>
+              <button 
+                onClick={handleCreateClient}
+                className="w-full p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium mt-2"
+              >
+                Create Client
+              </button>
             </div>
-            <div className="space-y-2">
-              <Label className="text-white/70 text-sm">Postal Code</Label>
-              <Input
-                placeholder="Enter postal code"
-                value={newClient.postalCode}
-                onChange={(e) => setNewClient({ ...newClient, postalCode: e.target.value })}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-              />
-            </div>
           </div>
-          <div className="space-y-2">
-            <Label className="text-white/70 text-sm">Country</Label>
-            <Input
-              placeholder="Enter country"
-              value={newClient.country}
-              onChange={(e) => setNewClient({ ...newClient, country: e.target.value })}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
-            />
-          </div>
-          <Button 
-            onClick={handleCreateClient}
-            className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl h-12 mt-4"
-          >
-            Create Client
-          </Button>
         </div>
       </div>
     );
