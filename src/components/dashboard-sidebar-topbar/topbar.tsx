@@ -5,6 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useWalletConnection } from "@/hooks/use-wallet-connection";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
@@ -53,10 +56,48 @@ import { toast } from "sonner";
 
 export function Topbar() {
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [newClient, setNewClient] = useState({
+    companyName: "",
+    vatNumber: "",
+    street: "",
+    city: "",
+    postalCode: "",
+    country: ""
+  });
   const { isConnected, address, balance, disconnect, copyAddress } = useWalletConnection();
   const { isOwner } = useUserRole();
   const navigate = useNavigate();
+
+  const handleCreateClient = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in");
+        return;
+      }
+
+      const { error } = await supabase.from('clients').insert({
+        user_id: user.id,
+        company_name: newClient.companyName,
+        vat_number: newClient.vatNumber,
+        street: newClient.street,
+        city: newClient.city,
+        postal_code: newClient.postalCode,
+        country: newClient.country
+      });
+
+      if (error) throw error;
+
+      toast.success("Client created successfully");
+      setShowNewClientModal(false);
+      setNewClient({ companyName: "", vatNumber: "", street: "", city: "", postalCode: "", country: "" });
+    } catch (error) {
+      console.error("Error creating client:", error);
+      toast.error("Error creating client");
+    }
+  };
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -111,7 +152,10 @@ export function Topbar() {
       {/* Center Menu */}
       <div className="flex items-center justify-center">
         <div className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/15">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white/60 hover:text-white/80 hover:bg-white/10 transition-all">
+          <button 
+            onClick={() => setShowNewClientModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white/60 hover:text-white/80 hover:bg-white/10 transition-all"
+          >
             <UserPlus className="w-4 h-4" />
             New Client
           </button>
@@ -206,6 +250,79 @@ export function Topbar() {
           </DropdownMenu>
         )}
       </div>
+
+      {/* New Client Modal */}
+      <Dialog open={showNewClientModal} onOpenChange={setShowNewClientModal}>
+        <DialogContent className="bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white text-lg font-medium">New Client</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label className="text-white/70 text-sm">Company Name</Label>
+              <Input
+                placeholder="Enter company name"
+                value={newClient.companyName}
+                onChange={(e) => setNewClient({ ...newClient, companyName: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white/70 text-sm">VAT Number</Label>
+              <Input
+                placeholder="Enter VAT number"
+                value={newClient.vatNumber}
+                onChange={(e) => setNewClient({ ...newClient, vatNumber: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white/70 text-sm">Street</Label>
+              <Input
+                placeholder="Enter street address"
+                value={newClient.street}
+                onChange={(e) => setNewClient({ ...newClient, street: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">City</Label>
+                <Input
+                  placeholder="Enter city"
+                  value={newClient.city}
+                  onChange={(e) => setNewClient({ ...newClient, city: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white/70 text-sm">Postal Code</Label>
+                <Input
+                  placeholder="Enter postal code"
+                  value={newClient.postalCode}
+                  onChange={(e) => setNewClient({ ...newClient, postalCode: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white/70 text-sm">Country</Label>
+              <Input
+                placeholder="Enter country"
+                value={newClient.country}
+                onChange={(e) => setNewClient({ ...newClient, country: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+              />
+            </div>
+            <Button 
+              onClick={handleCreateClient}
+              className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl mt-4"
+            >
+              Create Client
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
