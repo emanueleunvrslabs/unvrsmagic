@@ -66,7 +66,7 @@ export default function AdminClients() {
       <div className="space-y-6">
         {selectedProject ? (
           <>
-            <div className="flex items-center justify-end mb-4">
+            <div className="flex items-center justify-start -mt-12 mb-4">
               <button
                 onClick={() => setSelectedProject(null)}
                 className="p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
