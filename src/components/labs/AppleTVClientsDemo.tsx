@@ -2,7 +2,14 @@ import { useState, useCallback, useEffect } from "react";
 import { File, CheckSquare, Kanban, Mail, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
+import { useSearchParams } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import "./SocialMediaCard.css";
+
 interface MockClient {
   id: string;
   company_name: string;
@@ -29,12 +36,51 @@ const actionItems = [
 ];
 
 export function AppleTVClientsDemo() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isNewClientView = searchParams.get("view") === "new";
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [newClient, setNewClient] = useState({
+    companyName: "",
+    vatNumber: "",
+    street: "",
+    city: "",
+    postalCode: "",
+    country: ""
+  });
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: "center",
     skipSnaps: false,
   });
+
+  const handleCreateClient = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in");
+        return;
+      }
+
+      const { error } = await supabase.from('clients').insert({
+        user_id: user.id,
+        company_name: newClient.companyName,
+        vat_number: newClient.vatNumber,
+        street: newClient.street,
+        city: newClient.city,
+        postal_code: newClient.postalCode,
+        country: newClient.country
+      });
+
+      if (error) throw error;
+
+      toast.success("Client created successfully");
+      setNewClient({ companyName: "", vatNumber: "", street: "", city: "", postalCode: "", country: "" });
+      setSearchParams({});
+    } catch (error) {
+      console.error("Error creating client:", error);
+      toast.error("Error creating client");
+    }
+  };
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -49,6 +95,78 @@ export function AppleTVClientsDemo() {
       emblaApi.off("select", onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  // New Client Form View
+  if (isNewClientView) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center p-8">
+        <div className="w-full max-w-md space-y-6">
+          <div className="space-y-2">
+            <Label className="text-white/70 text-sm">Company Name</Label>
+            <Input
+              placeholder="Enter company name"
+              value={newClient.companyName}
+              onChange={(e) => setNewClient({ ...newClient, companyName: e.target.value })}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white/70 text-sm">VAT Number</Label>
+            <Input
+              placeholder="Enter VAT number"
+              value={newClient.vatNumber}
+              onChange={(e) => setNewClient({ ...newClient, vatNumber: e.target.value })}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white/70 text-sm">Street</Label>
+            <Input
+              placeholder="Enter street address"
+              value={newClient.street}
+              onChange={(e) => setNewClient({ ...newClient, street: e.target.value })}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-white/70 text-sm">City</Label>
+              <Input
+                placeholder="Enter city"
+                value={newClient.city}
+                onChange={(e) => setNewClient({ ...newClient, city: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white/70 text-sm">Postal Code</Label>
+              <Input
+                placeholder="Enter postal code"
+                value={newClient.postalCode}
+                onChange={(e) => setNewClient({ ...newClient, postalCode: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white/70 text-sm">Country</Label>
+            <Input
+              placeholder="Enter country"
+              value={newClient.country}
+              onChange={(e) => setNewClient({ ...newClient, country: e.target.value })}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-12"
+            />
+          </div>
+          <Button 
+            onClick={handleCreateClient}
+            className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl h-12 mt-4"
+          >
+            Create Client
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col pt-4">
