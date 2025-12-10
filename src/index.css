@@ -577,3 +577,126 @@ html {
   width: 100%;
   filter: drop-shadow(0 0 23px var(--animation-color));
 }
+
+/* Social Media Card - Header Icons */
+.social-card {
+  max-width: fit-content;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  backdrop-filter: blur(15px);
+  box-shadow:
+    inset 0 0 20px rgba(255, 255, 255, 0.192),
+    inset 0 0 5px rgba(255, 255, 255, 0.274),
+    0 5px 5px rgba(0, 0, 0, 0.164);
+  transition: 0.5s;
+}
+
+.social-card:hover {
+  animation: ease-out 5s;
+  background: rgba(173, 173, 173, 0.05);
+}
+
+.social-card ul {
+  padding: 0.5rem;
+  display: flex;
+  list-style: none;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  flex-wrap: wrap;
+  flex-direction: row;
+  margin: 0;
+}
+
+.social-card ul li {
+  cursor: pointer;
+}
+
+.social-svg {
+  transition: all 0.3s;
+  padding: 0.5rem;
+  height: 36px;
+  width: 36px;
+  border-radius: 100%;
+  color: hsl(var(--primary));
+  fill: currentColor;
+  box-shadow:
+    inset 0 0 20px rgba(255, 255, 255, 0.3),
+    inset 0 0 5px rgba(255, 255, 255, 0.5),
+    0 5px 5px rgba(0, 0, 0, 0.164);
+}
+
+.social-text {
+  opacity: 0;
+  border-radius: 5px;
+  padding: 5px;
+  transition: all 0.3s;
+  color: hsl(var(--primary));
+  background-color: rgba(255, 255, 255, 0.3);
+  position: absolute;
+  z-index: 9999;
+  font-size: 10px;
+  box-shadow:
+    -5px 0 1px rgba(153, 153, 153, 0.2),
+    -10px 0 1px rgba(153, 153, 153, 0.2),
+    inset 0 0 20px rgba(255, 255, 255, 0.3),
+    inset 0 0 5px rgba(255, 255, 255, 0.5),
+    0 5px 5px rgba(0, 0, 0, 0.082);
+}
+
+/* Isometric projection effect */
+.iso-pro {
+  transition: 0.5s;
+  position: relative;
+}
+
+.iso-pro:hover a > .social-svg {
+  transform: translate(10px, -10px);
+  border-radius: 100%;
+}
+
+.iso-pro:hover .social-text {
+  opacity: 1;
+  transform: translate(15px, -2px) skew(-5deg);
+}
+
+.iso-pro:hover .social-svg {
+  transform: translate(5px, -5px);
+}
+
+.iso-pro span {
+  opacity: 0;
+  position: absolute;
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  box-shadow:
+    inset 0 0 20px rgba(255, 255, 255, 0.3),
+    inset 0 0 5px rgba(255, 255, 255, 0.5),
+    0 5px 5px rgba(0, 0, 0, 0.164);
+  border-radius: 50%;
+  transition: all 0.3s;
+  height: 36px;
+  width: 36px;
+}
+
+.iso-pro:hover span {
+  opacity: 1;
+}
+
+.iso-pro:hover span:nth-child(1) {
+  opacity: 0.2;
+}
+
+.iso-pro:hover span:nth-child(2) {
+  opacity: 0.4;
+  transform: translate(3px, -3px);
+}
+
+.iso-pro:hover span:nth-child(3) {
+  opacity: 0.6;
+  transform: translate(6px, -6px);
+}
