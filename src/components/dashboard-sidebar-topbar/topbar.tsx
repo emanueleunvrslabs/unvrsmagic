@@ -104,9 +104,25 @@ export function Topbar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-end bg-background px-4 lg:h-16 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-background px-4 lg:h-16 lg:px-6">
+      {/* Left spacer */}
+      <div className="flex-1" />
+      
+      {/* Center Menu */}
+      <div className="flex items-center justify-center">
+        <div className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/15">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white/60 hover:text-white/80 hover:bg-white/10 transition-all">
+            <UserPlus className="w-4 h-4" />
+            New Client
+          </button>
+          <button className="px-4 py-2 rounded-full text-sm font-medium bg-white/20 text-white transition-all">
+            Clients
+          </button>
+        </div>
+      </div>
+      
       {/* Right section */}
-      <div className="flex items-center gap-2">
+      <div className="flex-1 flex items-center justify-end gap-2">
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
