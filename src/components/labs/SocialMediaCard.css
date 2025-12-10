@@ -621,9 +621,21 @@
 .labs-client-card {
   background-color: #171717;
   backdrop-filter: blur(15px);
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1),
-    inset 0 0 5px rgba(255, 255, 255, 0.15), 
-    0 5px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(155, 64, 252, 0.3);
+  box-shadow: 
+    inset 0 0 30px rgba(255, 255, 255, 0.08),
+    inset 0 0 10px rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(155, 64, 252, 0.2),
+    0 5px 30px rgba(0, 0, 0, 0.4);
+}
+
+.labs-client-card:hover {
+  border-color: rgba(155, 64, 252, 0.5);
+  box-shadow: 
+    inset 0 0 30px rgba(255, 255, 255, 0.1),
+    inset 0 0 10px rgba(255, 255, 255, 0.15),
+    0 0 40px rgba(155, 64, 252, 0.4),
+    0 5px 40px rgba(0, 0, 0, 0.5);
 }
 
 .labs-client-card::after {
@@ -631,59 +643,78 @@
   position: absolute;
   inset: 0;
   border-radius: 20px;
-  background: rgba(23, 23, 23, 0.85);
+  background: rgba(23, 23, 23, 0.8);
   z-index: 1;
 }
 
-/* Stars Layers */
-.labs-stars-layer {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  opacity: 1;
-  box-shadow: 120px 30px #fff, 280px 50px #fff, 40px 80px #fff,
-    350px 40px #fff, 180px 100px #fff, 420px 70px #fff, 
-    500px 30px #fff, 60px 45px #fff, 320px 85px #fff;
-  z-index: 2;
-  animation: 1s glowing-stars linear alternate infinite;
-  animation-delay: 0s;
-}
-
-.labs-stars-layer-2 {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  opacity: 1;
-  box-shadow: 80px 60px #fff, 220px 35px #fff, 160px 75px #fff,
-    400px 55px #fff, 480px 85px #fff, 30px 25px #fff,
-    260px 90px #fff, 540px 45px #fff;
-  z-index: 2;
-  animation: 1s glowing-stars linear alternate infinite;
-  animation-delay: 0.4s;
-}
-
+/* Stars Layers - positioned within card bounds */
+.labs-stars-layer,
+.labs-stars-layer-2,
 .labs-stars-layer-3 {
-  content: "";
   position: absolute;
+  width: 100%;
+  height: 100%;
   top: 0;
   left: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.labs-stars-layer::before {
+  content: "";
+  position: absolute;
   width: 2px;
   height: 2px;
   border-radius: 50%;
-  opacity: 1;
-  box-shadow: 200px 20px #fff, 380px 65px #fff, 100px 50px #fff,
-    450px 35px #fff, 560px 75px #fff, 140px 95px #fff;
-  z-index: 2;
-  animation: 1s glowing-stars linear alternate infinite;
-  animation-delay: 0.8s;
+  background: white;
+  box-shadow: 
+    50px 20px 0 0 rgba(255,255,255,0.8),
+    120px 45px 0 0 rgba(255,255,255,0.6),
+    200px 25px 0 0 rgba(255,255,255,0.9),
+    280px 60px 0 0 rgba(255,255,255,0.7),
+    350px 35px 0 0 rgba(255,255,255,0.8),
+    420px 55px 0 0 rgba(255,255,255,0.6),
+    500px 30px 0 0 rgba(255,255,255,0.9),
+    580px 50px 0 0 rgba(255,255,255,0.7);
+  animation: 2s glowing-stars linear alternate infinite;
+}
+
+.labs-stars-layer-2::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 
+    80px 70px 0 0 rgba(255,255,255,0.7),
+    150px 85px 0 0 rgba(255,255,255,0.8),
+    230px 75px 0 0 rgba(255,255,255,0.6),
+    310px 90px 0 0 rgba(255,255,255,0.9),
+    390px 80px 0 0 rgba(255,255,255,0.7),
+    470px 95px 0 0 rgba(255,255,255,0.8),
+    550px 70px 0 0 rgba(255,255,255,0.6);
+  animation: 2s glowing-stars linear alternate infinite;
+  animation-delay: 0.5s;
+}
+
+.labs-stars-layer-3::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 
+    30px 100px 0 0 rgba(255,255,255,0.8),
+    100px 115px 0 0 rgba(255,255,255,0.6),
+    180px 105px 0 0 rgba(255,255,255,0.9),
+    260px 120px 0 0 rgba(255,255,255,0.7),
+    340px 110px 0 0 rgba(255,255,255,0.8),
+    420px 125px 0 0 rgba(255,255,255,0.6),
+    500px 100px 0 0 rgba(255,255,255,0.9);
+  animation: 2s glowing-stars linear alternate infinite;
+  animation-delay: 1s;
 }
 
 /* Shooting Stars */
@@ -744,15 +775,14 @@
 /* Purple Glow */
 .labs-glow {
   position: absolute;
-  top: -50%;
-  left: -30%;
-  width: 3em;
-  height: 3em;
+  top: -20%;
+  left: -10%;
+  width: 4em;
+  height: 4em;
   border-radius: 50%;
-  background: #f9f9fb;
-  box-shadow: 0px 0px 60px rgba(193, 119, 241, 0.6),
-    0px 0px 80px rgba(135, 42, 211, 0.5), 
-    inset #9b40fc 0px 0px 40px -12px;
+  background: radial-gradient(circle, rgba(155, 64, 252, 0.4) 0%, transparent 70%);
+  box-shadow: 
+    0px 0px 80px rgba(193, 119, 241, 0.5),
+    0px 0px 120px rgba(135, 42, 211, 0.3);
   z-index: 2;
-  opacity: 0.8;
 }
