@@ -621,21 +621,21 @@
 .labs-client-card {
   background-color: #171717;
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 
-    inset 0 0 30px rgba(255, 255, 255, 0.08),
-    inset 0 0 10px rgba(255, 255, 255, 0.1),
-    0 0 20px rgba(255, 255, 255, 0.1),
-    0 5px 30px rgba(0, 0, 0, 0.4);
+    inset 0 0 40px rgba(255, 255, 255, 0.05),
+    0 0 60px rgba(255, 255, 255, 0.08),
+    0 0 100px rgba(255, 255, 255, 0.04),
+    0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .labs-client-card:hover {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.25);
   box-shadow: 
-    inset 0 0 30px rgba(255, 255, 255, 0.1),
-    inset 0 0 10px rgba(255, 255, 255, 0.15),
-    0 0 40px rgba(255, 255, 255, 0.2),
-    0 5px 40px rgba(0, 0, 0, 0.5);
+    inset 0 0 40px rgba(255, 255, 255, 0.08),
+    0 0 80px rgba(255, 255, 255, 0.12),
+    0 0 120px rgba(255, 255, 255, 0.06),
+    0 8px 40px rgba(0, 0, 0, 0.5);
 }
 
 .labs-client-card::after {
@@ -647,7 +647,7 @@
   z-index: 1;
 }
 
-/* Stars Layers - positioned within card bounds */
+/* Stars Layers - distributed across entire card */
 .labs-stars-layer,
 .labs-stars-layer-2,
 .labs-stars-layer-3 {
@@ -668,14 +668,25 @@
   border-radius: 50%;
   background: white;
   box-shadow: 
-    50px 20px 0 0 rgba(255,255,255,0.8),
-    120px 45px 0 0 rgba(255,255,255,0.6),
-    200px 25px 0 0 rgba(255,255,255,0.9),
-    280px 60px 0 0 rgba(255,255,255,0.7),
-    350px 35px 0 0 rgba(255,255,255,0.8),
-    420px 55px 0 0 rgba(255,255,255,0.6),
-    500px 30px 0 0 rgba(255,255,255,0.9),
-    580px 50px 0 0 rgba(255,255,255,0.7);
+    /* Top row */
+    50px 25px 0 0 rgba(255,255,255,0.7),
+    150px 35px 0 0 rgba(255,255,255,0.5),
+    280px 20px 0 0 rgba(255,255,255,0.8),
+    380px 40px 0 0 rgba(255,255,255,0.6),
+    500px 30px 0 0 rgba(255,255,255,0.7),
+    /* Middle row */
+    80px 80px 0 0 rgba(255,255,255,0.6),
+    200px 95px 0 0 rgba(255,255,255,0.8),
+    320px 75px 0 0 rgba(255,255,255,0.5),
+    450px 90px 0 0 rgba(255,255,255,0.7),
+    550px 85px 0 0 rgba(255,255,255,0.6),
+    /* Bottom row */
+    40px 140px 0 0 rgba(255,255,255,0.7),
+    130px 155px 0 0 rgba(255,255,255,0.5),
+    250px 145px 0 0 rgba(255,255,255,0.8),
+    360px 160px 0 0 rgba(255,255,255,0.6),
+    480px 150px 0 0 rgba(255,255,255,0.7),
+    580px 140px 0 0 rgba(255,255,255,0.5);
   animation: 2s glowing-stars linear alternate infinite;
 }
 
@@ -687,15 +698,25 @@
   border-radius: 50%;
   background: white;
   box-shadow: 
-    80px 70px 0 0 rgba(255,255,255,0.7),
-    150px 85px 0 0 rgba(255,255,255,0.8),
-    230px 75px 0 0 rgba(255,255,255,0.6),
-    310px 90px 0 0 rgba(255,255,255,0.9),
-    390px 80px 0 0 rgba(255,255,255,0.7),
-    470px 95px 0 0 rgba(255,255,255,0.8),
-    550px 70px 0 0 rgba(255,255,255,0.6);
+    /* Top row */
+    100px 30px 0 0 rgba(255,255,255,0.6),
+    220px 45px 0 0 rgba(255,255,255,0.7),
+    340px 25px 0 0 rgba(255,255,255,0.5),
+    460px 50px 0 0 rgba(255,255,255,0.8),
+    /* Middle row */
+    30px 100px 0 0 rgba(255,255,255,0.7),
+    160px 85px 0 0 rgba(255,255,255,0.5),
+    270px 110px 0 0 rgba(255,255,255,0.8),
+    400px 95px 0 0 rgba(255,255,255,0.6),
+    520px 105px 0 0 rgba(255,255,255,0.7),
+    /* Bottom row */
+    90px 165px 0 0 rgba(255,255,255,0.5),
+    190px 150px 0 0 rgba(255,255,255,0.7),
+    310px 170px 0 0 rgba(255,255,255,0.6),
+    430px 155px 0 0 rgba(255,255,255,0.8),
+    540px 165px 0 0 rgba(255,255,255,0.5);
   animation: 2s glowing-stars linear alternate infinite;
-  animation-delay: 0.5s;
+  animation-delay: 0.7s;
 }
 
 .labs-stars-layer-3::before {
@@ -706,15 +727,23 @@
   border-radius: 50%;
   background: white;
   box-shadow: 
-    30px 100px 0 0 rgba(255,255,255,0.8),
-    100px 115px 0 0 rgba(255,255,255,0.6),
-    180px 105px 0 0 rgba(255,255,255,0.9),
-    260px 120px 0 0 rgba(255,255,255,0.7),
-    340px 110px 0 0 rgba(255,255,255,0.8),
-    420px 125px 0 0 rgba(255,255,255,0.6),
-    500px 100px 0 0 rgba(255,255,255,0.9);
+    /* Scattered across all areas */
+    70px 55px 0 0 rgba(255,255,255,0.6),
+    180px 70px 0 0 rgba(255,255,255,0.8),
+    290px 50px 0 0 rgba(255,255,255,0.5),
+    410px 65px 0 0 rgba(255,255,255,0.7),
+    530px 55px 0 0 rgba(255,255,255,0.6),
+    120px 120px 0 0 rgba(255,255,255,0.7),
+    240px 135px 0 0 rgba(255,255,255,0.5),
+    350px 125px 0 0 rgba(255,255,255,0.8),
+    470px 130px 0 0 rgba(255,255,255,0.6),
+    60px 175px 0 0 rgba(255,255,255,0.8),
+    170px 180px 0 0 rgba(255,255,255,0.6),
+    280px 185px 0 0 rgba(255,255,255,0.7),
+    390px 175px 0 0 rgba(255,255,255,0.5),
+    510px 180px 0 0 rgba(255,255,255,0.8);
   animation: 2s glowing-stars linear alternate infinite;
-  animation-delay: 1s;
+  animation-delay: 1.4s;
 }
 
 /* Shooting Stars */
@@ -736,7 +765,7 @@
 }
 
 .labs-shooting-star-2 {
-  top: 40%;
+  top: 50%;
   right: -5%;
   rotate: -45deg;
   animation: 4s labs-shooting-star ease-in-out infinite;
@@ -744,7 +773,7 @@
 }
 
 .labs-shooting-star-3 {
-  top: 60%;
+  top: 75%;
   right: -15%;
   rotate: -45deg;
   animation: 4s labs-shooting-star ease-in-out infinite;
@@ -772,17 +801,15 @@
   }
 }
 
-/* Purple Glow */
+/* Soft Glow Effect */
 .labs-glow {
   position: absolute;
-  top: -20%;
-  left: -10%;
-  width: 4em;
-  height: 4em;
+  top: -30%;
+  left: -15%;
+  width: 50%;
+  height: 80%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(155, 64, 252, 0.4) 0%, transparent 70%);
-  box-shadow: 
-    0px 0px 80px rgba(193, 119, 241, 0.5),
-    0px 0px 120px rgba(135, 42, 211, 0.3);
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
   z-index: 2;
+  filter: blur(20px);
 }
