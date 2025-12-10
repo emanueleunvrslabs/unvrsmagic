@@ -108,9 +108,48 @@ export function Topbar() {
       {/* Right section */}
       <div className="flex items-center gap-3">
         {/* Notifications - iOS 26 style */}
-        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all">
-          <Bell className="h-5 w-5 text-foreground" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-white/15 transition-all">
+              <Bell className="h-5 w-5 text-foreground" />
+              <span className="absolute -right-0.5 -top-0.5 h-4 w-4 text-[9px] flex items-center justify-center bg-[#0a84ff] text-white rounded-full border-0">
+                3
+              </span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="end" 
+            className="w-[300px] bg-black/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/10 rounded-xl shadow-2xl"
+          >
+            <DropdownMenuLabel className="text-white/90 text-[15px] font-medium px-3 py-2">Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+              <div className="flex w-full justify-between">
+                <span className="font-medium text-sm text-white/90">Bot Action</span>
+                <span className="text-xs text-white/50">2 min ago</span>
+              </div>
+              <span className="text-xs text-white/60">BTC signal triggered at $65,000</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+              <div className="flex w-full justify-between">
+                <span className="font-medium text-sm text-white/90">Trade Alert</span>
+                <span className="text-xs text-white/50">15 min ago</span>
+              </div>
+              <span className="text-xs text-white/60">ETH trade completed: +2.3%</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
+              <div className="flex w-full justify-between">
+                <span className="font-medium text-sm text-white/90">System Notice</span>
+                <span className="text-xs text-white/50">1 hour ago</span>
+              </div>
+              <span className="text-xs text-white/60">New AI model update available</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium text-[#0a84ff] focus:bg-white/10 focus:text-[#0a84ff] rounded-lg mx-1 py-2">
+              View all notifications
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Wallet Connection - only show if connected */}
         {isConnected && (
