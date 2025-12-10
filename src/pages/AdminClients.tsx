@@ -65,10 +65,10 @@ export default function AdminClients() {
     <DashboardLayout>
       <div className="space-y-6">
         {selectedProject ? (
-          <div className="relative">
+          <>
             <button
               onClick={() => setSelectedProject(null)}
-              className="absolute -top-[52px] left-0 z-10 p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
+              className="fixed top-6 left-[306px] z-50 p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
@@ -78,7 +78,7 @@ export default function AdminClients() {
                 onClose={() => setSelectedProject(null)}
               />
             </div>
-          </div>
+          </>
         ) : (
           <>
             <div className="flex items-center justify-between">
