@@ -311,7 +311,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] transition-all duration-200 cursor-pointer",
                 isActive
                   ? "bg-[#0a84ff] text-white"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/30"
+                  : "text-white/80 hover:bg-white/10"
               )}
             >
               <Icon className="h-5 w-5 flex-shrink-0" />
@@ -337,7 +337,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                       "flex items-center gap-3 px-3 py-2 rounded-xl text-[14px] transition-all duration-200",
                       isSubActive
                         ? "bg-[#0a84ff] text-white"
-                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground"
+                        : "text-white/60 hover:bg-white/10 hover:text-white"
                     )}
                   >
                     <SubIcon className="h-4 w-4 flex-shrink-0" />
@@ -359,7 +359,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           "flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] transition-all duration-200",
           isActive
             ? "bg-[#0a84ff] text-white"
-            : "text-sidebar-foreground/80 hover:bg-sidebar-accent/30"
+            : "text-white/80 hover:bg-white/10"
         )}
       >
         <Icon className="h-5 w-5 flex-shrink-0" />
@@ -369,10 +369,10 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[260px] bg-[#1c1c1e] flex flex-col z-50">
+    <aside className="fixed left-0 top-0 h-screen w-[260px] bg-black/40 backdrop-blur-2xl backdrop-saturate-150 border-r border-white/5 flex flex-col z-50">
       {/* Search */}
       <div className="p-4">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-sidebar-accent/20 text-sidebar-foreground/50">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/10 text-white/50">
           <Search className="h-5 w-5" />
           <span className="text-[15px]">Search</span>
         </div>
@@ -383,7 +383,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         {menuSections.map((section, sectionIdx) => (
           <div key={sectionIdx} className="mb-4">
             {section.section && (
-              <div className="flex items-center gap-2 px-3 py-2 text-sidebar-foreground/50">
+              <div className="flex items-center gap-2 px-3 py-2 text-white/50">
                 <span className="text-[13px] font-normal">{section.section}</span>
                 <ChevronDown className="h-4 w-4" />
               </div>
@@ -396,18 +396,18 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       </nav>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-sidebar-border/20">
+      <div className="p-4 border-t border-white/10">
         <Link
           to="/settings?tab=profile"
-          className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-sidebar-accent/30 transition-all duration-200"
+          className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/10 transition-all duration-200"
         >
           <Avatar className="h-9 w-9">
             <AvatarImage src="" />
-            <AvatarFallback className="bg-sidebar-accent/30 text-sidebar-foreground text-sm">
+            <AvatarFallback className="bg-white/10 text-white text-sm">
               {userProfile?.full_name?.[0] || userProfile?.phone_number?.[0] || "U"}
             </AvatarFallback>
           </Avatar>
-          <span className="text-[15px] text-sidebar-foreground font-normal">
+          <span className="text-[15px] text-white font-normal">
             {userProfile?.full_name || userProfile?.phone_number || "User"}
           </span>
         </Link>
