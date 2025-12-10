@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt, Trash2, X } from "lucide-react";
+import { Briefcase, FileText, Users, Pencil, Mail, MessageCircle, Receipt, Trash2, X, CheckSquare, Kanban } from "lucide-react";
 import { useState } from "react";
 import { SendEmailModal } from "./SendEmailModal";
 import { WhatsAppChatModal } from "./WhatsAppChatModal";
@@ -594,6 +594,18 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
                 }}
               >
                 <Users className="icon" strokeWidth={2} />
+              </button>
+              <button 
+                className="fourth-link" 
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CheckSquare className="icon" strokeWidth={2} />
+              </button>
+              <button 
+                className="fourth-link" 
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Kanban className="icon" strokeWidth={2} />
               </button>
             </div>
 
