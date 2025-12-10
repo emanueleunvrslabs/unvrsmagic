@@ -36,14 +36,15 @@ export const SettingsInterface: React.FC = () => {
     resetSettings,
   } = useSettings();
 
-  // Set active tab from URL parameter
+  // Set active tab from URL parameter - run on every location change and after loading
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tab = searchParams.get('tab');
     if (tab && ['profile', 'security', 'exchanges'].includes(tab)) {
-      setActiveTab(tab);
+      // Use setTimeout to ensure this runs after any async state updates
+      setTimeout(() => setActiveTab(tab), 0);
     }
-  }, [location.search, setActiveTab]);
+  }, [location.search, setActiveTab, isLoading]);
 
   const handleSave = async () => {
     const result = await saveSettings();
