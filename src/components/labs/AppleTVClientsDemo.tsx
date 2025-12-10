@@ -55,14 +55,9 @@ export function AppleTVClientsDemo() {
   const selectedClient = mockClients[selectedIndex];
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="px-8 pt-6 pb-4">
-        <h1 className="text-3xl font-semibold text-white/90 tracking-tight">Clients</h1>
-      </div>
-
+    <div className="h-full flex flex-col pt-8">
       {/* Carousel Gallery */}
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 flex flex-col justify-center max-h-[55%]">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {mockClients.map((client, index) => {
@@ -70,7 +65,7 @@ export function AppleTVClientsDemo() {
               return (
                 <div
                   key={client.id}
-                  className="flex-[0_0_45%] min-w-0 px-3"
+                  className="flex-[0_0_50%] min-w-0 px-4"
                 >
                   <div
                     onClick={() => emblaApi?.scrollTo(index)}
@@ -89,16 +84,16 @@ export function AppleTVClientsDemo() {
                     )} />
                     
                     {/* Content */}
-                    <div className="absolute inset-0 flex flex-col justify-end p-8">
+                    <div className="absolute inset-0 flex flex-col justify-end p-6">
                       <div className="flex items-end justify-between">
                         <div>
-                          <h2 className="text-4xl font-bold text-white tracking-tight">
+                          <h2 className="text-3xl font-bold text-white tracking-tight">
                             {client.company_name}
                           </h2>
-                          <p className="text-white/70 text-lg mt-1">{client.city}</p>
+                          <p className="text-white/70 text-base mt-1">{client.city}</p>
                         </div>
-                        <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <span className="text-4xl font-bold text-white">
+                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <span className="text-3xl font-bold text-white">
                             {client.company_name[0]}
                           </span>
                         </div>
@@ -134,9 +129,9 @@ export function AppleTVClientsDemo() {
       </div>
 
       {/* Action Cards */}
-      <div className="px-8 pb-8">
+      <div className="px-8 py-10">
         <div className="grid grid-cols-5 gap-4">
-          {actionItems.map((action, index) => {
+          {actionItems.map((action) => {
             const Icon = action.icon;
             return (
               <button
