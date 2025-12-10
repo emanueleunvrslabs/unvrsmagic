@@ -290,7 +290,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     collapsible: true,
     defaultOpen: true,
     items: [
-      { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
       { id: "upload", label: "Upload", icon: Upload, href: "/file-upload" },
     ],
   });
