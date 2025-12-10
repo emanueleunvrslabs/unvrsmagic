@@ -417,32 +417,36 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
               </Badge>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="top" className="w-[280px] mb-2">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start py-2 cursor-default">
+          <DropdownMenuContent 
+            align="start" 
+            side="top" 
+            className="w-[280px] mb-2 bg-black/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/10 rounded-xl shadow-2xl"
+          >
+            <DropdownMenuLabel className="text-white/90 text-[15px] font-medium px-3 py-2">Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
               <div className="flex w-full justify-between">
-                <span className="font-medium text-sm">Bot Action</span>
-                <span className="text-xs text-muted-foreground">2 min ago</span>
+                <span className="font-medium text-sm text-white/90">Bot Action</span>
+                <span className="text-xs text-white/50">2 min ago</span>
               </div>
-              <span className="text-xs text-muted-foreground">BTC signal triggered at $65,000</span>
+              <span className="text-xs text-white/60">BTC signal triggered at $65,000</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start py-2 cursor-default">
+            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
               <div className="flex w-full justify-between">
-                <span className="font-medium text-sm">Trade Alert</span>
-                <span className="text-xs text-muted-foreground">15 min ago</span>
+                <span className="font-medium text-sm text-white/90">Trade Alert</span>
+                <span className="text-xs text-white/50">15 min ago</span>
               </div>
-              <span className="text-xs text-muted-foreground">ETH trade completed: +2.3%</span>
+              <span className="text-xs text-white/60">ETH trade completed: +2.3%</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start py-2 cursor-default">
+            <DropdownMenuItem className="flex flex-col items-start py-2.5 px-3 cursor-default focus:bg-white/10 rounded-lg mx-1">
               <div className="flex w-full justify-between">
-                <span className="font-medium text-sm">System Notice</span>
-                <span className="text-xs text-muted-foreground">1 hour ago</span>
+                <span className="font-medium text-sm text-white/90">System Notice</span>
+                <span className="text-xs text-white/50">1 hour ago</span>
               </div>
-              <span className="text-xs text-muted-foreground">New AI model update available</span>
+              <span className="text-xs text-white/60">New AI model update available</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium">
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium text-[#0a84ff] focus:bg-white/10 focus:text-[#0a84ff] rounded-lg mx-1 py-2">
               View all notifications
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -464,25 +468,29 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
               <ChevronDown className="h-4 w-4 text-white/50" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="top" className="w-[230px] mb-2">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/settings?tab=profile" className="cursor-pointer">
+          <DropdownMenuContent 
+            align="start" 
+            side="top" 
+            className="w-[230px] mb-2 bg-black/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/10 rounded-xl shadow-2xl"
+          >
+            <DropdownMenuLabel className="text-white/90 text-[15px] font-medium px-3 py-2">My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem asChild className="focus:bg-white/10 rounded-lg mx-1 px-3 py-2">
+              <Link to="/settings?tab=profile" className="cursor-pointer text-white/85">
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </Link>
             </DropdownMenuItem>
             {isOwner && (
-              <DropdownMenuItem asChild>
-                <Link to="/settings?tab=security" className="cursor-pointer">
+              <DropdownMenuItem asChild className="focus:bg-white/10 rounded-lg mx-1 px-3 py-2">
+                <Link to="/settings?tab=security" className="cursor-pointer text-white/85">
                   <Zap className="mr-2 h-4 w-4" />
                   AI Model API
                 </Link>
               </DropdownMenuItem>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 focus:text-red-500">
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 focus:text-red-400 focus:bg-white/10 rounded-lg mx-1 px-3 py-2">
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </DropdownMenuItem>
