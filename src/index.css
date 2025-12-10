@@ -700,3 +700,98 @@ html {
   opacity: 0.6;
   transform: translate(6px, -6px);
 }
+
+/* ============================================
+   GLASSMAC - MacOS/iOS Glassmorphism Style
+   ============================================ */
+
+/* Base glass effect */
+.glassmac {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(13, 38, 38, 0.37);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Pill/capsule variant */
+.glassmac-pill {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(13, 38, 38, 0.37);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 60px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Circle variant */
+.glassmac-circle {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(13, 38, 38, 0.37);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Small rounded variant */
+.glassmac-sm {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(13, 38, 38, 0.37);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Hover state for glassmac elements */
+.glassmac-hover {
+  transition: all 0.1s ease-in-out;
+}
+
+.glassmac-hover:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Active state */
+.glassmac-active:active {
+  transform: scale(0.95);
+}
+
+/* Glassmac animated shapes */
+@keyframes glassmac-float {
+  from, to {
+    transform: rotate(-45deg);
+  }
+  25%, 75% {
+    transform: translateX(30px) translateY(10px) rotate(30deg);
+  }
+  50% {
+    transform: translateX(60px) translateY(20px);
+  }
+}
+
+.glassmac-shape-triangle {
+  animation: glassmac-float 12s linear infinite;
+}
+
+.glassmac-shape-circle {
+  width: 80px;
+  height: 80px;
+  background-color: hsl(291, 82%, 57%);
+  border-radius: 50%;
+  animation: glassmac-float 12s linear infinite;
+  animation-delay: 2s;
+}
+
+.glassmac-shape-square {
+  width: 50px;
+  height: 50px;
+  background-color: hsl(65, 95%, 58%);
+  border-radius: 12px;
+  transform: rotate(45deg);
+  animation: glassmac-float 12s alternate-reverse infinite;
+  animation-delay: 6s;
+}
