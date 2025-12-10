@@ -4,6 +4,14 @@ import type React from "react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   ChevronDown,
   CircleDollarSign,
   FileText,
@@ -12,6 +20,7 @@ import {
   Image,
   Layers,
   LayoutDashboard,
+  LogOut,
   Radio,
   Repeat,
   Search,
@@ -31,11 +40,12 @@ import {
   Upload,
   type LucideIcon,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { toast } from "sonner";
 
 type MenuItem = {
   id: string;
@@ -59,11 +69,23 @@ type Props = {
 export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const location = useLocation();
   const pathname = location.pathname;
+  const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<{ full_name: string | null; phone_number: string } | null>(null);
   const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const { isOwner, isAdmin, isUser } = useUserRole();
   const { userProjects } = useUserProjects();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/auth");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Error logging out");
+    }
+  };
 
   // Load user profile
   useEffect(() => {
@@ -249,20 +271,45 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
       {/* User Profile */}
       <div className="p-3">
-        <Link
-          to="/settings?tab=profile"
-          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200"
-        >
-          <Avatar className="h-9 w-9">
-            <AvatarImage src="" />
-            <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-sm font-medium">
-              {userProfile?.full_name?.[0] || userProfile?.phone_number?.[0] || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-[14px] text-white/90 font-normal">
-            {userProfile?.full_name || userProfile?.phone_number || "User"}
-          </span>
-        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 w-full text-left">
+              <Avatar className="h-9 w-9">
+                <AvatarImage src="" />
+                <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-sm font-medium">
+                  {userProfile?.full_name?.[0] || userProfile?.phone_number?.[0] || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[14px] text-white/90 font-normal flex-1">
+                {userProfile?.full_name || userProfile?.phone_number || "User"}
+              </span>
+              <ChevronDown className="h-4 w-4 text-white/50" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="top" className="w-[230px] mb-2">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/settings?tab=profile" className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            {isOwner && (
+              <DropdownMenuItem asChild>
+                <Link to="/settings?tab=security" className="cursor-pointer">
+                  <Zap className="mr-2 h-4 w-4" />
+                  AI Model API
+                </Link>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 focus:text-red-500">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   );

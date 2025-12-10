@@ -104,20 +104,7 @@ export function Topbar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 lg:h-16 lg:px-6">
-      {/* Left section */}
-      <div className="flex items-center gap-4">
-        <div className="hidden sm:block">
-          <SearchBar />
-        </div>
-      </div>
-
-      {/* Center section - Market Ticker */}
-      <div className="hidden items-center gap-4 2xl:flex">
-        <MarketTicker symbol="BTC/USD" price="68,245.32" change="+2.4%" isPositive={true} />
-        <MarketTicker symbol="ETH/USD" price="3,892.17" change="-0.8%" isPositive={false} />
-      </div>
-
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-end border-b bg-background px-4 lg:h-16 lg:px-6">
       {/* Right section */}
       <div className="flex items-center gap-2">
         <DropdownMenu>
@@ -177,34 +164,6 @@ export function Topbar() {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2">
-              <span className="hidden md:inline-flex">{username || "User"}</span>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <Link to="/settings?tab=profile">Profile</Link>
-            </DropdownMenuItem>
-            {isOwner && (
-              <DropdownMenuItem>
-                <Zap className="mr-2 h-4 w-4" />
-                <Link to="/settings?tab=security">AI Model API</Link>
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </header>
   );
