@@ -1,9 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-fal-signature",
 };
 
 // Fal.ai pricing (USD per unit) - based on fal.ai/pricing (Nov 2025)
@@ -30,13 +31,74 @@ function estimateCost(contentType: string, modelId?: string, durationSeconds?: n
   return FAL_PRICING["fal-ai/nano-banana-pro"] || 0.04;
 }
 
+// Timing-safe string comparison to prevent timing attacks
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+// Verify webhook signature using HMAC-SHA256
+async function verifyWebhookSignature(payload: string, signature: string, secret: string): Promise<boolean> {
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const signatureBuffer = await crypto.subtle.sign("HMAC", key, encoder.encode(payload));
+    const computedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    return timingSafeEqual(computedSignature, signature);
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const payload = await req.json();
+    // Get the raw body for signature verification
+    const rawBody = await req.text();
+    const payload = JSON.parse(rawBody);
+    
+    // Verify webhook signature
+    const webhookSecret = Deno.env.get("FAL_WEBHOOK_SECRET");
+    const signature = req.headers.get("x-fal-signature") || req.headers.get("X-Fal-Signature");
+    
+    if (webhookSecret && webhookSecret.length > 0) {
+      if (!signature) {
+        console.error("Missing webhook signature header");
+        return new Response(JSON.stringify({ error: "Missing signature" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      const isValid = await verifyWebhookSignature(rawBody, signature, webhookSecret);
+      if (!isValid) {
+        console.error("Invalid webhook signature");
+        return new Response(JSON.stringify({ error: "Invalid signature" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.log("Webhook signature verified successfully");
+    } else {
+      console.warn("FAL_WEBHOOK_SECRET not configured - signature verification skipped");
+    }
+    
     console.log("Fal webhook received:", JSON.stringify(payload));
 
     const { request_id, status, payload: resultPayload } = payload;
@@ -54,11 +116,34 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Processing webhook for content: ${contentId}, status: ${status}`);
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Validate that the contentId corresponds to a pending/generating content record
+    const { data: existingContent, error: contentError } = await supabase
+      .from("ai_social_content")
+      .select("id, status")
+      .eq("id", contentId)
+      .single();
+    
+    if (contentError || !existingContent) {
+      console.error("Content not found for ID:", contentId);
+      return new Response(JSON.stringify({ error: "Content not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    if (existingContent.status !== "generating" && existingContent.status !== "pending") {
+      console.error("Content is not in pending/generating state:", existingContent.status);
+      return new Response(JSON.stringify({ error: "Invalid content state" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`Processing webhook for content: ${contentId}, status: ${status}`);
 
     if (status === "OK" || status === "COMPLETED") {
       // Get media URL from result
