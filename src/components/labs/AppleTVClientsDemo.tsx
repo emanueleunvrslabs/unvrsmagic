@@ -102,14 +102,9 @@ export function AppleTVClientsDemo() {
       <div className="h-full flex flex-col items-center justify-center p-8">
         <div className="w-full max-w-md">
           {/* Card Container */}
-          <div className="labs-client-card relative rounded-[20px] overflow-hidden p-8">
-            {/* Stars Layer */}
-            <div className="labs-stars-layer" />
-            <div className="labs-stars-layer-2" />
-            <div className="labs-stars-layer-3" />
-            
+          <div className="relative rounded-[20px] overflow-hidden p-8 bg-white/5 backdrop-blur-xl border border-white/10">
             {/* Content */}
-            <div className="relative z-10 space-y-5">
+            <div className="space-y-5">
               <div className="space-y-2">
                 <Label className="text-white/70 text-sm">Company Name</Label>
                 <Input
