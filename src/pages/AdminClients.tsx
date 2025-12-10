@@ -88,7 +88,7 @@ export default function AdminClients() {
               <UserPlus className="h-5 w-5" />
             </button>
 
-            <div className="flex flex-wrap gap-6 mx-auto" style={{ maxWidth: 'fit-content' }}>
+            <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
               {showNewClientForm && (
                 <ClientCard
                   client={null}
