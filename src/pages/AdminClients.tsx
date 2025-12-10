@@ -66,15 +66,13 @@ export default function AdminClients() {
       <div className="space-y-6">
         {selectedProject ? (
           <>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
+            <div className="flex items-center justify-end mb-4">
+              <button
                 onClick={() => setSelectedProject(null)}
-                className="gap-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 backdrop-blur-md"
+                className="p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Clients
-              </Button>
+                <ArrowLeft className="h-5 w-5" />
+              </button>
             </div>
             <div className="flex justify-start">
               <ProjectDetailCard
