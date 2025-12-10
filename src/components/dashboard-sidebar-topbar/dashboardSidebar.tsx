@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Bell,
   ChevronDown,
+  ChevronRight,
   CircleDollarSign,
   FileText,
   Gauge,
@@ -40,6 +41,10 @@ import {
   Bot,
   Cpu,
   Upload,
+  Video,
+  Link2,
+  Calendar,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -49,11 +54,19 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { toast } from "sonner";
 
+type SubMenuItem = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  href: string;
+};
+
 type MenuItem = {
   id: string;
   label: string;
   icon: LucideIcon;
   href?: string;
+  subItems?: SubMenuItem[];
 };
 
 type MenuSection = {
@@ -75,6 +88,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const [userProfile, setUserProfile] = useState<{ full_name: string | null; phone_number: string } | null>(null);
   const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [openProjects, setOpenProjects] = useState<Record<string, boolean>>({});
   const { isOwner, isAdmin, isUser } = useUserRole();
   const { userProjects } = useUserProjects();
 
@@ -132,6 +146,10 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     setOpenSections(prev => ({ ...prev, [title]: !prev[title] }));
   };
 
+  const toggleProject = (projectId: string) => {
+    setOpenProjects(prev => ({ ...prev, [projectId]: !prev[projectId] }));
+  };
+
   const isItemActive = (href?: string) => {
     if (!href) return false;
     if (href === pathname) return true;
@@ -163,31 +181,95 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       ],
     });
 
-    // Projects section
+    // Projects section with submenus
     menuSections.push({
       title: "Projects",
       collapsible: true,
       defaultOpen: true,
       items: [
-        { id: "ai-social", label: "Ai Social", icon: CircleDollarSign, href: "/ai-social" },
-        { id: "ai-art", label: "AI Art", icon: Wand2, href: "/ai-art/generate-image" },
+        { 
+          id: "ai-social", 
+          label: "Ai Social", 
+          icon: CircleDollarSign,
+          subItems: [
+            { id: "ai-social-dashboard", label: "Dashboard", icon: Home, href: "/ai-social" },
+            { id: "ai-social-generate", label: "Generate Image", icon: Image, href: "/ai-social/generate-image" },
+            { id: "ai-social-video", label: "Generate Video", icon: Video, href: "/ai-social/generate-video" },
+            { id: "ai-social-workflows", label: "Workflows", icon: Workflow, href: "/ai-social/workflows" },
+            { id: "ai-social-schedule", label: "Schedule", icon: Calendar, href: "/ai-social/schedule" },
+            { id: "ai-social-connections", label: "Connections", icon: Link2, href: "/ai-social/connections" },
+            { id: "ai-social-live", label: "Live Studio", icon: Radio, href: "/ai-social/live-studio" },
+          ]
+        },
+        { 
+          id: "ai-art", 
+          label: "AI Art", 
+          icon: Wand2,
+          subItems: [
+            { id: "ai-art-image", label: "Generate Image", icon: Image, href: "/ai-art/generate-image" },
+            { id: "ai-art-video", label: "Generate Video", icon: Video, href: "/ai-art/generate-video" },
+          ]
+        },
         { id: "delibere-arera", label: "Delibere Arera", icon: FileText, href: "/delibere-arera" },
-        { id: "nkmt", label: "NKMT", icon: Layers, href: "/nkmt/dashboard" },
+        { 
+          id: "nkmt", 
+          label: "NKMT", 
+          icon: Layers,
+          subItems: [
+            { id: "nkmt-dashboard", label: "Dashboard", icon: Home, href: "/nkmt/dashboard" },
+            { id: "nkmt-mkt-data", label: "MKT.DATA", icon: Database, href: "/nkmt/mkt-data" },
+            { id: "nkmt-deriv-data", label: "DERIV.DATA", icon: Activity, href: "/nkmt/deriv-data" },
+            { id: "nkmt-macro-data", label: "MACRO.DATA", icon: PieChart, href: "/nkmt/macro-data" },
+            { id: "nkmt-exchange", label: "Exchange", icon: Repeat, href: "/nkmt/exchange" },
+          ]
+        },
       ],
     });
   }
 
-  // User projects (for non-admin users)
+  // User projects (for non-admin users) - with same submenus
   if (!isOwner && !isAdmin && userProjects.length > 0) {
     const projectItems: MenuItem[] = userProjects.map((up) => {
       if (up.project.route === '/ai-social') {
-        return { id: `project-${up.project_id}`, label: up.project.name, icon: CircleDollarSign, href: "/ai-social" };
+        return { 
+          id: `project-${up.project_id}`, 
+          label: up.project.name, 
+          icon: CircleDollarSign,
+          subItems: [
+            { id: "user-ai-social-dashboard", label: "Dashboard", icon: Home, href: "/ai-social" },
+            { id: "user-ai-social-generate", label: "Generate Image", icon: Image, href: "/ai-social/generate-image" },
+            { id: "user-ai-social-video", label: "Generate Video", icon: Video, href: "/ai-social/generate-video" },
+            { id: "user-ai-social-workflows", label: "Workflows", icon: Workflow, href: "/ai-social/workflows" },
+            { id: "user-ai-social-schedule", label: "Schedule", icon: Calendar, href: "/ai-social/schedule" },
+            { id: "user-ai-social-connections", label: "Connections", icon: Link2, href: "/ai-social/connections" },
+            { id: "user-ai-social-live", label: "Live Studio", icon: Radio, href: "/ai-social/live-studio" },
+          ]
+        };
       } else if (up.project.route === '/ai-art') {
-        return { id: `project-${up.project_id}`, label: up.project.name, icon: Wand2, href: "/ai-art/generate-image" };
+        return { 
+          id: `project-${up.project_id}`, 
+          label: up.project.name, 
+          icon: Wand2,
+          subItems: [
+            { id: "user-ai-art-image", label: "Generate Image", icon: Image, href: "/ai-art/generate-image" },
+            { id: "user-ai-art-video", label: "Generate Video", icon: Video, href: "/ai-art/generate-video" },
+          ]
+        };
       } else if (up.project.route === '/delibere-arera') {
         return { id: `project-${up.project_id}`, label: up.project.name, icon: FileText, href: "/delibere-arera" };
       } else if (up.project.route === '/nkmt') {
-        return { id: `project-${up.project_id}`, label: up.project.name, icon: Layers, href: "/nkmt/dashboard" };
+        return { 
+          id: `project-${up.project_id}`, 
+          label: up.project.name, 
+          icon: Layers,
+          subItems: [
+            { id: "user-nkmt-dashboard", label: "Dashboard", icon: Home, href: "/nkmt/dashboard" },
+            { id: "user-nkmt-mkt-data", label: "MKT.DATA", icon: Database, href: "/nkmt/mkt-data" },
+            { id: "user-nkmt-deriv-data", label: "DERIV.DATA", icon: Activity, href: "/nkmt/deriv-data" },
+            { id: "user-nkmt-macro-data", label: "MACRO.DATA", icon: PieChart, href: "/nkmt/macro-data" },
+            { id: "user-nkmt-exchange", label: "Exchange", icon: Repeat, href: "/nkmt/exchange" },
+          ]
+        };
       }
       return { id: `project-${up.project_id}`, label: up.project.name, icon: LayoutDashboard, href: up.project.route };
     });
@@ -215,7 +297,59 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   const renderMenuItem = (item: MenuItem) => {
     const Icon = item.icon;
-    const isActive = isItemActive(item.href);
+    const hasSubItems = item.subItems && item.subItems.length > 0;
+    const isProjectOpen = openProjects[item.id] ?? false;
+    const isActive = hasSubItems 
+      ? item.subItems?.some(sub => isItemActive(sub.href))
+      : isItemActive(item.href);
+
+    if (hasSubItems) {
+      return (
+        <div key={item.id}>
+          <button
+            onClick={() => toggleProject(item.id)}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 text-[15px] transition-all duration-150 rounded-lg w-full",
+              isActive
+                ? "text-white"
+                : "text-white/85 hover:bg-white/10"
+            )}
+          >
+            <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+            <span className="font-normal flex-1 text-left">{item.label}</span>
+            <ChevronRight
+              className={cn(
+                "h-4 w-4 text-white/50 transition-transform duration-200",
+                isProjectOpen && "rotate-90"
+              )}
+            />
+          </button>
+          {isProjectOpen && (
+            <div className="ml-4 mt-0.5 space-y-0.5">
+              {item.subItems?.map((subItem) => {
+                const SubIcon = subItem.icon;
+                const isSubActive = isItemActive(subItem.href);
+                return (
+                  <Link
+                    key={subItem.id}
+                    to={subItem.href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-1.5 text-[14px] transition-all duration-150 rounded-lg",
+                      isSubActive
+                        ? "bg-[#0a84ff] text-white"
+                        : "text-white/70 hover:bg-white/10"
+                    )}
+                  >
+                    <SubIcon className="h-4 w-4 flex-shrink-0" strokeWidth={1.5} />
+                    <span className="font-normal">{subItem.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
 
     return (
       <Link
