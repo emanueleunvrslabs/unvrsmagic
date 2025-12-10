@@ -104,28 +104,9 @@ export function Topbar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-end border-b bg-background px-4 lg:h-16 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-end bg-background px-4 lg:h-16 lg:px-6">
       {/* Right section */}
       <div className="flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="relative">
-              <Bell className="h-4 w-4" />
-              <Badge className="absolute -right-1 flex items-center justify-center -top-1 h-4 w-4 p-0 text-[10px]">3</Badge>
-              <span className="sr-only">Notifications</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[300px]">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <NotificationItem title="Bot Action" message="BTC signal triggered at $65,000" time="2 min ago" />
-            <NotificationItem title="Trade Alert" message="ETH trade completed: +2.3%" time="15 min ago" />
-            <NotificationItem title="System Notice" message="New AI model update available" time="1 hour ago" />
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer justify-center text-sm font-medium">View all notifications</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
         {/* Wallet Connection - only show if connected */}
         {isConnected && (
           <DropdownMenu>
