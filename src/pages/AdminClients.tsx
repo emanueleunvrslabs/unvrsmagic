@@ -81,14 +81,12 @@ export default function AdminClients() {
           </>
         ) : (
           <>
-            <div className="flex justify-end">
-              <button 
-                onClick={() => setShowNewClientForm(true)} 
-                className="p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
-              >
-                <UserPlus className="h-5 w-5" />
-              </button>
-            </div>
+            <button 
+              onClick={() => setShowNewClientForm(true)} 
+              className="fixed top-6 left-[306px] z-50 p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5"
+            >
+              <UserPlus className="h-5 w-5" />
+            </button>
 
             <div className="flex flex-wrap gap-6 mx-auto" style={{ maxWidth: 'fit-content' }}>
               {showNewClientForm && (
