@@ -198,13 +198,13 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         key={item.id}
         to={item.href || "#"}
         className={cn(
-          "flex items-center gap-4 px-4 py-2.5 text-[17px] transition-all duration-150",
+          "flex items-center gap-3 px-3 py-2 text-[15px] transition-all duration-150 rounded-lg",
           isActive
-            ? "bg-[#0a84ff] text-white rounded-xl mx-2"
-            : "text-white/90 hover:text-white mx-2"
+            ? "bg-[#0a84ff] text-white"
+            : "text-white/85 hover:bg-white/10"
         )}
       >
-        <Icon className="h-[22px] w-[22px] flex-shrink-0" strokeWidth={1.5} />
+        <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
         <span className="font-normal">{item.label}</span>
       </Link>
     );
@@ -214,17 +214,17 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     const isOpen = section.title ? (openSections[section.title] ?? section.defaultOpen ?? true) : true;
 
     return (
-      <div key={index} className="mb-2">
+      <div key={index} className="mb-1">
         {section.title && (
           <button
             onClick={() => section.collapsible && toggleSection(section.title!)}
-            className="flex items-center justify-between w-full px-4 py-2 text-white/50 hover:text-white/70 transition-colors"
+            className="flex items-center justify-between w-full px-3 py-1.5 text-white/40 hover:text-white/60 transition-colors"
           >
-            <span className="text-[15px] font-normal">{section.title}</span>
+            <span className="text-[13px] font-normal">{section.title}</span>
             {section.collapsible && (
               <ChevronDown
                 className={cn(
-                  "h-4 w-4 transition-transform duration-200",
+                  "h-3.5 w-3.5 transition-transform duration-200",
                   !isOpen && "-rotate-90"
                 )}
               />
@@ -241,25 +241,25 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[280px] bg-black/60 backdrop-blur-3xl flex flex-col z-50">
+    <aside className="fixed left-4 top-4 bottom-4 w-[260px] bg-white/5 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl flex flex-col z-50 border border-white/10">
       {/* Menu */}
-      <nav className="flex-1 overflow-y-auto pt-4">
+      <nav className="flex-1 overflow-y-auto pt-4 px-2">
         {menuSections.map((section, idx) => renderSection(section, idx))}
       </nav>
 
       {/* User Profile */}
-      <div className="p-4">
+      <div className="p-3">
         <Link
           to="/settings?tab=profile"
-          className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/10 transition-all duration-200"
+          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-all duration-200"
         >
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-9 w-9">
             <AvatarImage src="" />
             <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-sm font-medium">
               {userProfile?.full_name?.[0] || userProfile?.phone_number?.[0] || "U"}
             </AvatarFallback>
           </Avatar>
-          <span className="text-[15px] text-white font-normal">
+          <span className="text-[14px] text-white/90 font-normal">
             {userProfile?.full_name || userProfile?.phone_number || "User"}
           </span>
         </Link>

@@ -10,7 +10,7 @@ const DashboardSidebarTopbar = ({ children }: { children: React.ReactNode }) => 
     <div className="min-h-screen w-full bg-background">
       <DashboardSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <div className="pl-[280px]">
+      <div className="pl-[290px] pt-4 pr-4 pb-4">
         <Topbar />
         <main className="p-6">{children}</main>
       </div>
