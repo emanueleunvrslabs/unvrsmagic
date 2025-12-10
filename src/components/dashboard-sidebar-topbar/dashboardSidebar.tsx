@@ -337,7 +337,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                     className={cn(
                       "flex items-center gap-3 px-3 py-1.5 text-[14px] transition-all duration-150 rounded-lg",
                       isSubActive
-                        ? "bg-[#0a84ff] text-white"
+                        ? "bg-white/15 backdrop-blur-md border border-white/20 text-white shadow-lg shadow-white/5"
                         : "text-white/70 hover:bg-white/10"
                     )}
                   >
@@ -359,7 +359,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         className={cn(
           "flex items-center gap-3 px-3 py-2 text-[15px] transition-all duration-150 rounded-lg",
           isActive
-            ? "bg-[#0a84ff] text-white"
+            ? "bg-white/15 backdrop-blur-md border border-white/20 text-white shadow-lg shadow-white/5"
             : "text-white/85 hover:bg-white/10"
         )}
       >
@@ -408,7 +408,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           className={cn(
             "flex items-center gap-3 px-3 py-2 text-[15px] transition-all duration-150 rounded-lg",
             isItemActive("/search")
-              ? "bg-[#0a84ff] text-white"
+              ? "bg-white/15 backdrop-blur-md border border-white/20 text-white shadow-lg shadow-white/5"
               : "text-white/85 hover:bg-white/10"
           )}
         >
