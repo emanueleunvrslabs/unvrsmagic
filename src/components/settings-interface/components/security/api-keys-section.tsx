@@ -84,7 +84,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   const [ownerIds, setOwnerIds] = useState<Record<string, string>>({
     qwen: "",
   })
-  const [revolutMerchantKey, setRevolutMerchantKey] = useState("")
+  const [revolutMerchantPublicKey, setRevolutMerchantPublicKey] = useState("")
+  const [revolutMerchantSecretKey, setRevolutMerchantSecretKey] = useState("")
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [connectedProviders, setConnectedProviders] = useState<Set<string>>(new Set())
@@ -114,27 +115,29 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
           const connected = new Set<string>()
 
           data.forEach((item) => {
-            if (item.provider === 'revolut_merchant') {
-              // Store merchant key separately
-              setRevolutMerchantKey(item.api_key)
+            if (item.provider === 'revolut_merchant_public') {
+              setRevolutMerchantPublicKey(item.api_key)
+            } else if (item.provider === 'revolut_merchant_secret') {
+              setRevolutMerchantSecretKey(item.api_key)
             } else {
               loadedKeys[item.provider] = item.api_key
             }
             if (item.owner_id) {
               loadedOwnerIds[item.provider] = item.owner_id
             }
-            // Mark revolut as connected only if both keys exist
-            if (item.provider === 'revolut' || item.provider === 'revolut_merchant') {
-              // Will check both after loading
+            // Mark revolut as connected only if all 3 keys exist
+            if (item.provider === 'revolut' || item.provider === 'revolut_merchant_public' || item.provider === 'revolut_merchant_secret') {
+              // Will check all after loading
             } else {
               connected.add(item.provider)
             }
           })
 
-          // Check if both revolut keys exist
+          // Check if all 3 revolut keys exist
           const hasBusinessKey = data.some(d => d.provider === 'revolut')
-          const hasMerchantKey = data.some(d => d.provider === 'revolut_merchant')
-          if (hasBusinessKey && hasMerchantKey) {
+          const hasMerchantPublicKey = data.some(d => d.provider === 'revolut_merchant_public')
+          const hasMerchantSecretKey = data.some(d => d.provider === 'revolut_merchant_secret')
+          if (hasBusinessKey && hasMerchantPublicKey && hasMerchantSecretKey) {
             connected.add('revolut')
           }
 
@@ -208,14 +211,18 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   }
 
   const handleConnect = async (providerId: string) => {
-    // For Revolut, validate both keys
+    // For Revolut, validate all 3 keys
     if (providerId === "revolut") {
       if (!apiKeys.revolut?.trim()) {
         toast.error("Business API key is required")
         return
       }
-      if (!revolutMerchantKey?.trim()) {
-        toast.error("Merchant API key is required")
+      if (!revolutMerchantPublicKey?.trim()) {
+        toast.error("Merchant Public Key is required")
+        return
+      }
+      if (!revolutMerchantSecretKey?.trim()) {
+        toast.error("Merchant Secret Key is required")
         return
       }
     } else {
@@ -261,21 +268,39 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
           return
         }
 
-        // Save Merchant API key
+        // Save Merchant Public Key
         const { error: saveError2 } = await supabase
           .from('api_keys')
           .upsert({
             user_id: user.id,
-            provider: 'revolut_merchant',
-            api_key: revolutMerchantKey,
+            provider: 'revolut_merchant_public',
+            api_key: revolutMerchantPublicKey,
             owner_id: null
           }, {
             onConflict: 'user_id,provider'
           })
 
         if (saveError2) {
-          console.error("Error saving Merchant API key:", saveError2)
-          toast.error("Failed to save Merchant API key")
+          console.error("Error saving Merchant Public Key:", saveError2)
+          toast.error("Failed to save Merchant Public Key")
+          return
+        }
+
+        // Save Merchant Secret Key
+        const { error: saveError3 } = await supabase
+          .from('api_keys')
+          .upsert({
+            user_id: user.id,
+            provider: 'revolut_merchant_secret',
+            api_key: revolutMerchantSecretKey,
+            owner_id: null
+          }, {
+            onConflict: 'user_id,provider'
+          })
+
+        if (saveError3) {
+          console.error("Error saving Merchant Secret Key:", saveError3)
+          toast.error("Failed to save Merchant Secret Key")
           return
         }
 
@@ -345,7 +370,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
 
-      // For Revolut, delete both keys
+      // For Revolut, delete all 3 keys
       if (providerId === "revolut") {
         const { error: error1 } = await supabase
           .from('api_keys')
@@ -357,10 +382,16 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
           .from('api_keys')
           .delete()
           .eq('user_id', user.id)
-          .eq('provider', 'revolut_merchant')
+          .eq('provider', 'revolut_merchant_public')
 
-        if (error1 || error2) {
-          console.error("Error deleting Revolut keys:", error1 || error2)
+        const { error: error3 } = await supabase
+          .from('api_keys')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('provider', 'revolut_merchant_secret')
+
+        if (error1 || error2 || error3) {
+          console.error("Error deleting Revolut keys:", error1 || error2 || error3)
           toast.error("Failed to disconnect Revolut")
           return
         }
@@ -372,7 +403,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         })
         
         setApiKeys(prev => ({ ...prev, revolut: "" }))
-        setRevolutMerchantKey("")
+        setRevolutMerchantPublicKey("")
+        setRevolutMerchantSecretKey("")
         toast.success("Revolut Business disconnected")
         return
       }
@@ -458,19 +490,40 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                         </div>
                         <div className="flex items-center space-x-2 max-w-md">
                           <Input
-                            type={visibleKeys.has(`${provider.id}_merchant`) ? "text" : "password"}
-                            placeholder="Merchant API Key (Secret)"
-                            value={revolutMerchantKey}
-                            onChange={(e) => setRevolutMerchantKey(e.target.value)}
+                            type={visibleKeys.has(`${provider.id}_merchant_public`) ? "text" : "password"}
+                            placeholder="Merchant Public Key"
+                            value={revolutMerchantPublicKey}
+                            onChange={(e) => setRevolutMerchantPublicKey(e.target.value)}
                             className="flex-1 bg-white/5 border-white/10"
                           />
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => toggleKeyVisibility(`${provider.id}_merchant`)}
+                            onClick={() => toggleKeyVisibility(`${provider.id}_merchant_public`)}
                             className="hover:bg-transparent"
                           >
-                            {visibleKeys.has(`${provider.id}_merchant`) ? (
+                            {visibleKeys.has(`${provider.id}_merchant_public`) ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        <div className="flex items-center space-x-2 max-w-md">
+                          <Input
+                            type={visibleKeys.has(`${provider.id}_merchant_secret`) ? "text" : "password"}
+                            placeholder="Merchant Secret Key"
+                            value={revolutMerchantSecretKey}
+                            onChange={(e) => setRevolutMerchantSecretKey(e.target.value)}
+                            className="flex-1 bg-white/5 border-white/10"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleKeyVisibility(`${provider.id}_merchant_secret`)}
+                            className="hover:bg-transparent"
+                          >
+                            {visibleKeys.has(`${provider.id}_merchant_secret`) ? (
                               <EyeOff className="h-4 w-4" />
                             ) : (
                               <Eye className="h-4 w-4" />
@@ -551,7 +604,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                       disabled={
                         connectingProvider === provider.id || 
                         (provider.isRevolut 
-                          ? (!apiKeys[provider.id] || !revolutMerchantKey) 
+                          ? (!apiKeys[provider.id] || !revolutMerchantPublicKey || !revolutMerchantSecretKey) 
                           : !apiKeys[provider.id])
                       }
                       className="h-8 px-3 text-xs bg-primary/20 text-primary border border-primary/30 hover:bg-primary/20"
