@@ -143,7 +143,7 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
                   variant="outline"
                   asChild
                   disabled={loading}
-                  className="bg-white/5 border-white/10 text-white hover:bg-white/10"
+                  className="text-white"
                 >
                   <label htmlFor="file-upload" className="cursor-pointer">
                     <Upload className="mr-2 h-4 w-4" />
@@ -191,7 +191,7 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
               onClick={handleSend}
               disabled={loading}
               size="lg"
-              className="bg-white/10 hover:bg-white/15 border border-white/20 text-white"
+              className="text-white"
             >
               {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
