@@ -139,6 +139,10 @@ serve(async (req) => {
         body = params.counterparty
         break
       
+      case 'getMerchantOrders':
+        // Fetch orders from Merchant API
+        return await handleMerchantOrders(supabase, user.id, params)
+      
       default:
         return new Response(JSON.stringify({ error: 'Unknown action' }), {
           status: 400,
@@ -210,6 +214,69 @@ serve(async (req) => {
     })
   }
 })
+
+async function handleMerchantOrders(supabase: any, userId: string, params: any): Promise<Response> {
+  const OWNER_USER_ID = "9d8f65ef-58ef-47db-be8f-926f26411b39";
+  
+  // Get Merchant secret key
+  const { data: merchantKeyData, error: keyError } = await supabase
+    .from('api_keys')
+    .select('api_key')
+    .eq('user_id', OWNER_USER_ID)
+    .eq('provider', 'revolut_merchant_secret')
+    .single();
+
+  if (keyError || !merchantKeyData) {
+    return new Response(JSON.stringify({ error: 'Merchant credentials not configured' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const merchantSecretKey = merchantKeyData.api_key;
+  const isSandbox = merchantSecretKey.startsWith('sandbox_');
+  const apiBase = isSandbox 
+    ? 'https://sandbox-merchant.revolut.com/api/orders'
+    : 'https://merchant.revolut.com/api/orders';
+
+  try {
+    const queryParams = new URLSearchParams();
+    if (params?.from) queryParams.append('from_created_date', params.from);
+    if (params?.to) queryParams.append('to_created_date', params.to);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const url = `${apiBase}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${merchantSecretKey}`,
+        'Accept': 'application/json',
+        'Revolut-Api-Version': '2024-09-01',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Merchant API error:', data);
+      return new Response(JSON.stringify({ error: data.message || 'Merchant API error' }), {
+        status: response.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify(data), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error: unknown) {
+    console.error('Merchant orders error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
 
 async function refreshAccessToken(supabase: any, userId: string, config: any): Promise<{ success: boolean; accessToken?: string }> {
   try {
