@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Eye, EyeOff, Copy, Key } from "lucide-react"
+import { Eye, EyeOff, Copy, Key, Check } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
 import type { ApiKey } from "../../types"
@@ -103,6 +103,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   const [revolutCertGenerating, setRevolutCertGenerating] = useState(false)
   const [revolutPublicKey, setRevolutPublicKey] = useState("")
   const [revolutRedirectUri, setRevolutRedirectUri] = useState("")
+  const [copiedItem, setCopiedItem] = useState<string | null>(null)
 
   // Load saved API keys on mount
   useEffect(() => {
@@ -523,9 +524,11 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     }
   }
 
-  const copyToClipboard = (text: string, label: string) => {
+  const copyToClipboard = (text: string, id: string, label: string) => {
     navigator.clipboard.writeText(text)
-    toast.success(`${label} copied to clipboard`)
+    setCopiedItem(id)
+    toast.success(`${label} copied!`)
+    setTimeout(() => setCopiedItem(null), 2000)
   }
 
   const renderInputField = (provider: typeof AI_PROVIDERS[0]) => {
@@ -549,20 +552,28 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => copyToClipboard(revolutPublicKey, "X509 Certificate")}
-                  className="h-8 px-3 text-xs bg-transparent text-green-400 border border-green-500/30 hover:bg-green-500/10"
+                  onClick={() => copyToClipboard(revolutPublicKey, "cert", "X509 Certificate")}
+                  className={`h-8 px-3 text-xs bg-transparent border ${
+                    copiedItem === "cert" 
+                      ? "text-green-400 border-green-500/50 bg-green-500/20" 
+                      : "text-green-400 border-green-500/30 hover:bg-green-500/10"
+                  }`}
                 >
-                  <Copy className="h-3 w-3 mr-2" />
-                  Copy X509 Certificate
+                  {copiedItem === "cert" ? <Check className="h-3 w-3 mr-2" /> : <Copy className="h-3 w-3 mr-2" />}
+                  {copiedItem === "cert" ? "Copied!" : "Copy X509 Certificate"}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => copyToClipboard(revolutRedirectUri, "Redirect URI")}
-                  className="h-8 px-3 text-xs bg-transparent text-blue-400 border border-blue-500/30 hover:bg-blue-500/10"
+                  onClick={() => copyToClipboard(revolutRedirectUri, "uri", "Redirect URI")}
+                  className={`h-8 px-3 text-xs bg-transparent border ${
+                    copiedItem === "uri" 
+                      ? "text-green-400 border-green-500/50 bg-green-500/20" 
+                      : "text-blue-400 border-blue-500/30 hover:bg-blue-500/10"
+                  }`}
                 >
-                  <Copy className="h-3 w-3 mr-2" />
-                  Copy Redirect URI
+                  {copiedItem === "uri" ? <Check className="h-3 w-3 mr-2" /> : <Copy className="h-3 w-3 mr-2" />}
+                  {copiedItem === "uri" ? "Copied!" : "Copy Redirect URI"}
                 </Button>
               </div>
               <span className="text-xs text-muted-foreground">Certificate generated ✓</span>
