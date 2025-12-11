@@ -71,3 +71,9 @@ verify_jwt = true
 
 [functions.revolut-oauth]
 verify_jwt = false
+
+[functions.create-revolut-checkout]
+verify_jwt = true
+
+[functions.revolut-webhook]
+verify_jwt = false
