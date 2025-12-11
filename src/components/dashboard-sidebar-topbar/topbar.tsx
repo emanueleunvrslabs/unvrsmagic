@@ -146,22 +146,24 @@ export function Topbar() {
                 />
               </div>
             )}
-            <button 
-              onClick={() => {
-                setClientSearch("");
-                const basePath = isClientsPage ? "/admin/clients" : "/labs";
-                navigate(`${basePath}?view=new`);
-              }}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
-                isNewClientView
-                  ? "bg-white/20 text-white"
-                  : "text-white/60 hover:text-white/80 hover:bg-white/10"
-              )}
-            >
-              <UserPlus className="w-4 h-4" />
-              New Client
-            </button>
+            {!editClientId && (
+              <button 
+                onClick={() => {
+                  setClientSearch("");
+                  const basePath = isClientsPage ? "/admin/clients" : "/labs";
+                  navigate(`${basePath}?view=new`);
+                }}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
+                  isNewClientView
+                    ? "bg-white/20 text-white"
+                    : "text-white/60 hover:text-white/80 hover:bg-white/10"
+                )}
+              >
+                <UserPlus className="w-4 h-4" />
+                New Client
+              </button>
+            )}
             <button 
               onClick={() => {
                 setClientSearch("");
