@@ -116,9 +116,9 @@ export function AppleTVClientsDemo() {
   if (isNewClientView) {
     return (
       <div className="relative h-full flex flex-col items-center justify-center p-8 overflow-hidden">
-        {/* Vibrant Background for Glassmorphism */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          {/* Base gradient mesh */}
+      {/* Vibrant Background for Glassmorphism - FULLSCREEN */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Base gradient mesh */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900/60 via-purple-800/30 to-teal-900/50" />
           
           {/* Floating color blobs */}
