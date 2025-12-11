@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Upload, X, Send } from "lucide-react";
-import "@/components/labs/GlassCards.css";
+import "@/components/SocialMediaCard.css";
 
 interface SendEmailModalProps {
   recipientEmail: string;
@@ -90,37 +90,15 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-2xl">
-        <div className="glass-card-large">
+        <div className="labs-client-card rounded-[22px] overflow-hidden">
           {/* Header */}
-          <div className="p-4 border-b border-white/10 flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 border border-primary/30">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-primary"
-              >
-                <path
-                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <polyline
-                  points="22,6 12,13 2,6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+          <div className="p-6 border-b border-white/10 flex items-center gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 border border-white/10">
+              <Send className="w-5 h-5 text-white/80" />
             </div>
             <div className="flex-1">
               <div className="text-lg font-semibold text-white">Send Email</div>
-              <div className="text-xs text-white/60">{recipientEmail}</div>
+              <div className="text-sm text-white/50">{recipientEmail}</div>
             </div>
           </div>
 
@@ -208,12 +186,12 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
           </ScrollArea>
 
           {/* Send Button Area */}
-          <div className="p-4 border-t border-white/10 flex justify-end">
+          <div className="p-6 border-t border-white/10 flex justify-end">
             <Button
               onClick={handleSend}
               disabled={loading}
               size="lg"
-              className="bg-primary/30 hover:bg-primary/40 text-white"
+              className="bg-white/10 hover:bg-white/15 border border-white/20 text-white"
             >
               {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
