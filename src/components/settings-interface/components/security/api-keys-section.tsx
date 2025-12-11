@@ -305,7 +305,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
           Loading API keys...
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
+        <div className="rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
         <Table>
           <TableHeader>
             <TableRow className="border-white/10">
