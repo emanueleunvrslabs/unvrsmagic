@@ -10,7 +10,7 @@ export function VideoBackground() {
         className="absolute inset-0 w-full h-full object-cover"
       >
         <source
-          src="https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object/public/uploads/9d8f65ef-58ef-47db-be8f-926f26411b39/1765480924978-Golden_Nebula_4K_Motion_Background.mp4"
+          src="https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object/public/uploads/9d8f65ef-58ef-47db-be8f-926f26411b39/1765481298321-curve_line_background.mp4"
           type="video/mp4"
         />
       </video>
