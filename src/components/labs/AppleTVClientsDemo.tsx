@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil, Phone, Upload, Image, X } from "lucide-react";
+import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil, Phone, Upload, ExternalLink, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
@@ -939,12 +939,15 @@ export function AppleTVClientsDemo() {
                     </div>
                     <div className="flex items-center gap-2">
                       <a
-                        href={doc.file_url}
+                        href={doc.file_type === 'application/pdf' 
+                          ? `https://docs.google.com/gview?url=${encodeURIComponent(doc.file_url)}&embedded=true`
+                          : doc.file_url
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 rounded-lg bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-all"
                       >
-                        <Image className="w-4 h-4" />
+                        <ExternalLink className="w-4 h-4" />
                       </a>
                       <button
                         onClick={() => handleDeleteDocument(doc.id, doc.file_path)}
