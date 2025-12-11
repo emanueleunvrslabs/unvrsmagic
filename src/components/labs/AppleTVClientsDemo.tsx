@@ -38,6 +38,27 @@ interface Contact {
   whatsapp: string;
 }
 
+interface ClientDocument {
+  id: string;
+  file_name: string;
+  file_path: string;
+  file_url: string;
+  file_size: number;
+  file_type: string;
+}
+
+interface ClientTodo {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+interface KanbanTask {
+  id: string;
+  title: string;
+  status: string;
+}
+
 const actionItems = [
   { id: "documents", label: "Documents", icon: File },
   { id: "todo", label: "Todo", icon: CheckSquare },
@@ -1096,7 +1117,7 @@ export function AppleTVClientsDemo() {
               </div>
             ) : clientDocuments && clientDocuments.length > 0 ? (
               <div className="space-y-2">
-                {clientDocuments.map((doc: any) => (
+                {(clientDocuments as ClientDocument[]).map((doc) => (
                   <div
                     key={doc.id}
                     className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
@@ -1184,7 +1205,7 @@ export function AppleTVClientsDemo() {
               </div>
             ) : clientTodos && clientTodos.length > 0 ? (
               <div className="space-y-2">
-                {clientTodos.map((todo: any) => (
+                {(clientTodos as ClientTodo[]).map((todo) => (
                   <div
                     key={todo.id}
                     className={cn(
@@ -1279,7 +1300,7 @@ export function AppleTVClientsDemo() {
                     To Do
                   </h4>
                   <div className="space-y-2">
-                    {kanbanTasks?.filter((t: any) => t.status === "todo").map((task: any) => (
+                    {(kanbanTasks as KanbanTask[] | undefined)?.filter((t) => t.status === "todo").map((task) => (
                       <div
                         key={task.id}
                         className="p-3 rounded-lg bg-white/5 border border-white/10 group"
@@ -1311,7 +1332,7 @@ export function AppleTVClientsDemo() {
                     In Progress
                   </h4>
                   <div className="space-y-2">
-                    {kanbanTasks?.filter((t: any) => t.status === "progress").map((task: any) => (
+                    {(kanbanTasks as KanbanTask[] | undefined)?.filter((t) => t.status === "progress").map((task) => (
                       <div
                         key={task.id}
                         className="p-3 rounded-lg bg-white/5 border border-white/10 group"
@@ -1349,7 +1370,7 @@ export function AppleTVClientsDemo() {
                     Done
                   </h4>
                   <div className="space-y-2">
-                    {kanbanTasks?.filter((t: any) => t.status === "done").map((task: any) => (
+                    {(kanbanTasks as KanbanTask[] | undefined)?.filter((t) => t.status === "done").map((task) => (
                       <div
                         key={task.id}
                         className="p-3 rounded-lg bg-white/5 border border-white/10 group"
