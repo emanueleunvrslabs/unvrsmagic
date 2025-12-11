@@ -241,6 +241,13 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "nkmt-mkt-data", label: "MKT.DATA", icon: Database, href: "/nkmt/mkt-data" },
             { id: "nkmt-deriv-data", label: "DERIV.DATA", icon: Activity, href: "/nkmt/deriv-data" },
             { id: "nkmt-macro-data", label: "MACRO.DATA", icon: PieChart, href: "/nkmt/macro-data" },
+            { id: "nkmt-sentiment-scout", label: "Sentiment.Scout", icon: Activity, href: "/nkmt/sentiment-scout" },
+            { id: "nkmt-chain-analyst", label: "Chain.Analyst", icon: Activity, href: "/nkmt/chain-analyst" },
+            { id: "nkmt-market-modeler", label: "Market.Modeler", icon: Activity, href: "/nkmt/market-modeler" },
+            { id: "nkmt-signal-maker", label: "Signal.Maker", icon: Activity, href: "/nkmt/signal-maker" },
+            { id: "nkmt-risk-mgr", label: "Risk.Mgr", icon: Activity, href: "/nkmt/risk-mgr" },
+            { id: "nkmt-trade-executor", label: "Trade.Executor", icon: Activity, href: "/nkmt/trade-executor" },
+            { id: "nkmt-reviewer", label: "Reviewer", icon: Activity, href: "/nkmt/reviewer" },
             { id: "nkmt-exchange", label: "Exchange", icon: Repeat, href: "/nkmt/exchange" },
           ]
         },
@@ -288,6 +295,13 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "user-nkmt-mkt-data", label: "MKT.DATA", icon: Database, href: "/nkmt/mkt-data" },
             { id: "user-nkmt-deriv-data", label: "DERIV.DATA", icon: Activity, href: "/nkmt/deriv-data" },
             { id: "user-nkmt-macro-data", label: "MACRO.DATA", icon: PieChart, href: "/nkmt/macro-data" },
+            { id: "user-nkmt-sentiment-scout", label: "Sentiment.Scout", icon: Activity, href: "/nkmt/sentiment-scout" },
+            { id: "user-nkmt-chain-analyst", label: "Chain.Analyst", icon: Activity, href: "/nkmt/chain-analyst" },
+            { id: "user-nkmt-market-modeler", label: "Market.Modeler", icon: Activity, href: "/nkmt/market-modeler" },
+            { id: "user-nkmt-signal-maker", label: "Signal.Maker", icon: Activity, href: "/nkmt/signal-maker" },
+            { id: "user-nkmt-risk-mgr", label: "Risk.Mgr", icon: Activity, href: "/nkmt/risk-mgr" },
+            { id: "user-nkmt-trade-executor", label: "Trade.Executor", icon: Activity, href: "/nkmt/trade-executor" },
+            { id: "user-nkmt-reviewer", label: "Reviewer", icon: Activity, href: "/nkmt/reviewer" },
             { id: "user-nkmt-exchange", label: "Exchange", icon: Repeat, href: "/nkmt/exchange" },
           ]
         };

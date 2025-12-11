@@ -20,6 +20,13 @@ import NKMTDashboard from "./pages/NKMTDashboard";
 import DerivData from "./pages/DerivData";
 import MacroData from "./pages/MacroData";
 import NKMTExchange from "./pages/NKMTExchange";
+import SentimentScout from "./pages/SentimentScout";
+import ChainAnalyst from "./pages/ChainAnalyst";
+import MarketModeler from "./pages/MarketModeler";
+import SignalMaker from "./pages/SignalMaker";
+import RiskMgr from "./pages/RiskMgr";
+import TradeExecutor from "./pages/TradeExecutor";
+import Reviewer from "./pages/Reviewer";
 import NotificationCenter from "./pages/NotificationCenter";
 import Marketplace from "./pages/Marketplace";
 import AdminProjects from "./pages/AdminProjects";
@@ -68,6 +75,13 @@ const App = () => (
           <Route path="/nkmt/mkt-data" element={<ProtectedRoute><MktData /></ProtectedRoute>} />
           <Route path="/nkmt/deriv-data" element={<ProtectedRoute><DerivData /></ProtectedRoute>} />
           <Route path="/nkmt/macro-data" element={<ProtectedRoute><MacroData /></ProtectedRoute>} />
+          <Route path="/nkmt/sentiment-scout" element={<ProtectedRoute><SentimentScout /></ProtectedRoute>} />
+          <Route path="/nkmt/chain-analyst" element={<ProtectedRoute><ChainAnalyst /></ProtectedRoute>} />
+          <Route path="/nkmt/market-modeler" element={<ProtectedRoute><MarketModeler /></ProtectedRoute>} />
+          <Route path="/nkmt/signal-maker" element={<ProtectedRoute><SignalMaker /></ProtectedRoute>} />
+          <Route path="/nkmt/risk-mgr" element={<ProtectedRoute><RiskMgr /></ProtectedRoute>} />
+          <Route path="/nkmt/trade-executor" element={<ProtectedRoute><TradeExecutor /></ProtectedRoute>} />
+          <Route path="/nkmt/reviewer" element={<ProtectedRoute><Reviewer /></ProtectedRoute>} />
           <Route path="/nkmt/dashboard" element={<ProtectedRoute><NKMTDashboard /></ProtectedRoute>} />
           <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
           <Route path="/nkmt" element={<Navigate to="/nkmt/dashboard" replace />} />
