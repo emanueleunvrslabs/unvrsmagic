@@ -18,7 +18,8 @@ import { useUserCredits } from "@/hooks/useUserCredits";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
+import type { Workflow, ScheduleConfig, ConnectedAccount, WorkflowContentType } from "@/types/ai-social";
+import { parseScheduleConfig } from "@/types/ai-social";
 const IMAGE_COST = 1;
 const VIDEO_COST = 10;
 
@@ -335,7 +336,7 @@ export default function Workflows() {
   };
 
   // Create scheduled posts for a workflow
-  const createScheduledPosts = async (workflowId: string, userId: string, scheduleConfig: any, platforms: string[]) => {
+  const createScheduledPosts = async (workflowId: string, userId: string, scheduleConfig: ScheduleConfig, platforms: string[]) => {
     const { frequency, times, days } = scheduleConfig;
     
     // Calculate next 7 days of scheduled times
@@ -478,26 +479,27 @@ export default function Workflows() {
     }
   };
 
-  const handleEditWorkflow = (workflow: any) => {
+  const handleEditWorkflow = (workflow: Workflow) => {
+    const config = parseScheduleConfig(workflow.schedule_config);
     setEditingWorkflowId(workflow.id);
     setWorkflowName(workflow.name || '');
-    setWorkflowType(workflow.content_type);
-    setGenerationMode(workflow.schedule_config?.generation_mode || (workflow.content_type === 'image' ? 'text-to-image' : 'text-to-video'));
+    setWorkflowType(workflow.content_type as WorkflowContentType);
+    setGenerationMode(config.generation_mode || (workflow.content_type === 'image' ? 'text-to-image' : 'text-to-video'));
     setDescription(workflow.prompt_template || workflow.description || '');
-    setAspectRatio(workflow.schedule_config?.aspect_ratio || '1:1');
-    setResolution(workflow.schedule_config?.resolution || '1K');
-    setOutputFormat(workflow.schedule_config?.output_format || 'png');
+    setAspectRatio(config.aspect_ratio || '1:1');
+    setResolution(config.resolution || '1K');
+    setOutputFormat(config.output_format || 'png');
     setSelectedPlatforms(workflow.platforms || []);
-    setUploadedImages(workflow.schedule_config?.image_urls || []);
-    setFirstFrameImage(workflow.schedule_config?.first_frame_image || '');
-    setLastFrameImage(workflow.schedule_config?.last_frame_image || '');
-    setDuration(workflow.schedule_config?.duration || '6s');
-    setGenerateAudio(workflow.schedule_config?.generate_audio !== false);
-    setScheduleFrequency(workflow.schedule_config?.frequency || 'daily');
+    setUploadedImages(config.image_urls || []);
+    setFirstFrameImage(config.first_frame_image || '');
+    setLastFrameImage(config.last_frame_image || '');
+    setDuration(config.duration || '6s');
+    setGenerateAudio(config.generate_audio !== false);
+    setScheduleFrequency(config.frequency || 'daily');
     // Support both old single time and new multiple times format
-    const times = workflow.schedule_config?.times || (workflow.schedule_config?.time ? [workflow.schedule_config.time] : ['09:00']);
+    const times = config.times || (config.time ? [config.time] : ['09:00']);
     setScheduleTimes(times);
-    setScheduleDays(workflow.schedule_config?.days || ['monday', 'wednesday', 'friday']);
+    setScheduleDays(config.days || ['monday', 'wednesday', 'friday']);
     setIsDialogOpen(true);
   };
 
@@ -568,7 +570,7 @@ export default function Workflows() {
           await createScheduledPosts(
             workflowId, 
             session.user.id, 
-            workflow.schedule_config, 
+            parseScheduleConfig(workflow.schedule_config), 
             workflow.platforms
           );
           toast.success("Workflow activated - scheduled posts created");
@@ -610,12 +612,13 @@ export default function Workflows() {
     );
   };
 
-  const handleRunNow = async (workflow: any) => {
-    const isVideo = workflow.content_type === "video";
+  const handleRunNow = async (workflow: Workflow) => {
+    const contentType = workflow.content_type as WorkflowContentType;
+    const isVideo = contentType === "video";
     const requiredCredits = isVideo ? VIDEO_COST : IMAGE_COST;
     
     // Check credits first
-    if (hasInsufficientCredits(workflow.content_type)) {
+    if (hasInsufficientCredits(contentType)) {
       toast.error(`Insufficient credits. You need at least €${requiredCredits} to run this workflow.`);
       return;
     }

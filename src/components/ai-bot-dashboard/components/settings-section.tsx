@@ -26,13 +26,32 @@ import { AlertTriangle, CheckCircle, Edit, Plus, RefreshCw, Save, Trash2, Wifi, 
 import { useState } from "react";
 import type { BotData, Exchange } from "../types";
 
+interface GeneralSettings {
+  botName: string;
+  autoStart: boolean;
+  notifications: boolean;
+  logLevel: string;
+  maxConcurrentTrades: number;
+  tradingHours: {
+    enabled: boolean;
+    start: string;
+    end: string;
+  };
+}
+
 interface SettingsSectionProps {
   botData: BotData;
-  onSettingsChange: (settings: any) => void;
+  onSettingsChange: (settings: GeneralSettings) => void;
+}
+
+interface SaveSettingsState {
+  success: boolean;
+  settings?: GeneralSettings;
+  error?: string;
 }
 
 // Server Action for saving settings
-async function saveSettingsAction(prevState: any, formData: FormData) {
+async function saveSettingsAction(prevState: SaveSettingsState, formData: FormData): Promise<SaveSettingsState> {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   const settings = {
@@ -54,19 +73,21 @@ async function saveSettingsAction(prevState: any, formData: FormData) {
   };
 }
 
+interface AddExchangeState {
+  success: boolean;
+  settings?: { exchanges: Exchange[] };
+  error?: string;
+}
+
 // Server Action for adding exchange
-async function addExchangeAction(prevState: any, formData: FormData) {
+async function addExchangeAction(prevState: AddExchangeState, formData: FormData): Promise<AddExchangeState> {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const exchange = {
-    name: formData.get("exchangeName") as string,
-    apiKey: formData.get("apiKey") as string,
-    secretKey: formData.get("secretKey") as string,
-    passphrase: formData.get("passphrase") as string,
-    sandbox: formData.get("sandbox") === "on",
-  };
+  const name = formData.get("exchangeName") as string;
+  const apiKey = formData.get("apiKey") as string;
+  const secretKey = formData.get("secretKey") as string;
 
-  if (!exchange.name || !exchange.apiKey || !exchange.secretKey) {
+  if (!name || !apiKey || !secretKey) {
     return {
       success: false,
       settings: prevState.settings,
@@ -74,11 +95,18 @@ async function addExchangeAction(prevState: any, formData: FormData) {
     };
   }
 
+  const newExchange: Exchange = {
+    id: crypto.randomUUID(),
+    name,
+    connected: false,
+    apiKeyStatus: "pending",
+    lastSync: null,
+  };
+
   return {
     success: true,
     settings: {
-      ...prevState.settings,
-      exchanges: [...(prevState.settings.exchanges || []), exchange],
+      exchanges: [...(prevState.settings?.exchanges || []), newExchange],
     },
   };
 }
@@ -116,9 +144,9 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
   const [isSettingsPending, setIsSettingsPending] = useState(false);
   const [isExchangePending, setIsExchangePending] = useState(false);
 
-  const handleGeneralSettingChange = (key: string, value: any) => {
+  const handleGeneralSettingChange = (key: string, value: string | number | boolean | { enabled: boolean; start: string; end: string }) => {
     const newSettings = { ...generalSettings, [key]: value };
-    setGeneralSettings(newSettings);
+    setGeneralSettings(newSettings as GeneralSettings);
   };
 
   const handleNotificationSettingChange = (key: string, value: boolean) => {

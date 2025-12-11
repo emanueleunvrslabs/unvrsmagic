@@ -148,7 +148,7 @@ export default function GenerateVideo() {
           prompt,
           status: "pending",
           title: `${modeNames[mode] || mode} ${new Date().toLocaleString()}`
-        } as any)
+        })
         .select()
         .single();
 

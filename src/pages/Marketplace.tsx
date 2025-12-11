@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { useMarketplaceProjects } from "@/hooks/useMarketplaceProjects";
+import { useMarketplaceProjects, MarketplaceProject } from "@/hooks/useMarketplaceProjects";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { Loader2 } from "lucide-react";
 import { ProjectCard } from "@/components/marketplace/project-card";
@@ -9,14 +9,14 @@ import { useState } from "react";
 export default function Marketplace() {
   const { projects, loading } = useMarketplaceProjects();
   const { userProjects, addProject, removeProject } = useUserProjects();
-  const [selectedProject, setSelectedProject] = useState<any | null>(null);
+  const [selectedProject, setSelectedProject] = useState<MarketplaceProject | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isProjectAdded = (projectId: string) => {
     return userProjects.some((up) => up.project_id === projectId);
   };
 
-  const handleViewDetails = (project: any) => {
+  const handleViewDetails = (project: MarketplaceProject) => {
     setSelectedProject(project);
     setIsModalOpen(true);
   };

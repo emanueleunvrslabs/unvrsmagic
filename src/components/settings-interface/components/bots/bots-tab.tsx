@@ -16,13 +16,13 @@ interface BotsTabProps {
 }
 
 export const BotsTab: React.FC<BotsTabProps> = ({ bots, onBotsChange }) => {
-  const handleDefaultsChange = (key: keyof BotSettings["defaultParameters"], value: any) => {
+  const handleDefaultsChange = (key: keyof BotSettings["defaultParameters"], value: string | number | string[]) => {
     onBotsChange({
       defaultParameters: { ...bots.defaultParameters, [key]: value },
     })
   }
 
-  const handleRiskChange = (key: keyof BotSettings["riskManagement"], value: any) => {
+  const handleRiskChange = (key: keyof BotSettings["riskManagement"], value: number | boolean) => {
     onBotsChange({
       riskManagement: { ...bots.riskManagement, [key]: value },
     })

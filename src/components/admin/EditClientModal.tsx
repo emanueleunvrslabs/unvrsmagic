@@ -128,8 +128,8 @@ export function EditClientModal({ client, open, onOpenChange, onSuccess }: EditC
       toast.success("Client updated successfully");
       onSuccess();
       onOpenChange(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update client");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to update client");
     } finally {
       setLoading(false);
     }
@@ -161,8 +161,8 @@ export function EditClientModal({ client, open, onOpenChange, onSuccess }: EditC
       onSuccess();
       onOpenChange(false);
       setDeleteDialogOpen(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete client");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete client");
     } finally {
       setLoading(false);
     }
