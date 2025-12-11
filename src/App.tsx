@@ -82,9 +82,9 @@ const App = () => (
           <Route path="/ai-social/generate-video" element={<ProtectedRoute><GenerateVideo /></ProtectedRoute>} />
           <Route path="/ai-social/avatar-studio" element={<ProtectedRoute><AvatarStudio /></ProtectedRoute>} />
           <Route path="/ai-social/live-studio" element={<ProtectedRoute><LiveStudio /></ProtectedRoute>} />
-          <Route path="/ai-social/schedule" element={<HomeRedirect />} />
+          <Route path="/ai-social/schedule" element={<ProtectedRoute><Workflows /></ProtectedRoute>} />
           <Route path="/ai-social/workflows" element={<ProtectedRoute><Workflows /></ProtectedRoute>} />
-          <Route path="/ai-social/connection" element={<ProtectedRoute><Connection /></ProtectedRoute>} />
+          <Route path="/ai-social/connections" element={<ProtectedRoute><Connection /></ProtectedRoute>} />
           <Route path="/ai-art/generate-image" element={<ProtectedRoute><AiArtGenerateImage /></ProtectedRoute>} />
           <Route path="/ai-art/generate-video" element={<ProtectedRoute><AiArtGenerateVideo /></ProtectedRoute>} />
           <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
