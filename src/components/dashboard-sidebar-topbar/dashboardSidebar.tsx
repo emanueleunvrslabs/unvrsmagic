@@ -26,6 +26,7 @@ import {
   CreditCard,
   Database,
   FileText,
+  FolderCog,
   FlaskConical,
   Gauge,
   Home,
@@ -189,6 +190,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: Home, href: "/admin/dashboard" },
         { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
+        { id: "admin-projects", label: "Project Management", icon: FolderCog, href: "/admin/projects" },
         {
           id: "admin-finance", 
           label: "Finance", 
