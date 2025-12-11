@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Mail, Send, Inbox, Loader2, X, Plus, Trash2, Paperclip, Upload, Image } from "lucide-react";
+import { Mail, Send, Inbox, Loader2, X, Plus, Trash2, Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -29,7 +29,6 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
   
   // Get first contact email automatically
   const primaryContact = contacts[0];
@@ -325,27 +324,12 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <input
-                ref={imageInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
               >
                 <Paperclip className="w-4 h-4" />
                 Attach Files
-              </button>
-              <button
-                onClick={() => imageInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
-              >
-                <Image className="w-4 h-4" />
-                Add Images
               </button>
             </div>
 
@@ -356,11 +340,7 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
                     key={index}
                     className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-sm border border-white/10 text-white"
                   >
-                    {file.type.startsWith('image/') ? (
-                      <Image className="w-4 h-4 text-white/60" />
-                    ) : (
-                      <Paperclip className="w-4 h-4 text-white/60" />
-                    )}
+                    <Paperclip className="w-4 h-4 text-white/60" />
                     <span className="truncate max-w-[150px]">{file.name}</span>
                     <button
                       onClick={() => removeAttachment(index)}
