@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Upload, X, Send } from "lucide-react";
-import "@/components/SocialMediaCard.css";
+import "@/components/labs/SocialMediaCard.css";
 
 interface SendEmailModalProps {
   recipientEmail: string;
