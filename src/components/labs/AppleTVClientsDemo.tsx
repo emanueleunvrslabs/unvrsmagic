@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClientEmailSection } from "@/components/clients/ClientEmailSection";
-import { WhatsAppChatModal } from "@/components/admin/WhatsAppChatModal";
+import { ClientWhatsAppSection } from "@/components/clients/ClientWhatsAppSection";
 import "./SocialMediaCard.css";
 
 interface Client {
@@ -1377,16 +1377,15 @@ export function AppleTVClientsDemo() {
         </div>
       )}
 
-      {/* WhatsApp Chat Modal */}
-      {selectedClient && selectedClient.client_contacts?.[0] && (
-        <WhatsAppChatModal
-          open={showWhatsApp}
-          onOpenChange={setShowWhatsApp}
-          contactName={`${selectedClient.client_contacts[0].first_name} ${selectedClient.client_contacts[0].last_name}`}
-          contactPhone={selectedClient.client_contacts[0].whatsapp_number}
-          clientId={selectedClient.id}
-          contactId={selectedClient.client_contacts[0].id}
-        />
+      {/* WhatsApp Chat Section */}
+      {showWhatsApp && selectedClient && (
+        <div className="relative z-10 px-8 pb-8">
+          <ClientWhatsAppSection
+            clientId={selectedClient.id}
+            contacts={selectedClient.client_contacts || []}
+            onClose={() => setShowWhatsApp(false)}
+          />
+        </div>
       )}
     </div>
   );
