@@ -97,7 +97,7 @@ const FileUpload = () => {
 
       toast.success('File deleted successfully');
       await loadSavedFiles();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting file:', error);
       toast.error('Failed to delete file');
     }
@@ -394,16 +394,17 @@ const FileUpload = () => {
       toast.success(`${file.name} uploaded successfully`);
 
       await loadSavedFiles();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Upload error:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
       setFiles((prev) =>
         prev.map((f, i) =>
           i === index
-            ? { ...f, status: "error" as const, error: error.message }
+            ? { ...f, status: "error" as const, error: errorMessage }
             : f
         )
       );
-      toast.error(`Failed to upload ${file.name}: ${error.message}`);
+      toast.error(`Failed to upload ${file.name}: ${errorMessage}`);
     }
   };
 

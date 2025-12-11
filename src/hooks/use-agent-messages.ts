@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import type { AgentMessagePayload } from "@/types/content"
 
 export interface AgentMessage {
   id: string
   sender_agent: string
   receiver_agent: string
   message_type: string
-  payload: any
+  payload: AgentMessagePayload
   priority: number
   status: string
   created_at: string

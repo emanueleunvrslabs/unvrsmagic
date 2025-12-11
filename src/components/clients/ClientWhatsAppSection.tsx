@@ -236,9 +236,9 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
       setAttachments([]);
       toast.success("Message sent");
       queryClient.invalidateQueries({ queryKey: ["whatsapp-messages", clientId, selectedContact.id] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error sending message:", error);
-      toast.error(error.message || "Failed to send message");
+      toast.error(error instanceof Error ? error.message : "Failed to send message");
     } finally {
       setSending(false);
       setIsUploading(false);

@@ -6,6 +6,13 @@ import { WhatsAppChatModal } from "./WhatsAppChatModal";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import type { ClientContact } from "@/types/client";
+
+interface ClientProject {
+  id: string;
+  project_name: string;
+  description?: string;
+}
 
 interface Client {
   id: string;
@@ -15,7 +22,7 @@ interface Client {
   city: string;
   postal_code: string;
   country: string;
-  client_contacts: any[];
+  client_contacts: ClientContact[];
 }
 
 interface ClientCardProps {
@@ -325,19 +332,22 @@ export function ClientCard({ client, onEdit, onContactAdded, clientProjects = []
     }
   };
 
-  const startEditProject = (project: any) => {
+  const startEditProject = (project: ClientProject) => {
     setEditingProjectId(project.id);
     setEditProject({
       projectName: project.project_name,
     });
   };
 
-  const startEditContact = (contact: any) => {
+  const startEditContact = (contact: ClientContact) => {
     setEditingContactId(contact.id);
+    const contactName = contact.name || (contact.first_name && contact.last_name 
+      ? `${contact.first_name} ${contact.last_name}` 
+      : '');
     setEditContact({
-      name: contact.name,
+      name: contactName,
       email: contact.email,
-      whatsappNumber: contact.phone,
+      whatsappNumber: contact.whatsapp_number || contact.phone || '',
     });
   };
 

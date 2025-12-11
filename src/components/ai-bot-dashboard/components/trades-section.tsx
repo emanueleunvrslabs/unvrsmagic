@@ -100,8 +100,8 @@ export function TradesSection({ botData }: TradesSectionProps) {
       // Simulate an API call or some async operation
       await new Promise((resolve) => setTimeout(resolve, 1000))
       console.log("Exporting trades...")
-    } catch (e: any) {
-      setError(e.message || "Failed to export trades.")
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to export trades.")
     } finally {
       setIsLoading(false)
     }

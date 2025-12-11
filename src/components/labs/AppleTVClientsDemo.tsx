@@ -423,9 +423,9 @@ export function AppleTVClientsDemo() {
 
       toast.success("Document uploaded successfully");
       refetchDocuments();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Upload error:", error);
-      toast.error(error.message || "Failed to upload document");
+      toast.error(error instanceof Error ? error.message : "Failed to upload document");
     } finally {
       setIsUploadingDocument(false);
       if (fileInputRef.current) {
@@ -449,8 +449,8 @@ export function AppleTVClientsDemo() {
       
       toast.success("Document deleted");
       refetchDocuments();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete document");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete document");
     }
   };
 
@@ -493,8 +493,8 @@ export function AppleTVClientsDemo() {
       
       setNewTodoText("");
       refetchTodos();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to add todo");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to add todo");
     }
   };
 
@@ -507,8 +507,8 @@ export function AppleTVClientsDemo() {
       
       if (error) throw error;
       refetchTodos();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update todo");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to update todo");
     }
   };
 
@@ -521,8 +521,8 @@ export function AppleTVClientsDemo() {
       
       if (error) throw error;
       refetchTodos();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete todo");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete todo");
     }
   };
 
@@ -566,8 +566,8 @@ export function AppleTVClientsDemo() {
       
       setNewKanbanTask("");
       refetchKanban();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to add task");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to add task");
     }
   };
 
@@ -580,8 +580,8 @@ export function AppleTVClientsDemo() {
       
       if (error) throw error;
       refetchKanban();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to move task");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to move task");
     }
   };
 
@@ -594,8 +594,8 @@ export function AppleTVClientsDemo() {
       
       if (error) throw error;
       refetchKanban();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete task");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete task");
     }
   };
 
