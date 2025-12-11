@@ -2,7 +2,8 @@ import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Activity, TrendingUp, Database, FileText, RefreshCw } from "lucide-react"
 import "@/components/labs/SocialMediaCard.css"
-import { useMktData } from "@/hooks/use-mkt-data"
+import { useMktData, parseOhlcv } from "@/hooks/use-mkt-data"
+import type { OHLCVBar } from "@/hooks/use-mkt-data"
 import { useBitgetOrderBook } from "@/hooks/use-bitget-orderbook"
 import { useTriggerMktData } from "@/hooks/use-trigger-mkt-data"
 import { useBitgetHistoricalData } from "@/hooks/use-bitget-historical"
@@ -75,16 +76,16 @@ export const MktDataInterface = () => {
   const chartSourceData = symbolData.find(d => d.timeframe === selectedTimeframe && d.market_type === 'spot') || symbolData[0]
   
   // Extract OHLCV data from backend
-  const dbOhlcvArray = (chartSourceData?.ohlcv as any[]) || []
+  const dbOhlcvArray = chartSourceData ? parseOhlcv(chartSourceData.ohlcv) : []
 
   // Choose the best source: if backend has less than 10 candles, use Bitget
-  const ohlcvArray = dbOhlcvArray.length >= 10
+  const ohlcvArray: OHLCVBar[] = dbOhlcvArray.length >= 10
     ? dbOhlcvArray
-    : (bitgetHistorical as any[]) || []
+    : (bitgetHistorical as OHLCVBar[]) || []
   
   // Calculate technical indicators
   const technicalIndicators = ohlcvArray.length > 0 ? applyIndicators(
-    ohlcvArray.map((c: any) => ({
+    ohlcvArray.map((c) => ({
       open: c.open,
       high: c.high,
       low: c.low,
@@ -106,7 +107,7 @@ export const MktDataInterface = () => {
     }
   ) : { sma: {}, ema: {}, rsi: null, macd: null }
   
-  const chartData = ohlcvArray.map((candle: any, idx: number) => ({
+  const chartData = ohlcvArray.map((candle, idx: number) => ({
     timestamp: candle.timestamp_ms,
     open: candle.open,
     high: candle.high,
@@ -130,12 +131,12 @@ export const MktDataInterface = () => {
   const priceChange = firstCandle?.close 
     ? ((currentPrice - firstCandle.close) / firstCandle.close) * 100 
     : 0
-  const volume24h = ohlcvArray.reduce((sum: number, candle: any) => sum + (candle.volume || 0), 0) / 1000000
+  const volume24h = ohlcvArray.reduce((sum: number, candle) => sum + (candle.volume || 0), 0) / 1000000
 
   // Get live ticker data from database
   const liveTickers = symbols.slice(0, 10).map(sym => {
     const symData = data.find(d => d.symbol === sym && d.timeframe === '1h' && d.market_type === 'spot')
-    const ohlcv = (symData?.ohlcv as any[]) || []
+    const ohlcv = symData ? parseOhlcv(symData.ohlcv) : []
     const latest = ohlcv[ohlcv.length - 1]
     const first = ohlcv[0]
     
@@ -152,9 +153,9 @@ export const MktDataInterface = () => {
     }
  
     const change = first?.close ? ((latest.close - first.close) / first.close) * 100 : 0
-    const high = Math.max(...ohlcv.map((c: any) => c.high || 0))
-    const low = Math.min(...ohlcv.filter((c: any) => c.low > 0).map((c: any) => c.low || Infinity))
-    const vol = ohlcv.reduce((sum: number, c: any) => sum + (c.volume || 0), 0) / 1000000
+    const high = Math.max(...ohlcv.map((c) => c.high || 0))
+    const low = Math.min(...ohlcv.filter((c) => c.low > 0).map((c) => c.low || Infinity))
+    const vol = ohlcv.reduce((sum: number, c) => sum + (c.volume || 0), 0) / 1000000
  
     return {
       symbol: sym,
@@ -176,7 +177,7 @@ export const MktDataInterface = () => {
     id: `log-${idx}`,
     type: 'candles' as const,
     symbol: item.symbol,
-    details: `📊 Records: ${(item.ohlcv as any[])?.length || 0} • Timeframe: ${item.timeframe} • ${item.market_type}`,
+    details: `📊 Records: ${parseOhlcv(item.ohlcv).length} • Timeframe: ${item.timeframe} • ${item.market_type}`,
     timestamp: new Date(item.updated_at).toLocaleTimeString(),
     duration: `${item.confidence_score}% confidence`,
     status: 'success' as const

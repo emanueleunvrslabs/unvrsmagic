@@ -80,9 +80,9 @@ export default function FinancePayments() {
 
       setAccounts(accountsRes.data || []);
       setCounterparties(counterpartiesRes.data || []);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error loading data:', error);
-      toast.error(error.message || "Failed to load data");
+      toast.error(error instanceof Error ? error.message : "Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -126,9 +126,9 @@ export default function FinancePayments() {
         bic: "",
       });
       loadData();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating counterparty:', error);
-      toast.error(error.message || "Failed to create counterparty");
+      toast.error(error instanceof Error ? error.message : "Failed to create counterparty");
     } finally {
       setCreatingCounterparty(false);
     }
@@ -184,9 +184,9 @@ export default function FinancePayments() {
       setReference("");
       setSelectedCounterparty("");
       loadData();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error sending payment:', error);
-      toast.error(error.message || "Failed to send payment");
+      toast.error(error instanceof Error ? error.message : "Failed to send payment");
     } finally {
       setSending(false);
     }
