@@ -1,5 +1,5 @@
 import "../labs/SocialMediaCard.css";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Plus } from "lucide-react";
 import { useUserCredits } from "@/hooks/useUserCredits";
 import {
   Dialog,
@@ -34,51 +34,59 @@ export function CreditCard() {
 
   return (
     <>
-      <div className="social-media-card expanded-lateral">
-        <div className="flex items-start justify-between w-full px-6 pt-6 pb-4 absolute top-0 left-0 right-0 z-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <h2 className="text-lg font-bold text-white">Credit Balance</h2>
+      <div className="labs-client-card w-full max-w-2xl rounded-[22px] p-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+              <Wallet className="w-6 h-6 text-white/80" />
             </div>
-            <p className="text-xs text-gray-400 whitespace-nowrap">Your available credits for content generation</p>
+            <div>
+              <h2 className="text-xl font-bold text-white">Credit Balance</h2>
+              <p className="text-sm text-white/50">Your available credits for content generation</p>
+            </div>
           </div>
           <button 
             onClick={() => setIsDialogOpen(true)}
-            className="px-3 py-1.5 rounded-lg bg-white/5 backdrop-blur-md border border-white/10 text-blue-400 text-xs font-semibold hover:bg-white/10 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 text-white/90 text-sm font-medium hover:from-purple-500/30 hover:to-cyan-500/30 hover:border-purple-500/50 transition-all"
           >
-            + Add Credits
+            <Plus className="w-4 h-4" />
+            Add Credits
           </button>
         </div>
         
-        <div className="card-main-content">
-          <img
-            src="https://uiverse.io/astronaut.png"
-            alt="Astronaut"
-            className="astronaut-image"
-          />
+        {/* Balance Display */}
+        <div className="text-center mb-10">
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-6xl font-bold text-white tracking-tight">
+              {formatCurrency(credits?.balance || 0)}
+            </span>
+          </div>
+          <p className="text-white/40 text-sm mt-2">Available Balance</p>
         </div>
         
-        <div className="flex flex-col justify-center items-center p-8 pt-16 h-full w-full max-w-4xl">
-          <div className="mb-12">
-            <div className="flex items-baseline justify-center gap-2 mb-2">
-              <span className="text-6xl font-bold text-white">{formatCurrency(credits?.balance || 0)}</span>
+        {/* Stats */}
+        <div className="flex gap-6 justify-center">
+          <div className="flex-1 p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-green-400" />
+              </div>
+              <div>
+                <p className="text-white/50 text-sm">Purchased</p>
+                <p className="text-xl font-semibold text-white">{formatCurrency(credits?.total_purchased || 0)}</p>
+              </div>
             </div>
           </div>
           
-          <div className="flex gap-16">
+          <div className="flex-1 p-4 rounded-xl bg-white/5 border border-white/10">
             <div className="flex items-center gap-3">
-              <TrendingUp className="w-6 h-6 text-green-500" />
-              <div>
-                <p className="text-gray-400 text-sm">Purchased</p>
-                <p className="text-2xl font-semibold text-white">{formatCurrency(credits?.total_purchased || 0)}</p>
+              <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                <TrendingDown className="w-5 h-5 text-red-400" />
               </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <TrendingDown className="w-6 h-6 text-red-500" />
               <div>
-                <p className="text-gray-400 text-sm">Spent</p>
-                <p className="text-2xl font-semibold text-white">{formatCurrency(credits?.total_spent || 0)}</p>
+                <p className="text-white/50 text-sm">Spent</p>
+                <p className="text-xl font-semibold text-white">{formatCurrency(credits?.total_spent || 0)}</p>
               </div>
             </div>
           </div>
@@ -86,10 +94,10 @@ export function CreditCard() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-[#0B0B0D]/95 backdrop-blur-xl border-white/10">
           <DialogHeader>
-            <DialogTitle>Purchase Credits</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-white">Purchase Credits</DialogTitle>
+            <DialogDescription className="text-white/60">
               Select a credit package. Credits are used for AI content generation.
             </DialogDescription>
           </DialogHeader>
@@ -98,7 +106,7 @@ export function CreditCard() {
               <Button
                 key={pkg.id}
                 variant="outline"
-                className="h-auto py-4 flex flex-col items-start gap-1"
+                className="h-auto py-4 flex flex-col items-start gap-1 bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
                 onClick={() => {
                   purchaseCredits(pkg.id);
                   setIsDialogOpen(false);
@@ -106,10 +114,10 @@ export function CreditCard() {
                 disabled={isPurchasing}
               >
                 <div className="flex items-center justify-between w-full">
-                  <span className="font-semibold">{pkg.price}</span>
-                  <Badge variant="secondary">{pkg.amount} credits</Badge>
+                  <span className="font-semibold text-white">{pkg.price}</span>
+                  <Badge variant="secondary" className="bg-white/10 text-white/80">{pkg.amount} credits</Badge>
                 </div>
-                <span className="text-xs text-muted-foreground">{pkg.description}</span>
+                <span className="text-xs text-white/50">{pkg.description}</span>
               </Button>
             ))}
           </div>
