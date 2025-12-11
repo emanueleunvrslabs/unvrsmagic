@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil } from "lucide-react";
+import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 import { useSearchParams } from "react-router-dom";
@@ -72,6 +72,7 @@ export function AppleTVClientsDemo() {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [selectedContactForEmail, setSelectedContactForEmail] = useState<ClientContact | null>(null);
   const [contactsToDelete, setContactsToDelete] = useState<string[]>([]);
+  const [editingContactIndex, setEditingContactIndex] = useState<number | null>(null);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -433,26 +434,90 @@ export function AppleTVClientsDemo() {
               )}
               
               {contacts.map((contact, index) => (
-                <div
-                  key={index}
-                  className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between group"
-                >
-                  <div className="flex-1">
-                    <p className="text-white/90 font-medium">{contact.name}</p>
-                    <p className="text-white/50 text-sm">{contact.email}</p>
-                    <p className="text-white/50 text-sm">{contact.whatsapp}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (contact.id) {
-                        setContactsToDelete([...contactsToDelete, contact.id]);
-                      }
-                      setContacts(contacts.filter((_, i) => i !== index));
-                    }}
-                    className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                <div key={index}>
+                  {editingContactIndex === index ? (
+                    <div className="space-y-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                      <div className="space-y-2">
+                        <Label className="text-white/70 text-sm">Name</Label>
+                        <Input
+                          placeholder="Enter contact name"
+                          value={contact.name}
+                          onChange={(e) => {
+                            const updated = [...contacts];
+                            updated[index] = { ...updated[index], name: e.target.value };
+                            setContacts(updated);
+                          }}
+                          className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-white/70 text-sm">Email</Label>
+                        <Input
+                          type="email"
+                          placeholder="Enter email address"
+                          value={contact.email}
+                          onChange={(e) => {
+                            const updated = [...contacts];
+                            updated[index] = { ...updated[index], email: e.target.value };
+                            setContacts(updated);
+                          }}
+                          className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-white/70 text-sm">WhatsApp</Label>
+                        <Input
+                          placeholder="Enter WhatsApp number"
+                          value={contact.whatsapp}
+                          onChange={(e) => {
+                            const updated = [...contacts];
+                            updated[index] = { ...updated[index], whatsapp: e.target.value };
+                            setContacts(updated);
+                          }}
+                          className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl h-10"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={() => {
+                            if (contact.id) {
+                              setContactsToDelete([...contactsToDelete, contact.id]);
+                            }
+                            setContacts(contacts.filter((_, i) => i !== index));
+                            setEditingContactIndex(null);
+                          }}
+                          className="p-2 px-4 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all text-sm font-medium flex items-center gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => setEditingContactIndex(null)}
+                          className="flex-1 p-2 rounded-full bg-white/10 border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all text-sm font-medium"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 group relative">
+                      <button
+                        onClick={() => setEditingContactIndex(index)}
+                        className="absolute top-3 right-3 p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <p className="text-white/90 font-medium mb-2">{contact.name}</p>
+                      <div className="flex items-center gap-2 text-white/50 text-sm mb-1">
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>{contact.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-white/50 text-sm">
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>{contact.whatsapp}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
 
