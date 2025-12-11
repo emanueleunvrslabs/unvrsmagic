@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
-import "@/components/wallet/SocialMediaCard.css";
+import "@/components/labs/SocialMediaCard.css";
 
 export default function DerivData() {
   return (
