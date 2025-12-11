@@ -374,13 +374,22 @@ export default function FinanceDashboard() {
               background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
             }}
           >
-            {merchantOrders.length === 0 ? (
-              <div className="p-8 text-center">
-                <CreditCard className="h-12 w-12 text-white/30 mx-auto mb-3" />
-                <p className="text-white/60">No merchant payments yet</p>
-              </div>
-            ) : (
-              merchantOrders.slice(0, 10).map((order: any) => {
+            {(() => {
+              const completedOrders = merchantOrders.filter((order: any) => {
+                const state = order.state || order.status || '';
+                return state.toUpperCase() === 'COMPLETED';
+              });
+              
+              if (completedOrders.length === 0) {
+                return (
+                  <div className="p-8 text-center">
+                    <CreditCard className="h-12 w-12 text-white/30 mx-auto mb-3" />
+                    <p className="text-white/60">No completed payments yet</p>
+                  </div>
+                );
+              }
+              
+              return completedOrders.slice(0, 10).map((order: any) => {
                 // Handle different API response structures
                 const amount = order.order_amount?.value ?? order.amount ?? 0;
                 const currency = order.order_amount?.currency ?? order.currency ?? 'EUR';
@@ -416,8 +425,8 @@ export default function FinanceDashboard() {
                     </div>
                   </div>
                 );
-              })
-            )}
+              });
+            })()}
           </div>
         </div>
       </div>
