@@ -17,6 +17,9 @@ import Auth from "./pages/Auth";
 import ProjectDetail from "./pages/ProjectDetail";
 import MktData from "./pages/MktData";
 import NKMTDashboard from "./pages/NKMTDashboard";
+import DerivData from "./pages/DerivData";
+import MacroData from "./pages/MacroData";
+import NKMTExchange from "./pages/NKMTExchange";
 import NotificationCenter from "./pages/NotificationCenter";
 import Marketplace from "./pages/Marketplace";
 import AdminProjects from "./pages/AdminProjects";
@@ -61,9 +64,12 @@ const App = () => (
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/project/:projectId" element={<PublicProjectDetail />} />
           <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
-          <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
+          <Route path="/nkmt/exchange" element={<ProtectedRoute><NKMTExchange /></ProtectedRoute>} />
           <Route path="/nkmt/mkt-data" element={<ProtectedRoute><MktData /></ProtectedRoute>} />
+          <Route path="/nkmt/deriv-data" element={<ProtectedRoute><DerivData /></ProtectedRoute>} />
+          <Route path="/nkmt/macro-data" element={<ProtectedRoute><MacroData /></ProtectedRoute>} />
           <Route path="/nkmt/dashboard" element={<ProtectedRoute><NKMTDashboard /></ProtectedRoute>} />
+          <Route path="/nkmt/:exchange" element={<ProtectedRoute><AiBot /></ProtectedRoute>} />
           <Route path="/nkmt" element={<Navigate to="/nkmt/dashboard" replace />} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationCenter /></ProtectedRoute>} />
           <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
