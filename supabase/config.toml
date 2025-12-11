@@ -65,3 +65,6 @@ verify_jwt = true
 
 [functions.arera-scraper]
 verify_jwt = false
+
+[functions.revolut-generate-cert]
+verify_jwt = true

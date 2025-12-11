@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Copy, Key } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
 import type { ApiKey } from "../../types"
@@ -98,6 +98,11 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   const [connectedProviders, setConnectedProviders] = useState<Set<string>>(new Set())
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Revolut Business OAuth state
+  const [revolutCertGenerating, setRevolutCertGenerating] = useState(false)
+  const [revolutPublicKey, setRevolutPublicKey] = useState("")
+  const [revolutRedirectUri, setRevolutRedirectUri] = useState("")
 
   // Load saved API keys on mount
   useEffect(() => {
@@ -494,7 +499,90 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     }
   }
 
+  const handleGenerateRevolutCert = async () => {
+    setRevolutCertGenerating(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('revolut-generate-cert')
+      
+      if (error) {
+        console.error("Error generating certificate:", error)
+        toast.error("Failed to generate certificate")
+        return
+      }
+
+      if (data?.publicKey) {
+        setRevolutPublicKey(data.publicKey)
+        setRevolutRedirectUri(data.redirectUri)
+        toast.success("Certificate generated! Copy the public key to Revolut")
+      }
+    } catch (error) {
+      console.error("Error generating certificate:", error)
+      toast.error("Failed to generate certificate")
+    } finally {
+      setRevolutCertGenerating(false)
+    }
+  }
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    toast.success(`${label} copied to clipboard`)
+  }
+
   const renderInputField = (provider: typeof AI_PROVIDERS[0]) => {
+    if (provider.type === 'revolut_business') {
+      return (
+        <div className="space-y-3">
+          {!revolutPublicKey ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleGenerateRevolutCert}
+              disabled={revolutCertGenerating}
+              className="h-8 px-3 text-xs bg-transparent text-blue-400 border border-blue-500/30 hover:bg-blue-500/10"
+            >
+              <Key className="h-3 w-3 mr-2" />
+              {revolutCertGenerating ? "Generating..." : "Generate Certificate"}
+            </Button>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Public Key (copy to Revolut):</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(revolutPublicKey, "Public Key")}
+                    className="h-6 px-2 text-xs hover:bg-white/10"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+                <pre className="text-xs bg-black/30 p-2 rounded border border-white/10 max-h-20 overflow-auto whitespace-pre-wrap break-all">
+                  {revolutPublicKey}
+                </pre>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Redirect URI:</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(revolutRedirectUri, "Redirect URI")}
+                    className="h-6 px-2 text-xs hover:bg-white/10"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+                <code className="text-xs bg-black/30 px-2 py-1 rounded border border-white/10 block">
+                  {revolutRedirectUri}
+                </code>
+              </div>
+            </>
+          )}
+        </div>
+      )
+    }
+
     if (provider.type === 'revolut_merchant') {
       return (
         <>
@@ -593,6 +681,11 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     
     if (provider.type === 'revolut_merchant') {
       return !revolutMerchantPublicKey || !revolutMerchantSecretKey
+    }
+    
+    if (provider.type === 'revolut_business') {
+      // Revolut Business uses OAuth - needs certificate generated first
+      return !revolutPublicKey
     }
     
     return !apiKeys[provider.id]
