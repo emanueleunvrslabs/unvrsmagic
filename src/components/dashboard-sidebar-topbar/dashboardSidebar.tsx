@@ -463,7 +463,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       </div>
 
       {/* Menu */}
-      <nav className="flex-1 overflow-y-auto px-2">
+      <nav className="flex-1 overflow-y-auto px-2 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]">
         {menuSections.map((section, idx) => renderSection(section, idx))}
       </nav>
 
