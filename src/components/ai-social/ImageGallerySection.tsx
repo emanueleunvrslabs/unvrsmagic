@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import "@/components/labs/SocialMediaCard.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -188,59 +188,55 @@ export function ImageGallerySection() {
         <p className="text-muted-foreground">Browse and manage your generated images</p>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by title or prompt..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="generating">Generating</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-              </SelectContent>
-            </Select>
+      <div className="labs-client-card rounded-[22px] p-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+            <Input
+              placeholder="Search by title or prompt..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
-        </CardContent>
-      </Card>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="generating">Generating</SelectItem>
+              <SelectItem value="failed">Failed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading gallery...</div>
       ) : filteredContent.length === 0 ? (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center text-muted-foreground">
-              <ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No images found</p>
-              <p className="text-sm mt-2">Try adjusting your search or filters</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="labs-client-card rounded-[22px] p-12">
+          <div className="text-center text-white/40">
+            <ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No images found</p>
+            <p className="text-sm mt-2">Try adjusting your search or filters</p>
+          </div>
+        </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredContent.map((item) => (
-            <Card key={item.id} className="overflow-hidden">
-              <CardHeader className="pb-4">
+            <div key={item.id} className="labs-client-card rounded-[22px] overflow-hidden">
+              <div className="p-4 pb-3">
                 <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-base line-clamp-1">{item.title}</CardTitle>
+                  <h3 className="text-base font-semibold text-white line-clamp-1">{item.title}</h3>
                   <Badge variant="outline" className={getStatusColor(item.status)}>
                     {item.status}
                   </Badge>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="aspect-square bg-muted rounded-lg overflow-hidden relative group">
+              </div>
+              <div className="px-4 pb-4 space-y-4">
+                <div className="aspect-square bg-white/5 rounded-xl overflow-hidden relative group">
                   {item.status === "completed" && item.media_url ? (
                     <>
                       <img
@@ -276,7 +272,7 @@ export function ImageGallerySection() {
                   ) : item.status === "generating" ? (
                     <div className="w-full h-full flex flex-col items-center justify-center gap-4 relative group">
                       <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
-                      <p className="text-xs text-muted-foreground">Generating...</p>
+                      <p className="text-xs text-white/40">Generating...</p>
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Button
                           size="sm"
@@ -290,22 +286,22 @@ export function ImageGallerySection() {
                     </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="h-12 w-12 text-muted-foreground opacity-50" />
+                      <ImageIcon className="h-12 w-12 text-white/30" />
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground line-clamp-2">{item.prompt}</p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <p className="text-sm text-white/50 line-clamp-2">{item.prompt}</p>
+                  <div className="flex items-center justify-between text-xs text-white/40">
                     <span>{new Date(item.created_at).toLocaleDateString()}</span>
                   </div>
                   {item.error_message && (
                     <p className="text-xs text-red-400 line-clamp-2">{item.error_message}</p>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
