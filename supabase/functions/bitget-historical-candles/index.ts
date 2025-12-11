@@ -15,10 +15,20 @@ interface OHLCVBar {
   volume: number
 }
 
+// Bitget API v2 valid granularities: 1min,3min,5min,15min,30min,1h,4h,6h,12h,1day,1week,1M
 const timeframeMap: Record<string, string> = {
-  '1h': '1H',
-  '4h': '4H',
-  '1d': '1D',
+  '1m': '1min',
+  '3m': '3min',
+  '5m': '5min',
+  '15m': '15min',
+  '30m': '30min',
+  '1h': '1h',
+  '4h': '4h',
+  '6h': '6h',
+  '12h': '12h',
+  '1d': '1day',
+  '1w': '1week',
+  '1M': '1M',
 }
 
 Deno.serve(async (req) => {
