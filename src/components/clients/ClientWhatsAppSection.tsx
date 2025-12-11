@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, Send, Loader2, X, Paperclip, Image, FileText } from "lucide-react";
+import { MessageCircle, Send, Loader2, X, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -41,7 +41,6 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
   const [isUploading, setIsUploading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const contactsWithWhatsApp = contacts.filter(c => c.whatsapp_number);
 
@@ -109,17 +108,13 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
     return "document";
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "file" | "image") => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       setAttachments(prev => [...prev, ...newFiles]);
     }
-    // Reset input
-    if (type === "file" && fileInputRef.current) {
+    if (fileInputRef.current) {
       fileInputRef.current.value = "";
-    }
-    if (type === "image" && imageInputRef.current) {
-      imageInputRef.current.value = "";
     }
   };
 
@@ -222,7 +217,7 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
   };
 
   return (
-    <div className="labs-client-card rounded-2xl p-6">
+    <div className="labs-client-card rounded-2xl p-6 max-w-md mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-white">WhatsApp</h3>
         <button
@@ -282,7 +277,7 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
           {/* Messages */}
           <div 
             ref={scrollRef}
-            className="space-y-3 max-h-[350px] overflow-y-auto mb-4 pr-2"
+            className="space-y-3 h-[500px] overflow-y-auto mb-4 pr-2"
           >
             {isLoading ? (
               <div className="flex justify-center py-8">
@@ -339,11 +334,11 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
                   className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/10 rounded-lg text-sm border border-green-500/20 text-white"
                 >
                   {file.type.startsWith("image/") ? (
-                    <Image className="w-4 h-4 text-green-400" />
+                    <ImageIcon className="w-4 h-4 text-green-400" />
                   ) : (
                     <FileText className="w-4 h-4 text-green-400" />
                   )}
-                  <span className="truncate max-w-[120px]">{file.name}</span>
+                  <span className="truncate max-w-[100px]">{file.name}</span>
                   <button
                     onClick={() => removeAttachment(index)}
                     className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-white"
@@ -358,44 +353,26 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
           {/* Input */}
           {selectedContact && (
             <div className="space-y-3">
-              {/* Hidden file inputs */}
+              {/* Hidden file input */}
               <input
                 ref={fileInputRef}
                 type="file"
                 multiple
-                onChange={(e) => handleFileSelect(e, "file")}
+                onChange={handleFileSelect}
                 className="hidden"
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
-              />
-              <input
-                ref={imageInputRef}
-                type="file"
-                multiple
-                onChange={(e) => handleFileSelect(e, "image")}
-                className="hidden"
-                accept="image/*,video/*"
+                accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
               />
 
-              <div className="flex items-end gap-3">
-                {/* Attachment buttons */}
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => imageInputRef.current?.click()}
-                    disabled={sending}
-                    className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
-                    title="Send image or video"
-                  >
-                    <Image className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={sending}
-                    className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
-                    title="Send document"
-                  >
-                    <Paperclip className="w-4 h-4" />
-                  </button>
-                </div>
+              <div className="flex items-end gap-2">
+                {/* Single attachment button */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending}
+                  className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+                  title="Attach file or image"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </button>
 
                 <Textarea
                   value={newMessage}
