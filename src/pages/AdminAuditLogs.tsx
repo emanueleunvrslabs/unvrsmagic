@@ -269,7 +269,7 @@ const AdminAuditLogs = () => {
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="bg-background/50 border-border/50 [color-scheme:dark]"
+                  className="bg-background/50 border-border/50 [color-scheme:dark] h-9 text-sm"
                 />
               </div>
 
@@ -279,7 +279,7 @@ const AdminAuditLogs = () => {
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="bg-background/50 border-border/50 [color-scheme:dark]"
+                  className="bg-background/50 border-border/50 [color-scheme:dark] h-9 text-sm"
                 />
               </div>
             </div>
