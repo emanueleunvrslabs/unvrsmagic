@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders } from '../_shared/cors.ts';
 
 const ARERA_BASE_URL = "https://www.arera.it";
 const ARERA_LIST_URL = `${ARERA_BASE_URL}/atti-e-provvedimenti?anno=&numero=&tipologia=Delibera&keyword=&settore=&orderby=&orderbydir=&numelements=25`;

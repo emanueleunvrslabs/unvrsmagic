@@ -56,9 +56,7 @@ export const SettingsInterface: React.FC = () => {
   };
 
   const handleConnectionsChange = (connections: any[]) => {
-    // Update connections in settings state
-    // This would typically be handled by a separate hook or state management
-    console.log("Connections updated:", connections);
+    // Connection updates are handled by child components
   };
 
   const renderActiveTab = () => {
