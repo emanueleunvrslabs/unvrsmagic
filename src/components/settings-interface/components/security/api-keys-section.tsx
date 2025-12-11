@@ -305,21 +305,21 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
           Loading API keys...
         </div>
       ) : (
-        <div className="border rounded-lg">
+        <div className="rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Provider</TableHead>
-              <TableHead>API Key</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-[120px]">Action</TableHead>
+            <TableRow className="border-white/10 hover:bg-white/5">
+              <TableHead className="text-foreground/80">Provider</TableHead>
+              <TableHead className="text-foreground/80">API Key</TableHead>
+              <TableHead className="text-foreground/80">Description</TableHead>
+              <TableHead className="text-foreground/80">Status</TableHead>
+              <TableHead className="w-[120px] text-foreground/80">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {AI_PROVIDERS.map((provider) => (
-              <TableRow key={provider.id}>
-                <TableCell className="font-medium">{provider.name}</TableCell>
+              <TableRow key={provider.id} className="border-white/10 hover:bg-white/5">
+                <TableCell className="font-medium text-foreground">{provider.name}</TableCell>
                 <TableCell>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2 max-w-md">
@@ -328,12 +328,13 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                         placeholder={provider.placeholder}
                         value={apiKeys[provider.id]}
                         onChange={(e) => handleKeyChange(provider.id, e.target.value)}
-                        className={`flex-1 ${validationErrors[provider.id] ? 'border-destructive' : ''}`}
+                        className={`flex-1 bg-white/5 border-white/10 ${validationErrors[provider.id] ? 'border-destructive' : ''}`}
                       />
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleKeyVisibility(provider.id)}
+                        className="hover:bg-white/10"
                       >
                         {visibleKeys.has(provider.id) ? (
                           <EyeOff className="h-4 w-4" />
@@ -349,7 +350,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                           placeholder="Enter Owner ID"
                           value={ownerIds[provider.id] || ""}
                           onChange={(e) => setOwnerIds(prev => ({ ...prev, [provider.id]: e.target.value }))}
-                          className="flex-1"
+                          className="flex-1 bg-white/5 border-white/10"
                         />
                         <div className="w-[40px]" />
                       </div>
@@ -365,10 +366,10 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                   {provider.description}
                 </TableCell>
                 <TableCell>
-                  <span className={`text-sm font-medium ${
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     connectedProviders.has(provider.id) 
-                      ? "text-green-600" 
-                      : "text-red-600"
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                      : "bg-red-500/20 text-red-400 border border-red-500/30"
                   }`}>
                     {connectedProviders.has(provider.id) ? "Connected" : "Not connected"}
                   </span>
@@ -376,10 +377,10 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                 <TableCell>
                   {connectedProviders.has(provider.id) ? (
                     <Button
-                      variant="destructive"
+                      variant="ghost"
                       size="sm"
                       onClick={() => handleDisconnect(provider.id)}
-                      className="h-8 px-3 text-xs"
+                      className="h-8 px-3 text-xs bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
                     >
                       Disconnect
                     </Button>
@@ -388,7 +389,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                       size="sm"
                       onClick={() => handleConnect(provider.id)}
                       disabled={connectingProvider === provider.id || !apiKeys[provider.id]}
-                      className="h-8 px-3 text-xs"
+                      className="h-8 px-3 text-xs bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30"
                     >
                       {connectingProvider === provider.id ? "Connecting..." : "Connect"}
                     </Button>

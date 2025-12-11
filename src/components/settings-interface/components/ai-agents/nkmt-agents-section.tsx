@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/integrations/supabase/client"
 import type { ApiKey } from "../../types"
@@ -159,62 +158,70 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
   }
   return (
     <div className="space-y-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Agent</TableHead>
-            <TableHead>Model</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead className="text-center">API Config</TableHead>
-            <TableHead className="text-center">Prompt</TableHead>
-            <TableHead className="text-right">Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {NKMT_AGENTS.map((agent) => (
-            <TableRow key={agent.id}>
-              <TableCell className="font-medium">{agent.name}</TableCell>
-              <TableCell>
-                <Badge variant={agent.model === "Code" ? "outline" : "secondary"}>
-                  {agent.model}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-muted-foreground">{agent.description}</TableCell>
-              <TableCell className="text-center">
-                {agent.externalApis && agent.externalApis.length > 0 ? (
+      <div className="rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-white/10 hover:bg-white/5">
+              <TableHead className="text-foreground/80">Agent</TableHead>
+              <TableHead className="text-foreground/80">Model</TableHead>
+              <TableHead className="text-foreground/80">Description</TableHead>
+              <TableHead className="text-center text-foreground/80">API Config</TableHead>
+              <TableHead className="text-center text-foreground/80">Prompt</TableHead>
+              <TableHead className="text-right text-foreground/80">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {NKMT_AGENTS.map((agent) => (
+              <TableRow key={agent.id} className="border-white/10 hover:bg-white/5">
+                <TableCell className="font-medium text-foreground">{agent.name}</TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    agent.model === "Code" 
+                      ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" 
+                      : "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                  }`}>
+                    {agent.model}
+                  </span>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{agent.description}</TableCell>
+                <TableCell className="text-center">
+                  {agent.externalApis && agent.externalApis.length > 0 ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenApiModal(agent)}
+                      className="h-8 w-8 p-0 hover:bg-white/10"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-center">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleOpenApiModal(agent)}
-                    className="h-8 w-8 p-0"
+                    onClick={() => handleOpenPromptModal(agent)}
+                    className="h-8 w-8 p-0 hover:bg-white/10"
                   >
-                    <Settings className="h-4 w-4" />
+                    <FileText className="h-4 w-4" />
                   </Button>
-                ) : (
-                  <span className="text-muted-foreground text-xs">-</span>
-                )}
-              </TableCell>
-              <TableCell className="text-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleOpenPromptModal(agent)}
-                  className="h-8 w-8 p-0"
-                >
-                  <FileText className="h-4 w-4" />
-                </Button>
-              </TableCell>
-              <TableCell className="text-right">
-                {isAgentConnected(agent) ? (
-                  <span className="text-green-600 text-sm font-medium">Connected</span>
-                ) : (
-                  <span className="text-red-600 text-sm">Not connected</span>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                </TableCell>
+                <TableCell className="text-right">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    isAgentConnected(agent) 
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                      : "bg-red-500/20 text-red-400 border border-red-500/30"
+                  }`}>
+                    {isAgentConnected(agent) ? "Connected" : "Not connected"}
+                  </span>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {selectedAgent && (
         <NKMTAgentApiModal
