@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClientEmailSection } from "@/components/clients/ClientEmailSection";
+import { WhatsAppChatModal } from "@/components/admin/WhatsAppChatModal";
 import "./SocialMediaCard.css";
 
 interface Client {
@@ -79,6 +80,7 @@ export function AppleTVClientsDemo() {
   const [showTodos, setShowTodos] = useState(false);
   const [showKanban, setShowKanban] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
+  const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [newTodoText, setNewTodoText] = useState("");
   const [newKanbanTask, setNewKanbanTask] = useState("");
@@ -324,8 +326,11 @@ export function AppleTVClientsDemo() {
         break;
       case "whatsapp":
         if (contact?.whatsapp_number) {
-          const phone = contact.whatsapp_number.replace(/\D/g, '');
-          window.open(`https://wa.me/${phone}`, '_blank');
+          setShowWhatsApp(true);
+          setShowDocuments(false);
+          setShowTodos(false);
+          setShowKanban(false);
+          setShowEmail(false);
         } else {
           toast.error("This client has no WhatsApp number");
         }
@@ -1370,6 +1375,18 @@ export function AppleTVClientsDemo() {
             onClose={() => setShowEmail(false)}
           />
         </div>
+      )}
+
+      {/* WhatsApp Chat Modal */}
+      {selectedClient && selectedClient.client_contacts?.[0] && (
+        <WhatsAppChatModal
+          open={showWhatsApp}
+          onOpenChange={setShowWhatsApp}
+          contactName={`${selectedClient.client_contacts[0].first_name} ${selectedClient.client_contacts[0].last_name}`}
+          contactPhone={selectedClient.client_contacts[0].whatsapp_number}
+          clientId={selectedClient.id}
+          contactId={selectedClient.client_contacts[0].id}
+        />
       )}
     </div>
   );
