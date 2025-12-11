@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useAgentStates } from "@/hooks/use-agent-states"
 import { useAgentMessages } from "@/hooks/use-agent-messages"
 import { Activity, Brain, TrendingUp, AlertCircle, Clock, CheckCircle2 } from "lucide-react"
+import "@/components/labs/SocialMediaCard.css"
 
 const AGENT_NAMES = [
   { id: 'mkt.data', name: 'Mkt.Data', icon: TrendingUp },
@@ -76,47 +76,39 @@ export const NKMTDashboardInterface = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{AGENT_NAMES.length}</div>
-          </CardContent>
-        </Card>
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative p-5 z-10">
+            <p className="text-sm text-gray-400 mb-1">Total Agents</p>
+            <p className="text-2xl font-bold text-white">{AGENT_NAMES.length}</p>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-500">
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative p-5 z-10">
+            <p className="text-sm text-gray-400 mb-1">Active Agents</p>
+            <p className="text-2xl font-bold text-green-500">
               {agentStates?.filter(s => s.status === 'processing' || s.status === 'idle').length || 0}
-            </div>
-          </CardContent>
-        </Card>
+            </p>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pending Messages</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-500">
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative p-5 z-10">
+            <p className="text-sm text-gray-400 mb-1">Pending Messages</p>
+            <p className="text-2xl font-bold text-blue-500">
               {messages?.filter(m => m.status === 'pending').length || 0}
-            </div>
-          </CardContent>
-        </Card>
+            </p>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Messages Processed</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative p-5 z-10">
+            <p className="text-sm text-gray-400 mb-1">Messages Processed</p>
+            <p className="text-2xl font-bold text-white">
               {messages?.filter(m => m.status === 'processed').length || 0}
-            </div>
-          </CardContent>
-        </Card>
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Agent Status Grid */}
@@ -128,12 +120,12 @@ export const NKMTDashboardInterface = () => {
           const Icon = agent.icon
 
           return (
-            <Card key={agent.id}>
-              <CardHeader>
+            <div key={agent.id} className="labs-client-card relative rounded-2xl overflow-hidden">
+              <div className="relative p-5 z-10 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Icon className="h-5 w-5" />
-                    <CardTitle className="text-lg">{agent.name}</CardTitle>
+                    <Icon className="h-5 w-5 text-primary" />
+                    <span className="text-lg font-semibold text-white">{agent.name}</span>
                   </div>
                   <Badge className={`${getStatusColor(status)} text-white`}>
                     <div className="flex items-center gap-1">
@@ -142,19 +134,17 @@ export const NKMTDashboardInterface = () => {
                     </div>
                   </Badge>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
                 <div className="text-sm">
-                  <span className="text-muted-foreground">Last Execution:</span>
-                  <div className="font-mono text-xs mt-1">{formatTimestamp(lastExecution)}</div>
+                  <span className="text-gray-400">Last Execution:</span>
+                  <div className="font-mono text-xs mt-1 text-white/80">{formatTimestamp(lastExecution)}</div>
                 </div>
                 
                 {Object.keys(metrics).length > 0 && (
                   <div className="text-sm">
-                    <span className="text-muted-foreground">Performance Metrics:</span>
+                    <span className="text-gray-400">Performance Metrics:</span>
                     <div className="font-mono text-xs mt-1 space-y-1">
                       {Object.entries(metrics).map(([key, value]) => (
-                        <div key={key} className="flex justify-between">
+                        <div key={key} className="flex justify-between text-white/80">
                           <span>{key}:</span>
                           <span className="font-semibold">{JSON.stringify(value)}</span>
                         </div>
@@ -162,48 +152,46 @@ export const NKMTDashboardInterface = () => {
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )
         })}
       </div>
 
       {/* Message Stream */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Message Stream</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="labs-client-card relative rounded-2xl overflow-hidden">
+        <div className="relative p-5 z-10">
+          <h3 className="text-lg font-semibold text-white mb-4">Message Stream</h3>
           <ScrollArea className="h-[400px]">
             <div className="space-y-2">
-              {messagesLoading && <div className="text-muted-foreground">Loading messages...</div>}
+              {messagesLoading && <div className="text-gray-400">Loading messages...</div>}
               {messages && messages.length === 0 && (
-                <div className="text-muted-foreground">No messages yet</div>
+                <div className="text-gray-400">No messages yet</div>
               )}
               {messages?.map(msg => (
                 <div
                   key={msg.id}
-                  className="border rounded-lg p-3 space-y-1"
+                  className="border border-white/10 rounded-lg p-3 space-y-1 bg-white/5"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{msg.sender_agent}</Badge>
-                      <span className="text-xs text-muted-foreground">→</span>
-                      <Badge variant="outline">{msg.receiver_agent}</Badge>
+                      <Badge variant="outline" className="border-white/20 text-white/80">{msg.sender_agent}</Badge>
+                      <span className="text-xs text-gray-400">→</span>
+                      <Badge variant="outline" className="border-white/20 text-white/80">{msg.receiver_agent}</Badge>
                     </div>
                     <Badge className={msg.status === 'processed' ? 'bg-green-500' : 'bg-yellow-500'}>
                       {msg.status}
                     </Badge>
                   </div>
                   
-                  <div className="text-sm font-medium">{msg.message_type}</div>
+                  <div className="text-sm font-medium text-white">{msg.message_type}</div>
                   
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-gray-400">
                     {new Date(msg.created_at).toLocaleString()}
                   </div>
                   
                   {msg.processed_at && (
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-gray-400">
                       Processed: {new Date(msg.processed_at).toLocaleString()}
                     </div>
                   )}
@@ -211,8 +199,8 @@ export const NKMTDashboardInterface = () => {
               ))}
             </div>
           </ScrollArea>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowDown, ArrowUp } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import "@/components/labs/SocialMediaCard.css"
 
 interface OrderBookEntry {
   price: number
@@ -22,19 +22,17 @@ export const MktDataOrderBook = ({ symbol, spread, spreadPercent, bids, asks }: 
   const formatTotal = (total: number) => `$${total.toLocaleString()}`
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Order Book</CardTitle>
+    <div className="labs-client-card relative rounded-2xl overflow-hidden h-full flex flex-col">
+      <div className="relative p-5 z-10 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">Order Book</h3>
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">Spread</p>
-            <p className="text-sm font-medium">${spread.toFixed(2)} ({spreadPercent.toFixed(3)}%)</p>
+            <p className="text-xs text-gray-400">Spread</p>
+            <p className="text-sm font-medium text-white">${spread.toFixed(2)} ({spreadPercent.toFixed(3)}%)</p>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="flex-1">
-        <div className="space-y-2">
-          <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground pb-2 border-b">
+        <div className="space-y-2 flex-1">
+          <div className="grid grid-cols-3 gap-2 text-xs text-gray-400 pb-2 border-b border-white/10">
             <span>Price (USDT)</span>
             <span className="text-right">Amount ({symbol.replace('USDT', '')})</span>
             <span className="text-right">Total</span>
@@ -43,19 +41,19 @@ export const MktDataOrderBook = ({ symbol, spread, spreadPercent, bids, asks }: 
           <ScrollArea className="h-[200px]">
             <div className="space-y-1">
               {asks.slice(0, 10).reverse().map((ask, idx) => (
-                <div key={`ask-${idx}`} className="grid grid-cols-3 gap-2 text-xs hover:bg-red-500/5 rounded px-1 py-0.5">
+                <div key={`ask-${idx}`} className="grid grid-cols-3 gap-2 text-xs hover:bg-red-500/10 rounded px-1 py-0.5">
                   <span className="text-red-500 font-medium">{formatPrice(ask.price)}</span>
-                  <span className="text-right">{formatAmount(ask.amount)}</span>
-                  <span className="text-right text-muted-foreground">{formatTotal(ask.total)}</span>
+                  <span className="text-right text-white/80">{formatAmount(ask.amount)}</span>
+                  <span className="text-right text-gray-400">{formatTotal(ask.total)}</span>
                 </div>
               ))}
             </div>
           </ScrollArea>
 
-          <div className="flex items-center justify-center gap-4 py-3 bg-muted/30 rounded-lg">
+          <div className="flex items-center justify-center gap-4 py-3 bg-white/5 rounded-lg">
             <div className="flex items-center gap-2">
               <ArrowDown className="h-4 w-4 text-red-500" />
-              <span className="text-xl font-bold">${formatPrice(bids[0]?.price || 0)}</span>
+              <span className="text-xl font-bold text-white">${formatPrice(bids[0]?.price || 0)}</span>
               <ArrowUp className="h-4 w-4 text-green-500" />
             </div>
           </div>
@@ -63,16 +61,16 @@ export const MktDataOrderBook = ({ symbol, spread, spreadPercent, bids, asks }: 
           <ScrollArea className="h-[200px]">
             <div className="space-y-1">
               {bids.slice(0, 10).map((bid, idx) => (
-                <div key={`bid-${idx}`} className="grid grid-cols-3 gap-2 text-xs hover:bg-green-500/5 rounded px-1 py-0.5">
+                <div key={`bid-${idx}`} className="grid grid-cols-3 gap-2 text-xs hover:bg-green-500/10 rounded px-1 py-0.5">
                   <span className="text-green-500 font-medium">{formatPrice(bid.price)}</span>
-                  <span className="text-right">{formatAmount(bid.amount)}</span>
-                  <span className="text-right text-muted-foreground">{formatTotal(bid.total)}</span>
+                  <span className="text-right text-white/80">{formatAmount(bid.amount)}</span>
+                  <span className="text-right text-gray-400">{formatTotal(bid.total)}</span>
                 </div>
               ))}
             </div>
           </ScrollArea>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
