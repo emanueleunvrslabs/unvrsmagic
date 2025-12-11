@@ -3,8 +3,73 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.81.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, svix-id, svix-timestamp, svix-signature",
 };
+
+// Verify Resend webhook signature (Svix)
+async function verifyWebhookSignature(
+  payload: string,
+  headers: Headers
+): Promise<boolean> {
+  const secret = Deno.env.get("RESEND_WEBHOOK_SECRET");
+  if (!secret) {
+    console.warn("RESEND_WEBHOOK_SECRET not configured, skipping verification");
+    return true;
+  }
+
+  const svixId = headers.get("svix-id");
+  const svixTimestamp = headers.get("svix-timestamp");
+  const svixSignature = headers.get("svix-signature");
+
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    console.error("Missing Svix headers");
+    return false;
+  }
+
+  // Check timestamp is recent (within 5 minutes)
+  const timestamp = parseInt(svixTimestamp, 10);
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - timestamp) > 300) {
+    console.error("Webhook timestamp too old");
+    return false;
+  }
+
+  // Construct signed payload
+  const signedPayload = `${svixId}.${svixTimestamp}.${payload}`;
+
+  // Decode secret (remove "whsec_" prefix if present)
+  const secretKey = secret.startsWith("whsec_") ? secret.slice(6) : secret;
+  const secretBytes = Uint8Array.from(atob(secretKey), c => c.charCodeAt(0));
+
+  // Import key for HMAC
+  const key = await crypto.subtle.importKey(
+    "raw",
+    secretBytes,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  // Sign
+  const signatureBytes = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(signedPayload)
+  );
+  const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)));
+
+  // Svix sends multiple signatures, check if any match
+  const signatures = svixSignature.split(" ");
+  for (const sig of signatures) {
+    const [version, signature] = sig.split(",");
+    if (version === "v1" && signature === expectedSignature) {
+      return true;
+    }
+  }
+
+  console.error("Webhook signature mismatch");
+  return false;
+}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -12,14 +77,28 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Read raw body for signature verification
+    const rawBody = await req.text();
+    
+    // Verify webhook signature
+    const isValid = await verifyWebhookSignature(rawBody, req.headers);
+    if (!isValid) {
+      return new Response(
+        JSON.stringify({ error: "Invalid webhook signature" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Parse incoming email from Resend inbound webhook
-    const payload = await req.json();
+    const payload = JSON.parse(rawBody);
     console.log("Received email webhook payload:", JSON.stringify(payload));
 
+    // Resend sends events wrapped in a data object
+    const emailData = payload.data || payload;
     const {
       from,
       to,
@@ -27,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
       text,
       html,
       attachments = []
-    } = payload;
+    } = emailData;
 
     // Extract sender email
     const senderEmail = from?.match(/<(.+?)>/)?.[1] || from || "";
@@ -50,13 +129,11 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: contactData } = await supabase
       .from("client_contacts")
       .select("id, client_id, first_name, last_name")
-      .eq("email", senderEmail)
+      .ilike("email", senderEmail)
       .single();
 
     if (!contactData) {
       console.log(`No client contact found for email: ${senderEmail}`);
-      // Still store the email but without client association
-      // You could create a generic inbox for unknown senders
       return new Response(
         JSON.stringify({ message: "Email received but no matching client contact found" }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -69,10 +146,9 @@ const handler = async (req: Request): Promise<Response> => {
     const storedAttachments: string[] = [];
     for (const attachment of attachments) {
       try {
-        // Resend sends attachments as base64
         if (attachment.content) {
           const fileName = `${Date.now()}-${attachment.filename || 'attachment'}`;
-          const filePath = `email-attachments/${fileName}`;
+          const filePath = `received/${fileName}`;
           
           // Decode base64
           const binaryString = atob(attachment.content);
