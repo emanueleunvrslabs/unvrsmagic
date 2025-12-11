@@ -1,6 +1,5 @@
 "use client";
 
-import { SearchBar } from "@/components/search-bar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,43 +8,14 @@ import { useWalletConnection } from "@/hooks/use-wallet-connection";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import {
-  Activity,
-  BarChart,
   Bell,
-  Bot,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  CircleDollarSign,
-  Cog,
-  Coins,
   Copy,
-  Cpu,
-  CreditCard,
-  Database,
   ExternalLink,
-  FileText,
-  Folder,
-  Gauge,
-  HelpCircle,
-  Layers,
-  LayoutDashboard,
-  LineChart,
   LogOut,
-  Menu,
-  Package,
-  PieChart,
-  Repeat,
-  Settings,
-  Store,
-  TrendingUp,
-  Upload,
-  User,
+  Search,
   UserPlus,
   Wallet,
-  XIcon,
-  Zap,
-  Search,
 } from "lucide-react";
 import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -270,27 +240,5 @@ export function Topbar() {
         )}
       </div>
     </header>
-  );
-}
-
-function MarketTicker({ symbol, price, change, isPositive }: { symbol: string; price: string; change: string; isPositive: boolean }) {
-  return (
-    <div className="flex items-center gap-2 rounded-md border px-3 py-1.5">
-      <div className="font-medium">{symbol}</div>
-      <div className="text-sm">${price}</div>
-      <div className={cn("text-xs", isPositive ? "text-emerald-500" : "text-rose-500")}>{change}</div>
-    </div>
-  );
-}
-
-function NotificationItem({ title, message, time }: { title: string; message: string; time: string }) {
-  return (
-    <DropdownMenuItem className="flex cursor-default flex-col items-start py-2">
-      <div className="flex w-full justify-between">
-        <span className="font-medium">{title}</span>
-        <span className="text-xs text-muted-foreground">{time}</span>
-      </div>
-      <span className="text-xs">{message}</span>
-    </DropdownMenuItem>
   );
 }
