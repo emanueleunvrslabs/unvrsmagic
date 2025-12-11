@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { SendEmailModal } from "@/components/admin/SendEmailModal";
+import { ClientEmailSection } from "@/components/clients/ClientEmailSection";
 import "./SocialMediaCard.css";
 
 interface Client {
@@ -73,13 +73,12 @@ export function AppleTVClientsDemo() {
   const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [emailModalOpen, setEmailModalOpen] = useState(false);
-  const [selectedContactForEmail, setSelectedContactForEmail] = useState<ClientContact | null>(null);
   const [contactsToDelete, setContactsToDelete] = useState<string[]>([]);
   const [editingContactIndex, setEditingContactIndex] = useState<number | null>(null);
   const [showDocuments, setShowDocuments] = useState(false);
   const [showTodos, setShowTodos] = useState(false);
   const [showKanban, setShowKanban] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [newTodoText, setNewTodoText] = useState("");
   const [newKanbanTask, setNewKanbanTask] = useState("");
@@ -318,12 +317,10 @@ export function AppleTVClientsDemo() {
 
     switch (actionId) {
       case "email":
-        if (contact) {
-          setSelectedContactForEmail(contact);
-          setEmailModalOpen(true);
-        } else {
-          toast.error("This client has no contacts");
-        }
+        setShowEmail(!showEmail);
+        setShowDocuments(false);
+        setShowTodos(false);
+        setShowKanban(false);
         break;
       case "whatsapp":
         if (contact?.whatsapp_number) {
@@ -337,16 +334,19 @@ export function AppleTVClientsDemo() {
         setShowDocuments(!showDocuments);
         setShowTodos(false);
         setShowKanban(false);
+        setShowEmail(false);
         break;
       case "todo":
         setShowTodos(!showTodos);
         setShowDocuments(false);
         setShowKanban(false);
+        setShowEmail(false);
         break;
       case "kanban":
         setShowKanban(!showKanban);
         setShowDocuments(false);
         setShowTodos(false);
+        setShowEmail(false);
         break;
     }
   };
@@ -1361,14 +1361,15 @@ export function AppleTVClientsDemo() {
         </div>
       )}
 
-      {/* Email Modal */}
-      {selectedContactForEmail && (
-        <SendEmailModal
-          open={emailModalOpen}
-          onOpenChange={setEmailModalOpen}
-          recipientEmail={selectedContactForEmail.email}
-          recipientName={`${selectedContactForEmail.first_name} ${selectedContactForEmail.last_name}`}
-        />
+      {/* Email Section */}
+      {showEmail && selectedClient && (
+        <div className="relative z-10 px-8 pb-8">
+          <ClientEmailSection
+            clientId={selectedClient.id}
+            contacts={selectedClient.client_contacts || []}
+            onClose={() => setShowEmail(false)}
+          />
+        </div>
       )}
     </div>
   );
