@@ -109,7 +109,7 @@ export function Topbar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-background px-4 lg:h-16 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between px-4 lg:h-16 lg:px-6">
       {/* Left spacer */}
       <div className="flex-1" />
       
