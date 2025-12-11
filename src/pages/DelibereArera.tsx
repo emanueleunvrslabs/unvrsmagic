@@ -198,7 +198,13 @@ const DelibereAreraPage = () => {
       });
 
       if (Array.isArray(result.results)) {
-        result.results.forEach((r: any) => {
+        interface SyncResult {
+          code: string;
+          status: string;
+          category?: string;
+          error?: string;
+        }
+        result.results.forEach((r: SyncResult) => {
           appendLog({
             type: r.status === "completed" ? "success" : "error",
             message:

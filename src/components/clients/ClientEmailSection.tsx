@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
+import type { ClientEmail } from "@/types/client";
 
 interface ClientEmailSectionProps {
   clientId: string;
@@ -24,7 +25,7 @@ type TabType = "inbox" | "sent" | "compose";
 export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailSectionProps) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>("inbox");
-  const [selectedEmail, setSelectedEmail] = useState<any>(null);
+  const [selectedEmail, setSelectedEmail] = useState<ClientEmail | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -172,9 +173,9 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
       setAttachments([]);
       setActiveTab("sent");
       queryClient.invalidateQueries({ queryKey: ["client-emails", clientId] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error sending email:", error);
-      toast.error(error.message || "Failed to send email");
+      toast.error(error instanceof Error ? error.message : "Failed to send email");
     } finally {
       setIsSending(false);
     }
@@ -192,12 +193,12 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
       toast.success("Email deleted");
       setSelectedEmail(null);
       queryClient.invalidateQueries({ queryKey: ["client-emails", clientId] });
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete email");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete email");
     }
   };
 
-  const renderEmailList = (emailList: any[]) => {
+  const renderEmailList = (emailList: ClientEmail[]) => {
     if (isLoading) {
       return (
         <div className="flex justify-center py-8">
@@ -436,11 +437,11 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
             </div>
             
             {/* Show attachments if any */}
-            {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
+            {selectedEmail.attachments && Array.isArray(selectedEmail.attachments) && (selectedEmail.attachments as string[]).length > 0 && (
               <div className="mt-4 pt-4 border-t border-white/10">
                 <p className="text-white/50 text-xs mb-2">Attachments:</p>
                 <div className="flex flex-wrap gap-2">
-                  {selectedEmail.attachments.map((url: string, index: number) => (
+                  {(selectedEmail.attachments as string[]).map((url: string, index: number) => (
                     <a
                       key={index}
                       href={url}

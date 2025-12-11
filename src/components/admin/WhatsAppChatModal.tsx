@@ -102,7 +102,7 @@ export function WhatsAppChatModal({
       if (error) throw error;
 
       setMessages((data || []) as Message[]);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error loading messages:", error);
       toast({
         title: "Error",
@@ -137,11 +137,11 @@ export function WhatsAppChatModal({
         title: "Message sent",
         description: "WhatsApp message sent successfully",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error sending message:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to send message",
+        description: error instanceof Error ? error.message : "Failed to send message",
         variant: "destructive",
       });
     } finally {

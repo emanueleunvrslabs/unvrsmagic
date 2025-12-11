@@ -39,17 +39,19 @@ const WorkflowsList = () => {
     return map[platform] || "🌐";
   };
 
-  const formatSchedule = (scheduleConfig: any) => {
+  const formatSchedule = (scheduleConfig: Record<string, unknown> | null) => {
     if (!scheduleConfig) return "";
-    const { frequency, times, days } = scheduleConfig;
+    const frequency = scheduleConfig.frequency as string | undefined;
+    const times = scheduleConfig.times as string[] | undefined;
+    const days = scheduleConfig.days as string[] | undefined;
     
-    if (frequency === "daily") {
+    if (frequency === "daily" && times) {
       return `Daily at ${times.join(", ")}`;
-    } else if (frequency === "weekly") {
+    } else if (frequency === "weekly" && days && times) {
       const dayNames = days.map((d: string) => d.charAt(0).toUpperCase() + d.slice(1, 3)).join(", ");
       return `${dayNames} at ${times.join(", ")}`;
     }
-    return frequency;
+    return frequency || "";
   };
 
   if (!workflows || workflows.length === 0) {

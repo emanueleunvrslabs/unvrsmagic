@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Download, Play, Trash2, Search, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
+import type { Json } from "@/integrations/supabase/types";
 
 interface ContentItem {
   id: string;
@@ -18,7 +19,7 @@ interface ContentItem {
   thumbnail_url: string | null;
   prompt: string;
   created_at: string;
-  metadata?: any;
+  metadata?: Json | null;
 }
 
 export function VideoGallerySection() {

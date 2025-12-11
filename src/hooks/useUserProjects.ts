@@ -52,7 +52,7 @@ export const useUserProjects = () => {
       queryClient.invalidateQueries({ queryKey: ["user-projects"] });
       toast.success("Progetto aggiunto alla tua dashboard");
     },
-    onError: (error: any) => {
+    onError: (error: Error & { code?: string }) => {
       if (error.code === "23505") {
         toast.error("Progetto già aggiunto");
       } else {
