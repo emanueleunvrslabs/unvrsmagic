@@ -133,6 +133,22 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
               setRevolutMerchantPublicKey(item.api_key)
             } else if (item.provider === 'revolut_merchant_secret') {
               setRevolutMerchantSecretKey(item.api_key)
+            } else if (item.provider === 'revolut_business') {
+              // Load existing Revolut Business certificate data
+              try {
+                const certData = JSON.parse(item.api_key)
+                if (certData.public_key) {
+                  setRevolutPublicKey(certData.public_key)
+                }
+                if (certData.redirect_uri) {
+                  setRevolutRedirectUri(certData.redirect_uri)
+                }
+                if (certData.client_id) {
+                  setRevolutClientId(certData.client_id)
+                }
+              } catch (e) {
+                console.error('Error parsing Revolut certificate data:', e)
+              }
             } else {
               loadedKeys[item.provider] = item.api_key
             }
