@@ -609,15 +609,14 @@ export function AppleTVClientsDemo() {
     };
   }, [emblaApi, onSelect]);
 
-  // Reset open sections when client changes - keep section open but with new client data
+  // Close all open cards when client changes
   useEffect(() => {
-    // Refetch data for open sections when selected client changes
-    if (selectedClient?.id) {
-      if (showDocuments) refetchDocuments();
-      if (showTodos) refetchTodos();
-      if (showKanban) refetchKanban();
-    }
-  }, [selectedClient?.id]);
+    setShowDocuments(false);
+    setShowTodos(false);
+    setShowKanban(false);
+    setShowEmail(false);
+    setShowWhatsApp(false);
+  }, [selectedIndex]);
 
   // Search and scroll to matching client
   useEffect(() => {
