@@ -247,7 +247,8 @@ export function AppleTVClientsDemo() {
       setNewClient({ companyName: "", vatNumber: "", street: "", city: "", postalCode: "", country: "" });
       setContacts([]);
       setContactsToDelete([]);
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      setEditingContactIndex(null);
+      await queryClient.invalidateQueries({ queryKey: ["clients"] });
       setSearchParams({});
     } catch (error) {
       console.error("Error updating client:", error);
