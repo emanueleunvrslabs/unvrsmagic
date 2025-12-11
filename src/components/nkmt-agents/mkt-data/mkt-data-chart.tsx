@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, Activity } from "lucide-react"
 import { ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Line } from "recharts"
 import { Badge } from "@/components/ui/badge"
+import "@/components/labs/SocialMediaCard.css"
 
 interface MktDataChartProps {
   symbol: string
@@ -114,12 +114,12 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
   const isPositive = priceChange >= 0
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
+    <div className="labs-client-card relative rounded-2xl overflow-hidden h-full">
+      <div className="relative p-5 z-10">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            <CardTitle>{symbol}</CardTitle>
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <span className="text-lg font-semibold text-white">{symbol}</span>
             {isLive && (
               <Badge variant="default" className="animate-pulse bg-green-500 text-white">
                 <Activity className="h-3 w-3 mr-1" />
@@ -128,18 +128,16 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
             )}
           </div>
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">24h Volume</p>
-            <p className="text-sm font-medium">${volume24h.toFixed(2)}M</p>
+            <p className="text-xs text-gray-400">24h Volume</p>
+            <p className="text-sm font-medium text-white">${volume24h.toFixed(2)}M</p>
           </div>
         </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold">${currentPrice.toLocaleString()}</span>
+        <div className="flex items-baseline gap-2 mb-4">
+          <span className="text-3xl font-bold text-white">${currentPrice.toLocaleString()}</span>
           <span className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
             {isPositive ? '+' : ''}{priceChange.toFixed(2)}%
           </span>
         </div>
-      </CardHeader>
-      <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <XAxis 
@@ -252,7 +250,7 @@ export const MktDataChart = ({ symbol, data, currentPrice, priceChange, volume24
             )}
           </ComposedChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Activity, TrendingUp, Database, FileText, RefreshCw } from "lucide-react"
+import "@/components/labs/SocialMediaCard.css"
 import { useMktData } from "@/hooks/use-mkt-data"
 import { useBitgetOrderBook } from "@/hooks/use-bitget-orderbook"
 import { useTriggerMktData } from "@/hooks/use-trigger-mkt-data"
@@ -273,46 +274,46 @@ export const MktDataInterface = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Data Points</CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Total market data records
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Symbols</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {new Set(data.map(d => d.symbol)).size}
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative flex items-center gap-3 p-5 z-10">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Database className="h-5 w-5 text-primary" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Unique trading pairs tracked
-            </p>
-          </CardContent>
-        </Card>
+            <div>
+              <p className="text-sm text-gray-400">Data Points</p>
+              <p className="text-2xl font-bold text-white">{data.length}</p>
+              <p className="text-xs text-gray-500">Total market data records</p>
+            </div>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Status</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">Active</div>
-            <p className="text-xs text-muted-foreground">
-              Auto-updating every 5 minutes
-            </p>
-          </CardContent>
-        </Card>
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative flex items-center gap-3 p-5 z-10">
+            <div className="p-2 rounded-lg bg-green-500/10">
+              <TrendingUp className="h-5 w-5 text-green-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Symbols</p>
+              <p className="text-2xl font-bold text-white">
+                {new Set(data.map(d => d.symbol)).size}
+              </p>
+              <p className="text-xs text-gray-500">Unique trading pairs tracked</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative flex items-center gap-3 p-5 z-10">
+            <div className="p-2 rounded-lg bg-blue-500/10">
+              <Activity className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Status</p>
+              <p className="text-2xl font-bold text-green-400">Active</p>
+              <p className="text-xs text-gray-500">Auto-updating every 5 minutes</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {error && (
@@ -322,38 +323,36 @@ export const MktDataInterface = () => {
       )}
 
       {isLoading && data.length === 0 ? (
-        <Card>
-          <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">
-              <Activity className="h-8 w-8 animate-pulse mx-auto mb-2" />
-              <p>Loading market data...</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative py-8 text-center z-10">
+            <Activity className="h-8 w-8 animate-pulse mx-auto mb-2 text-primary" />
+            <p className="text-gray-400">Loading market data...</p>
+          </div>
+        </div>
       ) : data.length > 0 ? (
         <div className="space-y-6">
           {/* First row: Symbol Selector + Chart + Activity Logs */}
           <div className="grid grid-cols-12 gap-6">
             {/* Symbol Selector */}
             <div className="col-span-12 lg:col-span-2 flex">
-              <Card className="flex-1">
-                <CardContent className="pt-6">
+              <div className="labs-client-card relative rounded-2xl overflow-hidden flex-1">
+                <div className="relative p-5 z-10">
                   <MktDataSymbolSelector
                     symbols={symbols}
                     selectedSymbol={selectedSymbol}
                     onSymbolChange={setSelectedSymbol}
                   />
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
             {/* Chart with Timeframe Selector */}
             <div className="col-span-12 lg:col-span-6 space-y-4 flex flex-col">
               {/* Timeframe and Indicators Selector */}
-              <Card>
-                <CardContent className="pt-6 space-y-4">
+              <div className="labs-client-card relative rounded-2xl overflow-hidden">
+                <div className="relative p-5 z-10 space-y-4">
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">Timeframe</Label>
+                    <Label className="text-sm font-medium mb-2 block text-white">Timeframe</Label>
                     <Tabs value={selectedTimeframe} onValueChange={(v) => setSelectedTimeframe(v as '1h' | '4h' | '1d')}>
                       <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="1h">1H</TabsTrigger>
@@ -364,7 +363,7 @@ export const MktDataInterface = () => {
                   </div>
                   
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">Technical Indicators</Label>
+                    <Label className="text-sm font-medium mb-2 block text-white">Technical Indicators</Label>
                     <div className="grid grid-cols-3 gap-3">
                       <div className="flex items-center space-x-2">
                         <Checkbox 
@@ -372,7 +371,7 @@ export const MktDataInterface = () => {
                           checked={indicators.sma20}
                           onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, sma20: !!checked }))}
                         />
-                        <Label htmlFor="sma20" className="text-xs cursor-pointer">SMA 20</Label>
+                        <Label htmlFor="sma20" className="text-xs cursor-pointer text-white/80">SMA 20</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox 
@@ -380,7 +379,7 @@ export const MktDataInterface = () => {
                           checked={indicators.sma50}
                           onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, sma50: !!checked }))}
                         />
-                        <Label htmlFor="sma50" className="text-xs cursor-pointer">SMA 50</Label>
+                        <Label htmlFor="sma50" className="text-xs cursor-pointer text-white/80">SMA 50</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox 
@@ -388,7 +387,7 @@ export const MktDataInterface = () => {
                           checked={indicators.ema12}
                           onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, ema12: !!checked }))}
                         />
-                        <Label htmlFor="ema12" className="text-xs cursor-pointer">EMA 12</Label>
+                        <Label htmlFor="ema12" className="text-xs cursor-pointer text-white/80">EMA 12</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox 
@@ -396,7 +395,7 @@ export const MktDataInterface = () => {
                           checked={indicators.ema26}
                           onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, ema26: !!checked }))}
                         />
-                        <Label htmlFor="ema26" className="text-xs cursor-pointer">EMA 26</Label>
+                        <Label htmlFor="ema26" className="text-xs cursor-pointer text-white/80">EMA 26</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox 
@@ -404,7 +403,7 @@ export const MktDataInterface = () => {
                           checked={indicators.rsi}
                           onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, rsi: !!checked }))}
                         />
-                        <Label htmlFor="rsi" className="text-xs cursor-pointer">RSI</Label>
+                        <Label htmlFor="rsi" className="text-xs cursor-pointer text-white/80">RSI</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox 
@@ -412,12 +411,12 @@ export const MktDataInterface = () => {
                           checked={indicators.macd}
                           onCheckedChange={(checked) => setIndicators(prev => ({ ...prev, macd: !!checked }))}
                         />
-                        <Label htmlFor="macd" className="text-xs cursor-pointer">MACD</Label>
+                        <Label htmlFor="macd" className="text-xs cursor-pointer text-white/80">MACD</Label>
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Price Chart */}
               <div className="flex-1">
@@ -454,14 +453,12 @@ export const MktDataInterface = () => {
             <div className="col-span-12 lg:col-span-8 flex">
               <div className="flex-1">
                 {isSymbolNotAvailable ? (
-                  <Card className="h-full">
-                    <CardContent className="py-8">
-                      <div className="text-center text-muted-foreground">
-                        <p className="text-sm">Symbol {selectedSymbol} is not available on Bitget</p>
-                        <p className="text-xs mt-2">Please select another symbol</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="labs-client-card relative rounded-2xl overflow-hidden h-full">
+                    <div className="relative py-8 text-center z-10">
+                      <p className="text-sm text-gray-400">Symbol {selectedSymbol} is not available on Bitget</p>
+                      <p className="text-xs mt-2 text-gray-500">Please select another symbol</p>
+                    </div>
+                  </div>
                 ) : (
                   <MktDataOrderBook {...orderBook} />
                 )}
@@ -470,13 +467,11 @@ export const MktDataInterface = () => {
           </div>
         </div>
       ) : (
-        <Card>
-          <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">
-              <p>No market data available yet. The agent will start collecting data automatically.</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="labs-client-card relative rounded-2xl overflow-hidden">
+          <div className="relative py-8 text-center z-10">
+            <p className="text-gray-400">No market data available yet. The agent will start collecting data automatically.</p>
+          </div>
+        </div>
       )}
     </div>
   )

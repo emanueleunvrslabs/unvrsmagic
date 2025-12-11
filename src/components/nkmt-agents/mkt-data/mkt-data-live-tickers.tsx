@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import "@/components/labs/SocialMediaCard.css"
 
 interface Ticker {
   symbol: string
@@ -28,14 +28,12 @@ export const MktDataLiveTickers = ({ tickers }: MktDataLiveTickersProps) => {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5" />
-          <CardTitle>Live Tickers</CardTitle>
+    <div className="labs-client-card relative rounded-2xl overflow-hidden h-full flex flex-col">
+      <div className="relative p-5 z-10 flex flex-col h-full">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold text-white">Live Tickers</h3>
         </div>
-      </CardHeader>
-      <CardContent>
         <ScrollArea className="h-[500px]">
           <div className="space-y-3 pr-4">
             {tickers.map((ticker) => {
@@ -45,7 +43,7 @@ export const MktDataLiveTickers = ({ tickers }: MktDataLiveTickersProps) => {
               return (
                 <div 
                   key={ticker.symbol}
-                  className="p-4 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors"
+                  className="p-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -53,12 +51,12 @@ export const MktDataLiveTickers = ({ tickers }: MktDataLiveTickersProps) => {
                         <span className="text-sm font-bold text-primary">{initial}</span>
                       </div>
                       <div>
-                        <p className="font-semibold">{ticker.symbol}</p>
-                        <p className="text-xs text-muted-foreground">{ticker.shortName}</p>
+                        <p className="font-semibold text-white">{ticker.symbol}</p>
+                        <p className="text-xs text-gray-400">{ticker.shortName}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">{formatPrice(ticker.price)}</p>
+                      <p className="text-xl font-bold text-white">{formatPrice(ticker.price)}</p>
                       <p className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
                         {isPositive ? '+' : ''}{(ticker.change24h || 0).toFixed(2)}%
                       </p>
@@ -66,15 +64,15 @@ export const MktDataLiveTickers = ({ tickers }: MktDataLiveTickersProps) => {
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-xs">
                     <div>
-                      <p className="text-muted-foreground">24h Vol</p>
-                      <p className="font-medium">{formatVolume(ticker.volume24h)}</p>
+                      <p className="text-gray-400">24h Vol</p>
+                      <p className="font-medium text-white">{formatVolume(ticker.volume24h)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">24h High</p>
+                      <p className="text-gray-400">24h High</p>
                       <p className="font-medium text-green-500">{formatPrice(ticker.high24h)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">24h Low</p>
+                      <p className="text-gray-400">24h Low</p>
                       <p className="font-medium text-red-500">{formatPrice(ticker.low24h)}</p>
                     </div>
                   </div>
@@ -83,7 +81,7 @@ export const MktDataLiveTickers = ({ tickers }: MktDataLiveTickersProps) => {
             })}
           </div>
         </ScrollArea>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
