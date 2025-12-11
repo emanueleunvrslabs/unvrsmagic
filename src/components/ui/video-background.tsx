@@ -10,8 +10,8 @@ export function VideoBackground() {
         className="absolute inset-0 w-full h-full object-cover"
       >
         <source
-          src="https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object/public/uploads/9d8f65ef-58ef-47db-be8f-926f26411b39/1765447014393-particle_loop_02_15SEC.mov"
-          type="video/quicktime"
+          src="https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object/public/uploads/9d8f65ef-58ef-47db-be8f-926f26411b39/1765447230468-4K_2.mp4"
+          type="video/mp4"
         />
       </video>
       
