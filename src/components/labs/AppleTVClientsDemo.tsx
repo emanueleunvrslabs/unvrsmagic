@@ -116,26 +116,6 @@ export function AppleTVClientsDemo() {
   if (isNewClientView) {
     return (
       <div className="relative h-full flex flex-col items-center justify-center p-8 overflow-hidden">
-      {/* Vibrant Background for Glassmorphism - FULLSCREEN */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        {/* Base gradient mesh */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/60 via-purple-800/30 to-teal-900/50" />
-          
-          {/* Floating color blobs */}
-          <div className="absolute top-[10%] left-[15%] w-[400px] h-[400px] rounded-full bg-purple-500/40 blur-[100px] animate-pulse" />
-          <div className="absolute top-[40%] right-[10%] w-[350px] h-[350px] rounded-full bg-teal-500/35 blur-[80px] animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-[10%] left-[30%] w-[300px] h-[300px] rounded-full bg-pink-500/30 blur-[90px] animate-pulse" style={{ animationDelay: '2s' }} />
-          
-          {/* Animated shapes */}
-          <div className="absolute top-[20%] left-[10%] glassmac-shape-triangle">
-            <svg width="100" height="100" viewBox="0 0 512 512" fill="none">
-              <path d="M246.3,5.6C252.9,9.4,258.4,14.9,262.2,21.5L444.7,340.8C456.4,361.3,449.3,387.4,428.8,399.1C422.3,402.7,415,404.7,407.6,404.7H42.7C19.1,404.7,0,385.6,0,362C0,354.6,1.9,347.3,5.6,340.8L188.1,21.5C199.8,1,225.9,-6.1,246.3,5.6Z" fill="hsl(185, 65%, 45%)" fillOpacity="0.7"/>
-            </svg>
-          </div>
-          <div className="absolute top-[50%] right-[25%] glassmac-shape-circle" />
-          <div className="absolute bottom-[25%] left-[60%] glassmac-shape-square" />
-        </div>
-        
         <div className="relative z-10 w-full max-w-4xl grid grid-cols-2 gap-6">
           {/* Left Card - Bill Information */}
           <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]">
@@ -318,27 +298,6 @@ export function AppleTVClientsDemo() {
 
   return (
     <div className="relative h-full flex flex-col pt-4 overflow-hidden">
-      {/* Vibrant Background for Glassmorphism */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* Base gradient mesh */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/60 via-purple-800/30 to-teal-900/50" />
-        
-        {/* Floating color blobs */}
-        <div className="absolute top-[5%] left-[20%] w-[500px] h-[500px] rounded-full bg-purple-500/40 blur-[120px] animate-pulse" />
-        <div className="absolute top-[30%] right-[5%] w-[400px] h-[400px] rounded-full bg-teal-500/35 blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-[5%] left-[40%] w-[450px] h-[450px] rounded-full bg-pink-500/30 blur-[110px] animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[60%] left-[5%] w-[300px] h-[300px] rounded-full bg-yellow-500/25 blur-[80px] animate-pulse" style={{ animationDelay: '3s' }} />
-        
-        {/* Animated shapes */}
-        <div className="absolute top-[15%] left-[8%] glassmac-shape-triangle">
-          <svg width="80" height="80" viewBox="0 0 512 512" fill="none">
-            <path d="M246.3,5.6C252.9,9.4,258.4,14.9,262.2,21.5L444.7,340.8C456.4,361.3,449.3,387.4,428.8,399.1C422.3,402.7,415,404.7,407.6,404.7H42.7C19.1,404.7,0,385.6,0,362C0,354.6,1.9,347.3,5.6,340.8L188.1,21.5C199.8,1,225.9,-6.1,246.3,5.6Z" fill="hsl(185, 65%, 45%)" fillOpacity="0.7"/>
-          </svg>
-        </div>
-        <div className="absolute top-[45%] right-[15%] glassmac-shape-circle" />
-        <div className="absolute bottom-[20%] left-[70%] glassmac-shape-square" />
-      </div>
-
       {/* Carousel Gallery */}
       <div className="relative z-10 flex-1 flex flex-col justify-center max-h-[55%]">
         <div className="overflow-hidden" ref={emblaRef}>
