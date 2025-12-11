@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,9 +47,12 @@ const actionItems = [
 
 export function AppleTVClientsDemo() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const isNewClientView = searchParams.get("view") === "new";
   const editClientId = searchParams.get("edit");
+  const basePath = location.pathname;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [newClient, setNewClient] = useState({
     companyName: "",
@@ -180,7 +183,7 @@ export function AppleTVClientsDemo() {
       setNewContact({ name: "", email: "", whatsapp: "" });
       setShowAddContact(false);
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      setSearchParams({});
+      navigate(basePath);
     } catch (error) {
       console.error("Error creating client:", error);
       toast.error("Error creating client");
@@ -249,7 +252,7 @@ export function AppleTVClientsDemo() {
       setContactsToDelete([]);
       setEditingContactIndex(null);
       await queryClient.invalidateQueries({ queryKey: ["clients"] });
-      setSearchParams({});
+      navigate(basePath);
     } catch (error) {
       console.error("Error updating client:", error);
       toast.error("Error updating client");
@@ -283,7 +286,7 @@ export function AppleTVClientsDemo() {
 
       toast.success("Client deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      setSearchParams({});
+      navigate(basePath);
     } catch (error) {
       console.error("Error deleting client:", error);
       toast.error("Error deleting client");
