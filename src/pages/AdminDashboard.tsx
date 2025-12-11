@@ -3,12 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { LayoutDashboard, Users, Package, TrendingUp, Image, Video, Loader2, Coins, Wallet, ArrowUpRight, ArrowDownRight, CreditCard } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { it } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+
+interface RevolutTransaction {
+  id: string;
+  type: string;
+  state: string;
+  created_at: string;
+  legs?: {
+    amount: number;
+    currency: string;
+    description?: string;
+  }[];
+}
 
 const AdminDashboard = () => {
   // Fetch total projects count
@@ -168,6 +180,32 @@ const AdminDashboard = () => {
         month,
         amount: Number(amount.toFixed(2))
       }));
+    }
+  });
+
+  // Fetch Revolut transactions
+  const { data: revolutTransactions, isLoading: loadingRevolutTx } = useQuery({
+    queryKey: ['admin-revolut-transactions'],
+    queryFn: async () => {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const { data, error } = await supabase.functions.invoke('revolut-business-api', {
+        body: { 
+          action: 'getTransactions', 
+          params: { 
+            from: thirtyDaysAgo.toISOString(),
+            count: 10 
+          } 
+        }
+      });
+      
+      if (error) {
+        console.error('Failed to fetch Revolut transactions:', error);
+        return [];
+      }
+      
+      return (data as RevolutTransaction[]) || [];
     }
   });
 
@@ -378,18 +416,25 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Transactions Table */}
+          {/* Revolut Transactions Table */}
           <Card className="dashboard-card">
             <CardHeader>
-              <CardTitle>Transactions</CardTitle>
-              <CardDescription>Credit purchases and usage history</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Revolut Transactions
+                  </CardTitle>
+                  <CardDescription>Recent bank transactions</CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              {loadingTransactions ? (
+              {loadingRevolutTx ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-              ) : transactionsData && transactionsData.length > 0 ? (
+              ) : revolutTransactions && revolutTransactions.length > 0 ? (
                 <div className="max-h-[400px] overflow-y-auto">
                   <Table>
                     <TableHeader>
@@ -401,44 +446,112 @@ const AdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {transactionsData.map((tx) => (
-                        <TableRow key={tx.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {Number(tx.amount) > 0 ? (
-                                <ArrowUpRight className="h-4 w-4 text-green-500" />
-                              ) : (
-                                <ArrowDownRight className="h-4 w-4 text-red-500" />
-                              )}
-                              <Badge variant={tx.type === 'purchase' ? 'default' : 'secondary'}>
-                                {tx.type === 'purchase' ? 'Purchase' : 'Usage'}
-                              </Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="max-w-[200px] truncate">
-                            {tx.description || '-'}
-                          </TableCell>
-                          <TableCell>
-                            <span className={Number(tx.amount) > 0 ? 'text-green-500' : 'text-red-500'}>
-                              {Number(tx.amount) > 0 ? '+' : ''}€{Number(tx.amount).toFixed(2)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {revolutTransactions.map((tx) => {
+                        const leg = tx.legs?.[0];
+                        const amount = leg?.amount || 0;
+                        const currency = leg?.currency || 'EUR';
+                        const description = leg?.description || tx.type;
+                        
+                        return (
+                          <TableRow key={tx.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                {amount > 0 ? (
+                                  <ArrowUpRight className="h-4 w-4 text-green-500" />
+                                ) : (
+                                  <ArrowDownRight className="h-4 w-4 text-red-500" />
+                                )}
+                                <Badge variant="secondary">
+                                  {tx.type.replace(/_/g, ' ')}
+                                </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell className="max-w-[200px] truncate">
+                              {description}
+                            </TableCell>
+                            <TableCell>
+                              <span className={amount > 0 ? 'text-green-500' : 'text-red-500'}>
+                                {amount > 0 ? '+' : ''}€{amount.toFixed(2)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No transactions yet
+                  No Revolut transactions yet
                 </p>
               )}
             </CardContent>
           </Card>
         </div>
+
+        {/* Credit Transactions */}
+        <Card className="dashboard-card">
+          <CardHeader>
+            <CardTitle>Credit Transactions</CardTitle>
+            <CardDescription>Credit purchases and usage history</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingTransactions ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : transactionsData && transactionsData.length > 0 ? (
+              <div className="max-h-[400px] overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactionsData.map((tx) => (
+                      <TableRow key={tx.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {Number(tx.amount) > 0 ? (
+                              <ArrowUpRight className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <ArrowDownRight className="h-4 w-4 text-red-500" />
+                            )}
+                            <Badge variant={tx.type === 'purchase' ? 'default' : 'secondary'}>
+                              {tx.type === 'purchase' ? 'Purchase' : 'Usage'}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {tx.description || '-'}
+                        </TableCell>
+                        <TableCell>
+                          <span className={Number(tx.amount) > 0 ? 'text-green-500' : 'text-red-500'}>
+                            {Number(tx.amount) > 0 ? '+' : ''}€{Number(tx.amount).toFixed(2)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', { locale: it })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No credit transactions yet
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="dashboard-card">
