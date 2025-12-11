@@ -8,8 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 
 const CREDIT_PACKAGES = [
@@ -94,7 +92,13 @@ export function CreditCard() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-[#0B0B0D]/95 backdrop-blur-xl border-white/10">
+        <DialogContent 
+          className="sm:max-w-md border-white/10 backdrop-blur-xl overflow-hidden"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+            boxShadow: '0 8px 32px 0 rgba(13, 38, 38, 0.37)'
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="text-white">Purchase Credits</DialogTitle>
             <DialogDescription className="text-white/60">
@@ -103,10 +107,10 @@ export function CreditCard() {
           </DialogHeader>
           <div className="grid gap-3 py-4">
             {CREDIT_PACKAGES.map((pkg) => (
-              <Button
+              <button
                 key={pkg.id}
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-start gap-1 bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 text-left transition-all hover:bg-white/10 hover:border-white/20 disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)' }}
                 onClick={() => {
                   purchaseCredits(pkg.id);
                   setIsDialogOpen(false);
@@ -115,10 +119,12 @@ export function CreditCard() {
               >
                 <div className="flex items-center justify-between w-full">
                   <span className="font-semibold text-white">{pkg.price}</span>
-                  <Badge variant="secondary" className="bg-white/10 text-white/80">{pkg.amount} credits</Badge>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-white/80 border border-white/10">
+                    {pkg.amount} credits
+                  </span>
                 </div>
-                <span className="text-xs text-white/50">{pkg.description}</span>
-              </Button>
+                <span className="text-xs text-white/50 mt-1 block">{pkg.description}</span>
+              </button>
             ))}
           </div>
         </DialogContent>
