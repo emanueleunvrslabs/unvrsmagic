@@ -16,10 +16,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const { data: { session: currentSession } } = await supabase.auth.getSession();
     setSession(currentSession);
     setLoading(false);
-    
-    if (!currentSession) {
-      console.log("Session expired or user logged out");
-    }
   }, []);
 
   useEffect(() => {
@@ -30,7 +26,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log("Auth state changed:", event);
       setSession(newSession);
       setLoading(false);
       

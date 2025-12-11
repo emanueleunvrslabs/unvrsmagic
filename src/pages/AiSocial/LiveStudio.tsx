@@ -669,8 +669,7 @@ export default function LiveStudio() {
                 return [...prev, newComment]
               })
 
-              // TODO: Send comment to AI for response and make avatar speak
-              console.log("New YouTube comment:", authorName, "-", commentText)
+              // Note: AI response integration pending - avatar will speak response
             }
           }
         }

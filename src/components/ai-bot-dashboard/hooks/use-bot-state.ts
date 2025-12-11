@@ -21,7 +21,6 @@ export function useBotState() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
-        console.log('No active session, skipping portfolio fetch')
         setIsLoadingPortfolio(false)
         return
       }
@@ -35,10 +34,7 @@ export function useBotState() {
       if (error) {
         // Check if this is a "credentials not found" error - don't show toast for this
         const errorMessage = error.message || ''
-        if (errorMessage.includes('credentials not found') || errorMessage.includes('404')) {
-          console.log('Bitget credentials not configured yet')
-        } else {
-          console.error('Error fetching Bitget portfolio:', error)
+        if (!errorMessage.includes('credentials not found') && !errorMessage.includes('404')) {
           toast.error('Failed to fetch Bitget portfolio data')
         }
         return
@@ -46,17 +42,14 @@ export function useBotState() {
 
       if (data?.error) {
         // Handle error response from edge function
-        if (data.error.includes('credentials not found')) {
-          console.log('Bitget credentials not configured yet')
-        } else {
-          console.error('Bitget API error:', data.error)
+        if (!data.error.includes('credentials not found')) {
           toast.error(data.error)
         }
         return
       }
 
       if (data?.success && data?.data) {
-        const { totalValue, spot, futures, unrealizedPnL, breakdown } = data.data
+        const { totalValue, breakdown } = data.data
         
         // Store complete breakdown data
         setRealPortfolioData(breakdown)
@@ -66,11 +59,8 @@ export function useBotState() {
           ...prev,
           balance: totalValue,
         }))
-        
-        console.log('Bitget portfolio loaded:', { totalValue, spot, futures, unrealizedPnL, breakdown })
       }
-    } catch (error) {
-      console.error('Exception fetching Bitget portfolio:', error)
+    } catch {
       toast.error('Failed to load portfolio data')
     } finally {
       setIsLoadingPortfolio(false)
