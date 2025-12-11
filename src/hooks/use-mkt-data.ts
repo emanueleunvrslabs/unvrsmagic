@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { RealtimeChannel } from '@supabase/supabase-js'
+import type { Json } from '@/integrations/supabase/types'
 
 export interface OHLCVBar {
   timestamp_ms: number
@@ -17,12 +18,20 @@ export interface MktDataResult {
   symbol: string
   market_type: string
   timeframe: string
-  ohlcv: any
-  data_sources: any
+  ohlcv: Json
+  data_sources: Json | null
   confidence_score: number | null
   notes: string | null
   created_at: string
   updated_at: string
+}
+
+// Helper function to parse OHLCV data safely
+export function parseOhlcv(ohlcv: Json): OHLCVBar[] {
+  if (Array.isArray(ohlcv)) {
+    return ohlcv as unknown as OHLCVBar[]
+  }
+  return []
 }
 
 export const useMktData = () => {

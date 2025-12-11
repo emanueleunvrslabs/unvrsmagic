@@ -130,6 +130,14 @@ export function calculateMACD(
   return { macd: macdLine, signal, histogram }
 }
 
+// Technical indicators result type
+export interface TechnicalIndicatorsResult {
+  sma: Record<number, (number | null)[]>
+  ema: Record<number, (number | null)[]>
+  rsi: (number | null)[] | null
+  macd: MACDResult | null
+}
+
 // Apply indicators to OHLCV data
 export function applyIndicators(
   ohlcvData: OHLCVData[],
@@ -139,9 +147,9 @@ export function applyIndicators(
     rsi?: boolean
     macd?: boolean
   }
-) {
+): TechnicalIndicatorsResult {
   const closePrices = ohlcvData.map(d => d.close)
-  const result: any = {
+  const result: TechnicalIndicatorsResult = {
     sma: {},
     ema: {},
     rsi: null,

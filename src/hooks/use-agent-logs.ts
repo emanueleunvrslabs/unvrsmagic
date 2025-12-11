@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import type { AgentLogMetadata } from "@/types/nkmt"
 
 export interface AgentLog {
   id: string
@@ -7,7 +8,7 @@ export interface AgentLog {
   user_id: string
   log_level: 'info' | 'warning' | 'error' | 'debug'
   message: string
-  metadata: any
+  metadata: AgentLogMetadata | null
   action: string | null
   duration_ms: number | null
   timestamp: string

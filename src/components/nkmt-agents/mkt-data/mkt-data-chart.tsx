@@ -2,43 +2,22 @@ import { TrendingUp, Activity } from "lucide-react"
 import { ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Line } from "recharts"
 import { Badge } from "@/components/ui/badge"
 import "@/components/labs/SocialMediaCard.css"
+import type { ChartDataPoint, CandlestickLayerProps, IndicatorSettings } from "@/types/nkmt"
 
 interface MktDataChartProps {
   symbol: string
-  data: Array<{
-    timestamp: number
-    open: number
-    high: number
-    low: number
-    close: number
-    volume: number
-    sma20?: number | null
-    sma50?: number | null
-    ema12?: number | null
-    ema26?: number | null
-    rsi?: number | null
-    macd?: number | null
-    macdSignal?: number | null
-    macdHistogram?: number | null
-  }>
+  data: ChartDataPoint[]
   currentPrice: number
   priceChange: number
   volume24h: number
-  indicators: {
-    sma20: boolean
-    sma50: boolean
-    ema12: boolean
-    ema26: boolean
-    rsi: boolean
-    macd: boolean
-  }
+  indicators: IndicatorSettings
   isLive?: boolean
 }
 
 // Candlestick custom layer component
-const CandlestickLayer = (props: any) => {
-  const { data, xAxisMap, yAxisMap, margin, width, height } = props
-  if (!data || !xAxisMap || !yAxisMap) return null
+const CandlestickLayer = (props: CandlestickLayerProps) => {
+  const { data, xAxisMap, yAxisMap, margin, width } = props
+  if (!data || !xAxisMap || !yAxisMap || !margin || !width) return null
   
   const xAxis = xAxisMap[0]
   const yAxis = yAxisMap['price']
@@ -52,8 +31,8 @@ const CandlestickLayer = (props: any) => {
   
   return (
     <g className="recharts-candlestick-layer">
-      {data.map((item: any, index: number) => {
-        if (!item.open || !item.close || !item.high || !item.low) return null
+      {data.map((item, index: number) => {
+        if (!item.open || !item.close || !item.high || !item.low || !item.time) return null
         
         const isPositive = item.close >= item.open
         const color = isPositive ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'
