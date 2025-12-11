@@ -7,7 +7,7 @@ const DashboardSidebarTopbar = ({ children }: { children: React.ReactNode }) => 
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div className="min-h-screen w-full">
       <DashboardSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <div className="pl-[290px] pt-4 pr-4 pb-4">
