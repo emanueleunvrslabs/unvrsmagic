@@ -44,6 +44,27 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Rate limiting: Check OTP requests in the last hour (max 5 per phone number)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentOtpCount, error: countError } = await supabaseAdmin
+      .from('otp_codes')
+      .select('*', { count: 'exact', head: true })
+      .eq('phone_number', phoneNumber)
+      .gte('created_at', oneHourAgo);
+
+    if (countError) {
+      console.error('Error checking rate limit:', countError);
+      throw new Error('Failed to check rate limit');
+    }
+
+    if (recentOtpCount !== null && recentOtpCount >= 5) {
+      console.log(`Rate limit exceeded for phone: ${phoneNumber}, count: ${recentOtpCount}`);
+      return new Response(
+        JSON.stringify({ error: 'Too many OTP requests. Please try again later.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Clean up old unverified OTP codes for this phone number
     await supabaseAdmin
       .from('otp_codes')
