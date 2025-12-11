@@ -544,40 +544,29 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
               {revolutCertGenerating ? "Generating..." : "Generate Certificate"}
             </Button>
           ) : (
-            <>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Public Key (copy to Revolut):</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(revolutPublicKey, "Public Key")}
-                    className="h-6 px-2 text-xs hover:bg-white/10"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-                <pre className="text-xs bg-black/30 p-2 rounded border border-white/10 max-h-20 overflow-auto whitespace-pre-wrap break-all">
-                  {revolutPublicKey}
-                </pre>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(revolutPublicKey, "X509 Certificate")}
+                  className="h-8 px-3 text-xs bg-transparent text-green-400 border border-green-500/30 hover:bg-green-500/10"
+                >
+                  <Copy className="h-3 w-3 mr-2" />
+                  Copy X509 Certificate
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(revolutRedirectUri, "Redirect URI")}
+                  className="h-8 px-3 text-xs bg-transparent text-blue-400 border border-blue-500/30 hover:bg-blue-500/10"
+                >
+                  <Copy className="h-3 w-3 mr-2" />
+                  Copy Redirect URI
+                </Button>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Redirect URI:</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(revolutRedirectUri, "Redirect URI")}
-                    className="h-6 px-2 text-xs hover:bg-white/10"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-                <code className="text-xs bg-black/30 px-2 py-1 rounded border border-white/10 block">
-                  {revolutRedirectUri}
-                </code>
-              </div>
-            </>
+              <span className="text-xs text-muted-foreground">Certificate generated ✓</span>
+            </div>
           )}
         </div>
       )
