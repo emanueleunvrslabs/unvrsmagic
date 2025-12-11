@@ -175,7 +175,7 @@ const AdminDashboard = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Projects
@@ -196,7 +196,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Registered Users
@@ -217,7 +217,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Content Generated
@@ -238,7 +238,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Active Workflows
@@ -262,7 +262,7 @@ const AdminDashboard = () => {
 
         {/* Credit Statistics */}
         <div className="grid gap-6 md:grid-cols-3">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Credits Purchased
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Credits Spent
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Available Balance
@@ -328,7 +328,7 @@ const AdminDashboard = () => {
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Monthly Spending Chart */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Credits Spent per Month</CardTitle>
               <CardDescription>Last 6 months spending overview</CardDescription>
@@ -379,7 +379,7 @@ const AdminDashboard = () => {
           </Card>
 
           {/* Transactions Table */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Transactions</CardTitle>
               <CardDescription>Credit purchases and usage history</CardDescription>
@@ -441,7 +441,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Recent Content</CardTitle>
               <CardDescription>Latest generated images and videos</CardDescription>
@@ -479,7 +479,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
               <CardDescription>Common administrative tasks</CardDescription>
