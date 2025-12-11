@@ -79,8 +79,10 @@ export function AppleTVClientsDemo() {
   const [editingContactIndex, setEditingContactIndex] = useState<number | null>(null);
   const [showDocuments, setShowDocuments] = useState(false);
   const [showTodos, setShowTodos] = useState(false);
+  const [showKanban, setShowKanban] = useState(false);
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [newTodoText, setNewTodoText] = useState("");
+  const [newKanbanTask, setNewKanbanTask] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -334,13 +336,17 @@ export function AppleTVClientsDemo() {
       case "documents":
         setShowDocuments(!showDocuments);
         setShowTodos(false);
+        setShowKanban(false);
         break;
       case "todo":
         setShowTodos(!showTodos);
         setShowDocuments(false);
+        setShowKanban(false);
         break;
       case "kanban":
-        toast.info(`${actionId.charAt(0).toUpperCase() + actionId.slice(1)} feature coming soon`);
+        setShowKanban(!showKanban);
+        setShowDocuments(false);
+        setShowTodos(false);
         break;
     }
   };
@@ -508,6 +514,79 @@ export function AppleTVClientsDemo() {
       refetchTodos();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete todo");
+    }
+  };
+
+  // Fetch kanban tasks for selected client
+  const { data: kanbanTasks, isLoading: loadingKanban, refetch: refetchKanban } = useQuery({
+    queryKey: ["client-kanban", selectedClient?.id],
+    queryFn: async () => {
+      if (!selectedClient?.id) return [];
+      const { data, error } = await supabase
+        .from("client_kanban_tasks")
+        .select("*")
+        .eq("client_id", selectedClient.id)
+        .order("created_at", { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!selectedClient?.id && showKanban,
+  });
+
+  const handleAddKanbanTask = async () => {
+    if (!newKanbanTask.trim() || !selectedClient) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("client_kanban_tasks")
+        .insert({
+          client_id: selectedClient.id,
+          user_id: user.id,
+          title: newKanbanTask.trim(),
+          status: "todo",
+        });
+      
+      if (error) throw error;
+      
+      setNewKanbanTask("");
+      refetchKanban();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add task");
+    }
+  };
+
+  const handleMoveKanbanTask = async (taskId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from("client_kanban_tasks")
+        .update({ status: newStatus })
+        .eq("id", taskId);
+      
+      if (error) throw error;
+      refetchKanban();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to move task");
+    }
+  };
+
+  const handleDeleteKanbanTask = async (taskId: string) => {
+    try {
+      const { error } = await supabase
+        .from("client_kanban_tasks")
+        .delete()
+        .eq("id", taskId);
+      
+      if (error) throw error;
+      refetchKanban();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete task");
     }
   };
 
@@ -1130,6 +1209,152 @@ export function AppleTVClientsDemo() {
                 <CheckSquare className="w-12 h-12 mx-auto mb-3 text-white/20" />
                 <p className="text-white/50 text-sm">No todos yet</p>
                 <p className="text-white/30 text-xs mt-1">Add your first todo above</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Kanban Section */}
+      {showKanban && selectedClient && (
+        <div className="relative z-10 px-8 pb-8">
+          <div className="labs-client-card rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Kanban</h3>
+              <button
+                onClick={() => setShowKanban(false)}
+                className="p-2 rounded-full bg-white/10 border border-white/20 text-white/60 hover:bg-white/20 hover:text-white transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Add Task Input */}
+            <div className="flex gap-2 mb-6">
+              <input
+                type="text"
+                value={newKanbanTask}
+                onChange={(e) => setNewKanbanTask(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddKanbanTask()}
+                placeholder="Add a new task..."
+                className="flex-1 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-white/30"
+              />
+              <button
+                onClick={handleAddKanbanTask}
+                disabled={!newKanbanTask.trim()}
+                className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white/80 hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+
+            {loadingKanban ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-white/50" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                {/* To Do Column */}
+                <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+                  <h4 className="text-white/70 text-sm font-medium mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                    To Do
+                  </h4>
+                  <div className="space-y-2">
+                    {kanbanTasks?.filter((t: any) => t.status === "todo").map((task: any) => (
+                      <div
+                        key={task.id}
+                        className="p-3 rounded-lg bg-white/5 border border-white/10 group"
+                      >
+                        <p className="text-white/90 text-sm mb-2">{task.title}</p>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleMoveKanbanTask(task.id, "progress")}
+                            className="px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                          >
+                            Start
+                          </button>
+                          <button
+                            onClick={() => handleDeleteKanbanTask(task.id)}
+                            className="p-1 rounded text-red-400/60 hover:text-red-400 hover:bg-red-500/20"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* In Progress Column */}
+                <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+                  <h4 className="text-white/70 text-sm font-medium mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                    In Progress
+                  </h4>
+                  <div className="space-y-2">
+                    {kanbanTasks?.filter((t: any) => t.status === "progress").map((task: any) => (
+                      <div
+                        key={task.id}
+                        className="p-3 rounded-lg bg-white/5 border border-white/10 group"
+                      >
+                        <p className="text-white/90 text-sm mb-2">{task.title}</p>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleMoveKanbanTask(task.id, "todo")}
+                            className="px-2 py-1 rounded text-xs bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"
+                          >
+                            Back
+                          </button>
+                          <button
+                            onClick={() => handleMoveKanbanTask(task.id, "done")}
+                            className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                          >
+                            Done
+                          </button>
+                          <button
+                            onClick={() => handleDeleteKanbanTask(task.id)}
+                            className="p-1 rounded text-red-400/60 hover:text-red-400 hover:bg-red-500/20"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Done Column */}
+                <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+                  <h4 className="text-white/70 text-sm font-medium mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                    Done
+                  </h4>
+                  <div className="space-y-2">
+                    {kanbanTasks?.filter((t: any) => t.status === "done").map((task: any) => (
+                      <div
+                        key={task.id}
+                        className="p-3 rounded-lg bg-white/5 border border-white/10 group"
+                      >
+                        <p className="text-white/90 text-sm line-through opacity-60 mb-2">{task.title}</p>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleMoveKanbanTask(task.id, "progress")}
+                            className="px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                          >
+                            Reopen
+                          </button>
+                          <button
+                            onClick={() => handleDeleteKanbanTask(task.id)}
+                            className="p-1 rounded text-red-400/60 hover:text-red-400 hover:bg-red-500/20"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
