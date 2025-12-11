@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 export function VideoBackground() {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [scrollBlur, setScrollBlur] = useState(0);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -10,23 +11,42 @@ export function VideoBackground() {
       setOffset({ x, y });
     };
 
+    const handleScroll = () => {
+      // Get the main scrollable container
+      const scrollContainer = document.querySelector('main') || document.documentElement;
+      const scrollTop = scrollContainer.scrollTop || window.scrollY;
+      const maxScroll = 500; // Max scroll distance for full blur
+      const maxBlur = 8; // Maximum blur in pixels
+      const blur = Math.min((scrollTop / maxScroll) * maxBlur, maxBlur);
+      setScrollBlur(blur);
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("scroll", handleScroll, true);
+    
+    // Initial check
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
   }, []);
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Video background with parallax */}
+      {/* Video background with parallax and scroll blur */}
       <video
         autoPlay
         muted
         loop
         playsInline
-        className="absolute w-[110%] h-[110%] object-cover transition-transform duration-300 ease-out"
+        className="absolute w-[110%] h-[110%] object-cover transition-all duration-300 ease-out"
         style={{
           left: "-5%",
           top: "-5%",
           transform: `translate(${offset.x}px, ${offset.y}px) scale(1.05)`,
+          filter: `blur(${scrollBlur}px)`,
         }}
       >
         <source
@@ -35,8 +55,13 @@ export function VideoBackground() {
         />
       </video>
       
-      {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-black/40" />
+      {/* Dark overlay for readability - also increases with scroll */}
+      <div 
+        className="absolute inset-0 transition-all duration-300"
+        style={{
+          backgroundColor: `rgba(0, 0, 0, ${0.4 + (scrollBlur / 8) * 0.2})`,
+        }}
+      />
       
       {/* Subtle blue/ice tint */}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-900/30 via-transparent to-slate-800/40" />
