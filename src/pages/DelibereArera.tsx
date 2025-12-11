@@ -54,7 +54,7 @@ interface LogEntry {
 const DelibereAreraPage = () => {
   const { toast } = useToast();
 
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isAdminUser, setIsAdminUser] = useState(false);
 
