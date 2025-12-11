@@ -67,8 +67,9 @@ serve(async (req) => {
 
     const merchantSecretKey = merchantKeyData.api_key;
     
-    // Determine if sandbox or production based on key prefix
-    const isSandbox = merchantSecretKey.startsWith("sk_");
+    // Production keys start with sk_, sandbox keys start with sandbox_sk_ or are from sandbox environment
+    // Since the user has production keys (from business.revolut.com), use production endpoint
+    const isSandbox = merchantSecretKey.startsWith("sandbox_");
     const apiBase = isSandbox 
       ? "https://sandbox-merchant.revolut.com/api/orders"
       : "https://merchant.revolut.com/api/orders";
