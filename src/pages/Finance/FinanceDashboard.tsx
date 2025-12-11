@@ -116,8 +116,15 @@ export default function FinanceDashboard() {
         }
       });
 
-      if (merchantResponse.data && !merchantResponse.data.error && Array.isArray(merchantResponse.data)) {
-        setMerchantOrders(merchantResponse.data);
+      console.log('Merchant response:', merchantResponse);
+
+      if (merchantResponse.data && !merchantResponse.data.error) {
+        // Handle both array and paginated response structures
+        const orders = Array.isArray(merchantResponse.data) 
+          ? merchantResponse.data 
+          : merchantResponse.data.orders || [];
+        console.log('Merchant orders:', orders);
+        setMerchantOrders(orders);
       }
 
     } catch (err: any) {
@@ -139,12 +146,16 @@ export default function FinanceDashboard() {
     toast.success("Data refreshed");
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
+  const formatCurrency = (amount: number, currency: string, isMinorUnits = true) => {
+    // Revolut Business API: Account balances are in major units
+    // Transaction leg amounts are in major units
+    // Merchant order amounts are in minor units (cents)
+    const displayAmount = isMinorUnits ? amount / 100 : amount;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
-    }).format(amount / 100); // Revolut uses minor units
+    }).format(displayAmount);
   };
 
   const getTotalBalance = () => {
@@ -243,7 +254,7 @@ export default function FinanceDashboard() {
                 </div>
               </div>
               <p className="text-3xl font-bold text-white">
-                {formatCurrency(amount, currency)}
+                {formatCurrency(amount, currency, false)}
               </p>
             </div>
           ))}
@@ -285,7 +296,7 @@ export default function FinanceDashboard() {
                     </span>
                   </div>
                   <p className="text-2xl font-bold text-white">
-                    {formatCurrency(account.balance, account.currency)}
+                    {formatCurrency(account.balance, account.currency, false)}
                   </p>
                   <p className="text-white/40 text-xs mt-2">
                     Updated: {format(new Date(account.updated_at), 'MMM d, HH:mm')}
@@ -339,7 +350,7 @@ export default function FinanceDashboard() {
                     </div>
                     <div className="text-right">
                       <p className={`font-medium ${leg.amount < 0 ? 'text-red-400' : 'text-green-400'}`}>
-                        {formatCurrency(leg.amount, leg.currency)}
+                        {formatCurrency(leg.amount, leg.currency, false)}
                       </p>
                       <p className="text-white/40 text-xs capitalize">{tx.state}</p>
                     </div>
