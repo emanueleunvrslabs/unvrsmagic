@@ -468,24 +468,28 @@ const AdminDashboard = () => {
 
           <Card className="dashboard-card">
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Common administrative tasks</CardDescription>
+              <CardTitle>Credits Spent</CardTitle>
+              <CardDescription>Monthly usage overview</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <a href="/admin/projects" className="block p-3 rounded-lg hover:bg-muted transition-colors">
-                  <p className="text-sm font-medium">Manage Projects</p>
-                  <p className="text-xs text-muted-foreground">View and configure all projects</p>
-                </a>
-                <a href="/marketplace" className="block p-3 rounded-lg hover:bg-muted transition-colors">
-                  <p className="text-sm font-medium">View Marketplace</p>
-                  <p className="text-xs text-muted-foreground">Check available projects</p>
-                </a>
-                <a href="/settings" className="block p-3 rounded-lg hover:bg-muted transition-colors">
-                  <p className="text-sm font-medium">Platform Settings</p>
-                  <p className="text-xs text-muted-foreground">Configure API keys and security</p>
-                </a>
-              </div>
+              {loadingMonthly ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : monthlySpending && monthlySpending.length > 0 ? (
+                <div className="space-y-3">
+                  {monthlySpending.map((item) => (
+                    <div key={item.month} className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">{item.month}</span>
+                      <span className="text-sm font-medium">€{item.amount.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No spending data available
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
