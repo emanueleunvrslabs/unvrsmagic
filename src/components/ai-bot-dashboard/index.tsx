@@ -87,7 +87,7 @@ export function AiBotDashboard() {
         setShowRemoveAsset(true);
         break;
       default:
-        console.log("Unknown action:", action);
+        break;
     }
   };
 

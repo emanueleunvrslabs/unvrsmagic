@@ -63,7 +63,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
         if (data) {
           const normalized = data.map((item) => normalizeProvider(item.provider))
           const apis = new Set(normalized)
-          console.log("NKMT: Loaded APIs:", Array.from(apis))
+          setConnectedApis(apis)
           setConnectedApis(apis)
         }
       } catch (error) {
@@ -89,7 +89,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
     if (!agent.requiresApi) return true
     // Check if the required API is connected
     const isConnected = connectedApis.has(agent.requiresApi)
-    console.log(`NKMT: Agent ${agent.name} (requires ${agent.requiresApi}):`, isConnected, "Available APIs:", Array.from(connectedApis))
+    return isConnected
     return isConnected
   }
 

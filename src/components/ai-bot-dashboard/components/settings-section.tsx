@@ -130,7 +130,6 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
     setIsSettingsPending(true);
     try {
       // Save settings logic here
-      console.log("Saving settings:", generalSettings);
     } finally {
       setIsSettingsPending(false);
     }
@@ -141,22 +140,21 @@ export function SettingsSection({ botData, onSettingsChange }: SettingsSectionPr
     setIsExchangePending(true);
     try {
       // Add exchange logic here
-      console.log("Adding exchange");
     } finally {
       setIsExchangePending(false);
     }
   };
 
   const handleTestConnection = (exchangeId: string) => {
-    console.log("Testing connection for:", exchangeId);
+    // Test connection logic
   };
 
   const handleRemoveExchange = (exchangeId: string) => {
-    console.log("Removing exchange:", exchangeId);
+    // Remove exchange logic
   };
 
   const handleResetSettings = () => {
-    console.log("Resetting settings to defaults");
+    // Reset settings logic
   };
 
   const getConnectionStatus = (exchange: Exchange) => {
