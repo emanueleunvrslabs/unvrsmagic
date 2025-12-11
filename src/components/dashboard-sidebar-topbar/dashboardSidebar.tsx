@@ -320,9 +320,9 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     }
   }
 
-  // Preferences section
+  // Tools section
   menuSections.push({
-    title: "Preferences",
+    title: "Tools",
     collapsible: true,
     defaultOpen: true,
     items: [
