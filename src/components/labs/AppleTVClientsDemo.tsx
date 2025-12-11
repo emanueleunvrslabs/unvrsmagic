@@ -68,6 +68,7 @@ export function AppleTVClientsDemo() {
   });
   const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [selectedContactForEmail, setSelectedContactForEmail] = useState<ClientContact | null>(null);
   const [contactsToDelete, setContactsToDelete] = useState<string[]>([]);
@@ -252,6 +253,40 @@ export function AppleTVClientsDemo() {
       toast.error("Error updating client");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteClient = async () => {
+    if (!editingClient) return;
+    
+    if (!confirm("Are you sure you want to delete this client and all their contacts?")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      // Delete contacts first
+      await supabase
+        .from('client_contacts')
+        .delete()
+        .eq('client_id', editingClient.id);
+
+      // Delete client
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', editingClient.id);
+
+      if (error) throw error;
+
+      toast.success("Client deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      setSearchParams({});
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      toast.error("Error deleting client");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -484,11 +519,25 @@ export function AppleTVClientsDemo() {
         </div>
         
         {/* Save/Create Button - Outside cards */}
-        <div className="w-full max-w-6xl mt-6">
+        <div className="w-full max-w-6xl mt-6 flex gap-4">
+          {isEditMode && (
+            <button 
+              onClick={handleDeleteClient}
+              disabled={isDeleting || isSaving}
+              className="px-8 p-4 rounded-full bg-red-500/10 backdrop-blur-md border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 shadow-lg shadow-red-500/5 text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+            >
+              {isDeleting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+              Delete
+            </button>
+          )}
           <button 
             onClick={isEditMode ? handleUpdateClient : handleCreateClient}
-            disabled={isCreating || isSaving}
-            className="w-full p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium disabled:opacity-50"
+            disabled={isCreating || isSaving || isDeleting}
+            className="flex-1 p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium disabled:opacity-50"
           >
             {isCreating || isSaving ? (
               <span className="flex items-center justify-center gap-2">
