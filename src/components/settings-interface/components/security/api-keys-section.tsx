@@ -334,7 +334,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleKeyVisibility(provider.id)}
-                        className="hover:bg-white/10"
+                        className="hover:bg-transparent"
                       >
                         {visibleKeys.has(provider.id) ? (
                           <EyeOff className="h-4 w-4" />
@@ -380,7 +380,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDisconnect(provider.id)}
-                      className="h-8 px-3 text-xs bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
+                      className="h-8 px-3 text-xs bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/10"
                     >
                       Disconnect
                     </Button>
@@ -389,7 +389,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                       size="sm"
                       onClick={() => handleConnect(provider.id)}
                       disabled={connectingProvider === provider.id || !apiKeys[provider.id]}
-                      className="h-8 px-3 text-xs bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30"
+                      className="h-8 px-3 text-xs bg-primary/20 text-primary border border-primary/30 hover:bg-primary/20"
                     >
                       {connectingProvider === provider.id ? "Connecting..." : "Connect"}
                     </Button>
