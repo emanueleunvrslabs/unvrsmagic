@@ -51,7 +51,7 @@ export default function FinanceTransactions() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const params: any = {
+      const params: { from: string; to: string; count: number; type?: string } = {
         from: new Date(dateFrom).toISOString(),
         to: new Date(dateTo + 'T23:59:59').toISOString(),
         count: 1000, // Get all, we'll paginate client-side
@@ -71,7 +71,7 @@ export default function FinanceTransactions() {
       }
 
       setTransactions(response.data || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching transactions:', err);
       toast.error("Failed to load transactions");
     } finally {

@@ -5,13 +5,29 @@ import { Button } from "@/components/ui/button";
 import { WorkflowInlineForm } from "./WorkflowInlineForm";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import type { Json } from "@/integrations/supabase/types";
+
+interface WorkflowScheduleConfig {
+  mode?: string;
+  generationMode?: string;
+  [key: string]: unknown;
+}
 
 interface Workflow {
   id: string;
   name: string;
   content_type: string;
   active: boolean;
-  schedule_config: any;
+  schedule_config: Json;
+}
+
+interface ProjectDetailCardProps {
+  project: {
+    id: string;
+    project_name: string;
+    description?: string;
+  };
+  onClose: () => void;
 }
 
 interface ProjectDetailCardProps {
@@ -86,8 +102,10 @@ export function ProjectDetailCard({ project, onClose }: ProjectDetailCardProps) 
     }
   };
 
-  const getModeLabel = (config: any) => {
-    const mode = config?.mode || config?.generationMode;
+  const getModeLabel = (config: Json | null) => {
+    if (!config || typeof config !== 'object' || Array.isArray(config)) return null;
+    const configObj = config as WorkflowScheduleConfig;
+    const mode = configObj.mode || configObj.generationMode;
     if (!mode) return null;
     const labels: Record<string, string> = {
       'text-to-image': 'Text to Image',

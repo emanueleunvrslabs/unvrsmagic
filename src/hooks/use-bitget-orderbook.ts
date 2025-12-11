@@ -34,9 +34,10 @@ export const useBitgetOrderBook = (symbol: string) => {
     },
     refetchInterval: 5000, // Refresh every 5 seconds
     enabled: !!symbol,
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error) => {
       // Don't retry if symbol is not available
-      if (error?.message?.includes('Symbol not available') || error?.message?.includes('40309') || error?.message?.includes('40034')) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      if (errorMessage.includes('Symbol not available') || errorMessage.includes('40309') || errorMessage.includes('40034')) {
         return false
       }
       return failureCount < 3

@@ -15,42 +15,88 @@ import {
 import { formatCurrency } from "../utils"
 import type { BotData, Asset } from "../types"
 
+interface SpotAccount {
+  coin: string
+  available: string
+  frozen: string
+  locked: string
+  usdtValue: string
+}
+
+interface FuturesAccount {
+  marginCoin: string
+  available: string
+}
+
+interface FuturesPosition {
+  symbol: string
+  total: string
+  unrealizedPL: string
+  holdSide: string
+}
+
+interface RealPortfolioData {
+  spotAccounts?: SpotAccount[]
+  futuresAccounts?: FuturesAccount[]
+  positions?: FuturesPosition[]
+}
+
+interface DisplayAsset {
+  symbol: string
+  amount: number
+  type: string
+  value: number
+  side?: string
+  allocation: number
+  price: number
+  change24h: number
+}
+
 interface PortfolioSectionProps {
   botData: BotData
-  realPortfolioData: any
+  realPortfolioData: RealPortfolioData | null
   isLoading: boolean
   onAssetAction: (asset: Asset, action: string) => void
 }
 
 export function PortfolioSection({ botData, realPortfolioData, isLoading, onAssetAction }: PortfolioSectionProps) {
   // Transform real portfolio data into displayable format
-  const displayAssets = realPortfolioData ? [
+  const displayAssets: DisplayAsset[] = realPortfolioData ? [
     // Spot assets
-    ...(realPortfolioData.spotAccounts || []).map((coin: any) => {
+    ...(realPortfolioData.spotAccounts || []).map((coin) => {
       const total = parseFloat(coin.available || '0') + parseFloat(coin.frozen || '0') + parseFloat(coin.locked || '0')
       return {
         symbol: coin.coin,
         amount: total,
         type: 'Spot',
-        value: parseFloat(coin.usdtValue || '0')
+        value: parseFloat(coin.usdtValue || '0'),
+        allocation: 0,
+        price: 0,
+        change24h: 0
       }
-    }).filter((asset: any) => asset.amount > 0),
+    }).filter((asset) => asset.amount > 0),
     // Futures account balance
-    ...(realPortfolioData.futuresAccounts || []).map((account: any) => ({
+    ...(realPortfolioData.futuresAccounts || []).map((account) => ({
       symbol: account.marginCoin,
       amount: parseFloat(account.available || '0'),
       type: 'Futures',
-      value: parseFloat(account.available || '0')
-    })).filter((asset: any) => asset.amount > 0),
+      value: parseFloat(account.available || '0'),
+      allocation: 0,
+      price: 0,
+      change24h: 0
+    })).filter((asset) => asset.amount > 0),
     // Futures positions
-    ...(realPortfolioData.positions || []).map((position: any) => ({
+    ...(realPortfolioData.positions || []).map((position) => ({
       symbol: position.symbol,
       amount: parseFloat(position.total || '0'),
       type: 'Futures Position',
       value: parseFloat(position.unrealizedPL || '0'),
-      side: position.holdSide
-    })).filter((asset: any) => asset.amount > 0)
-  ] : botData.assets
+      side: position.holdSide,
+      allocation: 0,
+      price: 0,
+      change24h: 0
+    })).filter((asset) => asset.amount > 0)
+  ] : botData.assets.map(a => ({ ...a, amount: a.allocation, type: 'Asset', value: a.price * a.allocation }))
 
   return (
     <>
@@ -84,7 +130,7 @@ export function PortfolioSection({ botData, realPortfolioData, isLoading, onAsse
                   </TableCell>
                 </TableRow>
               ) : (
-                displayAssets.map((asset: any) => (
+                displayAssets.map((asset) => (
                   <TableRow key={`${asset.symbol}-${asset.type}`}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">

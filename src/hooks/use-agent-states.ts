@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 
+export interface AgentPerformanceMetrics {
+  [key: string]: unknown
+}
+
 export interface AgentState {
   id: string
   agent_name: string
@@ -8,7 +12,7 @@ export interface AgentState {
   status: string
   last_execution: string | null
   last_error: string | null
-  performance_metrics: any
+  performance_metrics: AgentPerformanceMetrics | null
   created_at: string
   updated_at: string
 }

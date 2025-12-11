@@ -55,7 +55,7 @@ export const SettingsInterface: React.FC = () => {
     }
   };
 
-  const handleConnectionsChange = (connections: any[]) => {
+  const handleConnectionsChange = (connections: unknown[]) => {
     // Connection updates are handled by child components
   };
 

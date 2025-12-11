@@ -144,7 +144,7 @@ export const getRelativeTime = (date: string | Date): string => {
   return `${Math.floor(diffInSeconds / 31536000)} years ago`;
 };
 
-export const exportToJson = (data: any, filename: string): void => {
+export const exportToJson = (data: unknown, filename: string): void => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -156,7 +156,7 @@ export const exportToJson = (data: any, filename: string): void => {
   URL.revokeObjectURL(url);
 };
 
-export const exportToCsv = (data: any[], filename: string): void => {
+export const exportToCsv = (data: Record<string, unknown>[], filename: string): void => {
   if (data.length === 0) return;
 
   const headers = Object.keys(data[0]);
@@ -173,7 +173,7 @@ export const exportToCsv = (data: any[], filename: string): void => {
   URL.revokeObjectURL(url);
 };
 
-export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): ((...args: Parameters<T>) => void) => {
+export const debounce = <T extends (...args: unknown[]) => unknown>(func: T, wait: number): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
@@ -185,6 +185,6 @@ export const deepClone = <T>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-export const hasUnsavedChanges = (original: any, current: any): boolean => {
+export const hasUnsavedChanges = (original: unknown, current: unknown): boolean => {
   return JSON.stringify(original) !== JSON.stringify(current);
 };

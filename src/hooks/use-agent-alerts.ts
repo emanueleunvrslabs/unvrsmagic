@@ -3,6 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "sonner"
 
+export interface AgentAlertMetadata {
+  [key: string]: unknown
+}
+
 export interface AgentAlert {
   id: string
   user_id: string
@@ -11,7 +15,7 @@ export interface AgentAlert {
   severity: string
   title: string
   message: string
-  metadata: any
+  metadata: AgentAlertMetadata | null
   read: boolean
   created_at: string
 }

@@ -250,7 +250,7 @@ export const NotificationCenterInterface = () => {
                                   addSuffix: true,
                                 })}
                               </span>
-                              {alert.metadata?.symbol && (
+                              {alert.metadata?.symbol && typeof alert.metadata.symbol === 'string' && (
                                 <>
                                   <span>•</span>
                                   <Badge variant="outline" className="text-xs">
