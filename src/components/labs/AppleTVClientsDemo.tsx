@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus } from "lucide-react";
+import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 import { useSearchParams } from "react-router-dom";
@@ -31,6 +31,7 @@ interface ClientContact {
 }
 
 interface Contact {
+  id?: string;
   name: string;
   email: string;
   whatsapp: string;
@@ -48,6 +49,7 @@ export function AppleTVClientsDemo() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const isNewClientView = searchParams.get("view") === "new";
+  const editClientId = searchParams.get("edit");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [newClient, setNewClient] = useState({
     companyName: "",
@@ -65,8 +67,10 @@ export function AppleTVClientsDemo() {
     whatsapp: ""
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [selectedContactForEmail, setSelectedContactForEmail] = useState<ClientContact | null>(null);
+  const [contactsToDelete, setContactsToDelete] = useState<string[]>([]);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -92,6 +96,28 @@ export function AppleTVClientsDemo() {
   });
 
   const selectedClient = clients?.[selectedIndex];
+  const editingClient = editClientId ? clients?.find(c => c.id === editClientId) : null;
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editingClient) {
+      setNewClient({
+        companyName: editingClient.company_name,
+        vatNumber: editingClient.vat_number,
+        street: editingClient.street || "",
+        city: editingClient.city || "",
+        postalCode: editingClient.postal_code || "",
+        country: editingClient.country || ""
+      });
+      setContacts(editingClient.client_contacts?.map(c => ({
+        id: c.id,
+        name: `${c.first_name} ${c.last_name}`.trim(),
+        email: c.email,
+        whatsapp: c.whatsapp_number
+      })) || []);
+      setContactsToDelete([]);
+    }
+  }, [editingClient]);
 
   const handleCreateClient = async () => {
     if (!newClient.companyName || !newClient.vatNumber) {
@@ -161,6 +187,74 @@ export function AppleTVClientsDemo() {
     }
   };
 
+  const handleUpdateClient = async () => {
+    if (!editingClient || !newClient.companyName || !newClient.vatNumber) {
+      toast.error("Please fill in company name and VAT number");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Update client
+      const { error: clientError } = await supabase
+        .from('clients')
+        .update({
+          company_name: newClient.companyName,
+          vat_number: newClient.vatNumber,
+          street: newClient.street,
+          city: newClient.city,
+          postal_code: newClient.postalCode,
+          country: newClient.country
+        })
+        .eq('id', editingClient.id);
+
+      if (clientError) throw clientError;
+
+      // Delete removed contacts
+      if (contactsToDelete.length > 0) {
+        await supabase
+          .from('client_contacts')
+          .delete()
+          .in('id', contactsToDelete);
+      }
+
+      // Update existing contacts and add new ones
+      for (const contact of contacts) {
+        const nameParts = contact.name.split(' ');
+        const contactData = {
+          client_id: editingClient.id,
+          first_name: nameParts[0] || '',
+          last_name: nameParts.slice(1).join(' ') || '',
+          email: contact.email,
+          whatsapp_number: contact.whatsapp
+        };
+
+        if (contact.id) {
+          await supabase
+            .from('client_contacts')
+            .update(contactData)
+            .eq('id', contact.id);
+        } else {
+          await supabase
+            .from('client_contacts')
+            .insert(contactData);
+        }
+      }
+
+      toast.success("Client updated successfully");
+      setNewClient({ companyName: "", vatNumber: "", street: "", city: "", postalCode: "", country: "" });
+      setContacts([]);
+      setContactsToDelete([]);
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      setSearchParams({});
+    } catch (error) {
+      console.error("Error updating client:", error);
+      toast.error("Error updating client");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleActionClick = (actionId: string) => {
     if (!selectedClient) {
       toast.error("Please select a client first");
@@ -208,10 +302,13 @@ export function AppleTVClientsDemo() {
     };
   }, [emblaApi, onSelect]);
 
-  // New Client Form View
-  if (isNewClientView) {
+  // New/Edit Client Form View
+  if (isNewClientView || editClientId) {
+    const isEditMode = !!editClientId;
+    
     return (
       <div className="relative h-full flex flex-col items-center justify-start p-8 pt-4 overflow-y-auto">
+        <h2 className="text-2xl font-semibold text-white/90 mb-6">{isEditMode ? 'Edit Client' : 'New Client'}</h2>
         <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Left Card - Bill Information */}
           <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]">
@@ -311,7 +408,12 @@ export function AppleTVClientsDemo() {
                     <p className="text-white/50 text-sm">{contact.whatsapp}</p>
                   </div>
                   <button
-                    onClick={() => setContacts(contacts.filter((_, i) => i !== index))}
+                    onClick={() => {
+                      if (contact.id) {
+                        setContactsToDelete([...contactsToDelete, contact.id]);
+                      }
+                      setContacts(contacts.filter((_, i) => i !== index));
+                    }}
                     className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -381,20 +483,20 @@ export function AppleTVClientsDemo() {
           </div>
         </div>
         
-        {/* Create Button - Outside cards */}
+        {/* Save/Create Button - Outside cards */}
         <div className="w-full max-w-6xl mt-6">
           <button 
-            onClick={handleCreateClient}
-            disabled={isCreating}
+            onClick={isEditMode ? handleUpdateClient : handleCreateClient}
+            disabled={isCreating || isSaving}
             className="w-full p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium disabled:opacity-50"
           >
-            {isCreating ? (
+            {isCreating || isSaving ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Creating...
+                {isEditMode ? 'Saving...' : 'Creating...'}
               </span>
             ) : (
-              "Create Client"
+              isEditMode ? "Save Changes" : "Create Client"
             )}
           </button>
         </div>
@@ -473,6 +575,19 @@ export function AppleTVClientsDemo() {
                         </span>
                       </div>
                     </div>
+
+                    {/* Edit Icon - Top Right */}
+                    {isSelected && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchParams({ edit: client.id });
+                        }}
+                        className="absolute top-4 right-4 z-20 p-2.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white/50 hover:text-white hover:bg-white/20 transition-all duration-200"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                    )}
 
                     {/* Selected Glow */}
                     {isSelected && (
