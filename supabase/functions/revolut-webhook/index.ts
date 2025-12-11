@@ -7,6 +7,74 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, revolut-signature",
 };
 
+// Timing-safe string comparison to prevent timing attacks
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+// Verify Revolut webhook signature using HMAC-SHA256
+async function verifyRevolutSignature(
+  payload: string,
+  signatureHeader: string | null,
+  signingSecret: string
+): Promise<boolean> {
+  if (!signatureHeader || !signingSecret) {
+    console.error("Missing signature header or signing secret");
+    return false;
+  }
+
+  try {
+    // Revolut sends signature in format: v1=<signature>
+    const parts = signatureHeader.split(",");
+    let signature = "";
+    
+    for (const part of parts) {
+      const [key, value] = part.trim().split("=");
+      if (key === "v1") {
+        signature = value;
+        break;
+      }
+    }
+
+    if (!signature) {
+      // Try using the raw header value as signature
+      signature = signatureHeader;
+    }
+
+    // Generate expected signature using HMAC-SHA256
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(signingSecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const signatureBytes = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      encoder.encode(payload)
+    );
+
+    const expectedSignature = Array.from(new Uint8Array(signatureBytes))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    return timingSafeEqual(expectedSignature, signature);
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
+}
+
 // Generate invoice email HTML
 function generateInvoiceEmail(
   customerEmail: string,
@@ -70,13 +138,40 @@ serve(async (req) => {
 
   try {
     const body = await req.text();
-    const event = JSON.parse(body);
-
-    console.log("Revolut webhook received:", event.event, event.order_id);
-
+    
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get the signing secret from api_keys table
+    const { data: signingSecretData } = await supabase
+      .from("api_keys")
+      .select("api_key")
+      .eq("provider", "revolut_webhook_secret")
+      .single();
+
+    const signingSecret = signingSecretData?.api_key;
+    
+    // Verify webhook signature
+    const signatureHeader = req.headers.get("revolut-signature");
+    
+    if (signingSecret) {
+      const isValid = await verifyRevolutSignature(body, signatureHeader, signingSecret);
+      
+      if (!isValid) {
+        console.error("Invalid Revolut webhook signature");
+        return new Response(
+          JSON.stringify({ error: "Invalid signature" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      console.log("Revolut webhook signature verified successfully");
+    } else {
+      console.warn("No Revolut webhook signing secret configured - signature verification skipped");
+    }
+
+    const event = JSON.parse(body);
+    console.log("Revolut webhook received:", event.event, event.order_id);
 
     // Handle ORDER_COMPLETED event
     if (event.event === "ORDER_COMPLETED") {
