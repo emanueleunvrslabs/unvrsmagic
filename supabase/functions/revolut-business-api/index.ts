@@ -38,7 +38,12 @@ serve(async (req) => {
     const { action, params } = await req.json()
     console.log('Revolut Business API request:', { action, userId: user.id })
 
-    // Get Revolut Business credentials
+    // Handle Merchant-only actions first (don't require Business API credentials)
+    if (action === 'getMerchantOrders') {
+      return await handleMerchantOrders(supabase, user.id, params)
+    }
+
+    // Get Revolut Business credentials for other actions
     const { data: configData, error: configError } = await supabase
       .from('api_keys')
       .select('api_key')
@@ -138,10 +143,6 @@ serve(async (req) => {
         method = 'POST'
         body = params.counterparty
         break
-      
-      case 'getMerchantOrders':
-        // Fetch orders from Merchant API
-        return await handleMerchantOrders(supabase, user.id, params)
       
       default:
         return new Response(JSON.stringify({ error: 'Unknown action' }), {
