@@ -380,36 +380,43 @@ export default function FinanceDashboard() {
                 <p className="text-white/60">No merchant payments yet</p>
               </div>
             ) : (
-              merchantOrders.slice(0, 10).map((order) => (
-                <div key={order.id} className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-xl bg-green-500/20 border border-green-500/30 flex items-center justify-center">
-                      <CreditCard className="h-4 w-4 text-green-400" />
+              merchantOrders.slice(0, 10).map((order: any) => {
+                // Handle different API response structures
+                const amount = order.order_amount?.value ?? order.amount ?? 0;
+                const currency = order.order_amount?.currency ?? order.currency ?? 'EUR';
+                const state = order.state || order.status || 'unknown';
+                
+                return (
+                  <div key={order.id} className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-xl bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                        <CreditCard className="h-4 w-4 text-green-400" />
+                      </div>
+                      <div>
+                        <p className="text-white text-sm font-medium">
+                          {order.description || order.metadata?.package_id || 'Credit Purchase'}
+                        </p>
+                        <p className="text-white/40 text-xs">
+                          {order.customer_email || order.merchant_order_ext_ref?.split('_')[1]?.slice(0, 8) || 'Unknown'}
+                          {' · '}
+                          {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-white text-sm font-medium">
-                        {order.description || order.metadata?.package_id || 'Credit Purchase'}
+                    <div className="text-right">
+                      <p className="font-medium text-green-400">
+                        {formatCurrency(amount, currency, true)}
                       </p>
-                      <p className="text-white/40 text-xs">
-                        {order.customer_email || order.merchant_order_ext_ref?.split('_')[1]?.slice(0, 8) || 'Unknown'}
-                        {' · '}
-                        {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
+                      <p className={`text-xs capitalize ${
+                        state === 'COMPLETED' || state === 'completed' ? 'text-green-400' : 
+                        state === 'PENDING' || state === 'pending' ? 'text-yellow-400' : 'text-white/40'
+                      }`}>
+                        {state.toLowerCase()}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium text-green-400">
-                      {formatCurrency(order.order_amount.value, order.order_amount.currency)}
-                    </p>
-                    <p className={`text-xs capitalize ${
-                      order.state === 'COMPLETED' ? 'text-green-400' : 
-                      order.state === 'PENDING' ? 'text-yellow-400' : 'text-white/40'
-                    }`}>
-                      {order.state.toLowerCase()}
-                    </p>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
