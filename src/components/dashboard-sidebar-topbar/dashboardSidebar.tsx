@@ -189,8 +189,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: Home, href: "/admin/dashboard" },
         { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
-        { id: "admin-audit-logs", label: "Audit Logs", icon: Shield, href: "/admin/audit-logs" },
-        { 
+        {
           id: "admin-finance", 
           label: "Finance", 
           icon: Landmark,
@@ -327,6 +326,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     collapsible: true,
     defaultOpen: true,
     items: [
+      ...(isOwner ? [{ id: "audit-logs", label: "Audit Logs", icon: Shield, href: "/admin/audit-logs" }] : []),
       { id: "upload", label: "Upload", icon: Upload, href: "/file-upload" },
       { id: "labs", label: "Labs", icon: FlaskConical, href: "/labs" },
     ],
