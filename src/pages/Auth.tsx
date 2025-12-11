@@ -152,16 +152,16 @@ export default function Auth() {
 
       if (error) throw error;
 
-      if (data.success) {
-        // Sign in with the temporary password
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.tempPassword,
+      if (data.success && data.session) {
+        // Set the session from the edge function response
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
         });
 
-        if (signInError) {
-          console.error("Sign in error:", signInError);
-          throw new Error("Failed to sign in");
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw new Error("Failed to set session");
         }
 
         // Get the authenticated user
