@@ -51,7 +51,7 @@ export default function Auth() {
   // Auto-verify OTP when 6 digits are entered
   useEffect(() => {
     if (otp.length === 6 && step === "otp" && !loading) {
-      handleVerifyOtp(new Event("submit") as any);
+      handleVerifyOtp();
     }
   }, [otp]);
 
@@ -60,7 +60,7 @@ export default function Auth() {
     if (step === "phone" && !loading && phoneNumber.length > 0) {
       const requiredLength = countryCode === "+34" ? 9 : countryCode === "+39" ? 10 : 10;
       if (phoneNumber.length === requiredLength) {
-        handleSendOtp(new Event("submit") as any);
+        handleSendOtp();
       }
     }
   }, [phoneNumber, countryCode]);

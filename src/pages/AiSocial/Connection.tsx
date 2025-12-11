@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { OAuthResponse, YouTubeConnection, LinkedInConnection, FunctionsInvokeError } from "@/types/edge-functions";
 
 export default function Connection() {
   const queryClient = useQueryClient();
@@ -102,20 +103,21 @@ export default function Connection() {
 
       if (error) {
         console.error("Error starting OAuth:", error);
-        const errorMessage = (error as any).message || "Failed to connect Instagram";
-        toast.error(errorMessage);
+        const funcError = error as FunctionsInvokeError;
+        toast.error(funcError.message || "Failed to connect Instagram");
         return;
       }
 
-      if (data && (data as any).error) {
-        console.error("Instagram OAuth error:", (data as any).error);
-        toast.error((data as any).error);
+      const oauthData = data as OAuthResponse | null;
+      if (oauthData?.error) {
+        console.error("Instagram OAuth error:", oauthData.error);
+        toast.error(oauthData.error);
         return;
       }
 
-      if (data && (data as any).authUrl) {
-        console.log('Redirecting to Instagram:', (data as any).authUrl);
-        window.location.href = (data as any).authUrl as string;
+      if (oauthData?.authUrl) {
+        console.log('Redirecting to Instagram:', oauthData.authUrl);
+        window.location.href = oauthData.authUrl;
       } else {
         console.error("Invalid response:", data);
         toast.error("Invalid response from Instagram OAuth");
@@ -170,20 +172,21 @@ export default function Connection() {
 
       if (error) {
         console.error("Error starting YouTube OAuth:", error);
-        const errorMessage = (error as any).message || "Failed to connect YouTube";
-        toast.error(errorMessage);
+        const funcError = error as FunctionsInvokeError;
+        toast.error(funcError.message || "Failed to connect YouTube");
         return;
       }
 
-      if (data && (data as any).error) {
-        console.error("YouTube OAuth error:", (data as any).error);
-        toast.error((data as any).error);
+      const oauthData = data as OAuthResponse | null;
+      if (oauthData?.error) {
+        console.error("YouTube OAuth error:", oauthData.error);
+        toast.error(oauthData.error);
         return;
       }
 
-      if (data && (data as any).authUrl) {
-        console.log('Redirecting to YouTube:', (data as any).authUrl);
-        window.location.href = (data as any).authUrl as string;
+      if (oauthData?.authUrl) {
+        console.log('Redirecting to YouTube:', oauthData.authUrl);
+        window.location.href = oauthData.authUrl;
       } else {
         console.error("Invalid response:", data);
         toast.error("Invalid response from YouTube OAuth");
@@ -238,20 +241,21 @@ export default function Connection() {
 
       if (error) {
         console.error("Error starting LinkedIn OAuth:", error);
-        const errorMessage = (error as any).message || "Failed to connect LinkedIn";
-        toast.error(errorMessage);
+        const funcError = error as FunctionsInvokeError;
+        toast.error(funcError.message || "Failed to connect LinkedIn");
         return;
       }
 
-      if (data && (data as any).error) {
-        console.error("LinkedIn OAuth error:", (data as any).error);
-        toast.error((data as any).error);
+      const oauthData = data as OAuthResponse | null;
+      if (oauthData?.error) {
+        console.error("LinkedIn OAuth error:", oauthData.error);
+        toast.error(oauthData.error);
         return;
       }
 
-      if (data && (data as any).authUrl) {
-        console.log('Redirecting to LinkedIn:', (data as any).authUrl);
-        window.location.href = (data as any).authUrl as string;
+      if (oauthData?.authUrl) {
+        console.log('Redirecting to LinkedIn:', oauthData.authUrl);
+        window.location.href = oauthData.authUrl;
       } else {
         console.error("Invalid response:", data);
         toast.error("Invalid response from LinkedIn OAuth");
@@ -384,7 +388,7 @@ export default function Connection() {
               </div>
               <CardDescription>
                 {youtubeConnection 
-                  ? `Connected to: ${(youtubeConnection as any).channelTitle || 'YouTube Channel'}` 
+                  ? `Connected to: ${(youtubeConnection as YouTubeConnection).channelTitle || 'YouTube Channel'}` 
                   : "Connect your YouTube channel for live streaming"}
               </CardDescription>
             </CardHeader>
@@ -424,7 +428,7 @@ export default function Connection() {
               </div>
               <CardDescription>
                 {linkedinConnection 
-                  ? `Connected as: ${(linkedinConnection as any).name || 'LinkedIn User'}` 
+                  ? `Connected as: ${(linkedinConnection as LinkedInConnection).name || 'LinkedIn User'}` 
                   : "Connect your LinkedIn account for publishing"}
               </CardDescription>
             </CardHeader>

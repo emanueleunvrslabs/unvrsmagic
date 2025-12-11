@@ -3,13 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import "@/components/labs/SocialMediaCard.css";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Download, Trash2, Maximize2, Play, Loader2, Instagram, ExternalLink, Linkedin, RefreshCw, Image, Video, ArrowRight } from "lucide-react";
+import { Download, Trash2, Maximize2, Play, Loader2, Instagram, Linkedin, RefreshCw, Image, Video, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import type { ContentMetadata } from "@/types/edge-functions";
 
 interface ContentItem {
   id: string;
@@ -374,7 +374,7 @@ export function ContentGallerySection() {
                   
                   {/* Pipeline AI con frecce */}
                   <div className="flex items-center gap-1 text-xs overflow-x-auto">
-                    {(item.metadata as any)?.execution_type === "scheduled" ? (
+                    {(item.metadata as ContentMetadata | null)?.execution_type === "scheduled" ? (
                       <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 rounded border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
                         Schedule
                       </span>
@@ -403,7 +403,7 @@ export function ContentGallerySection() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       {item.workflow?.platforms?.map((platform: string) => {
-                        const metadata = item.metadata as any;
+                        const metadata = item.metadata as ContentMetadata | null;
                         const postUrl = platform === "instagram" 
                           ? metadata?.instagram_post_url 
                           : platform === "linkedin" 

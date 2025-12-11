@@ -181,6 +181,7 @@ export interface ApiKey {
   lastUsed: string
   created: string
   status: "active" | "inactive"
+  provider?: string
 }
 
 export interface ExchangeKey {

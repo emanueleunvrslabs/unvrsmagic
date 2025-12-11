@@ -106,7 +106,7 @@ export default function GenerateImage() {
           prompt,
           status: "pending",
           title: mode === "text-to-image" ? "Text to Image" : "Image to Image"
-        } as any)
+        })
         .select()
         .single();
 
