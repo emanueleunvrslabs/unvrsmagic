@@ -98,6 +98,7 @@ serve(async (req) => {
         "Authorization": `Bearer ${merchantSecretKey}`,
         "Content-Type": "application/json",
         "Accept": "application/json",
+        "Revolut-Api-Version": "2024-09-01",
       },
       body: JSON.stringify({
         amount: creditPackage.price,

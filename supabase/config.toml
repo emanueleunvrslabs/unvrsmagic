@@ -77,3 +77,6 @@ verify_jwt = true
 
 [functions.revolut-webhook]
 verify_jwt = false
+
+[functions.register-revolut-webhook]
+verify_jwt = true
