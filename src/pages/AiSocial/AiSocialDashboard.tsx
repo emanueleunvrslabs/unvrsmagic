@@ -206,7 +206,7 @@ export default function AiSocialDashboard() {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
+              <Card className="dashboard-card">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Content</CardTitle>
                   <Image className="h-4 w-4 text-muted-foreground" />
@@ -217,7 +217,7 @@ export default function AiSocialDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dashboard-card">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Generated Images</CardTitle>
                   <Image className="h-4 w-4 text-muted-foreground" />
@@ -228,7 +228,7 @@ export default function AiSocialDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dashboard-card">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Generated Videos</CardTitle>
                   <Video className="h-4 w-4 text-muted-foreground" />
@@ -239,7 +239,7 @@ export default function AiSocialDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dashboard-card">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Active Workflows</CardTitle>
                   <Zap className="h-4 w-4 text-muted-foreground" />
@@ -251,7 +251,7 @@ export default function AiSocialDashboard() {
               </Card>
             </div>
 
-            <Card>
+            <Card className="dashboard-card">
               <CardHeader>
                 <CardTitle>Get Started</CardTitle>
                 <CardDescription>
@@ -261,7 +261,7 @@ export default function AiSocialDashboard() {
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-3">
                   <Card 
-                    className="cursor-pointer hover:bg-accent transition-colors"
+                    className="dashboard-card cursor-pointer hover:bg-accent/50 transition-colors"
                     onClick={() => navigate('/ai-social/generate-image')}
                   >
                     <CardHeader>
@@ -276,7 +276,7 @@ export default function AiSocialDashboard() {
                   </Card>
 
                   <Card 
-                    className="cursor-pointer hover:bg-accent transition-colors"
+                    className="dashboard-card cursor-pointer hover:bg-accent/50 transition-colors"
                     onClick={() => navigate('/ai-social/generate-video')}
                   >
                     <CardHeader>
@@ -291,7 +291,7 @@ export default function AiSocialDashboard() {
                   </Card>
 
                   <Card 
-                    className="cursor-pointer hover:bg-accent transition-colors"
+                    className="dashboard-card cursor-pointer hover:bg-accent/50 transition-colors"
                     onClick={() => navigate('/ai-social/workflows')}
                   >
                     <CardHeader>
