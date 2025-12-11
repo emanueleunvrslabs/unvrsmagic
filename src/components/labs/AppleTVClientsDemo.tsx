@@ -115,8 +115,8 @@ export function AppleTVClientsDemo() {
   // New Client Form View
   if (isNewClientView) {
     return (
-      <div className="relative h-full flex flex-col items-center justify-center p-8 overflow-hidden">
-        <div className="relative z-10 w-full max-w-4xl grid grid-cols-2 gap-6">
+      <div className="relative h-full flex flex-col items-center justify-start p-8 pt-4 overflow-y-auto">
+        <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Left Card - Bill Information */}
           <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]">
             <h3 className="text-white/90 text-lg font-semibold mb-6">Bill Information</h3>
@@ -181,7 +181,7 @@ export function AppleTVClientsDemo() {
           </div>
 
           {/* Right Card - Contacts */}
-          <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)] flex flex-col">
+          <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)] flex flex-col min-h-[400px]">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-white/90 text-lg font-semibold">Contacts</h3>
               {!showAddContact && (
@@ -196,7 +196,7 @@ export function AppleTVClientsDemo() {
             </div>
 
             {/* Contacts List */}
-            <div className="flex-1 space-y-3 overflow-y-auto max-h-[280px]">
+            <div className="flex-1 space-y-3 overflow-y-auto">
               {contacts.length === 0 && !showAddContact && (
                 <div className="flex flex-col items-center justify-center py-8 text-white/40">
                   <User className="w-12 h-12 mb-3 opacity-50" />
