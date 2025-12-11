@@ -88,7 +88,8 @@ export function useUserCredits() {
     mutationFn: async (packageId: string) => {
       const returnUrl = `${window.location.origin}/ai-social`;
       
-      const { data, error } = await supabase.functions.invoke("create-credit-checkout", {
+      // Use Revolut Merchant for payments
+      const { data, error } = await supabase.functions.invoke("create-revolut-checkout", {
         body: { packageId, returnUrl },
       });
 
