@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, TrendingUp, TrendingDown, RefreshCw, AlertCircle, Wallet, ArrowUpRight, ArrowDownLeft, CreditCard } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, AlertCircle, Wallet, ArrowUpRight, ArrowDownLeft, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
@@ -138,13 +138,14 @@ export default function FinanceDashboard() {
 
   useEffect(() => {
     fetchData();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchData();
-    toast.success("Data refreshed");
-  };
 
   const formatCurrency = (amount: number, currency: string, isMinorUnits = true) => {
     // Revolut Business API: Account balances are in major units
@@ -201,8 +202,7 @@ export default function FinanceDashboard() {
                 </Button>
               </Link>
             ) : (
-              <Button onClick={handleRefresh} variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10">
-                <RefreshCw className="h-4 w-4 mr-2" />
+              <Button onClick={() => fetchData()} variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10">
                 Try Again
               </Button>
             )}
@@ -218,20 +218,9 @@ export default function FinanceDashboard() {
     <DashboardLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-white">Finance Dashboard</h1>
-            <p className="text-white/60 text-sm">Revolut Business account overview</p>
-          </div>
-          <Button 
-            onClick={handleRefresh} 
-            variant="outline" 
-            className="bg-white/5 border-white/10 hover:bg-white/10"
-            disabled={refreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+        <div>
+          <h1 className="text-2xl font-semibold text-white">Finance Dashboard</h1>
+          <p className="text-white/60 text-sm">Revolut Business account overview</p>
         </div>
 
         {/* Balance Cards */}
