@@ -147,8 +147,8 @@ async function createClientAssertionJWT(clientId: string, privateKeyPem: string)
     exp: exp,
   }
 
-  const encodedHeader = base64UrlEncode(JSON.stringify(header))
-  const encodedPayload = base64UrlEncode(JSON.stringify(payload))
+  const encodedHeader = base64UrlEncodeString(JSON.stringify(header))
+  const encodedPayload = base64UrlEncodeString(JSON.stringify(payload))
   const signingInput = `${encodedHeader}.${encodedPayload}`
 
   // Import the private key
@@ -161,7 +161,7 @@ async function createClientAssertionJWT(clientId: string, privateKeyPem: string)
     new TextEncoder().encode(signingInput)
   )
 
-  const encodedSignature = base64UrlEncode(String.fromCharCode(...new Uint8Array(signature)))
+  const encodedSignature = base64UrlEncodeBytes(new Uint8Array(signature))
 
   return `${signingInput}.${encodedSignature}`
 }
@@ -187,7 +187,17 @@ async function importPrivateKey(pem: string): Promise<CryptoKey> {
   )
 }
 
-function base64UrlEncode(str: string): string {
-  const base64 = btoa(str)
+function base64UrlEncodeString(str: string): string {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  return base64UrlEncodeBytes(data)
+}
+
+function base64UrlEncodeBytes(bytes: Uint8Array): string {
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  const base64 = btoa(binary)
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
