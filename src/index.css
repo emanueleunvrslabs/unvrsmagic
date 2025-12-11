@@ -238,10 +238,17 @@ html {
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: 
+      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(139, 92, 246, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 30%, rgba(45, 212, 191, 0.35) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 30% at 40% 80%, rgba(236, 72, 153, 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 40% at 70% 70%, rgba(250, 204, 21, 0.2) 0%, transparent 50%),
+      hsl(var(--background));
+    background-attachment: fixed;
   }
   
   /* Glass Effect Utility Classes */
