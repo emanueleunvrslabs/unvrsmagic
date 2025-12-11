@@ -47,6 +47,8 @@ import {
   Link2,
   Calendar,
   Workflow,
+  Landmark,
+  ArrowRightLeft,
   type LucideIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -182,6 +184,15 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: Home, href: "/admin/dashboard" },
         { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
+        { 
+          id: "admin-finance", 
+          label: "Finance", 
+          icon: Landmark,
+          subItems: [
+            { id: "finance-dashboard", label: "Dashboard", icon: Home, href: "/admin/finance" },
+            { id: "finance-transactions", label: "Transactions", icon: ArrowRightLeft, href: "/admin/finance/transactions" },
+          ]
+        },
       ],
     });
 
