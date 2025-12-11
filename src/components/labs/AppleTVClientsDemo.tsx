@@ -282,15 +282,17 @@ export function AppleTVClientsDemo() {
                 </div>
               )}
             </div>
-            
-            {/* Create Button */}
-            <button 
-              onClick={handleCreateClient}
-              className="w-full p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium mt-6"
-            >
-              Create Client
-            </button>
           </div>
+        </div>
+        
+        {/* Create Button - Outside cards */}
+        <div className="w-full max-w-6xl mt-6">
+          <button 
+            onClick={handleCreateClient}
+            className="w-full p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 hover:bg-white/15 hover:text-white transition-all duration-200 shadow-lg shadow-white/5 text-sm font-medium"
+          >
+            Create Client
+          </button>
         </div>
       </div>
     );
