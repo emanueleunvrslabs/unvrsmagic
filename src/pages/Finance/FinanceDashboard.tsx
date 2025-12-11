@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, TrendingUp, TrendingDown, RefreshCw, AlertCircle, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, RefreshCw, AlertCircle, Wallet, ArrowUpRight, ArrowDownLeft, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
@@ -38,9 +38,28 @@ interface Transaction {
   };
 }
 
+interface MerchantOrder {
+  id: string;
+  public_id: string;
+  type: string;
+  state: string;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  order_amount: {
+    value: number;
+    currency: string;
+  };
+  merchant_order_ext_ref?: string;
+  customer_email?: string;
+  description?: string;
+  metadata?: Record<string, string>;
+}
+
 export default function FinanceDashboard() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [merchantOrders, setMerchantOrders] = useState<MerchantOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -85,6 +104,20 @@ export default function FinanceDashboard() {
 
       if (transactionsResponse.data && !transactionsResponse.data.error) {
         setTransactions(transactionsResponse.data || []);
+      }
+
+      // Fetch merchant orders (payments received)
+      const merchantResponse = await supabase.functions.invoke('revolut-business-api', {
+        body: { 
+          action: 'getMerchantOrders',
+          params: {
+            limit: 20
+          }
+        }
+      });
+
+      if (merchantResponse.data && !merchantResponse.data.error && Array.isArray(merchantResponse.data)) {
+        setMerchantOrders(merchantResponse.data);
       }
 
     } catch (err: any) {
@@ -313,6 +346,59 @@ export default function FinanceDashboard() {
                   </div>
                 );
               })
+            )}
+          </div>
+        </div>
+
+        {/* Merchant Payments (Credit Purchases) */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-white">Merchant Payments</h2>
+            <span className="text-white/40 text-sm">Credit purchases from users</span>
+          </div>
+          
+          <div 
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl divide-y divide-white/10"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+            }}
+          >
+            {merchantOrders.length === 0 ? (
+              <div className="p-8 text-center">
+                <CreditCard className="h-12 w-12 text-white/30 mx-auto mb-3" />
+                <p className="text-white/60">No merchant payments yet</p>
+              </div>
+            ) : (
+              merchantOrders.slice(0, 10).map((order) => (
+                <div key={order.id} className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-xl bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                      <CreditCard className="h-4 w-4 text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">
+                        {order.description || order.metadata?.package_id || 'Credit Purchase'}
+                      </p>
+                      <p className="text-white/40 text-xs">
+                        {order.customer_email || order.merchant_order_ext_ref?.split('_')[1]?.slice(0, 8) || 'Unknown'}
+                        {' · '}
+                        {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-green-400">
+                      {formatCurrency(order.order_amount.value, order.order_amount.currency)}
+                    </p>
+                    <p className={`text-xs capitalize ${
+                      order.state === 'COMPLETED' ? 'text-green-400' : 
+                      order.state === 'PENDING' ? 'text-yellow-400' : 'text-white/40'
+                    }`}>
+                      {order.state.toLowerCase()}
+                    </p>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>
