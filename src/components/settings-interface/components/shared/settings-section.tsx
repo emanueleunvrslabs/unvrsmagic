@@ -1,5 +1,4 @@
 import type React from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface SettingsSectionProps {
   title: string
@@ -10,12 +9,12 @@ interface SettingsSectionProps {
 
 export const SettingsSection: React.FC<SettingsSectionProps> = ({ title, description, children, className = "" }) => {
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent className="space-y-4">{children}</CardContent>
-    </Card>
+    <div className={`labs-client-card p-6 ${className}`}>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+      </div>
+      <div className="space-y-4">{children}</div>
+    </div>
   )
 }

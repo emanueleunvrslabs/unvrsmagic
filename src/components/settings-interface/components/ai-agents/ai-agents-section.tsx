@@ -284,28 +284,30 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border">
+      <div className="rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Provider</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Model Provider</TableHead>
-              <TableHead>Status</TableHead>
+            <TableRow className="border-white/10 hover:bg-white/5">
+              <TableHead className="text-foreground/80">Provider</TableHead>
+              <TableHead className="text-foreground/80">Description</TableHead>
+              <TableHead className="text-foreground/80">Model Provider</TableHead>
+              <TableHead className="text-foreground/80">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {AI_AGENT_PROVIDERS.map((provider) => (
-              <TableRow key={provider.id}>
-                <TableCell className="font-medium">{provider.name}</TableCell>
+              <TableRow key={provider.id} className="border-white/10 hover:bg-white/5">
+                <TableCell className="font-medium text-foreground">{provider.name}</TableCell>
                 <TableCell className="text-muted-foreground">{provider.description}</TableCell>
-                <TableCell className="text-sm">{provider.usesProvider}</TableCell>
+                <TableCell className="text-sm text-foreground/70">{provider.usesProvider}</TableCell>
                 <TableCell>
-                  {connectedProviders.has(provider.id) ? (
-                    <span className="text-green-600 text-sm font-medium">Connected</span>
-                  ) : (
-                    <span className="text-red-600 text-sm">Not connected</span>
-                  )}
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    connectedProviders.has(provider.id) 
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                      : "bg-red-500/20 text-red-400 border border-red-500/30"
+                  }`}>
+                    {connectedProviders.has(provider.id) ? "Connected" : "Not connected"}
+                  </span>
                 </TableCell>
               </TableRow>
             ))}
