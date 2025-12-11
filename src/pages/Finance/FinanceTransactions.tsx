@@ -168,7 +168,12 @@ export default function FinanceTransactions() {
         </div>
 
         {/* Filters */}
-        <div className="glassmorphism-card p-4 flex flex-wrap gap-4 items-center">
+        <div 
+          className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 flex flex-wrap gap-4 items-center"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+          }}
+        >
           <Filter className="h-4 w-4 text-white/60" />
           
           <div className="flex items-center gap-2">
@@ -207,7 +212,12 @@ export default function FinanceTransactions() {
         </div>
 
         {/* Transactions Table */}
-        <div className="glassmorphism-card overflow-hidden">
+        <div 
+          className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+          }}
+        >
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
