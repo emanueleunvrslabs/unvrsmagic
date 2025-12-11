@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil, Phone, Upload, ExternalLink, X } from "lucide-react";
+import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil, Phone, Upload, ExternalLink, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
@@ -39,7 +39,7 @@ interface Contact {
 
 const actionItems = [
   { id: "documents", label: "Documents", icon: File },
-  { id: "notes", label: "Notes", icon: CheckSquare },
+  { id: "todo", label: "Todo", icon: CheckSquare },
   { id: "kanban", label: "Kanban", icon: Kanban },
   { id: "email", label: "Email", icon: Mail },
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
@@ -78,7 +78,9 @@ export function AppleTVClientsDemo() {
   const [contactsToDelete, setContactsToDelete] = useState<string[]>([]);
   const [editingContactIndex, setEditingContactIndex] = useState<number | null>(null);
   const [showDocuments, setShowDocuments] = useState(false);
+  const [showTodos, setShowTodos] = useState(false);
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+  const [newTodoText, setNewTodoText] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -331,8 +333,12 @@ export function AppleTVClientsDemo() {
         break;
       case "documents":
         setShowDocuments(!showDocuments);
+        setShowTodos(false);
         break;
-      case "notes":
+      case "todo":
+        setShowTodos(!showTodos);
+        setShowDocuments(false);
+        break;
       case "kanban":
         toast.info(`${actionId.charAt(0).toUpperCase() + actionId.slice(1)} feature coming soon`);
         break;
@@ -430,6 +436,78 @@ export function AppleTVClientsDemo() {
       refetchDocuments();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete document");
+    }
+  };
+
+  // Fetch todos for selected client
+  const { data: clientTodos, isLoading: loadingTodos, refetch: refetchTodos } = useQuery({
+    queryKey: ["client-todos", selectedClient?.id],
+    queryFn: async () => {
+      if (!selectedClient?.id) return [];
+      const { data, error } = await supabase
+        .from("client_todos")
+        .select("*")
+        .eq("client_id", selectedClient.id)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!selectedClient?.id && showTodos,
+  });
+
+  const handleAddTodo = async () => {
+    if (!newTodoText.trim() || !selectedClient) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("client_todos")
+        .insert({
+          client_id: selectedClient.id,
+          user_id: user.id,
+          text: newTodoText.trim(),
+        });
+      
+      if (error) throw error;
+      
+      setNewTodoText("");
+      refetchTodos();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add todo");
+    }
+  };
+
+  const handleToggleTodo = async (todoId: string, completed: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("client_todos")
+        .update({ completed: !completed })
+        .eq("id", todoId);
+      
+      if (error) throw error;
+      refetchTodos();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update todo");
+    }
+  };
+
+  const handleDeleteTodo = async (todoId: string) => {
+    try {
+      const { error } = await supabase
+        .from("client_todos")
+        .delete()
+        .eq("id", todoId);
+      
+      if (error) throw error;
+      refetchTodos();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete todo");
     }
   };
 
@@ -964,6 +1042,94 @@ export function AppleTVClientsDemo() {
                 <File className="w-12 h-12 mx-auto mb-3 text-white/20" />
                 <p className="text-white/50 text-sm">No documents yet</p>
                 <p className="text-white/30 text-xs mt-1">Click Upload to add files</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Todo Section */}
+      {showTodos && selectedClient && (
+        <div className="relative z-10 px-8 pb-8">
+          <div className="labs-client-card rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Todo</h3>
+              <button
+                onClick={() => setShowTodos(false)}
+                className="p-2 rounded-full bg-white/10 border border-white/20 text-white/60 hover:bg-white/20 hover:text-white transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Add Todo Input */}
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={newTodoText}
+                onChange={(e) => setNewTodoText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddTodo()}
+                placeholder="Add a new todo..."
+                className="flex-1 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-white/30"
+              />
+              <button
+                onClick={handleAddTodo}
+                disabled={!newTodoText.trim()}
+                className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white/80 hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+
+            {loadingTodos ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-white/50" />
+              </div>
+            ) : clientTodos && clientTodos.length > 0 ? (
+              <div className="space-y-2">
+                {clientTodos.map((todo: any) => (
+                  <div
+                    key={todo.id}
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-xl border transition-all",
+                      todo.completed 
+                        ? "bg-white/5 border-white/5" 
+                        : "bg-white/5 border-white/10 hover:bg-white/10"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleToggleTodo(todo.id, todo.completed)}
+                        className={cn(
+                          "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all",
+                          todo.completed 
+                            ? "bg-green-500/20 border-green-500/50 text-green-400" 
+                            : "border-white/30 hover:border-white/50"
+                        )}
+                      >
+                        {todo.completed && <Check className="w-4 h-4" />}
+                      </button>
+                      <span className={cn(
+                        "text-sm",
+                        todo.completed ? "text-white/40 line-through" : "text-white/90"
+                      )}>
+                        {todo.text}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteTodo(todo.id)}
+                      className="p-2 rounded-lg bg-white/10 text-red-400/60 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <CheckSquare className="w-12 h-12 mx-auto mb-3 text-white/20" />
+                <p className="text-white/50 text-sm">No todos yet</p>
+                <p className="text-white/30 text-xs mt-1">Add your first todo above</p>
               </div>
             )}
           </div>
