@@ -32,6 +32,7 @@ import Marketplace from "./pages/Marketplace";
 import AdminProjects from "./pages/AdminProjects";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminClients from "./pages/AdminClients";
+import AdminAuditLogs from "./pages/AdminAuditLogs";
 import FinanceDashboard from "./pages/Finance/FinanceDashboard";
 import FinanceTransactions from "./pages/Finance/FinanceTransactions";
 import FinanceTransfers from "./pages/Finance/FinanceTransfers";
@@ -92,6 +93,7 @@ const App = () => (
           <Route path="/file-upload" element={<ProtectedRoute><FileUpload /></ProtectedRoute>} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/clients" element={<ProtectedRoute><AdminClients /></ProtectedRoute>} />
+          <Route path="/admin/audit-logs" element={<ProtectedRoute><AdminAuditLogs /></ProtectedRoute>} />
           <Route path="/admin/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
           <Route path="/admin/finance/transactions" element={<ProtectedRoute><FinanceTransactions /></ProtectedRoute>} />
           <Route path="/admin/finance/transfers" element={<ProtectedRoute><FinanceTransfers /></ProtectedRoute>} />
