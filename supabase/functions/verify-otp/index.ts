@@ -133,12 +133,25 @@ serve(async (req) => {
       }
     }
 
+    // Sign in the user server-side and return session tokens instead of password
+    const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password: tempPassword,
+    });
+
+    if (signInError || !signInData.session) {
+      console.error('Error signing in user:', signInError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to create session' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true,
         isNewUser,
-        email,
-        tempPassword,
+        session: signInData.session,
       }),
       { 
         status: 200, 

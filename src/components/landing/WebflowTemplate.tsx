@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 
 export function WebflowTemplate() {
@@ -15,7 +16,11 @@ export function WebflowTemplate() {
         if (error) throw error;
         
         if (data?.content) {
-          setHtmlContent(data.content);
+          const sanitizedHtml = DOMPurify.sanitize(data.content, {
+            ADD_TAGS: ['style', 'link'],
+            ADD_ATTR: ['target', 'rel', 'href']
+          });
+          setHtmlContent(sanitizedHtml);
         }
       } catch (error) {
         console.error('Error loading template:', error);
