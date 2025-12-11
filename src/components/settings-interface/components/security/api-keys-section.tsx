@@ -93,6 +93,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   })
   const [revolutMerchantPublicKey, setRevolutMerchantPublicKey] = useState("")
   const [revolutMerchantSecretKey, setRevolutMerchantSecretKey] = useState("")
+  const [revolutWebhookConfigured, setRevolutWebhookConfigured] = useState(false)
+  const [configuringWebhook, setConfiguringWebhook] = useState(false)
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [connectedProviders, setConnectedProviders] = useState<Set<string>>(new Set())
@@ -163,8 +165,12 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
               // Check if both merchant keys exist
               const hasMerchantPublic = data.some(d => d.provider === 'revolut_merchant_public')
               const hasMerchantSecret = data.some(d => d.provider === 'revolut_merchant_secret')
+              const hasWebhookSecret = data.some(d => d.provider === 'revolut_webhook_secret')
               if (hasMerchantPublic && hasMerchantSecret) {
                 connected.add('revolut_merchant')
+              }
+              if (hasWebhookSecret) {
+                setRevolutWebhookConfigured(true)
               }
             } else if (item.provider !== 'revolut_merchant') {
               connected.add(item.provider)
@@ -437,6 +443,31 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     }
   }
 
+  const handleSetupWebhook = async () => {
+    setConfiguringWebhook(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('register-revolut-webhook')
+      
+      if (error) {
+        console.error("Error setting up webhook:", error)
+        toast.error("Failed to setup webhooks")
+        return
+      }
+
+      if (data?.success) {
+        setRevolutWebhookConfigured(true)
+        toast.success("Webhooks configured successfully")
+      } else {
+        toast.error(data?.error || "Failed to setup webhooks")
+      }
+    } catch (error) {
+      console.error("Error setting up webhook:", error)
+      toast.error("Failed to setup webhooks")
+    } finally {
+      setConfiguringWebhook(false)
+    }
+  }
+
   const handleDisconnect = async (providerId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -649,6 +680,25 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
               )}
             </Button>
           </div>
+          {connectedProviders.has('revolut_merchant') && (
+            <div className="flex items-center gap-2 mt-2">
+              {revolutWebhookConfigured ? (
+                <span className="text-xs text-green-500 flex items-center gap-1">
+                  <Check className="h-3 w-3" /> Webhooks configured
+                </span>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSetupWebhook}
+                  disabled={configuringWebhook}
+                  className="text-xs"
+                >
+                  {configuringWebhook ? "Configuring..." : "Setup Webhooks"}
+                </Button>
+              )}
+            </div>
+          )}
         </>
       )
     }
