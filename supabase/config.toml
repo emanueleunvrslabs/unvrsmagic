@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.revolut-generate-cert]
 verify_jwt = true
+
+[functions.revolut-oauth]
+verify_jwt = false
