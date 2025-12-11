@@ -1,10 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import * as x509 from "https://esm.sh/@peculiar/x509@1.9.5";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Set crypto provider
+x509.cryptoProvider.set(crypto);
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -28,28 +32,48 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Generate RSA key pair using Web Crypto API
-    const keyPair = await crypto.subtle.generateKey(
-      {
-        name: "RSASSA-PKCS1-v1_5",
-        modulusLength: 2048,
-        publicExponent: new Uint8Array([1, 0, 1]),
-        hash: "SHA-256",
-      },
-      true,
-      ["sign", "verify"]
-    );
+    console.log('Generating RSA key pair for user:', user.id);
 
-    // Export keys to PEM format
-    const publicKeyBuffer = await crypto.subtle.exportKey("spki", keyPair.publicKey);
-    const privateKeyBuffer = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+    // Generate RSA-2048 key pair
+    const alg = {
+      name: "RSASSA-PKCS1-v1_5",
+      hash: "SHA-256",
+      publicExponent: new Uint8Array([1, 0, 1]),
+      modulusLength: 2048,
+    };
 
-    const publicKeyPem = `-----BEGIN PUBLIC KEY-----\n${arrayBufferToBase64(publicKeyBuffer).match(/.{1,64}/g)?.join('\n')}\n-----END PUBLIC KEY-----`;
-    const privateKeyPem = `-----BEGIN PRIVATE KEY-----\n${arrayBufferToBase64(privateKeyBuffer).match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----`;
+    const keys = await crypto.subtle.generateKey(alg, true, ["sign", "verify"]);
 
-    // Create self-signed X509 certificate manually
-    // For Revolut, we need to provide the public key in X509 certificate format
-    const x509Certificate = await generateSelfSignedCert(publicKeyBuffer, privateKeyBuffer, "UNVRS Labs");
+    console.log('Key pair generated, creating X509 certificate...');
+
+    // Create self-signed X509 certificate
+    const cert = await x509.X509CertificateGenerator.createSelfSigned({
+      serialNumber: "01",
+      name: "CN=UNVRS Labs",
+      notBefore: new Date(),
+      notAfter: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+      signingAlgorithm: alg,
+      keys: keys,
+      extensions: [
+        new x509.BasicConstraintsExtension(false, undefined, true),
+        new x509.KeyUsagesExtension(
+          x509.KeyUsageFlags.digitalSignature | x509.KeyUsageFlags.keyEncipherment,
+          true
+        ),
+      ],
+    });
+
+    console.log('X509 certificate created');
+
+    // Export certificate to PEM format
+    const certPem = cert.toString("pem");
+    
+    // Export private key to PEM format
+    const privateKeyBuffer = await crypto.subtle.exportKey("pkcs8", keys.privateKey);
+    const privateKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(privateKeyBuffer)));
+    const privateKeyPem = `-----BEGIN PRIVATE KEY-----\n${privateKeyBase64.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----`;
+
+    console.log('Certificate PEM:', certPem.substring(0, 100) + '...');
 
     // Save private key to database using service role
     const supabaseAdmin = createClient(
@@ -83,7 +107,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        publicKey: x509Certificate,
+        publicKey: certPem,
         redirectUri: `https://amvbkkbqkzklrcynpwwm.supabase.co/functions/v1/revolut-oauth`,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -98,31 +122,3 @@ serve(async (req) => {
     );
   }
 });
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-}
-
-async function generateSelfSignedCert(publicKeyDer: ArrayBuffer, privateKeyDer: ArrayBuffer, commonName: string): Promise<string> {
-  // Create a simple X509 certificate structure
-  // This is a simplified version - for production, consider using a proper ASN.1 library
-  
-  const now = new Date();
-  const notBefore = now;
-  const notAfter = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year validity
-
-  // For simplicity, we'll return the public key in SPKI format wrapped as a certificate
-  // Revolut accepts this format for the X509 public key field
-  const publicKeyBase64 = arrayBufferToBase64(publicKeyDer);
-  
-  const x509Pem = `-----BEGIN CERTIFICATE-----
-${publicKeyBase64.match(/.{1,64}/g)?.join('\n')}
------END CERTIFICATE-----`;
-
-  return x509Pem;
-}
