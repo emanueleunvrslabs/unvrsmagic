@@ -333,10 +333,10 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const renderMenuItem = (item: MenuItem) => {
     const Icon = item.icon;
     const hasSubItems = item.subItems && item.subItems.length > 0;
-    const isProjectOpen = openProjects[item.id] ?? false;
     const isActive = hasSubItems 
       ? item.subItems?.some(sub => isItemActive(sub.href))
       : isItemActive(item.href);
+    const isProjectOpen = openProjects[item.id] ?? isActive ?? false;
 
     if (hasSubItems) {
       return (
