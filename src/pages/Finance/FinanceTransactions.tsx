@@ -91,11 +91,12 @@ export default function FinanceTransactions() {
   };
 
   const formatCurrency = (amount: number, currency: string) => {
+    // Revolut Business API returns amounts in major units (not cents)
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
-    }).format(amount / 100);
+    }).format(amount);
   };
 
   const exportCSV = () => {
@@ -106,7 +107,7 @@ export default function FinanceTransactions() {
         format(new Date(tx.created_at), 'yyyy-MM-dd HH:mm:ss'),
         tx.type,
         tx.merchant?.name || leg?.description || '',
-        leg ? (leg.amount / 100).toFixed(2) : '',
+        leg ? leg.amount.toFixed(2) : '',
         leg?.currency || '',
         tx.state,
         tx.reference || ''
