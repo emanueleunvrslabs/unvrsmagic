@@ -242,46 +242,7 @@ html {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: 
-      /* Fog layers */
-      radial-gradient(ellipse 120% 80% at 20% 100%, hsla(210, 10%, 70%, 0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 100% 60% at 80% 90%, hsla(200, 15%, 65%, 0.1) 0%, transparent 50%),
-      radial-gradient(ellipse 150% 100% at 50% 120%, hsla(210, 8%, 60%, 0.08) 0%, transparent 70%),
-      /* Mountain/terrain subtle shapes */
-      radial-gradient(ellipse 80% 40% at 15% 85%, hsla(210, 5%, 50%, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 35% at 85% 80%, hsla(200, 8%, 55%, 0.05) 0%, transparent 50%),
-      /* Base ice gradient */
-      linear-gradient(180deg, 
-        hsl(210, 12%, 16%) 0%, 
-        hsl(210, 10%, 20%) 30%,
-        hsl(200, 8%, 25%) 60%,
-        hsl(210, 6%, 28%) 100%
-      );
-    background-attachment: fixed;
-    position: relative;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: 
-      radial-gradient(ellipse 200% 100% at 30% 110%, hsla(210, 15%, 80%, 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse 180% 80% at 70% 100%, hsla(200, 10%, 75%, 0.04) 0%, transparent 45%);
-    pointer-events: none;
-    z-index: 0;
-    animation: iceFog 25s ease-in-out infinite alternate;
-  }
-
-  @keyframes iceFog {
-    0% {
-      opacity: 0.5;
-      transform: translateY(0) scale(1);
-    }
-    100% {
-      opacity: 0.8;
-      transform: translateY(-3%) scale(1.03);
-    }
+    background: transparent;
   }
   
   /* Glass Effect Utility Classes */
