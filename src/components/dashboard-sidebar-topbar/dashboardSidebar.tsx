@@ -49,6 +49,7 @@ import {
   Workflow,
   Landmark,
   ArrowRightLeft,
+  Send,
   type LucideIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -192,6 +193,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             { id: "finance-dashboard", label: "Dashboard", icon: Home, href: "/admin/finance" },
             { id: "finance-transactions", label: "Transactions", icon: ArrowRightLeft, href: "/admin/finance/transactions" },
             { id: "finance-transfers", label: "Transfers", icon: Repeat, href: "/admin/finance/transfers" },
+            { id: "finance-payments", label: "Payments", icon: Send, href: "/admin/finance/payments" },
           ]
         },
       ],
