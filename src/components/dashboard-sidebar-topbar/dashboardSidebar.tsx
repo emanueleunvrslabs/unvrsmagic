@@ -341,8 +341,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     if (hasSubItems) {
       return (
         <div key={item.id}>
-          <button
-            onClick={() => toggleProject(item.id)}
+          <div
             className={cn(
               "flex items-center gap-3 px-3 py-2 text-[15px] transition-all duration-150 rounded-lg w-full",
               isActive
@@ -352,13 +351,21 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           >
             <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
             <span className="font-normal flex-1 text-left">{item.label}</span>
-            <ChevronRight
-              className={cn(
-                "h-4 w-4 text-white/50 transition-transform duration-200",
-                isProjectOpen && "rotate-90"
-              )}
-            />
-          </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleProject(item.id);
+              }}
+              className="p-1 hover:bg-white/20 rounded transition-colors"
+            >
+              <ChevronRight
+                className={cn(
+                  "h-4 w-4 text-white/50 transition-transform duration-200",
+                  isProjectOpen && "rotate-90"
+                )}
+              />
+            </button>
+          </div>
           {isProjectOpen && (
             <div className="ml-4 mt-0.5 space-y-0.5">
               {item.subItems?.map((subItem) => {
