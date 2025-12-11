@@ -818,6 +818,72 @@ export type Database = {
           },
         ]
       }
+      client_emails: {
+        Row: {
+          attachments: Json | null
+          body: string
+          client_id: string
+          contact_id: string | null
+          created_at: string
+          direction: string
+          id: string
+          read_at: string | null
+          recipient_email: string
+          sender_email: string
+          status: string | null
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          body: string
+          client_id: string
+          contact_id?: string | null
+          created_at?: string
+          direction: string
+          id?: string
+          read_at?: string | null
+          recipient_email: string
+          sender_email: string
+          status?: string | null
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          body?: string
+          client_id?: string
+          contact_id?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          read_at?: string | null
+          recipient_email?: string
+          sender_email?: string
+          status?: string | null
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_emails_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_emails_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "client_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_kanban_tasks: {
         Row: {
           client_id: string
