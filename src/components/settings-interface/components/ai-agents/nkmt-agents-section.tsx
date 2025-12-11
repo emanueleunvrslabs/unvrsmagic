@@ -190,7 +190,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
                       variant="ghost"
                       size="sm"
                       onClick={() => handleOpenApiModal(agent)}
-                      className="h-8 w-8 p-0 hover:bg-white/10"
+                      className="h-8 w-8 p-0 hover:bg-transparent"
                     >
                       <Settings className="h-4 w-4" />
                     </Button>
@@ -203,7 +203,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
                     variant="ghost"
                     size="sm"
                     onClick={() => handleOpenPromptModal(agent)}
-                    className="h-8 w-8 p-0 hover:bg-white/10"
+                    className="h-8 w-8 p-0 hover:bg-transparent"
                   >
                     <FileText className="h-4 w-4" />
                   </Button>
