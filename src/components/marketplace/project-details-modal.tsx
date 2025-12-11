@@ -127,17 +127,17 @@ export function ProjectDetailsModal({
 
         <div className="flex gap-6 py-4">
           {/* What's Included Card - Left */}
-          <div className="flex-1 p-6 rounded-2xl border border-white/10">
-            <h2 className="text-2xl font-semibold mb-4">What's Included</h2>
+          <div className="detail-card flex-1 p-6">
+            <h2 className="text-2xl font-semibold mb-4 text-white/90">What's Included</h2>
             <div className="flex flex-col gap-3">
               {config.features.map((feature, index) => {
                 const IconComponent = feature.icon;
                 return (
                   <div key={index} className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                      <IconComponent className="w-5 h-5 text-blue-400" />
+                    <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+                      <IconComponent className="w-5 h-5 text-white/70" />
                     </div>
-                    <span className="text-white/90 text-sm">{feature.text}</span>
+                    <span className="text-white/80 text-sm">{feature.text}</span>
                   </div>
                 );
               })}
@@ -145,36 +145,36 @@ export function ProjectDetailsModal({
           </div>
 
           {/* Pricing Card - Right */}
-          <div className="flex-1 p-6 rounded-2xl border border-white/10">
-            <h2 className="text-2xl font-semibold mb-4">Pricing</h2>
+          <div className="detail-card flex-1 p-6">
+            <h2 className="text-2xl font-semibold mb-4 text-white/90">Pricing</h2>
             <div className="flex flex-col gap-4">
               {config.pricing.map((item, index) => (
                 <div 
                   key={index} 
-                  className="relative p-4 rounded-2xl border-2 border-blue-500/50 backdrop-blur-sm"
+                  className="pricing-item relative p-4"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center">
-                        {item.type === "Image" && <Image className="w-5 h-5 text-blue-400" />}
-                        {item.type === "Video" && <Video className="w-5 h-5 text-blue-400" />}
-                        {item.type !== "Image" && item.type !== "Video" && <Check className="w-5 h-5 text-blue-400" />}
+                      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+                        {item.type === "Image" && <Image className="w-5 h-5 text-white/70" />}
+                        {item.type === "Video" && <Video className="w-5 h-5 text-white/70" />}
+                        {item.type !== "Image" && item.type !== "Video" && <Check className="w-5 h-5 text-white/70" />}
                       </div>
-                      <span className="text-xl font-semibold text-white">{item.type}</span>
+                      <span className="text-xl font-semibold text-white/90">{item.type}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-white">{item.price}</div>
-                      <div className="text-sm text-white/60">{item.unit}</div>
+                      <div className="text-sm text-white/50">{item.unit}</div>
                     </div>
                   </div>
-                  <p className="text-sm text-white/70">{item.description}</p>
+                  <p className="text-sm text-white/60">{item.description}</p>
                 </div>
               ))}
 
               {/* Add to Dashboard Button */}
               {!isAdded ? (
                 <Button 
-                  className="w-full py-3 px-4 rounded-xl bg-blue-600/20 border border-blue-500/30 backdrop-blur-sm text-blue-400 font-medium flex items-center justify-center gap-2 hover:bg-blue-600/30 transition-colors" 
+                  className="w-full py-3 px-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm text-white/80 font-medium flex items-center justify-center gap-2 hover:bg-white/15 hover:text-white transition-all" 
                   onClick={onAddProject}
                   disabled={isLoading}
                   variant="ghost"
@@ -189,7 +189,7 @@ export function ProjectDetailsModal({
               ) : (
                 <Button 
                   variant="ghost"
-                  className="w-full py-3 px-4 rounded-xl bg-blue-600/20 border border-blue-500/30 backdrop-blur-sm text-blue-400 font-medium flex items-center justify-center gap-2 hover:bg-blue-600/30 transition-colors"
+                  className="w-full py-3 px-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm text-white/80 font-medium flex items-center justify-center gap-2 hover:bg-white/15 hover:text-white transition-all"
                   asChild
                 >
                   <a href={project.route} target="_blank" rel="noopener noreferrer">
@@ -200,9 +200,9 @@ export function ProjectDetailsModal({
               )}
 
               {/* Usage-Based Billing Notice */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-500/40 backdrop-blur-sm">
-                <h3 className="text-lg font-semibold text-orange-400 mb-2">Usage-Based Billing</h3>
-                <p className="text-sm text-orange-200/80">
+              <div className="notice-card p-4">
+                <h3 className="text-lg font-semibold text-white/80 mb-2">Usage-Based Billing</h3>
+                <p className="text-sm text-white/60">
                   You only pay for what you generate. Costs are calculated based on actual content created through the AI models.
                 </p>
               </div>
