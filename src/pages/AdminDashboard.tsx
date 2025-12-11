@@ -312,59 +312,6 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Monthly Spending Chart */}
-          <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle>Credits Spent per Month</CardTitle>
-              <CardDescription>Last 6 months spending overview</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingMonthly ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : monthlySpending && monthlySpending.length > 0 ? (
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={monthlySpending}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                      <XAxis 
-                        dataKey="month" 
-                        tick={{ fontSize: 12 }}
-                        className="text-muted-foreground"
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 12 }}
-                        className="text-muted-foreground"
-                        tickFormatter={(value) => `€${value}`}
-                      />
-                      <Tooltip 
-                        formatter={(value: number) => [`€${value.toFixed(2)}`, 'Spent']}
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--card))', 
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Bar 
-                        dataKey="amount" 
-                        fill="hsl(var(--primary))" 
-                        radius={[4, 4, 0, 0]}
-                        fillOpacity={0.6}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  No spending data available
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-        </div>
 
         {/* Credit Transactions */}
         <Card className="dashboard-card">
@@ -466,10 +413,11 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
+          {/* Monthly Spending Chart */}
           <Card className="dashboard-card">
             <CardHeader>
-              <CardTitle>Credits Spent</CardTitle>
-              <CardDescription>Monthly usage overview</CardDescription>
+              <CardTitle>Credits Spent per Month</CardTitle>
+              <CardDescription>Last 6 months spending overview</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingMonthly ? (
@@ -477,16 +425,39 @@ const AdminDashboard = () => {
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : monthlySpending && monthlySpending.length > 0 ? (
-                <div className="space-y-3">
-                  {monthlySpending.map((item) => (
-                    <div key={item.month} className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">{item.month}</span>
-                      <span className="text-sm font-medium">€{item.amount.toFixed(2)}</span>
-                    </div>
-                  ))}
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={monthlySpending}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fontSize: 12 }}
+                        className="text-muted-foreground"
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        className="text-muted-foreground"
+                        tickFormatter={(value) => `€${value}`}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`€${value.toFixed(2)}`, 'Spent']}
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))', 
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="amount" 
+                        fill="hsl(var(--primary))" 
+                        radius={[4, 4, 0, 0]}
+                        fillOpacity={0.6}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-8">
                   No spending data available
                 </p>
               )}
