@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Mail, Send, Inbox, Loader2, X, Plus, Trash2, Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,6 +55,38 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
       return data || [];
     },
   });
+
+  // Real-time subscription for new emails
+  useEffect(() => {
+    const channel = supabase
+      .channel(`client-emails-${clientId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'client_emails',
+          filter: `client_id=eq.${clientId}`
+        },
+        (payload) => {
+          console.log('Email realtime update:', payload);
+          // Invalidate query to refetch emails
+          queryClient.invalidateQueries({ queryKey: ["client-emails", clientId] });
+          
+          // Show toast for new received emails
+          if (payload.eventType === 'INSERT' && payload.new.direction === 'received') {
+            toast.info(`New email from ${payload.new.sender_email}`, {
+              description: payload.new.subject
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [clientId, queryClient]);
 
   const inboxEmails = emails?.filter(e => e.direction === "received") || [];
   const sentEmails = emails?.filter(e => e.direction === "sent") || [];
