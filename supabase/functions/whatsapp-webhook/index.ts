@@ -43,31 +43,57 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Process incoming messages
-    if (payload.event === 'message.received') {
-      const { from, text } = payload.data || {};
+    console.log('Webhook payload received:', JSON.stringify(payload));
+
+    // Process incoming messages - WASender uses "messages.received" event
+    if (payload.event === 'messages.received') {
+      const data = payload.data || {};
+      // WASender format: data.key.remoteJid for phone, data.message.conversation for text
+      const from = data.key?.remoteJid || data.from;
+      const text = data.message?.conversation || data.message?.extendedTextMessage?.text || data.text;
+      
+      console.log('Processing incoming message from:', from, 'text:', text);
       
       if (from && text) {
-        // Find the contact by phone number
-        const { data: contact } = await supabase
+        // Normalize phone number (remove @s.whatsapp.net suffix if present)
+        const normalizedPhone = from.replace('@s.whatsapp.net', '').replace('@c.us', '');
+        const phoneWithPlus = normalizedPhone.startsWith('+') ? normalizedPhone : `+${normalizedPhone}`;
+        
+        console.log('Looking for contact with phone:', phoneWithPlus);
+        
+        // Find the contact by phone number (try with and without +)
+        const { data: contact, error: contactError } = await supabase
           .from('client_contacts')
-          .select('id, client_id, first_name, last_name')
-          .eq('whatsapp_number', from)
+          .select('id, client_id, first_name, last_name, whatsapp_number')
+          .or(`whatsapp_number.eq.${phoneWithPlus},whatsapp_number.eq.${normalizedPhone}`)
           .single();
 
+        console.log('Contact lookup result:', contact, 'error:', contactError);
+
         if (contact) {
+          // Get owner user_id
+          const { data: ownerRole } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .eq('role', 'owner')
+            .single();
+
           // Save incoming message to database
-          await supabase
+          const { error: insertError } = await supabase
             .from('whatsapp_messages')
             .insert({
               client_id: contact.client_id,
               contact_id: contact.id,
-              phone_number: from,
+              phone_number: contact.whatsapp_number,
               message_text: text,
               direction: 'incoming',
               status: 'received',
-              user_id: (await supabase.from('user_roles').select('user_id').eq('role', 'owner').single()).data?.user_id
+              user_id: ownerRole?.user_id
             });
+
+          console.log('Message insert result:', insertError ? 'error: ' + insertError.message : 'success');
+        } else {
+          console.log('No contact found for phone number:', phoneWithPlus);
         }
       }
     }
