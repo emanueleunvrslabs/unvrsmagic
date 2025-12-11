@@ -70,8 +70,8 @@ serve(async (req) => {
     // Create JWT for client assertion
     const jwt = await createClientAssertionJWT(clientId, privateKey)
 
-    // Exchange code for tokens (using sandbox for development)
-    const tokenResponse = await fetch('https://sandbox-b2b.revolut.com/api/1.0/auth/token', {
+    // Exchange code for tokens
+    const tokenResponse = await fetch('https://b2b.revolut.com/api/1.0/auth/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -142,7 +142,7 @@ async function createClientAssertionJWT(clientId: string, privateKeyPem: string)
   const payload = {
     iss: clientId,
     sub: clientId,
-    aud: 'https://sandbox-b2b.revolut.com',
+    aud: 'https://revolut.com',
     iat: now,
     exp: exp,
   }
