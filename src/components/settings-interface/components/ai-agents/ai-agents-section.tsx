@@ -287,7 +287,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
       <div className="rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/10 hover:bg-white/5">
+            <TableRow className="border-white/10">
               <TableHead className="text-foreground/80">Provider</TableHead>
               <TableHead className="text-foreground/80">Description</TableHead>
               <TableHead className="text-foreground/80">Model Provider</TableHead>
@@ -296,7 +296,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = () => {
           </TableHeader>
           <TableBody>
             {AI_AGENT_PROVIDERS.map((provider) => (
-              <TableRow key={provider.id} className="border-white/10 hover:bg-white/5">
+              <TableRow key={provider.id} className="border-white/10">
                 <TableCell className="font-medium text-foreground">{provider.name}</TableCell>
                 <TableCell className="text-muted-foreground">{provider.description}</TableCell>
                 <TableCell className="text-sm text-foreground/70">{provider.usesProvider}</TableCell>
