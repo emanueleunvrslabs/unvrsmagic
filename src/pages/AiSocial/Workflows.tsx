@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import "@/components/labs/SocialMediaCard.css";
 import { Button } from "@/components/ui/button";
 import { Plus, Sparkles, Loader2, X, Pencil, Trash2, Upload, Clock, Play, Pause, Rocket, AlertCircle } from "lucide-react";
 import { useState, useRef } from "react";
@@ -775,20 +775,19 @@ export default function Workflows() {
           </Button>
         </div>
 
-        <Card className="dashboard-card">
-          <CardHeader>
-            <CardTitle>Your Workflows</CardTitle>
-            <CardDescription>Manage automated content workflows</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="labs-client-card rounded-[22px] p-6">
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-white">Your Workflows</h3>
+            <p className="text-sm text-white/50 mt-1">Manage automated content workflows</p>
+          </div>
+          <div>
             {workflows && workflows.length > 0 ? (
               <div className="space-y-4">
                 {workflows.map((workflow) => (
-                  <Card key={workflow.id} className="dashboard-card bg-muted/30">
-                    <CardContent className="p-4">
-                      <div>
-                        <h3 className="font-medium">{workflow.name}</h3>
-                        <div className="flex flex-wrap gap-2 mt-2 items-center">
+                  <div key={workflow.id} className="labs-client-card rounded-[18px] bg-white/5 p-4">
+                    <div>
+                      <h3 className="font-medium text-white">{workflow.name}</h3>
+                      <div className="flex flex-wrap gap-2 mt-2 items-center">
                             {/* Run Now Button */}
                             <Button
                               variant="outline"
@@ -923,19 +922,18 @@ export default function Workflows() {
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
-                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-12 text-white/40">
                 No workflows configured yet. Create your first automated workflow!
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
