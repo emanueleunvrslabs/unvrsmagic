@@ -191,6 +191,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           subItems: [
             { id: "finance-dashboard", label: "Dashboard", icon: Home, href: "/admin/finance" },
             { id: "finance-transactions", label: "Transactions", icon: ArrowRightLeft, href: "/admin/finance/transactions" },
+            { id: "finance-transfers", label: "Transfers", icon: Repeat, href: "/admin/finance/transfers" },
           ]
         },
       ],

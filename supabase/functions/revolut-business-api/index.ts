@@ -105,6 +105,40 @@ serve(async (req) => {
         endpoint = `/rate?from=${params.from}&to=${params.to}&amount=${params.amount || 1}`
         break
       
+      case 'createTransfer':
+        // Transfer between own accounts
+        endpoint = '/transfer'
+        method = 'POST'
+        body = {
+          request_id: params.request_id || crypto.randomUUID(),
+          source_account_id: params.source_account_id,
+          target_account_id: params.target_account_id,
+          amount: params.amount,
+          currency: params.currency,
+          reference: params.reference || 'Internal transfer',
+        }
+        break
+      
+      case 'createPayment':
+        // Payment to counterparty
+        endpoint = '/pay'
+        method = 'POST'
+        body = {
+          request_id: params.request_id || crypto.randomUUID(),
+          account_id: params.account_id,
+          receiver: params.receiver,
+          amount: params.amount,
+          currency: params.currency,
+          reference: params.reference || 'Payment',
+        }
+        break
+      
+      case 'createCounterparty':
+        endpoint = '/counterparty'
+        method = 'POST'
+        body = params.counterparty
+        break
+      
       default:
         return new Response(JSON.stringify({ error: 'Unknown action' }), {
           status: 400,
