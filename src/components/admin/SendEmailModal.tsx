@@ -79,9 +79,9 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
       setSubject("");
       setText("");
       setAttachments([]);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error sending email:", error);
-      toast.error(error.message || "Failed to send email");
+      toast.error(error instanceof Error ? error.message : "Failed to send email");
     } finally {
       setLoading(false);
     }

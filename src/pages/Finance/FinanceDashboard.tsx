@@ -42,14 +42,17 @@ interface MerchantOrder {
   id: string;
   public_id: string;
   type: string;
-  state: string;
+  state?: string;
+  status?: string;
   created_at: string;
   updated_at: string;
   completed_at?: string;
-  order_amount: {
+  order_amount?: {
     value: number;
     currency: string;
   };
+  amount?: number;
+  currency?: string;
   merchant_order_ext_ref?: string;
   customer_email?: string;
   description?: string;
@@ -127,9 +130,9 @@ export default function FinanceDashboard() {
         setMerchantOrders(orders);
       }
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching finance data:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -364,7 +367,7 @@ export default function FinanceDashboard() {
             }}
           >
             {(() => {
-              const completedOrders = merchantOrders.filter((order: any) => {
+              const completedOrders = merchantOrders.filter((order) => {
                 const state = order.state || order.status || '';
                 return state.toUpperCase() === 'COMPLETED';
               });
@@ -378,7 +381,7 @@ export default function FinanceDashboard() {
                 );
               }
               
-              return completedOrders.slice(0, 10).map((order: any) => {
+              return completedOrders.slice(0, 10).map((order) => {
                 // Handle different API response structures
                 const amount = order.order_amount?.value ?? order.amount ?? 0;
                 const currency = order.order_amount?.currency ?? order.currency ?? 'EUR';

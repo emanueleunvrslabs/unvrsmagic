@@ -409,7 +409,7 @@ export function StrategySection({ botData, onStrategyChange, onRiskSettingsChang
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="risk">Risk Level</Label>
-                      <Select value={newStrategy.risk} onValueChange={(value: any) => setNewStrategy({ ...newStrategy, risk: value })}>
+                      <Select value={newStrategy.risk} onValueChange={(value: "low" | "medium" | "high") => setNewStrategy({ ...newStrategy, risk: value })}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -683,7 +683,7 @@ export function StrategySection({ botData, onStrategyChange, onRiskSettingsChang
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="edit-risk">Risk Level</Label>
-                <Select value={newStrategy.risk} onValueChange={(value: any) => setNewStrategy({ ...newStrategy, risk: value })}>
+                <Select value={newStrategy.risk} onValueChange={(value: "low" | "medium" | "high") => setNewStrategy({ ...newStrategy, risk: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

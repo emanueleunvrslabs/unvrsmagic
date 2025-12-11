@@ -2,11 +2,44 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle2, Database, TrendingUp, TrendingDown, Activity, DollarSign, BarChart3 } from "lucide-react"
+import { AlertCircle, CheckCircle2, Database, TrendingUp, TrendingDown, Activity, BarChart3 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+interface DataSource {
+  name: string
+  notes: string
+}
+
+interface MarketError {
+  symbol?: string
+  message: string
+}
+
+interface TimeframeData {
+  timeframe: string
+  confidence_score: number
+  notes?: string
+  ohlcv: number[][]
+}
+
+interface MarketData {
+  market_type: string
+  timeframes: TimeframeData[]
+}
+
+interface SymbolData {
+  symbol: string
+  markets: MarketData[]
+}
+
+interface MktDataResultsData {
+  data_sources_used?: DataSource[]
+  errors?: MarketError[]
+  symbols?: SymbolData[]
+}
+
 interface MktDataResultsProps {
-  results: any
+  results: MktDataResultsData
 }
 
 export const MktDataResults = ({ results }: MktDataResultsProps) => {
@@ -71,7 +104,7 @@ export const MktDataResults = ({ results }: MktDataResultsProps) => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {results.data_sources_used?.map((source: any, idx: number) => (
+            {results.data_sources_used?.map((source, idx) => (
               <Badge key={idx} variant="secondary" className="text-sm">
                 {source.name}: {source.notes}
               </Badge>
@@ -87,7 +120,7 @@ export const MktDataResults = ({ results }: MktDataResultsProps) => {
           <AlertDescription>
             <div className="font-semibold mb-2">Errors encountered:</div>
             <ul className="list-disc list-inside space-y-1">
-              {results.errors.map((error: any, idx: number) => (
+              {results.errors.map((error, idx) => (
                 <li key={idx} className="text-sm">
                   {error.symbol && `${error.symbol}: `}
                   {error.message}
@@ -99,7 +132,7 @@ export const MktDataResults = ({ results }: MktDataResultsProps) => {
       )}
 
       {/* Symbols Data */}
-      {results.symbols?.map((symbolData: any, symbolIdx: number) => {
+      {results.symbols?.map((symbolData, symbolIdx) => {
         const firstMarket = symbolData.markets?.[0]
         const firstTimeframe = firstMarket?.timeframes?.[0]
         const stats = firstTimeframe ? calculateStats(firstTimeframe.ohlcv) : null
@@ -208,16 +241,16 @@ export const MktDataResults = ({ results }: MktDataResultsProps) => {
               <CardContent>
                 <Tabs defaultValue="0" className="w-full">
                   <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${symbolData.markets?.length || 1}, 1fr)` }}>
-                    {symbolData.markets?.map((market: any, marketIdx: number) => (
+                    {symbolData.markets?.map((market, marketIdx) => (
                       <TabsTrigger key={marketIdx} value={marketIdx.toString()}>
                         {market.market_type}
                       </TabsTrigger>
                     ))}
                   </TabsList>
 
-                  {symbolData.markets?.map((market: any, marketIdx: number) => (
+                  {symbolData.markets?.map((market, marketIdx) => (
                     <TabsContent key={marketIdx} value={marketIdx.toString()} className="space-y-4">
-                      {market.timeframes?.map((timeframe: any, tfIdx: number) => (
+                      {market.timeframes?.map((timeframe, tfIdx) => (
                         <div key={tfIdx} className="space-y-2">
                           <div className="flex items-center justify-between">
                             <h4 className="text-sm font-semibold">

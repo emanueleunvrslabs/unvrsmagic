@@ -21,7 +21,13 @@ interface AdjustAllocationModalProps {
   totalBalance: number;
 }
 
-async function adjustAllocationAction(prevState: any, formData: FormData) {
+interface AllocationActionState {
+  success: boolean;
+  error?: string;
+  allocation?: number;
+}
+
+async function adjustAllocationAction(prevState: AllocationActionState | null, formData: FormData): Promise<AllocationActionState> {
   const allocation = Number(formData.get("allocation"));
 
   // Simulate API call

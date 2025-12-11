@@ -29,7 +29,7 @@ export const DataTab: React.FC<DataTabProps> = ({ data, onDataChange }) => {
     })
   }
 
-  const handleExportChange = (key: keyof DataSettings["export"], value: any) => {
+  const handleExportChange = (key: keyof DataSettings["export"], value: string | boolean) => {
     onDataChange({
       export: { ...data.export, [key]: value },
     })

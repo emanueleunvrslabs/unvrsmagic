@@ -10,9 +10,11 @@ import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
 import { z } from "zod"
 
+import type { ExchangeKey } from "../../types"
+
 interface ExchangesSectionProps {
-  exchanges: any[]
-  onExchangesChange: (exchanges: any[]) => void
+  exchanges: ExchangeKey[]
+  onExchangesChange: (exchanges: ExchangeKey[]) => void
 }
 
 const EXCHANGES = [

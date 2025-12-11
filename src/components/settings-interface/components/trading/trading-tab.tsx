@@ -17,7 +17,7 @@ interface TradingTabProps {
 }
 
 export const TradingTab: React.FC<TradingTabProps> = ({ trading, onTradingChange }) => {
-  const handleDefaultsChange = (key: keyof TradingSettings["orderDefaults"], value: any) => {
+  const handleDefaultsChange = (key: keyof TradingSettings["orderDefaults"], value: string | boolean) => {
     onTradingChange({
       orderDefaults: { ...trading.orderDefaults, [key]: value },
     })
@@ -29,7 +29,7 @@ export const TradingTab: React.FC<TradingTabProps> = ({ trading, onTradingChange
     })
   }
 
-  const handleChartChange = (key: keyof TradingSettings["chartPreferences"], value: any) => {
+  const handleChartChange = (key: keyof TradingSettings["chartPreferences"], value: string | string[]) => {
     onTradingChange({
       chartPreferences: { ...trading.chartPreferences, [key]: value },
     })

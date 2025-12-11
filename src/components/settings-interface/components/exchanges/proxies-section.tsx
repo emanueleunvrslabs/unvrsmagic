@@ -10,9 +10,15 @@ import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
 import { z } from "zod"
 
+interface ProxyConnection {
+  id: string
+  provider: string
+  api_key: string
+}
+
 interface ProxiesSectionProps {
-  proxies?: any[]
-  onProxiesChange?: (proxies: any[]) => void
+  proxies?: ProxyConnection[]
+  onProxiesChange?: (proxies: ProxyConnection[]) => void
 }
 
 const PROXIES = [
