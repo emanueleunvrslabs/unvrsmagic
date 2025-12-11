@@ -1,13 +1,33 @@
+import { useEffect, useState } from "react";
+
 export function VideoBackground() {
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 20;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      setOffset({ x, y });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Video background */}
+      {/* Video background with parallax */}
       <video
         autoPlay
         muted
         loop
         playsInline
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute w-[110%] h-[110%] object-cover transition-transform duration-300 ease-out"
+        style={{
+          left: "-5%",
+          top: "-5%",
+          transform: `translate(${offset.x}px, ${offset.y}px) scale(1.05)`,
+        }}
       >
         <source
           src="https://amvbkkbqkzklrcynpwwm.supabase.co/storage/v1/object/public/uploads/9d8f65ef-58ef-47db-be8f-926f26411b39/1765494350764-4K_2.mp4"
