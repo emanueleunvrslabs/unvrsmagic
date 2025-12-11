@@ -362,11 +362,6 @@ const DelibereAreraPage = () => {
         {isAdminUser && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="labs-client-card relative rounded-2xl overflow-hidden">
-              <div className="labs-stars-layer"></div>
-              <div className="labs-stars-layer-2"></div>
-              <div className="labs-stars-layer-3"></div>
-              <div className="labs-shooting-star labs-shooting-star-1"></div>
-              <div className="labs-glow"></div>
               <div className="relative flex items-center gap-3 p-5 z-10">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <FileText className="h-5 w-5 text-primary" />
@@ -378,11 +373,6 @@ const DelibereAreraPage = () => {
               </div>
             </div>
             <div className="labs-client-card relative rounded-2xl overflow-hidden">
-              <div className="labs-stars-layer"></div>
-              <div className="labs-stars-layer-2"></div>
-              <div className="labs-stars-layer-3"></div>
-              <div className="labs-shooting-star labs-shooting-star-2"></div>
-              <div className="labs-glow"></div>
               <div className="relative flex items-center gap-3 p-5 z-10">
                 <div className="p-2 rounded-lg bg-green-500/10">
                   <Download className="h-5 w-5 text-green-400" />
@@ -399,11 +389,6 @@ const DelibereAreraPage = () => {
               </div>
             </div>
             <div className="labs-client-card relative rounded-2xl overflow-hidden">
-              <div className="labs-stars-layer"></div>
-              <div className="labs-stars-layer-2"></div>
-              <div className="labs-stars-layer-3"></div>
-              <div className="labs-shooting-star labs-shooting-star-1"></div>
-              <div className="labs-glow"></div>
               <div className="relative flex items-center gap-3 p-5 z-10">
                 <div className="p-2 rounded-lg bg-yellow-500/10">
                   <Clock
@@ -427,9 +412,6 @@ const DelibereAreraPage = () => {
         <div className="space-y-4">
           {isLoading ? (
             <div className="labs-client-card relative rounded-2xl overflow-hidden">
-              <div className="labs-stars-layer"></div>
-              <div className="labs-stars-layer-2"></div>
-              <div className="labs-glow"></div>
               <div className="relative py-8 text-center z-10">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
                 <p className="mt-2 text-muted-foreground">
@@ -439,9 +421,6 @@ const DelibereAreraPage = () => {
             </div>
           ) : delibere.length === 0 ? (
             <div className="labs-client-card relative rounded-2xl overflow-hidden">
-              <div className="labs-stars-layer"></div>
-              <div className="labs-stars-layer-2"></div>
-              <div className="labs-glow"></div>
               <div className="relative py-8 text-center z-10">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground/50" />
                 <p className="mt-4 text-muted-foreground">
