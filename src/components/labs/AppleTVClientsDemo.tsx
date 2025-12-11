@@ -679,23 +679,21 @@ export function AppleTVClientsDemo() {
                     )}
                   >
                     {/* Content */}
-                    <div className="absolute inset-0 flex items-center justify-between p-8 z-10">
-                      <div>
-                        <h2 className="text-3xl font-bold text-white tracking-tight">
-                          {client.company_name}
-                        </h2>
-                        <p className="text-white/60 text-lg mt-2">{client.city || "—"}</p>
-                        {client.client_contacts?.length > 0 && (
-                          <p className="text-white/40 text-sm mt-1">
-                            {client.client_contacts.length} contact{client.client_contacts.length > 1 ? 's' : ''}
-                          </p>
-                        )}
-                      </div>
-                      <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
-                        <span className="text-4xl font-bold text-white/80">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 z-10">
+                      <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 mb-4">
+                        <span className="text-3xl font-bold text-white/80">
                           {client.company_name[0]}
                         </span>
                       </div>
+                      <h2 className="text-2xl font-bold text-white tracking-tight text-center">
+                        {client.company_name}
+                      </h2>
+                      <p className="text-white/60 text-base mt-1">{client.city || "—"}</p>
+                      {client.client_contacts?.length > 0 && (
+                        <p className="text-white/40 text-sm mt-1">
+                          {client.client_contacts.length} contact{client.client_contacts.length > 1 ? 's' : ''}
+                        </p>
+                      )}
                     </div>
 
                     {/* Edit Icon - Top Right */}
