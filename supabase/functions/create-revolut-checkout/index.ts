@@ -92,6 +92,9 @@ serve(async (req) => {
       isSandbox
     });
 
+    // Build the redirect URL for after payment
+    const successRedirectUrl = returnUrl || `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovableproject.com')}/wallet`;
+
     // Create Revolut order
     const orderResponse = await fetch(apiBase, {
       method: "POST",
@@ -107,6 +110,7 @@ serve(async (req) => {
         description: `${creditPackage.amount} credits for AI content generation`,
         merchant_order_ext_ref: orderRef,
         customer_email: user.email,
+        redirect_url: successRedirectUrl,
         metadata: {
           user_id: user.id,
           credit_amount: creditPackage.amount.toString(),
