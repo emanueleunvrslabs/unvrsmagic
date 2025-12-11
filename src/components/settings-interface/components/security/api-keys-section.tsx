@@ -103,6 +103,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   const [revolutCertGenerating, setRevolutCertGenerating] = useState(false)
   const [revolutPublicKey, setRevolutPublicKey] = useState("")
   const [revolutRedirectUri, setRevolutRedirectUri] = useState("")
+  const [revolutClientId, setRevolutClientId] = useState("")
   const [copiedItem, setCopiedItem] = useState<string | null>(null)
 
   // Load saved API keys on mount
@@ -547,7 +548,7 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
               {revolutCertGenerating ? "Generating..." : "Generate Certificate"}
             </Button>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -576,7 +577,16 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                   {copiedItem === "uri" ? "Copied!" : "Copy Redirect URI"}
                 </Button>
               </div>
-              <span className="text-xs text-muted-foreground">Certificate generated ✓</span>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  placeholder="Paste Client ID from Revolut"
+                  value={revolutClientId}
+                  onChange={(e) => setRevolutClientId(e.target.value)}
+                  className="flex-1 max-w-xs h-8 text-xs bg-white/5 border-white/10"
+                />
+              </div>
+              <span className="text-xs text-muted-foreground">Certificate generated ✓ - Paste Client ID to connect</span>
             </div>
           )}
         </div>
@@ -684,8 +694,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     }
     
     if (provider.type === 'revolut_business') {
-      // Revolut Business uses OAuth - needs certificate generated first
-      return !revolutPublicKey
+      // Revolut Business uses OAuth - needs certificate and client ID
+      return !revolutPublicKey || !revolutClientId
     }
     
     return !apiKeys[provider.id]
