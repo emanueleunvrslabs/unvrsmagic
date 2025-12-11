@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
+import "@/components/labs/SocialMediaCard.css";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -259,8 +259,8 @@ export function ContentGallerySection() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredContent.map((item) => (
-            <Card key={item.id} className="group relative overflow-hidden">
-              <CardContent className="p-0">
+            <div key={item.id} className="labs-client-card rounded-[18px] group relative overflow-hidden">
+              <div className="p-0">
                 {/* Thumbnail con overlay badges */}
                 <div className="relative aspect-square bg-muted">
                   {item.status === "completed" && (item.media_url || item.thumbnail_url) ? (
@@ -453,8 +453,8 @@ export function ContentGallerySection() {
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}

@@ -1,5 +1,4 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Video, Zap, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentGallerySection } from "@/components/ai-social/ContentGallerySection";
 import { useQuery } from "@tanstack/react-query";
+import "@/components/labs/SocialMediaCard.css";
 
 const WorkflowsList = () => {
   const { data: workflows } = useQuery({
@@ -54,19 +54,15 @@ const WorkflowsList = () => {
 
   if (!workflows || workflows.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Automated Workflows</CardTitle>
-          <CardDescription>
-            Configure automations to generate and publish content
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            No active workflows
-          </div>
-        </CardContent>
-      </Card>
+      <div className="labs-client-card rounded-[22px] p-6">
+        <div className="mb-4">
+          <h3 className="text-xl font-bold text-white">Automated Workflows</h3>
+          <p className="text-sm text-white/50 mt-1">Configure automations to generate and publish content</p>
+        </div>
+        <div className="text-center py-12 text-white/40">
+          No active workflows
+        </div>
+      </div>
     );
   }
 
@@ -81,21 +77,19 @@ const WorkflowsList = () => {
           .join(" ");
 
         return (
-          <Card key={workflow.id} className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate('/ai-social/workflows')}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1 flex-1">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Play className="h-4 w-4 text-primary" />
-                    {workflow.name}
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    {formatSchedule(scheduleConfig)}
-                  </CardDescription>
-                </div>
+          <div key={workflow.id} className="labs-client-card rounded-[22px] p-5 cursor-pointer hover:bg-white/10 transition-colors" onClick={() => navigate('/ai-social/workflows')}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="space-y-1 flex-1">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Play className="h-4 w-4 text-primary" />
+                  {workflow.name}
+                </h3>
+                <p className="text-xs text-white/50">
+                  {formatSchedule(scheduleConfig)}
+                </p>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
+            </div>
+            <div className="space-y-3">
               <div className="flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-blue-500/10 text-blue-400 border-blue-500/20">
                   {workflow.content_type === "image" ? "🖼️ Image" : "🎥 Video"}
@@ -123,8 +117,8 @@ const WorkflowsList = () => {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         );
       })}
     </div>
@@ -206,107 +200,83 @@ export default function AiSocialDashboard() {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card className="dashboard-card">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Content</CardTitle>
-                  <Image className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalContent}</div>
-                  <p className="text-xs text-muted-foreground">Images & Videos</p>
-                </CardContent>
-              </Card>
+              <div className="labs-client-card rounded-[22px] p-5">
+                <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <h3 className="text-sm font-medium text-white/70">Total Content</h3>
+                  <Image className="h-4 w-4 text-white/40" />
+                </div>
+                <div className="text-2xl font-bold text-white">{stats.totalContent}</div>
+                <p className="text-xs text-white/40">Images & Videos</p>
+              </div>
 
-              <Card className="dashboard-card">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Generated Images</CardTitle>
-                  <Image className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.generatedImages}</div>
-                  <p className="text-xs text-muted-foreground">Total images</p>
-                </CardContent>
-              </Card>
+              <div className="labs-client-card rounded-[22px] p-5">
+                <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <h3 className="text-sm font-medium text-white/70">Generated Images</h3>
+                  <Image className="h-4 w-4 text-white/40" />
+                </div>
+                <div className="text-2xl font-bold text-white">{stats.generatedImages}</div>
+                <p className="text-xs text-white/40">Total images</p>
+              </div>
 
-              <Card className="dashboard-card">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Generated Videos</CardTitle>
-                  <Video className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.generatedVideos}</div>
-                  <p className="text-xs text-muted-foreground">Total videos</p>
-                </CardContent>
-              </Card>
+              <div className="labs-client-card rounded-[22px] p-5">
+                <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <h3 className="text-sm font-medium text-white/70">Generated Videos</h3>
+                  <Video className="h-4 w-4 text-white/40" />
+                </div>
+                <div className="text-2xl font-bold text-white">{stats.generatedVideos}</div>
+                <p className="text-xs text-white/40">Total videos</p>
+              </div>
 
-              <Card className="dashboard-card">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Workflows</CardTitle>
-                  <Zap className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeWorkflows}</div>
-                  <p className="text-xs text-muted-foreground">Active automations</p>
-                </CardContent>
-              </Card>
+              <div className="labs-client-card rounded-[22px] p-5">
+                <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <h3 className="text-sm font-medium text-white/70">Active Workflows</h3>
+                  <Zap className="h-4 w-4 text-white/40" />
+                </div>
+                <div className="text-2xl font-bold text-white">{stats.activeWorkflows}</div>
+                <p className="text-xs text-white/40">Active automations</p>
+              </div>
             </div>
 
-            <Card className="dashboard-card">
-              <CardHeader>
-                <CardTitle>Get Started</CardTitle>
-                <CardDescription>
-                  Generate AI visual content for your social media
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <Card 
-                    className="dashboard-card cursor-pointer hover:bg-accent/50 transition-colors"
-                    onClick={() => navigate('/ai-social/generate-image')}
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Image className="h-5 w-5" />
-                        Generate Image
-                      </CardTitle>
-                      <CardDescription>
-                        Create images with Nano Banana
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-
-                  <Card 
-                    className="dashboard-card cursor-pointer hover:bg-accent/50 transition-colors"
-                    onClick={() => navigate('/ai-social/generate-video')}
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Video className="h-5 w-5" />
-                        Generate Video
-                      </CardTitle>
-                      <CardDescription>
-                        Create videos with Veo3
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-
-                  <Card 
-                    className="dashboard-card cursor-pointer hover:bg-accent/50 transition-colors"
-                    onClick={() => navigate('/ai-social/workflows')}
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Zap className="h-5 w-5" />
-                        Create Workflow
-                      </CardTitle>
-                      <CardDescription>
-                        Automate AI content generation
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
+            <div className="labs-client-card rounded-[22px] p-6">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-white">Get Started</h3>
+                <p className="text-sm text-white/50 mt-1">Generate AI visual content for your social media</p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div 
+                  className="labs-client-card rounded-[18px] p-5 cursor-pointer hover:bg-white/10 transition-colors"
+                  onClick={() => navigate('/ai-social/generate-image')}
+                >
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Image className="h-5 w-5" />
+                    Generate Image
+                  </h3>
+                  <p className="text-sm text-white/50 mt-2">Create images with Nano Banana</p>
                 </div>
-              </CardContent>
-            </Card>
+
+                <div 
+                  className="labs-client-card rounded-[18px] p-5 cursor-pointer hover:bg-white/10 transition-colors"
+                  onClick={() => navigate('/ai-social/generate-video')}
+                >
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Video className="h-5 w-5" />
+                    Generate Video
+                  </h3>
+                  <p className="text-sm text-white/50 mt-2">Create videos with Veo3</p>
+                </div>
+
+                <div 
+                  className="labs-client-card rounded-[18px] p-5 cursor-pointer hover:bg-white/10 transition-colors"
+                  onClick={() => navigate('/ai-social/workflows')}
+                >
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Zap className="h-5 w-5" />
+                    Create Workflow
+                  </h3>
+                  <p className="text-sm text-white/50 mt-2">Automate AI content generation</p>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="content">
