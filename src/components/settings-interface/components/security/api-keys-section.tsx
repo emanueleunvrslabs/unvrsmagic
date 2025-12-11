@@ -629,10 +629,10 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                   {provider.description}
                 </TableCell>
                 <TableCell>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  <span className={`inline-flex items-center text-xs font-medium ${
                     connectedProviders.has(provider.id) 
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                      : "bg-red-500/20 text-red-400 border border-red-500/30"
+                      ? "text-emerald-400" 
+                      : "text-red-400"
                   }`}>
                     {connectedProviders.has(provider.id) ? "Connected" : "Not connected"}
                   </span>
