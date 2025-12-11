@@ -179,211 +179,195 @@ export default function GenerateImage() {
         )}
 
         <div className="grid gap-6 md:grid-cols-2">
-          <div 
-            className="social-media-card" 
-            style={{ 
-              width: '100%', 
-              height: 'auto',
-              minHeight: '30em',
-              cursor: 'default'
-            }}
-          >
-            <div className="card-main-content" style={{ width: '100%', padding: '1.5em' }}>
-              <div className="card-heading text-lg mb-4">Image Settings</div>
-              <p className="text-sm text-muted-foreground mb-4">Configure your AI-generated image</p>
-              
-              <div className="space-y-4 w-full">
+          <div className="labs-client-card rounded-[22px] p-6">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-white">Image Settings</h3>
+              <p className="text-sm text-white/50 mt-1">Configure your AI-generated image</p>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="mode">Generation Mode</Label>
+                <Select value={mode} onValueChange={(value) => handleModeChange(value as "text-to-image" | "image-to-image")}>
+                  <SelectTrigger id="mode">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text-to-image">Text to Image</SelectItem>
+                    <SelectItem value="image-to-image">Image to Image</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {mode === "image-to-image" && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="input-image">Upload Images</Label>
+                    <Input
+                      id="input-image"
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileUpload}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="image-url">Add Image from URL</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="image-url"
+                        type="url"
+                        placeholder="https://example.com/image.jpg"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddUrl();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddUrl}
+                        disabled={!imageUrl.trim()}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+
+                  {inputImages.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Uploaded Images ({inputImages.length})</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {inputImages.map((img, index) => (
+                          <div key={index} className="relative group">
+                            <img 
+                              src={img} 
+                              alt={`Input ${index + 1}`}
+                              className="w-full rounded-lg aspect-square object-cover"
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="prompt">Prompt</Label>
+                <Textarea
+                  id="prompt"
+                  placeholder={mode === "text-to-image" 
+                    ? "Describe the image you want to generate..." 
+                    : "Describe how you want to modify the image..."}
+                  rows={6}
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="mode">Generation Mode</Label>
-                  <Select value={mode} onValueChange={(value) => handleModeChange(value as "text-to-image" | "image-to-image")}>
-                    <SelectTrigger id="mode">
+                  <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
+                  <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="text-to-image">Text to Image</SelectItem>
-                      <SelectItem value="image-to-image">Image to Image</SelectItem>
+                      {mode === "image-to-image" && <SelectItem value="auto">Auto</SelectItem>}
+                      <SelectItem value="1:1">1:1 (Square)</SelectItem>
+                      <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                      <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                      <SelectItem value="4:3">4:3</SelectItem>
+                      <SelectItem value="3:4">3:4</SelectItem>
+                      <SelectItem value="21:9">21:9 (Ultrawide)</SelectItem>
+                      <SelectItem value="3:2">3:2</SelectItem>
+                      <SelectItem value="2:3">2:3</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                {mode === "image-to-image" && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="input-image">Upload Images</Label>
-                      <Input
-                        id="input-image"
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleFileUpload}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="image-url">Add Image from URL</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="image-url"
-                          type="url"
-                          placeholder="https://example.com/image.jpg"
-                          value={imageUrl}
-                          onChange={(e) => setImageUrl(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleAddUrl();
-                            }
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={handleAddUrl}
-                          disabled={!imageUrl.trim()}
-                        >
-                          Add
-                        </Button>
-                      </div>
-                    </div>
-
-                    {inputImages.length > 0 && (
-                      <div className="space-y-2">
-                        <Label>Uploaded Images ({inputImages.length})</Label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {inputImages.map((img, index) => (
-                            <div key={index} className="relative group">
-                              <img 
-                                src={img} 
-                                alt={`Input ${index + 1}`}
-                                className="w-full rounded-lg aspect-square object-cover"
-                              />
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="destructive"
-                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => handleRemoveImage(index)}
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="resolution">Resolution</Label>
+                  <Select value={resolution} onValueChange={setResolution}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1K">1K</SelectItem>
+                      <SelectItem value="2K">2K</SelectItem>
+                      <SelectItem value="4K">4K</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="prompt">Prompt</Label>
-                  <Textarea
-                    id="prompt"
-                    placeholder={mode === "text-to-image" 
-                      ? "Describe the image you want to generate..." 
-                      : "Describe how you want to modify the image..."}
-                    rows={6}
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                  />
+                  <Label htmlFor="output-format">Output Format</Label>
+                  <Select value={outputFormat} onValueChange={setOutputFormat}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="png">PNG</SelectItem>
+                      <SelectItem value="jpeg">JPEG</SelectItem>
+                      <SelectItem value="webp">WEBP</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
-                    <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {mode === "image-to-image" && <SelectItem value="auto">Auto</SelectItem>}
-                        <SelectItem value="1:1">1:1 (Square)</SelectItem>
-                        <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-                        <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                        <SelectItem value="4:3">4:3</SelectItem>
-                        <SelectItem value="3:4">3:4</SelectItem>
-                        <SelectItem value="21:9">21:9 (Ultrawide)</SelectItem>
-                        <SelectItem value="3:2">3:2</SelectItem>
-                        <SelectItem value="2:3">2:3</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="resolution">Resolution</Label>
-                    <Select value={resolution} onValueChange={setResolution}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1K">1K</SelectItem>
-                        <SelectItem value="2K">2K</SelectItem>
-                        <SelectItem value="4K">4K</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="output-format">Output Format</Label>
-                    <Select value={outputFormat} onValueChange={setOutputFormat}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="png">PNG</SelectItem>
-                        <SelectItem value="jpeg">JPEG</SelectItem>
-                        <SelectItem value="webp">WEBP</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={handleGenerate} 
-                  disabled={loading || hasInsufficientCredits}
-                  className="w-full"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : hasInsufficientCredits ? (
-                    "Crediti insufficienti"
-                  ) : (
-                    `Generate Image (€${IMAGE_COST})`
-                  )}
-                </Button>
               </div>
+
+              <Button 
+                onClick={handleGenerate} 
+                disabled={loading || hasInsufficientCredits}
+                className="w-full"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : hasInsufficientCredits ? (
+                  "Crediti insufficienti"
+                ) : (
+                  `Generate Image (€${IMAGE_COST})`
+                )}
+              </Button>
             </div>
           </div>
 
-          <div 
-            className="social-media-card" 
-            style={{ 
-              width: '100%', 
-              height: 'auto',
-              minHeight: '30em',
-              cursor: 'default'
-            }}
-          >
-            <div className="card-main-content" style={{ width: '100%', padding: '1.5em' }}>
-              <div className="card-heading text-lg mb-4">Preview</div>
-              <p className="text-sm text-muted-foreground mb-4">Generated image will appear here</p>
-              
-              <div className="w-full flex-1">
-                {generatedImage ? (
-                  <img 
-                    src={generatedImage} 
-                    alt="Generated" 
-                    className="w-full rounded-lg"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-64 bg-white/5 rounded-lg border border-white/10">
-                    <p className="text-muted-foreground">No image generated yet</p>
-                  </div>
-                )}
-              </div>
+          <div className="labs-client-card rounded-[22px] p-6">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-white">Preview</h3>
+              <p className="text-sm text-white/50 mt-1">Generated image will appear here</p>
+            </div>
+            
+            <div className="w-full">
+              {generatedImage ? (
+                <img 
+                  src={generatedImage} 
+                  alt="Generated" 
+                  className="w-full rounded-lg"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-64 rounded-xl bg-white/5 border border-white/10">
+                  <p className="text-white/40">No image generated yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
