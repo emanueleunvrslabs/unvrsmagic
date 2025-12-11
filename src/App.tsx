@@ -22,6 +22,8 @@ import Marketplace from "./pages/Marketplace";
 import AdminProjects from "./pages/AdminProjects";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminClients from "./pages/AdminClients";
+import FinanceDashboard from "./pages/Finance/FinanceDashboard";
+import FinanceTransactions from "./pages/Finance/FinanceTransactions";
 import AiSocialDashboard from "./pages/AiSocial/AiSocialDashboard";
 import GenerateImage from "./pages/AiSocial/GenerateImage";
 import GenerateVideo from "./pages/AiSocial/GenerateVideo";
@@ -68,6 +70,8 @@ const App = () => (
           <Route path="/file-upload" element={<ProtectedRoute><FileUpload /></ProtectedRoute>} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/clients" element={<ProtectedRoute><AdminClients /></ProtectedRoute>} />
+          <Route path="/admin/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
+          <Route path="/admin/finance/transactions" element={<ProtectedRoute><FinanceTransactions /></ProtectedRoute>} />
           <Route path="/admin/projects" element={<ProtectedRoute><AdminProjects /></ProtectedRoute>} />
           <Route path="/ai-social" element={<ProtectedRoute><AiSocialDashboard /></ProtectedRoute>} />
           <Route path="/ai-social/generate-image" element={<ProtectedRoute><GenerateImage /></ProtectedRoute>} />
