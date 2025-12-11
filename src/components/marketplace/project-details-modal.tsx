@@ -148,33 +148,51 @@ export function ProjectDetailsModal({
           <div className="detail-card flex-1 p-6">
             <h2 className="text-2xl font-semibold mb-4 text-white/90">Pricing</h2>
             <div className="flex flex-col gap-4">
-              {config.pricing.map((item, index) => (
-                <div 
-                  key={index} 
-                  className="pricing-item relative p-4"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
-                        {item.type === "Image" && <Image className="w-5 h-5 text-white/70" />}
-                        {item.type === "Video" && <Video className="w-5 h-5 text-white/70" />}
-                        {item.type !== "Image" && item.type !== "Video" && <Check className="w-5 h-5 text-white/70" />}
+              {config.pricing.map((item, index) => {
+                const cardClass = item.type === "Image" 
+                  ? "pricing-image" 
+                  : item.type === "Video" 
+                    ? "pricing-video" 
+                    : "pricing-default";
+                const iconColor = item.type === "Image" 
+                  ? "text-purple-400" 
+                  : item.type === "Video" 
+                    ? "text-cyan-400" 
+                    : "text-white/70";
+                const iconBg = item.type === "Image" 
+                  ? "bg-purple-500/20 border-purple-500/30" 
+                  : item.type === "Video" 
+                    ? "bg-cyan-500/20 border-cyan-500/30" 
+                    : "bg-white/10 border-white/10";
+                
+                return (
+                  <div 
+                    key={index} 
+                    className={cn(cardClass, "relative p-4")}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={cn("w-8 h-8 rounded-xl border flex items-center justify-center", iconBg)}>
+                          {item.type === "Image" && <Image className={cn("w-5 h-5", iconColor)} />}
+                          {item.type === "Video" && <Video className={cn("w-5 h-5", iconColor)} />}
+                          {item.type !== "Image" && item.type !== "Video" && <Check className={cn("w-5 h-5", iconColor)} />}
+                        </div>
+                        <span className="text-xl font-semibold text-white/90">{item.type}</span>
                       </div>
-                      <span className="text-xl font-semibold text-white/90">{item.type}</span>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-white">{item.price}</div>
+                        <div className="text-sm text-white/50">{item.unit}</div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-white">{item.price}</div>
-                      <div className="text-sm text-white/50">{item.unit}</div>
-                    </div>
+                    <p className="text-sm text-white/60">{item.description}</p>
                   </div>
-                  <p className="text-sm text-white/60">{item.description}</p>
-                </div>
-              ))}
+                );
+              })}
 
               {/* Add to Dashboard Button */}
               {!isAdded ? (
                 <Button 
-                  className="w-full py-3 px-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm text-white/80 font-medium flex items-center justify-center gap-2 hover:bg-white/15 hover:text-white transition-all" 
+                  className="add-button w-full py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2" 
                   onClick={onAddProject}
                   disabled={isLoading}
                   variant="ghost"
@@ -189,7 +207,7 @@ export function ProjectDetailsModal({
               ) : (
                 <Button 
                   variant="ghost"
-                  className="w-full py-3 px-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm text-white/80 font-medium flex items-center justify-center gap-2 hover:bg-white/15 hover:text-white transition-all"
+                  className="add-button w-full py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2"
                   asChild
                 >
                   <a href={project.route} target="_blank" rel="noopener noreferrer">
