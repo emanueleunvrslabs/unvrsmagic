@@ -52,6 +52,7 @@ export function AppleTVClientsDemo() {
   const queryClient = useQueryClient();
   const isNewClientView = searchParams.get("view") === "new";
   const editClientId = searchParams.get("edit");
+  const searchQuery = searchParams.get("search") || "";
   const basePath = location.pathname;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [newClient, setNewClient] = useState({
@@ -346,6 +347,20 @@ export function AppleTVClientsDemo() {
       emblaApi.off("select", onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  // Search and scroll to matching client
+  useEffect(() => {
+    if (!emblaApi || !clients || !searchQuery) return;
+    
+    const matchingIndex = clients.findIndex(client => 
+      client.company_name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    if (matchingIndex !== -1) {
+      emblaApi.scrollTo(matchingIndex);
+      setSelectedIndex(matchingIndex);
+    }
+  }, [emblaApi, clients, searchQuery]);
 
   // New/Edit Client Form View
   if (isNewClientView || editClientId) {
