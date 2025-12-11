@@ -643,16 +643,17 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDisconnect(provider.id)}
-                      className="h-8 px-3 text-xs bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/10"
+                      className="h-8 px-3 text-xs bg-transparent text-red-400 border border-red-500/30 hover:bg-red-500/10"
                     >
                       Disconnect
                     </Button>
                   ) : (
                     <Button
+                      variant="ghost"
                       size="sm"
                       onClick={() => handleConnect(provider.id)}
                       disabled={isConnectDisabled(provider)}
-                      className="h-8 px-3 text-xs bg-primary/20 text-primary border border-primary/30 hover:bg-primary/20"
+                      className="h-8 px-3 text-xs bg-transparent text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 disabled:opacity-50"
                     >
                       {connectingProvider === provider.id ? "Connecting..." : "Connect"}
                     </Button>
