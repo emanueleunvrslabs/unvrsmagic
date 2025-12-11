@@ -348,7 +348,6 @@ export function AppleTVClientsDemo() {
     
     return (
       <div className="relative h-full flex flex-col items-center justify-start p-8 pt-4 overflow-y-auto">
-        <h2 className="text-2xl font-semibold text-white/90 mb-6">{isEditMode ? 'Edit Client' : 'New Client'}</h2>
         <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Left Card - Bill Information */}
           <div className="relative rounded-[22px] overflow-hidden p-8 bg-white/[0.08] backdrop-blur-[36px] backdrop-saturate-[1.2] border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]">
