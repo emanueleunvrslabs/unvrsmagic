@@ -193,10 +193,16 @@ export default function FinanceDashboard() {
         {/* Balance Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(totalBalances).map(([currency, amount]) => (
-            <div key={currency} className="glassmorphism-card p-6">
+            <div 
+              key={currency} 
+              className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+              }}
+            >
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <Wallet className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-white/10 flex items-center justify-center">
+                  <Wallet className="h-5 w-5 text-blue-400" />
                 </div>
                 <div>
                   <p className="text-white/60 text-sm">Total Balance</p>
@@ -210,7 +216,12 @@ export default function FinanceDashboard() {
           ))}
 
           {accounts.length === 0 && (
-            <div className="glassmorphism-card p-6 col-span-full text-center">
+            <div 
+              className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 col-span-full text-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+              }}
+            >
               <Wallet className="h-12 w-12 text-white/30 mx-auto mb-3" />
               <p className="text-white/60">No accounts found</p>
             </div>
@@ -223,13 +234,19 @@ export default function FinanceDashboard() {
             <h2 className="text-lg font-medium text-white mb-4">Accounts</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {accounts.map((account) => (
-                <div key={account.id} className="glassmorphism-card p-5">
+                <div 
+                  key={account.id} 
+                  className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+                  }}
+                >
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-white font-medium">{account.name || account.currency}</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
+                    <span className={`text-xs px-2 py-1 rounded-full border ${
                       account.state === 'active' 
-                        ? 'bg-green-500/20 text-green-400' 
-                        : 'bg-yellow-500/20 text-yellow-400'
+                        ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                        : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
                     }`}>
                       {account.state}
                     </span>
@@ -257,7 +274,12 @@ export default function FinanceDashboard() {
             </Link>
           </div>
           
-          <div className="glassmorphism-card divide-y divide-white/10">
+          <div 
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl divide-y divide-white/10"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+            }}
+          >
             {transactions.length === 0 ? (
               <div className="p-8 text-center">
                 <p className="text-white/60">No recent transactions</p>
@@ -270,7 +292,7 @@ export default function FinanceDashboard() {
                 return (
                   <div key={tx.id} className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
+                      <div className="h-8 w-8 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
                         {getTransactionIcon(tx.type)}
                       </div>
                       <div>
