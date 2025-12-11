@@ -142,7 +142,7 @@ async function createClientAssertionJWT(clientId: string, privateKeyPem: string)
   const payload = {
     iss: clientId,
     sub: clientId,
-    aud: 'https://revolut.com',
+    aud: 'https://sandbox-b2b.revolut.com',
     iat: now,
     exp: exp,
   }
