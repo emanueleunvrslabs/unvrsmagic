@@ -149,7 +149,8 @@ export function Topbar() {
             <button 
               onClick={() => {
                 setClientSearch("");
-                navigate(isClientsPage ? "/admin/clients?view=new" : "/labs?view=new");
+                const basePath = isClientsPage ? "/admin/clients" : "/labs";
+                navigate(`${basePath}?view=new`);
               }}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
