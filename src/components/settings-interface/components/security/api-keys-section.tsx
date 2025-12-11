@@ -257,8 +257,13 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
     } else if (provider.type === 'revolut_business') {
-      if (!apiKeys.revolut_business?.trim()) {
-        toast.error("Business API key is required")
+      // For Revolut Business OAuth, validate certificate and client ID
+      if (!revolutPublicKey) {
+        toast.error("Please generate a certificate first")
+        return
+      }
+      if (!revolutClientId?.trim()) {
+        toast.error("Client ID is required")
         return
       }
     } else {
@@ -284,48 +289,38 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
 
-      // For Revolut Business, verify with API then save
+      // For Revolut Business OAuth flow
       if (provider.type === 'revolut_business') {
-        // Verify the Business API key
-        const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-api-key', {
-          body: {
-            provider: 'revolut_business',
-            apiKey: apiKeys.revolut_business
-          }
-        })
-
-        if (verifyError) {
-          console.error("Error verifying Revolut Business API key:", verifyError)
-          toast.error("Failed to verify Revolut Business API key")
-          return
-        }
-
-        if (!verifyData?.valid) {
-          toast.error(verifyData?.error || "Invalid Revolut Business API key")
-          return
-        }
-
-        // Save the verified API key
+        // Save the client ID along with existing certificate data
         const { error: saveError } = await supabase
           .from('api_keys')
           .upsert({
             user_id: user.id,
             provider: 'revolut_business',
-            api_key: apiKeys.revolut_business,
+            api_key: JSON.stringify({
+              public_key: revolutPublicKey,
+              redirect_uri: revolutRedirectUri,
+              client_id: revolutClientId
+            }),
             owner_id: null
           }, {
             onConflict: 'user_id,provider'
           })
 
         if (saveError) {
-          console.error("Error saving Business API key:", saveError)
-          toast.error("Failed to save Business API key")
+          console.error("Error saving Revolut Business config:", saveError)
+          toast.error("Failed to save configuration")
+          setConnectingProvider(null)
           return
         }
 
-        setConnectedProviders(prev => new Set(prev).add('revolut_business'))
-        toast.success("Revolut Business connected successfully")
-        setConnectingProvider(null)
+        // Redirect to Revolut OAuth authorization page
+        const state = user.id // Use user ID as state for callback
+        const redirectUri = revolutRedirectUri
+        const authUrl = `https://business.revolut.com/app-confirm?client_id=${revolutClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&state=${state}`
+        
+        toast.success("Redirecting to Revolut for authorization...")
+        window.location.href = authUrl
         return
       }
 
