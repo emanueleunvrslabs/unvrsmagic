@@ -45,6 +45,7 @@ import {
   Wallet,
   XIcon,
   Zap,
+  Search,
 } from "lucide-react";
 import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -54,16 +55,29 @@ import { toast } from "sonner";
 export function Topbar() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [clientSearch, setClientSearch] = useState("");
   const { isConnected, address, balance, disconnect, copyAddress } = useWalletConnection();
   const { isOwner } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const isLabsPage = location.pathname === "/labs";
   const isClientsPage = location.pathname === "/admin/clients";
   const showClientsMenu = isLabsPage || isClientsPage;
   const isNewClientView = searchParams.get("view") === "new";
+  const editClientId = searchParams.get("edit");
+  const showSearchInMenu = showClientsMenu && !isNewClientView && !editClientId;
+
+  const handleClientSearch = (value: string) => {
+    setClientSearch(value);
+    const basePath = isClientsPage ? "/admin/clients" : "/labs";
+    if (value.trim()) {
+      navigate(`${basePath}?search=${encodeURIComponent(value.trim())}`);
+    } else {
+      navigate(basePath);
+    }
+  };
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -117,10 +131,27 @@ export function Topbar() {
       
       {/* Center Menu - show on Labs and Clients pages */}
       {showClientsMenu && (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center gap-3">
+          {/* Search Input */}
+          {showSearchInMenu && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+              <input
+                type="text"
+                placeholder="Search clients..."
+                value={clientSearch}
+                onChange={(e) => handleClientSearch(e.target.value)}
+                className="w-48 pl-9 pr-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/15 text-white text-sm placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-white/20"
+              />
+            </div>
+          )}
+          
           <div className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/15">
             <button 
-              onClick={() => navigate(isClientsPage ? "/admin/clients?view=new" : "/labs?view=new")}
+              onClick={() => {
+                setClientSearch("");
+                navigate(isClientsPage ? "/admin/clients?view=new" : "/labs?view=new");
+              }}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
                 isNewClientView
@@ -132,10 +163,13 @@ export function Topbar() {
               New Client
             </button>
             <button 
-              onClick={() => navigate(isClientsPage ? "/admin/clients" : "/labs")}
+              onClick={() => {
+                setClientSearch("");
+                navigate(isClientsPage ? "/admin/clients" : "/labs");
+              }}
               className={cn(
                 "px-4 py-2 rounded-full text-sm font-medium transition-all",
-                !isNewClientView
+                !isNewClientView && !editClientId
                   ? "bg-white/20 text-white"
                   : "text-white/60 hover:text-white/80 hover:bg-white/10"
               )}
