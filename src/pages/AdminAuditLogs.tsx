@@ -217,11 +217,11 @@ const AdminAuditLogs = () => {
             <CardTitle className="text-lg">Filters</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-4">
-              <div className="space-y-2 w-[160px]">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="space-y-2">
                 <label className="text-sm font-medium">Table</label>
                 <Select value={tableFilter} onValueChange={setTableFilter}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="h-10">
                     <SelectValue placeholder="Select table" />
                   </SelectTrigger>
                   <SelectContent>
@@ -234,10 +234,10 @@ const AdminAuditLogs = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2 w-[160px]">
+              <div className="space-y-2">
                 <label className="text-sm font-medium">Action</label>
                 <Select value={actionFilter} onValueChange={setActionFilter}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="h-10">
                     <SelectValue placeholder="Select action" />
                   </SelectTrigger>
                   <SelectContent>
@@ -250,36 +250,36 @@ const AdminAuditLogs = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2 w-[160px]">
+              <div className="space-y-2">
                 <label className="text-sm font-medium">User ID</label>
-                <div className="relative">
+                <div className="relative h-10">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Filter by user ID"
                     value={userIdFilter}
                     onChange={(e) => setUserIdFilter(e.target.value)}
-                    className="pl-10 w-full"
+                    className="pl-10 h-10"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2 w-[160px]">
+              <div className="space-y-2">
                 <label className="text-sm font-medium">From Date</label>
                 <Input
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full h-10 px-3 py-2 text-sm [color-scheme:dark]"
+                  className="h-10 [color-scheme:dark]"
                 />
               </div>
 
-              <div className="space-y-2 w-[160px]">
+              <div className="space-y-2">
                 <label className="text-sm font-medium">To Date</label>
                 <Input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full h-10 px-3 py-2 text-sm [color-scheme:dark]"
+                  className="h-10 [color-scheme:dark]"
                 />
               </div>
             </div>
