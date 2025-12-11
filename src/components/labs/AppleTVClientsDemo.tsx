@@ -323,10 +323,11 @@ export function AppleTVClientsDemo() {
         setShowDocuments(false);
         setShowTodos(false);
         setShowKanban(false);
+        setShowWhatsApp(false);
         break;
       case "whatsapp":
         if (contact?.whatsapp_number) {
-          setShowWhatsApp(true);
+          setShowWhatsApp(!showWhatsApp);
           setShowDocuments(false);
           setShowTodos(false);
           setShowKanban(false);
@@ -340,18 +341,21 @@ export function AppleTVClientsDemo() {
         setShowTodos(false);
         setShowKanban(false);
         setShowEmail(false);
+        setShowWhatsApp(false);
         break;
       case "todo":
         setShowTodos(!showTodos);
         setShowDocuments(false);
         setShowKanban(false);
         setShowEmail(false);
+        setShowWhatsApp(false);
         break;
       case "kanban":
         setShowKanban(!showKanban);
         setShowDocuments(false);
         setShowTodos(false);
         setShowEmail(false);
+        setShowWhatsApp(false);
         break;
     }
   };
