@@ -80,7 +80,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
   useEffect(() => {
     if (!apiKeys) return
     const normalizeProvider = (p: string) => (p === 'chatgpt' ? 'openai' : p === 'claude' ? 'anthropic' : p)
-    const fromProps = new Set(apiKeys.map(k => normalizeProvider((k as any).provider)))
+    const fromProps = new Set(apiKeys.map(k => normalizeProvider(k.provider)))
     setConnectedApis(prev => new Set([...prev, ...fromProps]))
   }, [apiKeys])
 

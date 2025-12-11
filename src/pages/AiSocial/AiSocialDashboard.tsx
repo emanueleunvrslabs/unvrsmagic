@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentGallerySection } from "@/components/ai-social/ContentGallerySection";
 import { useQuery } from "@tanstack/react-query";
+import type { WorkflowScheduleConfig } from "@/types/edge-functions";
 import "@/components/labs/SocialMediaCard.css";
 
 const WorkflowsList = () => {
@@ -71,7 +72,7 @@ const WorkflowsList = () => {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {workflows.map((workflow) => {
-        const scheduleConfig = workflow.schedule_config as any;
+        const scheduleConfig = workflow.schedule_config as WorkflowScheduleConfig | null;
         const mode = scheduleConfig?.mode || "text-to-image";
         const modeLabel = mode
           .split("-")
