@@ -17,16 +17,17 @@ interface ApiKeysSectionProps {
 }
 
 const AI_PROVIDERS = [
-  { id: "openai", name: "OpenAI", placeholder: "sk-...", description: "GPT models", requiresOwnerId: false },
-  { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models", requiresOwnerId: false },
-  { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresOwnerId: true },
-  { id: "fal", name: "Fal", placeholder: "Enter API key", description: "Fal AI models", requiresOwnerId: false },
-  { id: "firecrawl", name: "Firecrawl", placeholder: "fc-...", description: "Web scraping API", requiresOwnerId: false },
-  { id: "heygen", name: "HeyGen", placeholder: "Enter API key", description: "AI Avatar & Streaming", requiresOwnerId: false },
-  { id: "restream", name: "Restream", placeholder: "Enter API key", description: "Multi-platform streaming (WHIP)", requiresOwnerId: false },
-  { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false },
-  { id: "resend", name: "Resend", placeholder: "re_...", description: "Email API", requiresOwnerId: false },
-  { id: "webshare", name: "Webshare", placeholder: "Enter API key", description: "Proxy service", requiresOwnerId: false },
+  { id: "openai", name: "OpenAI", placeholder: "sk-...", description: "GPT models", requiresOwnerId: false, isRevolut: false },
+  { id: "anthropic", name: "Anthropic", placeholder: "sk-ant-...", description: "Claude models", requiresOwnerId: false, isRevolut: false },
+  { id: "qwen", name: "Qwen3", placeholder: "Enter API key", description: "Alibaba AI models", requiresOwnerId: true, isRevolut: false },
+  { id: "fal", name: "Fal", placeholder: "Enter API key", description: "Fal AI models", requiresOwnerId: false, isRevolut: false },
+  { id: "firecrawl", name: "Firecrawl", placeholder: "fc-...", description: "Web scraping API", requiresOwnerId: false, isRevolut: false },
+  { id: "heygen", name: "HeyGen", placeholder: "Enter API key", description: "AI Avatar & Streaming", requiresOwnerId: false, isRevolut: false },
+  { id: "restream", name: "Restream", placeholder: "Enter API key", description: "Multi-platform streaming (WHIP)", requiresOwnerId: false, isRevolut: false },
+  { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false, isRevolut: false },
+  { id: "resend", name: "Resend", placeholder: "re_...", description: "Email API", requiresOwnerId: false, isRevolut: false },
+  { id: "webshare", name: "Webshare", placeholder: "Enter API key", description: "Proxy service", requiresOwnerId: false, isRevolut: false },
+  { id: "revolut", name: "Revolut Business", placeholder: "", description: "Transactions & Payments", requiresOwnerId: false, isRevolut: true },
 ]
 
 // Validation schemas for each provider
@@ -60,6 +61,9 @@ const apiKeySchemas = {
   }),
   webshare: z.string().trim().min(20, {
     message: "Webshare API key must be at least 20 characters"
+  }),
+  revolut: z.string().trim().min(10, {
+    message: "Revolut API key must be at least 10 characters"
   })
 }
 
@@ -75,10 +79,12 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     gamma: "",
     resend: "",
     webshare: "",
+    revolut: "",
   })
   const [ownerIds, setOwnerIds] = useState<Record<string, string>>({
     qwen: "",
   })
+  const [revolutMerchantKey, setRevolutMerchantKey] = useState("")
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [connectedProviders, setConnectedProviders] = useState<Set<string>>(new Set())
@@ -108,12 +114,29 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
           const connected = new Set<string>()
 
           data.forEach((item) => {
-            loadedKeys[item.provider] = item.api_key
+            if (item.provider === 'revolut_merchant') {
+              // Store merchant key separately
+              setRevolutMerchantKey(item.api_key)
+            } else {
+              loadedKeys[item.provider] = item.api_key
+            }
             if (item.owner_id) {
               loadedOwnerIds[item.provider] = item.owner_id
             }
-            connected.add(item.provider)
+            // Mark revolut as connected only if both keys exist
+            if (item.provider === 'revolut' || item.provider === 'revolut_merchant') {
+              // Will check both after loading
+            } else {
+              connected.add(item.provider)
+            }
           })
+
+          // Check if both revolut keys exist
+          const hasBusinessKey = data.some(d => d.provider === 'revolut')
+          const hasMerchantKey = data.some(d => d.provider === 'revolut_merchant')
+          if (hasBusinessKey && hasMerchantKey) {
+            connected.add('revolut')
+          }
 
           setApiKeys(prev => ({ ...prev, ...loadedKeys }))
           setOwnerIds(prev => ({ ...prev, ...loadedOwnerIds }))
@@ -185,10 +208,22 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
   }
 
   const handleConnect = async (providerId: string) => {
-    // Validate the API key first
-    if (!validateApiKey(providerId)) {
-      toast.error("Please fix validation errors")
-      return
+    // For Revolut, validate both keys
+    if (providerId === "revolut") {
+      if (!apiKeys.revolut?.trim()) {
+        toast.error("Business API key is required")
+        return
+      }
+      if (!revolutMerchantKey?.trim()) {
+        toast.error("Merchant API key is required")
+        return
+      }
+    } else {
+      // Validate the API key first
+      if (!validateApiKey(providerId)) {
+        toast.error("Please fix validation errors")
+        return
+      }
     }
 
     // For Qwen3, validate owner_id as well
@@ -203,6 +238,50 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
       
       if (!user) {
         toast.error("User not authenticated")
+        return
+      }
+
+      // For Revolut, skip verification and save directly
+      if (providerId === "revolut") {
+        // Save Business API key
+        const { error: saveError1 } = await supabase
+          .from('api_keys')
+          .upsert({
+            user_id: user.id,
+            provider: 'revolut',
+            api_key: apiKeys.revolut,
+            owner_id: null
+          }, {
+            onConflict: 'user_id,provider'
+          })
+
+        if (saveError1) {
+          console.error("Error saving Business API key:", saveError1)
+          toast.error("Failed to save Business API key")
+          return
+        }
+
+        // Save Merchant API key
+        const { error: saveError2 } = await supabase
+          .from('api_keys')
+          .upsert({
+            user_id: user.id,
+            provider: 'revolut_merchant',
+            api_key: revolutMerchantKey,
+            owner_id: null
+          }, {
+            onConflict: 'user_id,provider'
+          })
+
+        if (saveError2) {
+          console.error("Error saving Merchant API key:", saveError2)
+          toast.error("Failed to save Merchant API key")
+          return
+        }
+
+        setConnectedProviders(prev => new Set(prev).add('revolut'))
+        toast.success("Revolut Business connected successfully")
+        setConnectingProvider(null)
         return
       }
 
@@ -266,6 +345,38 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
 
+      // For Revolut, delete both keys
+      if (providerId === "revolut") {
+        const { error: error1 } = await supabase
+          .from('api_keys')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('provider', 'revolut')
+
+        const { error: error2 } = await supabase
+          .from('api_keys')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('provider', 'revolut_merchant')
+
+        if (error1 || error2) {
+          console.error("Error deleting Revolut keys:", error1 || error2)
+          toast.error("Failed to disconnect Revolut")
+          return
+        }
+
+        setConnectedProviders(prev => {
+          const newSet = new Set(prev)
+          newSet.delete('revolut')
+          return newSet
+        })
+        
+        setApiKeys(prev => ({ ...prev, revolut: "" }))
+        setRevolutMerchantKey("")
+        toast.success("Revolut Business disconnected")
+        return
+      }
+
       // Delete the API key from database
       const { error } = await supabase
         .from('api_keys')
@@ -322,43 +433,92 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                 <TableCell className="font-medium text-foreground">{provider.name}</TableCell>
                 <TableCell>
                   <div className="space-y-2">
-                    <div className="flex items-center space-x-2 max-w-md">
-                      <Input
-                        type={visibleKeys.has(provider.id) ? "text" : "password"}
-                        placeholder={provider.placeholder}
-                        value={apiKeys[provider.id]}
-                        onChange={(e) => handleKeyChange(provider.id, e.target.value)}
-                        className={`flex-1 bg-white/5 border-white/10 ${validationErrors[provider.id] ? 'border-destructive' : ''}`}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleKeyVisibility(provider.id)}
-                        className="hover:bg-transparent"
-                      >
-                        {visibleKeys.has(provider.id) ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
+                    {provider.isRevolut ? (
+                      <>
+                        <div className="flex items-center space-x-2 max-w-md">
+                          <Input
+                            type={visibleKeys.has(`${provider.id}_business`) ? "text" : "password"}
+                            placeholder="Business API Key"
+                            value={apiKeys[provider.id]}
+                            onChange={(e) => handleKeyChange(provider.id, e.target.value)}
+                            className="flex-1 bg-white/5 border-white/10"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleKeyVisibility(`${provider.id}_business`)}
+                            className="hover:bg-transparent"
+                          >
+                            {visibleKeys.has(`${provider.id}_business`) ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        <div className="flex items-center space-x-2 max-w-md">
+                          <Input
+                            type={visibleKeys.has(`${provider.id}_merchant`) ? "text" : "password"}
+                            placeholder="Merchant API Key (Secret)"
+                            value={revolutMerchantKey}
+                            onChange={(e) => setRevolutMerchantKey(e.target.value)}
+                            className="flex-1 bg-white/5 border-white/10"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleKeyVisibility(`${provider.id}_merchant`)}
+                            className="hover:bg-transparent"
+                          >
+                            {visibleKeys.has(`${provider.id}_merchant`) ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center space-x-2 max-w-md">
+                          <Input
+                            type={visibleKeys.has(provider.id) ? "text" : "password"}
+                            placeholder={provider.placeholder}
+                            value={apiKeys[provider.id]}
+                            onChange={(e) => handleKeyChange(provider.id, e.target.value)}
+                            className={`flex-1 bg-white/5 border-white/10 ${validationErrors[provider.id] ? 'border-destructive' : ''}`}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleKeyVisibility(provider.id)}
+                            className="hover:bg-transparent"
+                          >
+                            {visibleKeys.has(provider.id) ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        {provider.requiresOwnerId && (
+                          <div className="flex items-center space-x-2 max-w-md">
+                            <Input
+                              type="text"
+                              placeholder="Enter Owner ID"
+                              value={ownerIds[provider.id] || ""}
+                              onChange={(e) => setOwnerIds(prev => ({ ...prev, [provider.id]: e.target.value }))}
+                              className="flex-1 bg-white/5 border-white/10"
+                            />
+                            <div className="w-[40px]" />
+                          </div>
                         )}
-                      </Button>
-                    </div>
-                    {provider.requiresOwnerId && (
-                      <div className="flex items-center space-x-2 max-w-md">
-                        <Input
-                          type="text"
-                          placeholder="Enter Owner ID"
-                          value={ownerIds[provider.id] || ""}
-                          onChange={(e) => setOwnerIds(prev => ({ ...prev, [provider.id]: e.target.value }))}
-                          className="flex-1 bg-white/5 border-white/10"
-                        />
-                        <div className="w-[40px]" />
-                      </div>
-                    )}
-                    {validationErrors[provider.id] && (
-                      <p className="text-sm text-destructive">
-                        {validationErrors[provider.id]}
-                      </p>
+                        {validationErrors[provider.id] && (
+                          <p className="text-sm text-destructive">
+                            {validationErrors[provider.id]}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </TableCell>
@@ -388,7 +548,12 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
                     <Button
                       size="sm"
                       onClick={() => handleConnect(provider.id)}
-                      disabled={connectingProvider === provider.id || !apiKeys[provider.id]}
+                      disabled={
+                        connectingProvider === provider.id || 
+                        (provider.isRevolut 
+                          ? (!apiKeys[provider.id] || !revolutMerchantKey) 
+                          : !apiKeys[provider.id])
+                      }
                       className="h-8 px-3 text-xs bg-primary/20 text-primary border border-primary/30 hover:bg-primary/20"
                     >
                       {connectingProvider === provider.id ? "Connecting..." : "Connect"}
