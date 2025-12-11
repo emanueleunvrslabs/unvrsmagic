@@ -5,13 +5,10 @@ import ThemeProvider from "./components/theme-provider";
 import { NotificationProvider } from "@/components/notifications/notification-provider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { HomeRedirect } from "./components/HomeRedirect";
-import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import AiBot from "./pages/AiBot";
-import StrategiesMarketplace from "./pages/StrategiesMarketplace";
 import Settings from "./pages/Settings";
-import Subscription from "./pages/Subscription";
 import PublicProjectDetail from "./pages/PublicProjectDetail";
 import Auth from "./pages/Auth";
 import ProjectDetail from "./pages/ProjectDetail";
@@ -109,11 +106,11 @@ const App = () => (
           <Route path="/ai-social/connections" element={<ProtectedRoute><Connection /></ProtectedRoute>} />
           <Route path="/ai-art/generate-image" element={<ProtectedRoute><AiArtGenerateImage /></ProtectedRoute>} />
           <Route path="/ai-art/generate-video" element={<ProtectedRoute><AiArtGenerateVideo /></ProtectedRoute>} />
-          <Route path="/strategies-marketplace" element={<ProtectedRoute><StrategiesMarketplace /></ProtectedRoute>} />
+          <Route path="/strategies-marketplace" element={<HomeRedirect />} />
           <Route path="/labs" element={<ProtectedRoute><Labs /></ProtectedRoute>} />
           <Route path="/delibere-arera" element={<ProtectedRoute><DelibereArera /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+          <Route path="/subscription" element={<HomeRedirect />} />
           {/* Redirects for removed pages */}
           <Route path="/bot-templates" element={<HomeRedirect />} />
           <Route path="/overview" element={<HomeRedirect />} />
