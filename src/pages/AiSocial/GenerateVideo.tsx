@@ -224,7 +224,7 @@ export default function GenerateVideo() {
         )}
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Video Settings</CardTitle>
               <CardDescription>Configure your AI-generated video</CardDescription>
@@ -484,7 +484,7 @@ export default function GenerateVideo() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Preview</CardTitle>
               <CardDescription>Generated video will appear here</CardDescription>

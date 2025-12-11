@@ -775,7 +775,7 @@ export default function Workflows() {
           </Button>
         </div>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Your Workflows</CardTitle>
             <CardDescription>Manage automated content workflows</CardDescription>
@@ -784,7 +784,7 @@ export default function Workflows() {
             {workflows && workflows.length > 0 ? (
               <div className="space-y-4">
                 {workflows.map((workflow) => (
-                  <Card key={workflow.id} className="bg-muted/30">
+                  <Card key={workflow.id} className="dashboard-card bg-muted/30">
                     <CardContent className="p-4">
                       <div>
                         <h3 className="font-medium">{workflow.name}</h3>

@@ -179,7 +179,7 @@ export default function GenerateImage() {
         )}
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Image Settings</CardTitle>
               <CardDescription>Configure your AI-generated image</CardDescription>
@@ -349,7 +349,7 @@ export default function GenerateImage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Preview</CardTitle>
               <CardDescription>Generated image will appear here</CardDescription>
