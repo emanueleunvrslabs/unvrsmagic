@@ -1,26 +1,61 @@
-/* Project Details Modal - Clean Style */
+/* Project Details Modal - iOS 26 Glassmorphism Style */
 
 .project-details-modal {
-  position: relative;
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(40px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
   overflow: visible !important;
 }
 
 .project-details-modal::before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  inset: -3px;
-  border-radius: 10px;
-  background: radial-gradient(#858585, transparent, transparent);
-  transform: translate(-5px, calc(100% - 50px));
-  transition: 0.4s ease-in-out;
-  z-index: -1;
-  pointer-events: none;
+  display: none;
 }
 
 /* Ensure content stays above effects */
 .project-details-modal > * {
   position: relative;
   z-index: 2;
+}
+
+/* Inner cards styling */
+.project-details-modal .detail-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.project-details-modal .detail-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Pricing card styling */
+.project-details-modal .pricing-item {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.project-details-modal .pricing-item:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Notice card styling */
+.project-details-modal .notice-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
 }
