@@ -1,11 +1,44 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, Send, Loader2, X, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
+import { MessageCircle, Send, Loader2, X, Paperclip, FileText, Image as ImageIcon, Check, CheckCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
+
+// Typing indicator component
+const TypingIndicator = () => (
+  <div className="flex justify-start">
+    <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+      <div className="flex gap-1">
+        <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+        <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+        <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+      </div>
+    </div>
+  </div>
+);
+
+// Message status component with proper icons
+const MessageStatus = ({ status }: { status: string }) => {
+  if (status === "sending") {
+    return <Loader2 className="w-3 h-3 animate-spin text-white/40" />;
+  }
+  if (status === "sent") {
+    return <Check className="w-3 h-3 text-white/40" />;
+  }
+  if (status === "delivered") {
+    return <CheckCheck className="w-3 h-3 text-white/40" />;
+  }
+  if (status === "read") {
+    return <CheckCheck className="w-3 h-3 text-blue-400" />;
+  }
+  if (status === "failed") {
+    return <span className="text-red-400 text-xs">✗</span>;
+  }
+  return null;
+};
 
 interface ClientContact {
   id: string;
@@ -39,8 +72,11 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
   const [sending, setSending] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [contactTyping, setContactTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const contactsWithWhatsApp = contacts.filter(c => c.whatsapp_number);
 
@@ -311,18 +347,15 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
                         {format(new Date(message.created_at), "dd/MM/yy HH:mm")}
                       </span>
                       {message.direction === "outgoing" && (
-                        <span className="text-white/40 text-xs">
-                          {message.status === "sent" && "✓"}
-                          {message.status === "delivered" && "✓✓"}
-                          {message.status === "read" && "✓✓"}
-                          {message.status === "failed" && "✗"}
-                        </span>
+                        <MessageStatus status={message.status} />
                       )}
                     </div>
                   </div>
                 </div>
               ))
             )}
+            {/* Typing indicator */}
+            {contactTyping && <TypingIndicator />}
           </div>
 
           {/* Attachments preview */}
@@ -376,7 +409,21 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
 
                 <Textarea
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={(e) => {
+                    setNewMessage(e.target.value);
+                    // Show typing indicator logic
+                    if (!isTyping && e.target.value.trim()) {
+                      setIsTyping(true);
+                    }
+                    // Clear previous timeout
+                    if (typingTimeoutRef.current) {
+                      clearTimeout(typingTimeoutRef.current);
+                    }
+                    // Set timeout to stop typing indicator
+                    typingTimeoutRef.current = setTimeout(() => {
+                      setIsTyping(false);
+                    }, 2000);
+                  }}
                   onKeyDown={handleKeyDown}
                   placeholder="Type a message..."
                   className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl resize-none min-h-[48px]"
