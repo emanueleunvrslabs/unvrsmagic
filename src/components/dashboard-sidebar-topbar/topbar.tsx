@@ -61,6 +61,8 @@ export function Topbar() {
   const [searchParams] = useSearchParams();
   
   const isLabsPage = location.pathname === "/labs";
+  const isClientsPage = location.pathname === "/admin/clients";
+  const showClientsMenu = isLabsPage || isClientsPage;
   const isNewClientView = searchParams.get("view") === "new";
 
   const formatAddress = (addr: string) => {
@@ -113,12 +115,12 @@ export function Topbar() {
       {/* Left spacer */}
       <div className="flex-1" />
       
-      {/* Center Menu - only show on Labs page */}
-      {isLabsPage && (
+      {/* Center Menu - show on Labs and Clients pages */}
+      {showClientsMenu && (
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/15">
             <button 
-              onClick={() => navigate("/labs?view=new")}
+              onClick={() => navigate(isClientsPage ? "/admin/clients?view=new" : "/labs?view=new")}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
                 isNewClientView
@@ -130,7 +132,7 @@ export function Topbar() {
               New Client
             </button>
             <button 
-              onClick={() => navigate("/labs")}
+              onClick={() => navigate(isClientsPage ? "/admin/clients" : "/labs")}
               className={cn(
                 "px-4 py-2 rounded-full text-sm font-medium transition-all",
                 !isNewClientView
