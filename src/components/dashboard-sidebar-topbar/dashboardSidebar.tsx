@@ -156,9 +156,12 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     setOpenProjects(prev => ({ ...prev, [projectId]: !prev[projectId] }));
   };
 
-  const isItemActive = (href?: string) => {
+  const isItemActive = (href?: string, isSubItem = false) => {
     if (!href) return false;
     if (href === pathname) return true;
+    // For sub-items, use exact match only to avoid multiple highlights
+    if (isSubItem) return false;
+    // For parent items without sub-items, allow prefix match
     if (href !== "/" && pathname.startsWith(href)) return true;
     return false;
   };
@@ -346,7 +349,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             <div className="ml-4 mt-0.5 space-y-0.5">
               {item.subItems?.map((subItem) => {
                 const SubIcon = subItem.icon;
-                const isSubActive = isItemActive(subItem.href);
+                const isSubActive = isItemActive(subItem.href, true);
                 return (
                   <Link
                     key={subItem.id}
