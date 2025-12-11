@@ -33,8 +33,25 @@ export function useBotState() {
       })
       
       if (error) {
-        console.error('Error fetching Bitget portfolio:', error)
-        toast.error('Failed to fetch Bitget portfolio data')
+        // Check if this is a "credentials not found" error - don't show toast for this
+        const errorMessage = error.message || ''
+        if (errorMessage.includes('credentials not found') || errorMessage.includes('404')) {
+          console.log('Bitget credentials not configured yet')
+        } else {
+          console.error('Error fetching Bitget portfolio:', error)
+          toast.error('Failed to fetch Bitget portfolio data')
+        }
+        return
+      }
+
+      if (data?.error) {
+        // Handle error response from edge function
+        if (data.error.includes('credentials not found')) {
+          console.log('Bitget credentials not configured yet')
+        } else {
+          console.error('Bitget API error:', data.error)
+          toast.error(data.error)
+        }
         return
       }
 
