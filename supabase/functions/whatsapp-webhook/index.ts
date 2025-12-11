@@ -47,10 +47,10 @@ serve(async (req) => {
 
     // Process incoming messages - WASender uses "messages.received" event
     if (payload.event === 'messages.received') {
-      const data = payload.data || {};
-      // WASender format: data.key.remoteJid for phone, data.message.conversation for text
-      const from = data.key?.remoteJid || data.from;
-      const text = data.message?.conversation || data.message?.extendedTextMessage?.text || data.text;
+      // WASender format: data.messages contains the message object
+      const messageData = payload.data?.messages || {};
+      const from = messageData.key?.remoteJid || messageData.remoteJid;
+      const text = messageData.message?.conversation || messageData.messageBody || messageData.message?.extendedTextMessage?.text;
       
       console.log('Processing incoming message from:', from, 'text:', text);
       
@@ -59,7 +59,7 @@ serve(async (req) => {
         const normalizedPhone = from.replace('@s.whatsapp.net', '').replace('@c.us', '');
         const phoneWithPlus = normalizedPhone.startsWith('+') ? normalizedPhone : `+${normalizedPhone}`;
         
-        console.log('Looking for contact with phone:', phoneWithPlus);
+        console.log('Looking for contact with phone:', phoneWithPlus, 'or', normalizedPhone);
         
         // Find the contact by phone number (try with and without +)
         const { data: contact, error: contactError } = await supabase
