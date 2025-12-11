@@ -1,153 +1,22 @@
-/* Space Sidebar Styles - Apple TV inspired */
+/* Space Sidebar Styles - Glassmorphism */
 
 .space-sidebar {
   position: relative;
-  background-color: rgba(28, 28, 30, 0.95);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 }
 
-/* Fixed stars layer 1 */
-.space-sidebar::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 0;
-  box-shadow: 
-    15px 60px 0 0.3px rgba(255, 255, 255, 0.6),
-    45px 150px 0 0.2px rgba(255, 255, 255, 0.5),
-    80px 280px 0 0.4px rgba(255, 255, 255, 0.7),
-    25px 400px 0 0.3px rgba(255, 255, 255, 0.5),
-    60px 520px 0 0.2px rgba(255, 255, 255, 0.6),
-    120px 100px 0 0.3px rgba(255, 255, 255, 0.5),
-    180px 220px 0 0.2px rgba(255, 255, 255, 0.4),
-    140px 380px 0 0.4px rgba(255, 255, 255, 0.6),
-    200px 480px 0 0.3px rgba(255, 255, 255, 0.5),
-    90px 620px 0 0.2px rgba(255, 255, 255, 0.4),
-    170px 720px 0 0.3px rgba(255, 255, 255, 0.6),
-    30px 800px 0 0.2px rgba(255, 255, 255, 0.5),
-    220px 50px 0 0.2px rgba(255, 255, 255, 0.4),
-    50px 900px 0 0.3px rgba(255, 255, 255, 0.5);
-  animation: glowing-stars 3s ease-in-out infinite;
-}
-
-/* Fixed stars layer 2 */
-.space-sidebar::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 0;
-  box-shadow: 
-    100px 30px 0 0.2px rgba(255, 255, 255, 0.4),
-    70px 200px 0 0.3px rgba(255, 255, 255, 0.6),
-    160px 340px 0 0.2px rgba(255, 255, 255, 0.5),
-    40px 460px 0 0.3px rgba(255, 255, 255, 0.4),
-    130px 580px 0 0.2px rgba(255, 255, 255, 0.5),
-    210px 150px 0 0.3px rgba(255, 255, 255, 0.6),
-    55px 700px 0 0.2px rgba(255, 255, 255, 0.4),
-    185px 850px 0 0.3px rgba(255, 255, 255, 0.5),
-    95px 950px 0 0.2px rgba(255, 255, 255, 0.6),
-    20px 250px 0 0.2px rgba(255, 255, 255, 0.4),
-    150px 450px 0 0.3px rgba(255, 255, 255, 0.5);
-  animation: glowing-stars 3s ease-in-out infinite;
-  animation-delay: 1.5s;
-}
-
-/* Shooting stars container */
-.shooting-stars-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-/* Shooting star styles */
-.shooting-star {
-  position: absolute;
-  width: 5em;
-  height: 1px;
-  background: linear-gradient(90deg, #ffffff, transparent);
-  rotate: -45deg;
-  animation: shooting-star 4s ease-in-out infinite;
-}
-
-.shooting-star:nth-child(1) {
-  top: 10%;
-  left: 80%;
-  animation-delay: 1s;
-}
-
-.shooting-star:nth-child(2) {
-  top: 35%;
-  left: 90%;
-  animation-delay: 3s;
-}
-
-.shooting-star:nth-child(3) {
-  top: 65%;
-  left: 85%;
-  animation-delay: 5s;
-}
-
-/* Purple glow accent */
-.space-glow {
-  position: absolute;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, rgba(138, 43, 226, 0.15) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(20px);
+/* Hover effect */
+.space-sidebar:hover {
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Ensure content stays above effects */
-.space-sidebar > *:not(.shooting-stars-container):not(.space-glow) {
+.space-sidebar > * {
   position: relative;
   z-index: 1;
-}
-
-/* Animations */
-@keyframes glowing-stars {
-  0%, 100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes shooting-star {
-  0% {
-    transform: translateX(0) translateY(0);
-    opacity: 1;
-  }
-  50% {
-    transform: translateX(-15em) translateY(0);
-    opacity: 1;
-  }
-  70% {
-    transform: translateX(-20em) translateY(0);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0) translateY(0);
-    opacity: 0;
-  }
 }

@@ -404,14 +404,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
   return (
     <aside className="space-sidebar fixed left-4 top-4 bottom-4 w-[260px] rounded-2xl flex flex-col z-50">
-      {/* Shooting Stars */}
-      <div className="shooting-stars-container">
-        <div className="shooting-star" />
-        <div className="shooting-star" />
-        <div className="shooting-star" />
-      </div>
-      {/* Purple Glow */}
-      <div className="space-glow" />
       
       {/* Search Row */}
       <div className="px-2 pt-4 pb-2">

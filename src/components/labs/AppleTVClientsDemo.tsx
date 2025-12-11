@@ -319,16 +319,6 @@ export function AppleTVClientsDemo() {
                         : "scale-90 opacity-40 hover:opacity-60"
                     )}
                   >
-                    {/* Stars Layer */}
-                    <div className="labs-stars-layer" />
-                    <div className="labs-stars-layer-2" />
-                    <div className="labs-stars-layer-3" />
-                    
-                    {/* Shooting Stars */}
-                    <div className="labs-shooting-star labs-shooting-star-1" />
-                    <div className="labs-shooting-star labs-shooting-star-2" />
-                    <div className="labs-shooting-star labs-shooting-star-3" />
-                    
                     {/* Content */}
                     <div className="absolute inset-0 flex items-center justify-between p-8 z-10">
                       <div>
