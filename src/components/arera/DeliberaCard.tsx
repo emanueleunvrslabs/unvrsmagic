@@ -73,18 +73,16 @@ export function DeliberaCard({ delibera }: DeliberaCardProps) {
   };
 
   return (
-    <div 
-      className="social-media-card" 
-      style={{ 
-        width: '100%', 
-        height: 'auto', 
-        minHeight: 'auto',
-        flexDirection: 'column',
-        cursor: 'default'
-      }}
-    >
+    <div className="labs-client-card relative rounded-2xl overflow-hidden">
+      {/* Star effects */}
+      <div className="labs-stars-layer"></div>
+      <div className="labs-stars-layer-2"></div>
+      <div className="labs-stars-layer-3"></div>
+      <div className="labs-shooting-star labs-shooting-star-1"></div>
+      <div className="labs-shooting-star labs-shooting-star-2"></div>
+      <div className="labs-glow"></div>
       {/* Badges Row */}
-      <div className="flex items-center justify-between w-full px-5 pt-5 pb-3 z-10">
+      <div className="relative flex items-center justify-between w-full px-5 pt-5 pb-3 z-10">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border backdrop-blur-sm bg-primary/10 text-primary border-primary/20 font-semibold">
             {delibera.delibera_code}
