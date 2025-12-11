@@ -402,6 +402,99 @@ serve(async (req) => {
         }
         break;
 
+      case "revolut_business":
+        try {
+          // Revolut Business API - verify with accounts endpoint
+          // Try sandbox first, then production
+          const sandboxResponse = await fetch("https://sandbox-b2b.revolut.com/api/1.0/accounts", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Revolut Business sandbox response status:", sandboxResponse.status);
+
+          if (sandboxResponse.status === 200) {
+            isValid = true;
+            console.log("Revolut Business API key is valid (sandbox)");
+          } else if (sandboxResponse.status === 401 || sandboxResponse.status === 403) {
+            // Try production endpoint
+            const prodResponse = await fetch("https://b2b.revolut.com/api/1.0/accounts", {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+            });
+
+            console.log("Revolut Business production response status:", prodResponse.status);
+
+            if (prodResponse.status === 200) {
+              isValid = true;
+              console.log("Revolut Business API key is valid (production)");
+            } else {
+              errorMessage = "Invalid Revolut Business API key";
+              console.error("Revolut Business verification failed");
+            }
+          } else {
+            errorMessage = "Failed to verify Revolut Business API key";
+            console.error("Revolut Business unexpected status:", sandboxResponse.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Revolut Business API key";
+          console.error("Revolut Business verification error:", error);
+        }
+        break;
+
+      case "revolut_merchant":
+        try {
+          // Revolut Merchant API - verify with orders endpoint using the secret key
+          // The verification uses the secret key (passed as apiKey parameter)
+          // Try sandbox first, then production
+          const sandboxResponse = await fetch("https://sandbox-merchant.revolut.com/api/orders", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Revolut Merchant sandbox response status:", sandboxResponse.status);
+
+          if (sandboxResponse.status === 200 || sandboxResponse.status === 400) {
+            isValid = true;
+            console.log("Revolut Merchant API key is valid (sandbox)");
+          } else if (sandboxResponse.status === 401 || sandboxResponse.status === 403) {
+            // Try production endpoint
+            const prodResponse = await fetch("https://merchant.revolut.com/api/orders", {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+            });
+
+            console.log("Revolut Merchant production response status:", prodResponse.status);
+
+            if (prodResponse.status === 200 || prodResponse.status === 400) {
+              isValid = true;
+              console.log("Revolut Merchant API key is valid (production)");
+            } else {
+              errorMessage = "Invalid Revolut Merchant Secret Key";
+              console.error("Revolut Merchant verification failed");
+            }
+          } else {
+            errorMessage = "Failed to verify Revolut Merchant API key";
+            console.error("Revolut Merchant unexpected status:", sandboxResponse.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Revolut Merchant API key";
+          console.error("Revolut Merchant verification error:", error);
+        }
+        break;
+
       default:
         return new Response(
           JSON.stringify({ error: "Unsupported provider" }),

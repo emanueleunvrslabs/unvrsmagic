@@ -261,8 +261,28 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
 
-      // For Revolut Business, skip verification and save directly
+      // For Revolut Business, verify with API then save
       if (provider.type === 'revolut_business') {
+        // Verify the Business API key
+        const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-api-key', {
+          body: {
+            provider: 'revolut_business',
+            apiKey: apiKeys.revolut_business
+          }
+        })
+
+        if (verifyError) {
+          console.error("Error verifying Revolut Business API key:", verifyError)
+          toast.error("Failed to verify Revolut Business API key")
+          return
+        }
+
+        if (!verifyData?.valid) {
+          toast.error(verifyData?.error || "Invalid Revolut Business API key")
+          return
+        }
+
+        // Save the verified API key
         const { error: saveError } = await supabase
           .from('api_keys')
           .upsert({
@@ -286,8 +306,27 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
         return
       }
 
-      // For Revolut Merchant, save both keys
+      // For Revolut Merchant, verify with API then save both keys
       if (provider.type === 'revolut_merchant') {
+        // Verify the Merchant Secret Key (the main authentication key)
+        const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-api-key', {
+          body: {
+            provider: 'revolut_merchant',
+            apiKey: revolutMerchantSecretKey
+          }
+        })
+
+        if (verifyError) {
+          console.error("Error verifying Revolut Merchant API key:", verifyError)
+          toast.error("Failed to verify Revolut Merchant API key")
+          return
+        }
+
+        if (!verifyData?.valid) {
+          toast.error(verifyData?.error || "Invalid Revolut Merchant Secret Key")
+          return
+        }
+
         // Save Merchant Public Key
         const { error: saveError1 } = await supabase
           .from('api_keys')
