@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil, Phone } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { File, CheckSquare, Kanban, Mail, MessageCircle, Plus, Trash2, User, Loader2, UserPlus, Pencil, Phone, Upload, Image, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
@@ -77,6 +77,9 @@ export function AppleTVClientsDemo() {
   const [selectedContactForEmail, setSelectedContactForEmail] = useState<ClientContact | null>(null);
   const [contactsToDelete, setContactsToDelete] = useState<string[]>([]);
   const [editingContactIndex, setEditingContactIndex] = useState<number | null>(null);
+  const [showDocuments, setShowDocuments] = useState(false);
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -327,10 +330,106 @@ export function AppleTVClientsDemo() {
         }
         break;
       case "documents":
+        setShowDocuments(!showDocuments);
+        break;
       case "notes":
       case "kanban":
         toast.info(`${actionId.charAt(0).toUpperCase() + actionId.slice(1)} feature coming soon`);
         break;
+    }
+  };
+
+  // Fetch documents for selected client
+  const { data: clientDocuments, isLoading: loadingDocuments, refetch: refetchDocuments } = useQuery({
+    queryKey: ["client-documents", selectedClient?.id],
+    queryFn: async () => {
+      if (!selectedClient?.id) return [];
+      const { data, error } = await supabase
+        .from("client_documents")
+        .select("*")
+        .eq("client_id", selectedClient.id)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!selectedClient?.id && showDocuments,
+  });
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0 || !selectedClient) return;
+
+    setIsUploadingDocument(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to upload files");
+        return;
+      }
+
+      for (const file of Array.from(files)) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${selectedClient.id}/${Date.now()}-${file.name}`;
+        
+        // Upload to storage
+        const { error: uploadError } = await supabase.storage
+          .from("client-documents")
+          .upload(fileName, file);
+        
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from("client-documents")
+          .getPublicUrl(fileName);
+
+        // Save to database
+        const { error: dbError } = await supabase
+          .from("client_documents")
+          .insert({
+            client_id: selectedClient.id,
+            user_id: user.id,
+            file_name: file.name,
+            file_path: fileName,
+            file_url: urlData.publicUrl,
+            file_size: file.size,
+            file_type: file.type || `application/${fileExt}`,
+          });
+        
+        if (dbError) throw dbError;
+      }
+
+      toast.success("Document uploaded successfully");
+      refetchDocuments();
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error(error.message || "Failed to upload document");
+    } finally {
+      setIsUploadingDocument(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleDeleteDocument = async (docId: string, filePath: string) => {
+    try {
+      // Delete from storage
+      await supabase.storage.from("client-documents").remove([filePath]);
+      
+      // Delete from database
+      const { error } = await supabase
+        .from("client_documents")
+        .delete()
+        .eq("id", docId);
+      
+      if (error) throw error;
+      
+      toast.success("Document deleted");
+      refetchDocuments();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete document");
     }
   };
 
@@ -779,6 +878,94 @@ export function AppleTVClientsDemo() {
           })}
         </div>
       </div>
+
+      {/* Documents Section */}
+      {showDocuments && selectedClient && (
+        <div className="relative z-10 px-8 pb-8">
+          <div className="labs-client-card rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Documents</h3>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="*/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingDocument}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/80 hover:bg-white/20 transition-all text-sm"
+                >
+                  {isUploadingDocument ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                  Upload
+                </button>
+                <button
+                  onClick={() => setShowDocuments(false)}
+                  className="p-2 rounded-full bg-white/10 border border-white/20 text-white/60 hover:bg-white/20 hover:text-white transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {loadingDocuments ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-white/50" />
+              </div>
+            ) : clientDocuments && clientDocuments.length > 0 ? (
+              <div className="space-y-2">
+                {clientDocuments.map((doc: any) => (
+                  <div
+                    key={doc.id}
+                    className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                        <File className="w-5 h-5 text-white/60" />
+                      </div>
+                      <div>
+                        <p className="text-white/90 text-sm font-medium">{doc.file_name}</p>
+                        <p className="text-white/40 text-xs">
+                          {(doc.file_size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 rounded-lg bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-all"
+                      >
+                        <Image className="w-4 h-4" />
+                      </a>
+                      <button
+                        onClick={() => handleDeleteDocument(doc.id, doc.file_path)}
+                        className="p-2 rounded-lg bg-white/10 text-red-400/60 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <File className="w-12 h-12 mx-auto mb-3 text-white/20" />
+                <p className="text-white/50 text-sm">No documents yet</p>
+                <p className="text-white/30 text-xs mt-1">Click Upload to add files</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Email Modal */}
       {selectedContactForEmail && (
