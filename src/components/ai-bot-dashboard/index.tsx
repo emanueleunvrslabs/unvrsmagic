@@ -16,7 +16,6 @@ import { PortfolioSection } from "./components/portfolio-section";
 import { SettingsSection } from "./components/settings-section";
 import { StrategySection } from "./components/strategy-section";
 import { TradesSection } from "./components/trades-section";
-import { TradingInterface } from "@/components/trading-interface/index";
 import { useBotState } from "./hooks/use-bot-state";
 import type { Asset } from "./types";
 
@@ -133,11 +132,10 @@ export function AiBotDashboard() {
       {/* Main content tabs */}
       <Tabs defaultValue="overview" onValueChange={setActiveTab} className="space-y-4">
         <div className="overflow-x-auto">
-          <TabsList className="grid grid-cols-4 min-w-[450px] lg:w-[700px]">
+          <TabsList className="grid grid-cols-3 min-w-[350px] lg:w-[500px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="trades">Trades</TabsTrigger>
-            <TabsTrigger value="place-order">Place Order</TabsTrigger>
           </TabsList>
         </div>
 
@@ -154,11 +152,6 @@ export function AiBotDashboard() {
         {/* Trades Tab */}
         <TabsContent value="trades" className="space-y-4">
           <TradesSection botData={botData} />
-        </TabsContent>
-
-        {/* Place Order Tab */}
-        <TabsContent value="place-order" className="space-y-4">
-          <TradingInterface />
         </TabsContent>
       </Tabs>
 
