@@ -46,8 +46,8 @@ serve(async (req) => {
 
     const merchantSecretKey = merchantKeyData.api_key;
     
-    // Determine if sandbox or production based on key prefix
-    const isSandbox = merchantSecretKey.startsWith("sk_");
+    // Production keys start with sk_, sandbox keys start with sandbox_sk_
+    const isSandbox = merchantSecretKey.startsWith("sandbox_");
     const apiBase = isSandbox 
       ? "https://sandbox-merchant.revolut.com/api/1.0/webhooks"
       : "https://merchant.revolut.com/api/1.0/webhooks";
