@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Mail, Send, Inbox, Loader2, X, Plus, Trash2, Paperclip, Upload } from "lucide-react";
+import { useState, useRef } from "react";
+import { Mail, Send, Inbox, Loader2, X, Plus, Trash2, Paperclip, Upload, Image } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,10 +26,18 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
   const [activeTab, setActiveTab] = useState<TabType>("inbox");
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
   const [isSending, setIsSending] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  
+  // Get first contact email automatically
+  const primaryContact = contacts[0];
+  const recipientEmail = primaryContact?.email || "";
+  const recipientName = primaryContact ? `${primaryContact.first_name} ${primaryContact.last_name}` : "";
   
   // Compose form state
   const [composeData, setComposeData] = useState({
-    recipientEmail: "",
     subject: "",
     body: ""
   });
@@ -52,9 +60,23 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
   const inboxEmails = emails?.filter(e => e.direction === "received") || [];
   const sentEmails = emails?.filter(e => e.direction === "sent") || [];
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setAttachments([...attachments, ...Array.from(e.target.files)]);
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(attachments.filter((_, i) => i !== index));
+  };
+
   const handleSendEmail = async () => {
-    if (!composeData.recipientEmail || !composeData.subject || !composeData.body) {
-      toast.error("Please fill in all fields");
+    if (!recipientEmail) {
+      toast.error("This client has no contacts with email");
+      return;
+    }
+    if (!composeData.subject || !composeData.body) {
+      toast.error("Please fill in subject and message");
       return;
     }
 
@@ -66,17 +88,31 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
         return;
       }
 
-      // Find contact by email
-      const contact = contacts.find(c => c.email === composeData.recipientEmail);
+      // Upload attachments
+      const uploadedAttachments: string[] = [];
+      for (const file of attachments) {
+        const filePath = `email-attachments/${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("email-attachments")
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("email-attachments")
+          .getPublicUrl(filePath);
+
+        uploadedAttachments.push(publicUrl);
+      }
 
       // Send email via edge function
       const { error: sendError } = await supabase.functions.invoke("send-email", {
         body: {
-          to: composeData.recipientEmail,
-          recipientName: contact ? `${contact.first_name} ${contact.last_name}` : composeData.recipientEmail,
+          to: recipientEmail,
+          recipientName,
           subject: composeData.subject,
           text: composeData.body,
-          attachmentUrls: []
+          attachmentUrls: uploadedAttachments
         }
       });
 
@@ -87,20 +123,22 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
         .from("client_emails")
         .insert({
           client_id: clientId,
-          contact_id: contact?.id || null,
+          contact_id: primaryContact?.id || null,
           user_id: user.id,
           direction: "sent",
           subject: composeData.subject,
           body: composeData.body,
-          recipient_email: composeData.recipientEmail,
+          recipient_email: recipientEmail,
           sender_email: "emanuele@unvrslabs.dev",
-          status: "sent"
+          status: "sent",
+          attachments: uploadedAttachments
         });
 
       if (dbError) throw dbError;
 
       toast.success("Email sent successfully");
-      setComposeData({ recipientEmail: "", subject: "", body: "" });
+      setComposeData({ subject: "", body: "" });
+      setAttachments([]);
       setActiveTab("sent");
       queryClient.invalidateQueries({ queryKey: ["client-emails", clientId] });
     } catch (error: any) {
@@ -246,20 +284,14 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
       {/* Content */}
       {activeTab === "compose" ? (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-white/70 text-sm">To</label>
-            <select
-              value={composeData.recipientEmail}
-              onChange={(e) => setComposeData({ ...composeData, recipientEmail: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-1 focus:ring-white/20"
-            >
-              <option value="" className="bg-zinc-900">Select contact...</option>
-              {contacts.map((contact) => (
-                <option key={contact.id} value={contact.email} className="bg-zinc-900">
-                  {contact.first_name} {contact.last_name} ({contact.email})
-                </option>
-              ))}
-            </select>
+          {/* Recipient (auto-filled) */}
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex items-center gap-3">
+              <span className="text-white/50 text-sm">To:</span>
+              <span className="text-white text-sm font-medium">
+                {recipientName} ({recipientEmail})
+              </span>
+            </div>
           </div>
           
           <div className="space-y-2">
@@ -278,15 +310,74 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
               value={composeData.body}
               onChange={(e) => setComposeData({ ...composeData, body: e.target.value })}
               placeholder="Write your message..."
-              rows={8}
+              rows={6}
               className="bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl resize-none"
             />
+          </div>
+
+          {/* Attachments */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <input
+                ref={imageInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
+              >
+                <Paperclip className="w-4 h-4" />
+                Attach Files
+              </button>
+              <button
+                onClick={() => imageInputRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
+              >
+                <Image className="w-4 h-4" />
+                Add Images
+              </button>
+            </div>
+
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {attachments.map((file, index) => (
+                  <div
+                    key={index}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-sm border border-white/10 text-white"
+                  >
+                    {file.type.startsWith('image/') ? (
+                      <Image className="w-4 h-4 text-white/60" />
+                    ) : (
+                      <Paperclip className="w-4 h-4 text-white/60" />
+                    )}
+                    <span className="truncate max-w-[150px]">{file.name}</span>
+                    <button
+                      onClick={() => removeAttachment(index)}
+                      className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-white"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           
           <div className="flex justify-end">
             <button
               onClick={handleSendEmail}
-              disabled={isSending}
+              disabled={isSending || !recipientEmail}
               className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/15 transition-all disabled:opacity-50"
             >
               {isSending ? (
@@ -331,6 +422,27 @@ export function ClientEmailSection({ clientId, contacts, onClose }: ClientEmailS
             <div className="text-white/80 text-sm whitespace-pre-wrap">
               {selectedEmail.body}
             </div>
+            
+            {/* Show attachments if any */}
+            {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <p className="text-white/50 text-xs mb-2">Attachments:</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedEmail.attachments.map((url: string, index: number) => (
+                    <a
+                      key={index}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-sm border border-white/10 text-white hover:bg-white/15"
+                    >
+                      <Paperclip className="w-4 h-4" />
+                      Attachment {index + 1}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : (
