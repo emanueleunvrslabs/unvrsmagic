@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, Send, Inbox, Loader2, X } from "lucide-react";
+import { MessageCircle, Send, Loader2, X, Paperclip, Image, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -37,7 +37,11 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
   );
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const contactsWithWhatsApp = contacts.filter(c => c.whatsapp_number);
 
@@ -98,24 +102,107 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
     }
   }, [messages]);
 
+  const getMediaType = (file: File): "image" | "document" | "video" | "audio" => {
+    if (file.type.startsWith("image/")) return "image";
+    if (file.type.startsWith("video/")) return "video";
+    if (file.type.startsWith("audio/")) return "audio";
+    return "document";
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "file" | "image") => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setAttachments(prev => [...prev, ...newFiles]);
+    }
+    // Reset input
+    if (type === "file" && fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    if (type === "image" && imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const fileName = `whatsapp/${clientId}/${Date.now()}-${file.name}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from("client-documents")
+      .upload(fileName, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("client-documents")
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
   const handleSend = async () => {
-    if (!newMessage.trim() || sending || !selectedContact) return;
+    if ((!newMessage.trim() && attachments.length === 0) || sending || !selectedContact) return;
 
     try {
       setSending(true);
 
-      const { error } = await supabase.functions.invoke("send-whatsapp", {
-        body: {
-          phoneNumber: selectedContact.whatsapp_number,
-          message: newMessage,
-          clientId,
-          contactId: selectedContact.id,
-        },
-      });
+      // If there are attachments, upload and send them
+      if (attachments.length > 0) {
+        setIsUploading(true);
+        
+        for (const file of attachments) {
+          const mediaUrl = await uploadFile(file);
+          const mediaType = getMediaType(file);
 
-      if (error) throw error;
+          const { error } = await supabase.functions.invoke("send-whatsapp", {
+            body: {
+              phoneNumber: selectedContact.whatsapp_number,
+              message: attachments.length === 1 ? newMessage : undefined,
+              clientId,
+              contactId: selectedContact.id,
+              mediaUrl,
+              mediaType,
+              fileName: file.name,
+            },
+          });
+
+          if (error) throw error;
+        }
+
+        setIsUploading(false);
+
+        // If there's also a text message and multiple attachments, send it separately
+        if (newMessage.trim() && attachments.length > 1) {
+          const { error } = await supabase.functions.invoke("send-whatsapp", {
+            body: {
+              phoneNumber: selectedContact.whatsapp_number,
+              message: newMessage,
+              clientId,
+              contactId: selectedContact.id,
+            },
+          });
+
+          if (error) throw error;
+        }
+      } else {
+        // Just text message
+        const { error } = await supabase.functions.invoke("send-whatsapp", {
+          body: {
+            phoneNumber: selectedContact.whatsapp_number,
+            message: newMessage,
+            clientId,
+            contactId: selectedContact.id,
+          },
+        });
+
+        if (error) throw error;
+      }
 
       setNewMessage("");
+      setAttachments([]);
       toast.success("Message sent");
       queryClient.invalidateQueries({ queryKey: ["whatsapp-messages", clientId, selectedContact.id] });
     } catch (error: any) {
@@ -123,6 +210,7 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
       toast.error(error.message || "Failed to send message");
     } finally {
       setSending(false);
+      setIsUploading(false);
     }
   };
 
@@ -132,9 +220,6 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
       handleSend();
     }
   };
-
-  const incomingMessages = messages?.filter(m => m.direction === "incoming") || [];
-  const outgoingMessages = messages?.filter(m => m.direction === "outgoing") || [];
 
   return (
     <div className="labs-client-card rounded-2xl p-6">
@@ -245,29 +330,98 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
             )}
           </div>
 
+          {/* Attachments preview */}
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {attachments.map((file, index) => (
+                <div
+                  key={index}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-green-500/10 rounded-lg text-sm border border-green-500/20 text-white"
+                >
+                  {file.type.startsWith("image/") ? (
+                    <Image className="w-4 h-4 text-green-400" />
+                  ) : (
+                    <FileText className="w-4 h-4 text-green-400" />
+                  )}
+                  <span className="truncate max-w-[120px]">{file.name}</span>
+                  <button
+                    onClick={() => removeAttachment(index)}
+                    className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-white"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Input */}
           {selectedContact && (
-            <div className="flex items-end gap-3">
-              <Textarea
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type a message..."
-                className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl resize-none min-h-[48px]"
-                rows={1}
-                disabled={sending}
+            <div className="space-y-3">
+              {/* Hidden file inputs */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={(e) => handleFileSelect(e, "file")}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
               />
-              <button
-                onClick={handleSend}
-                disabled={!newMessage.trim() || sending}
-                className="flex items-center gap-2 px-5 py-3 rounded-full bg-green-500/20 backdrop-blur-md border border-green-500/30 text-green-300 hover:bg-green-500/30 transition-all disabled:opacity-50"
-              >
-                {sending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </button>
+              <input
+                ref={imageInputRef}
+                type="file"
+                multiple
+                onChange={(e) => handleFileSelect(e, "image")}
+                className="hidden"
+                accept="image/*,video/*"
+              />
+
+              <div className="flex items-end gap-3">
+                {/* Attachment buttons */}
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={sending}
+                    className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+                    title="Send image or video"
+                  >
+                    <Image className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={sending}
+                    className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+                    title="Send document"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <Textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type a message..."
+                  className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl resize-none min-h-[48px]"
+                  rows={1}
+                  disabled={sending}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={(!newMessage.trim() && attachments.length === 0) || sending}
+                  className="flex items-center gap-2 px-5 py-3 rounded-full bg-green-500/20 backdrop-blur-md border border-green-500/30 text-green-300 hover:bg-green-500/30 transition-all disabled:opacity-50"
+                >
+                  {sending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+
+              {isUploading && (
+                <p className="text-xs text-white/50 text-center">Uploading files...</p>
+              )}
             </div>
           )}
         </>

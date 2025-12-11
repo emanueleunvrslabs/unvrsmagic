@@ -8,9 +8,12 @@ const corsHeaders = {
 
 interface SendWhatsAppRequest {
   phoneNumber: string;
-  message: string;
+  message?: string;
   clientId: string;
   contactId: string;
+  mediaUrl?: string;
+  mediaType?: "image" | "document" | "video" | "audio";
+  fileName?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -45,24 +48,71 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("WASender API key not configured");
     }
 
-    const { phoneNumber, message, clientId, contactId }: SendWhatsAppRequest = await req.json();
+    const { phoneNumber, message, clientId, contactId, mediaUrl, mediaType, fileName }: SendWhatsAppRequest = await req.json();
 
-    // Send message via WASender API
-    const wasenderResponse = await fetch("https://www.wasenderapi.com/api/send-message", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${wasenderApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    let wasenderResponse;
+    let messageText = message || "";
+
+    // Check if sending media or text
+    if (mediaUrl && mediaType) {
+      // Send media message via WASender API
+      const mediaEndpoint = mediaType === "image" 
+        ? "https://www.wasenderapi.com/api/send-image"
+        : mediaType === "document"
+        ? "https://www.wasenderapi.com/api/send-document"
+        : mediaType === "video"
+        ? "https://www.wasenderapi.com/api/send-video"
+        : "https://www.wasenderapi.com/api/send-audio";
+
+      const mediaBody: any = {
         to: phoneNumber,
-        text: message,
-      }),
-    });
+        url: mediaUrl,
+      };
+
+      // Add caption for images/videos
+      if ((mediaType === "image" || mediaType === "video") && message) {
+        mediaBody.caption = message;
+      }
+
+      // Add filename for documents
+      if (mediaType === "document" && fileName) {
+        mediaBody.filename = fileName;
+      }
+
+      console.log(`Sending ${mediaType} to ${phoneNumber}:`, mediaBody);
+
+      wasenderResponse = await fetch(mediaEndpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${wasenderApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(mediaBody),
+      });
+
+      // Update message text to include media info
+      if (!message) {
+        messageText = `[${mediaType.toUpperCase()}] ${fileName || "Media"}`;
+      }
+    } else {
+      // Send text message via WASender API
+      wasenderResponse = await fetch("https://www.wasenderapi.com/api/send-message", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${wasenderApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: phoneNumber,
+          text: message,
+        }),
+      });
+    }
 
     if (!wasenderResponse.ok) {
-      const errorData = await wasenderResponse.json();
-      throw new Error(errorData.message || "Failed to send WhatsApp message");
+      const errorText = await wasenderResponse.text();
+      console.error("WASender API error:", errorText);
+      throw new Error(`Failed to send WhatsApp message: ${errorText}`);
     }
 
     const wasenderData = await wasenderResponse.json();
@@ -75,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
         client_id: clientId,
         contact_id: contactId,
         phone_number: phoneNumber,
-        message_text: message,
+        message_text: messageText,
         direction: "outgoing",
         status: "sent",
         message_id: wasenderData.message_id || null,
