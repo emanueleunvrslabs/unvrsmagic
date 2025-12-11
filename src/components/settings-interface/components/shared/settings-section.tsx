@@ -9,7 +9,7 @@ interface SettingsSectionProps {
 
 export const SettingsSection: React.FC<SettingsSectionProps> = ({ title, description, children, className = "" }) => {
   return (
-    <div className={`labs-client-card p-6 ${className}`}>
+    <div className={`labs-client-card p-6 rounded-2xl ${className}`}>
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}

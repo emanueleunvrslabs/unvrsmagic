@@ -161,7 +161,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
       <div className="rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/10 hover:bg-white/5">
+            <TableRow className="border-white/10">
               <TableHead className="text-foreground/80">Agent</TableHead>
               <TableHead className="text-foreground/80">Model</TableHead>
               <TableHead className="text-foreground/80">Description</TableHead>
@@ -172,7 +172,7 @@ export const NKMTAgentsSection: React.FC<{ apiKeys?: ApiKey[] }> = ({ apiKeys })
           </TableHeader>
           <TableBody>
             {NKMT_AGENTS.map((agent) => (
-              <TableRow key={agent.id} className="border-white/10 hover:bg-white/5">
+              <TableRow key={agent.id} className="border-white/10">
                 <TableCell className="font-medium text-foreground">{agent.name}</TableCell>
                 <TableCell>
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
