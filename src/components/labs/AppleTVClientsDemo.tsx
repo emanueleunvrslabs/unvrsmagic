@@ -193,7 +193,15 @@ export function AppleTVClientsDemo() {
   };
 
   const handleUpdateClient = async () => {
-    if (!editingClient || !newClient.companyName || !newClient.vatNumber) {
+    console.log("handleUpdateClient called", { editingClient, newClient });
+    
+    if (!editingClient) {
+      console.log("editingClient is null/undefined");
+      toast.error("Client data not found");
+      return;
+    }
+    
+    if (!newClient.companyName || !newClient.vatNumber) {
       toast.error("Please fill in company name and VAT number");
       return;
     }
