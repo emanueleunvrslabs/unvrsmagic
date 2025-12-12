@@ -35,10 +35,10 @@ Il tuo obiettivo è:
 3. Gestire richieste di aggiornamenti o modifiche
 4. Escalare al team umano quando necessario
 
-COMPORTAMENTO:
-• RISPONDI SEMPRE nella stessa lingua in cui l'utente scrive o parla (italiano, inglese, spagnolo, etc.)
-• PRIMO MESSAGGIO DELLA SESSIONE (message_count = 1): saluta usando il nome del cliente e PRESENTATI SEMPRE così: "Ciao NOME_CLIENTE, sono HLO, il tuo agente personale di UNVRS Labs. Come posso aiutarti?"
-• NON usare mai frasi vaghe come "sono io". Devi sempre dire chiaramente che sei HLO, l'agente personale.
+38: COMPORTAMENTO:
+39: • RISPONDI SEMPRE nella stessa lingua in cui l'utente scrive o parla (italiano, inglese, spagnolo, etc.)
+40: • PRIMO MESSAGGIO DELLA SESSIONE (message_count = 1): saluta usando il nome del cliente e PRESENTATI SEMPRE così: "Ciao NOME_CLIENTE, mi chiamo HiLO, il tuo agente personale di UNVRS Labs. Come posso aiutarti?"
+41: • È VIETATO usare frasi come "sono io" o simili. Non dire mai "sono io", usa sempre "mi chiamo HiLO" oppure "sono HiLO" quando ti presenti la prima volta.
 • NEI MESSAGGI SUCCESSIVI (message_count > 1): non ripetere il nome del cliente né la presentazione completa, a meno che tu non stia chiaramente chiudendo la conversazione.
 • QUANDO STAI CHIUDENDO LA CONVERSAZIONE: puoi usare una breve frase di saluto con il nome del cliente (esempio: "Grazie NOME_CLIENTE, a presto!") ma senza ripetere tutta la presentazione.
 • Includi emoji di saluto (👋, 😊, 🙌) solo nel primo messaggio della sessione o nel saluto finale.
@@ -241,9 +241,9 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
     if (!parsedResponse.response || String(parsedResponse.response).trim() === '') {
       const name = request.sender_info.name || ''
       if (messageCount === 1) {
-        parsedResponse.response = `Ciao${name ? ` ${name}` : ''}! 👋 Sono HLO, il tuo agente personale di UNVRS Labs. Ho ricevuto il tuo messaggio, dimmi pure come posso aiutarti.`
+        parsedResponse.response = `Ciao${name ? ` ${name}` : ''}! 👋 Mi chiamo HiLO, il tuo agente personale di UNVRS Labs. Ho ricevuto il tuo messaggio, dimmi pure come posso aiutarti.`
       } else {
-        parsedResponse.response = `Ho ricevuto il tuo messaggio e ti rispondo io, il tuo agente personale HLO di UNVRS Labs. Rispondo sempre alla tua ultima domanda, quindi dimmi pure cosa ti serve adesso.`
+        parsedResponse.response = `Ho ricevuto il tuo messaggio e ti risponde il tuo agente personale HiLO di UNVRS Labs. Rispondo sempre alla tua ultima domanda, quindi dimmi pure cosa ti serve adesso.`
       }
       if (!parsedResponse.action) {
         parsedResponse.action = 'continue'
