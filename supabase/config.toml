@@ -89,3 +89,12 @@ verify_jwt = false
 
 [functions.verify-otp]
 verify_jwt = false
+
+[functions.unvrs-brain]
+verify_jwt = false
+
+[functions.agent-logger]
+verify_jwt = false
+
+[functions.agent-message-broker]
+verify_jwt = false
