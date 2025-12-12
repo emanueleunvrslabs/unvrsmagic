@@ -50,17 +50,24 @@ serve(async (req) => {
     // Process incoming messages - WASender uses "messages.received" event
     if (payload.event === 'messages.received') {
       const messageData = payload.data?.messages || {};
-      const from = messageData.key?.remoteJid || messageData.remoteJid;
+      
+      // Use senderPn (actual phone number) if available, otherwise fall back to remoteJid
+      // senderPn contains the real phone number like "447853751579@s.whatsapp.net"
+      // remoteJid can be a LID (LinkedIn ID) like "215479281016833@lid" which doesn't match client contacts
+      const senderPn = messageData.key?.senderPn || messageData.key?.cleanedSenderPn;
+      const remoteJid = messageData.key?.remoteJid || messageData.remoteJid;
+      const from = senderPn || remoteJid;
+      
       const pushName = messageData.pushName || payload.data?.pushName;
       
       // Determine message content type and extract content
       const messageContent = extractMessageContent(messageData);
       
-      console.log('[WhatsApp Webhook] Processing message from:', from, 'type:', messageContent.type, 'content:', messageContent.text?.substring(0, 100));
+      console.log('[WhatsApp Webhook] Processing message from:', from, 'senderPn:', senderPn, 'remoteJid:', remoteJid, 'type:', messageContent.type);
       
       if (from) {
-        // Normalize phone number
-        const normalizedPhone = from.replace('@s.whatsapp.net', '').replace('@c.us', '');
+        // Normalize phone number - remove WhatsApp suffixes
+        const normalizedPhone = from.replace('@s.whatsapp.net', '').replace('@c.us', '').replace('@lid', '');
         
         // Forward to UNVRS.BRAIN for intelligent routing
         const brainPayload = {
