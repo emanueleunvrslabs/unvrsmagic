@@ -25,6 +25,8 @@ const AI_PROVIDERS = [
   { id: "fal", name: "Fal", placeholder: "Enter API key", description: "Fal AI models", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "firecrawl", name: "Firecrawl", placeholder: "fc-...", description: "Web scraping API", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "heygen", name: "HeyGen", placeholder: "Enter API key", description: "AI Avatar & Streaming", requiresOwnerId: false, type: 'standard' as ProviderType },
+  { id: "elevenlabs", name: "ElevenLabs", placeholder: "Enter API key", description: "Voice AI (TTS/STT)", requiresOwnerId: false, type: 'standard' as ProviderType },
+  { id: "telegram", name: "Telegram Bot", placeholder: "Enter Bot Token", description: "Telegram Bot API", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "restream", name: "Restream", placeholder: "Enter API key", description: "Multi-platform streaming (WHIP)", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "resend", name: "Resend", placeholder: "re_...", description: "Email API", requiresOwnerId: false, type: 'standard' as ProviderType },
@@ -52,6 +54,12 @@ const apiKeySchemas = {
   }),
   heygen: z.string().trim().min(20, {
     message: "HeyGen API key must be at least 20 characters"
+  }),
+  elevenlabs: z.string().trim().min(20, {
+    message: "ElevenLabs API key must be at least 20 characters"
+  }),
+  telegram: z.string().trim().regex(/^\d+:[A-Za-z0-9_-]{35,}$/, {
+    message: "Telegram Bot Token must be in format: 123456789:ABCdefGHI..."
   }),
   restream: z.string().trim().min(10, {
     message: "Restream API key must be at least 10 characters"
@@ -81,6 +89,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     fal: "",
     firecrawl: "",
     heygen: "",
+    elevenlabs: "",
+    telegram: "",
     restream: "",
     gamma: "",
     resend: "",
