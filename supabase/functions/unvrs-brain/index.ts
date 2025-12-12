@@ -434,14 +434,28 @@ async function transcribeVoice(
   }
 
   try {
+    console.log('[UNVRS.BRAIN] Downloading audio from:', mediaUrl)
+    
     // Download audio file
     const audioResponse = await fetch(mediaUrl)
+    if (!audioResponse.ok) {
+      console.error('[UNVRS.BRAIN] Failed to download audio:', audioResponse.status)
+      return '[Voice message - download failed]'
+    }
+    
     const audioBlob = await audioResponse.blob()
+    console.log('[UNVRS.BRAIN] Audio blob size:', audioBlob.size, 'type:', audioBlob.type)
 
-    // Send to ElevenLabs Speech-to-Text
+    // Send to ElevenLabs Speech-to-Text with required model_id
     const formData = new FormData()
-    formData.append('audio', audioBlob, 'audio.ogg')
+    // Use the actual MIME type from the response, or default to audio/mpeg for WhatsApp voice messages
+    const mimeType = audioBlob.type || 'audio/ogg'
+    const extension = mimeType.includes('ogg') ? 'ogg' : mimeType.includes('mp4') ? 'm4a' : 'mp3'
+    formData.append('file', audioBlob, `audio.${extension}`)
+    formData.append('model_id', 'scribe_v1')
 
+    console.log('[UNVRS.BRAIN] Sending to ElevenLabs STT...')
+    
     const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
       method: 'POST',
       headers: {
@@ -452,9 +466,11 @@ async function transcribeVoice(
 
     if (response.ok) {
       const result = await response.json()
+      console.log('[UNVRS.BRAIN] Transcription result:', JSON.stringify(result))
       return result.text || '[Voice message - no text detected]'
     } else {
-      console.error('[UNVRS.BRAIN] ElevenLabs STT error:', response.status)
+      const errorText = await response.text()
+      console.error('[UNVRS.BRAIN] ElevenLabs STT error:', response.status, errorText)
       return '[Voice message - transcription failed]'
     }
   } catch (error) {
