@@ -320,6 +320,48 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     }
   }
 
+  // AI Agents section - only for owner
+  if (isOwner) {
+    menuSections.push({
+      title: "AI Agents",
+      collapsible: false,
+      items: [
+        { id: "agents-overview", label: "Overview", icon: Gauge, href: "/ai-agents" },
+        { 
+          id: "agents-core", 
+          label: "Core Agents", 
+          icon: Cpu,
+          subItems: [
+            { id: "agent-brain", label: "BRAIN", icon: Bot, href: "/ai-agents/brain" },
+            { id: "agent-switch", label: "SWITCH", icon: ArrowRightLeft, href: "/ai-agents/switch" },
+            { id: "agent-hlo", label: "HLO", icon: Users, href: "/ai-agents/hlo" },
+          ]
+        },
+        { 
+          id: "agents-business", 
+          label: "Business Agents", 
+          icon: CreditCard,
+          subItems: [
+            { id: "agent-intake", label: "INTAKE", icon: FileText, href: "/ai-agents/intake" },
+            { id: "agent-quote", label: "QUOTE", icon: FileText, href: "/ai-agents/quote" },
+            { id: "agent-deck", label: "DECK", icon: Layers, href: "/ai-agents/deck" },
+            { id: "agent-call", label: "CALL", icon: Zap, href: "/ai-agents/call" },
+          ]
+        },
+        { 
+          id: "agents-social", 
+          label: "Social Agents", 
+          icon: Send,
+          subItems: [
+            { id: "agent-social-brain", label: "SOCIAL.BRAIN", icon: Bot, href: "/ai-agents/social-brain" },
+            { id: "agent-social-publisher", label: "SOCIAL.PUBLISHER", icon: Send, href: "/ai-agents/social-publisher" },
+            { id: "agent-social-reply", label: "SOCIAL.REPLY", icon: Zap, href: "/ai-agents/social-reply" },
+          ]
+        },
+      ],
+    });
+  }
+
   // Tools section
   menuSections.push({
     title: "Tools",
