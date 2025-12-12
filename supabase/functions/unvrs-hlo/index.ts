@@ -236,11 +236,15 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
       }
     }
 
-    // Safety fallback: if for qualsiasi motivo la response è vuota,
+    // Safety fallback: se per qualsiasi motivo la response è vuota,
     // mandiamo comunque un messaggio di conferma al cliente
     if (!parsedResponse.response || String(parsedResponse.response).trim() === '') {
       const name = request.sender_info.name || ''
-      parsedResponse.response = `Ciao${name ? ` ${name}` : ''}! 👋 Ho ricevuto il tuo messaggio e ti rispondo io, il tuo assistente personale UNVRS. Dimmi pure come posso aiutarti.`
+      if (messageCount === 1) {
+        parsedResponse.response = `Ciao${name ? ` ${name}` : ''}! 👋 Sono HLO, il tuo agente personale di UNVRS Labs. Ho ricevuto il tuo messaggio, dimmi pure come posso aiutarti.`
+      } else {
+        parsedResponse.response = `Ho ricevuto il tuo messaggio e ti rispondo io, il tuo agente personale HLO di UNVRS Labs. Rispondo sempre alla tua ultima domanda, quindi dimmi pure cosa ti serve adesso.`
+      }
       if (!parsedResponse.action) {
         parsedResponse.action = 'continue'
       }
