@@ -93,6 +93,12 @@ verify_jwt = false
 [functions.unvrs-brain]
 verify_jwt = false
 
+[functions.unvrs-switch]
+verify_jwt = false
+
+[functions.unvrs-hlo]
+verify_jwt = false
+
 [functions.agent-logger]
 verify_jwt = false
 
