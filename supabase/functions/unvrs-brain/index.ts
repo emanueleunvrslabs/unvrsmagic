@@ -602,53 +602,47 @@ async function textToSpeech(
   ownerId: string,
   text: string
 ): Promise<string | undefined> {
-  // Get ElevenLabs API key
-  const { data: elevenLabsKey } = await supabase
+  // Get OpenAI API key
+  const { data: openaiKey } = await supabase
     .from('api_keys')
     .select('api_key')
     .eq('user_id', ownerId)
-    .eq('provider', 'elevenlabs')
+    .eq('provider', 'openai')
     .single()
 
-  if (!elevenLabsKey) {
-    console.log('[UNVRS.BRAIN] No ElevenLabs API key found, skipping TTS')
+  if (!openaiKey) {
+    console.log('[UNVRS.BRAIN] No OpenAI API key found, skipping TTS')
     return undefined
   }
 
   try {
-    // Use ElevenLabs TTS API
-    // Voice ID: Laura (Italian) - FGY2WhTYpPnrIDTdsKH5
-    const voiceId = 'FGY2WhTYpPnrIDTdsKH5'
-    
     // Replace UNVRS with Universe for proper TTS pronunciation
     const ttsText = text
       .replace(/UNVRS Labs/gi, 'Universe Labs')
       .replace(/UNVRS/gi, 'Universe')
     
-    console.log('[UNVRS.BRAIN] Generating TTS for:', ttsText.substring(0, 100))
+    console.log('[UNVRS.BRAIN] Generating TTS with OpenAI for:', ttsText.substring(0, 100))
 
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    // Use OpenAI TTS API
+    // Voice options: alloy, echo, fable, onyx, nova, shimmer
+    // Using 'nova' - natural sounding female voice good for multilingual
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'xi-api-key': elevenLabsKey.api_key,
+        'Authorization': `Bearer ${openaiKey.api_key}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text: ttsText,
-        model_id: 'eleven_multilingual_v2',
-        output_format: 'mp3_44100_128',
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-          style: 0.3,
-          use_speaker_boost: true
-        }
+        model: 'tts-1',
+        input: ttsText,
+        voice: 'nova',
+        response_format: 'mp3'
       })
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('[UNVRS.BRAIN] ElevenLabs TTS error:', response.status, errorText)
+      console.error('[UNVRS.BRAIN] OpenAI TTS error:', response.status, errorText)
       return undefined
     }
 
