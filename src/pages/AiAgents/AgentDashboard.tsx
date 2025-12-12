@@ -101,7 +101,6 @@ export default function AgentDashboard() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Fetch agent state
     const { data: state } = await supabase
       .from("agent_state")
       .select("*")
@@ -109,7 +108,6 @@ export default function AgentDashboard() {
       .eq("agent_name", config.name)
       .single();
 
-    // Fetch logs
     const { data: agentLogs } = await supabase
       .from("agent_logs")
       .select("*")
@@ -118,7 +116,6 @@ export default function AgentDashboard() {
       .order("timestamp", { ascending: false })
       .limit(50);
 
-    // Fetch sessions
     const { data: agentSessions } = await supabase
       .from("unvrs_agent_sessions")
       .select("*")
@@ -127,7 +124,6 @@ export default function AgentDashboard() {
       .order("created_at", { ascending: false })
       .limit(20);
 
-    // Fetch prompt
     const { data: promptData } = await supabase
       .from("agent_prompts")
       .select("prompt")
@@ -176,7 +172,7 @@ export default function AgentDashboard() {
       case "error": return "text-red-400 bg-red-500/20";
       case "warn": return "text-yellow-400 bg-yellow-500/20";
       case "info": return "text-blue-400 bg-blue-500/20";
-      default: return "text-white/60 bg-white/10";
+      default: return "text-muted-foreground bg-white/10";
     }
   };
 
@@ -184,7 +180,7 @@ export default function AgentDashboard() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-[60vh]">
-          <p className="text-white/50">Agent not found</p>
+          <p className="text-muted-foreground">Agent not found</p>
         </div>
       </DashboardLayout>
     );
@@ -194,7 +190,7 @@ export default function AgentDashboard() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-white/50" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </DashboardLayout>
     );
@@ -204,20 +200,20 @@ export default function AgentDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/10">
-              <Icon className="h-6 w-6 text-white" />
+              <Icon className="h-6 w-6 text-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-white">{config.name}</h1>
-              <p className="text-white/60">{config.description}</p>
+              <h1 className="text-2xl font-semibold text-foreground">{config.name}</h1>
+              <p className="text-muted-foreground">{config.description}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="border-white/20 text-white/70">
+            <Badge variant="outline" className="border-white/20 text-foreground/70">
               {config.model}
             </Badge>
             {agentState?.status === "active" ? (
@@ -225,62 +221,62 @@ export default function AgentDashboard() {
             ) : agentState?.status === "error" ? (
               <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Error</Badge>
             ) : (
-              <Badge className="bg-white/10 text-white/60 border-white/20">Idle</Badge>
+              <Badge className="bg-white/10 text-muted-foreground border-white/20">Idle</Badge>
             )}
           </div>
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="social-media-card border-white/10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <Activity className="h-5 w-5 text-blue-400" />
                 <div>
-                  <p className="text-2xl font-semibold text-white">{logs.length}</p>
-                  <p className="text-sm text-white/60">Total Logs</p>
+                  <p className="text-2xl font-semibold text-foreground">{logs.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Logs</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="social-media-card border-white/10">
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <History className="h-5 w-5 text-purple-400" />
                 <div>
-                  <p className="text-2xl font-semibold text-white">{sessions.length}</p>
-                  <p className="text-sm text-white/60">Sessions</p>
+                  <p className="text-2xl font-semibold text-foreground">{sessions.length}</p>
+                  <p className="text-sm text-muted-foreground">Sessions</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="social-media-card border-white/10">
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-orange-400" />
                 <div>
-                  <p className="text-2xl font-semibold text-white">
+                  <p className="text-2xl font-semibold text-foreground">
                     {agentState?.last_execution 
                       ? format(new Date(agentState.last_execution), "HH:mm")
                       : "--:--"}
                   </p>
-                  <p className="text-sm text-white/60">Last Run</p>
+                  <p className="text-sm text-muted-foreground">Last Run</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="social-media-card border-white/10">
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <Settings className="h-5 w-5 text-emerald-400" />
                 <div>
-                  <p className="text-2xl font-semibold text-white">
+                  <p className="text-2xl font-semibold text-foreground">
                     {logs.filter(l => l.duration_ms).reduce((acc, l) => acc + (l.duration_ms || 0), 0) / Math.max(logs.filter(l => l.duration_ms).length, 1) | 0}ms
                   </p>
-                  <p className="text-sm text-white/60">Avg Duration</p>
+                  <p className="text-sm text-muted-foreground">Avg Duration</p>
                 </div>
               </div>
             </CardContent>
@@ -290,44 +286,44 @@ export default function AgentDashboard() {
         {/* Tabs */}
         <Tabs defaultValue="logs" className="w-full">
           <TabsList className="bg-white/5 border border-white/10">
-            <TabsTrigger value="logs" className="data-[state=active]:bg-white/10">Logs</TabsTrigger>
-            <TabsTrigger value="sessions" className="data-[state=active]:bg-white/10">Sessions</TabsTrigger>
-            <TabsTrigger value="config" className="data-[state=active]:bg-white/10">Configuration</TabsTrigger>
+            <TabsTrigger value="logs" className="data-[state=active]:bg-white/10 text-foreground">Logs</TabsTrigger>
+            <TabsTrigger value="sessions" className="data-[state=active]:bg-white/10 text-foreground">Sessions</TabsTrigger>
+            <TabsTrigger value="config" className="data-[state=active]:bg-white/10 text-foreground">Configuration</TabsTrigger>
           </TabsList>
 
           <TabsContent value="logs" className="mt-4">
-            <Card className="social-media-card border-white/10">
-              <CardHeader>
-                <CardTitle className="text-white">Activity Logs</CardTitle>
+            <Card className="glass-card">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-foreground text-lg">Activity Logs</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                <div className="space-y-2 max-h-[500px] overflow-y-auto scrollbar-glass">
                   {logs.length === 0 ? (
-                    <p className="text-white/50 text-sm text-center py-8">No logs yet</p>
+                    <p className="text-muted-foreground text-sm text-center py-8">No logs yet</p>
                   ) : (
                     logs.map((log) => (
                       <div key={log.id} className="p-3 rounded-lg bg-white/5 border border-white/10">
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs font-medium px-2 py-0.5 rounded ${getLogLevelColor(log.log_level)}`}>
                               {log.log_level.toUpperCase()}
                             </span>
                             {log.action && (
-                              <Badge variant="outline" className="text-xs border-white/20 text-white/70">
+                              <Badge variant="outline" className="text-xs border-white/20 text-foreground/70">
                                 {log.action}
                               </Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-3">
                             {log.duration_ms && (
-                              <span className="text-xs text-white/40">{log.duration_ms}ms</span>
+                              <span className="text-xs text-muted-foreground">{log.duration_ms}ms</span>
                             )}
-                            <span className="text-xs text-white/40">
+                            <span className="text-xs text-muted-foreground">
                               {log.timestamp ? format(new Date(log.timestamp), "MMM d, HH:mm:ss") : ""}
                             </span>
                           </div>
                         </div>
-                        <p className="text-sm text-white/80">{log.message}</p>
+                        <p className="text-sm text-foreground/80">{log.message}</p>
                       </div>
                     ))
                   )}
@@ -337,29 +333,29 @@ export default function AgentDashboard() {
           </TabsContent>
 
           <TabsContent value="sessions" className="mt-4">
-            <Card className="social-media-card border-white/10">
-              <CardHeader>
-                <CardTitle className="text-white">Agent Sessions</CardTitle>
+            <Card className="glass-card">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-foreground text-lg">Agent Sessions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                <div className="space-y-2 max-h-[500px] overflow-y-auto scrollbar-glass">
                   {sessions.length === 0 ? (
-                    <p className="text-white/50 text-sm text-center py-8">No sessions yet</p>
+                    <p className="text-muted-foreground text-sm text-center py-8">No sessions yet</p>
                   ) : (
                     sessions.map((session) => (
                       <div key={session.id} className="p-4 rounded-lg bg-white/5 border border-white/10">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-white">
+                          <span className="text-sm font-medium text-foreground">
                             Session {session.id.slice(0, 8)}...
                           </span>
                           <Badge 
                             variant="outline" 
-                            className={`text-xs ${session.ended_at ? 'border-white/20 text-white/50' : 'border-emerald-500/30 text-emerald-400'}`}
+                            className={`text-xs ${session.ended_at ? 'border-white/20 text-muted-foreground' : 'border-emerald-500/30 text-emerald-400'}`}
                           >
                             {session.ended_at ? "Completed" : "Active"}
                           </Badge>
                         </div>
-                        <div className="flex items-center justify-between text-xs text-white/50">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span>Started: {session.started_at ? format(new Date(session.started_at), "MMM d, HH:mm") : "N/A"}</span>
                           {session.ended_at && (
                             <span>Ended: {format(new Date(session.ended_at), "MMM d, HH:mm")}</span>
@@ -374,15 +370,16 @@ export default function AgentDashboard() {
           </TabsContent>
 
           <TabsContent value="config" className="mt-4">
-            <Card className="social-media-card border-white/10">
-              <CardHeader>
+            <Card className="glass-card">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-white">System Prompt</CardTitle>
+                  <CardTitle className="text-foreground text-lg">System Prompt</CardTitle>
                   <Button
                     onClick={savePrompt}
                     disabled={saving || prompt === originalPrompt}
                     size="sm"
-                    className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+                    variant="outline"
+                    className="bg-white/10 hover:bg-white/20 text-foreground border-white/20"
                   >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                     Save
@@ -394,9 +391,9 @@ export default function AgentDashboard() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Enter the system prompt for this agent..."
-                  className="min-h-[300px] bg-white/5 border-white/10 text-white placeholder:text-white/40 font-mono text-sm"
+                  className="min-h-[300px] bg-white/5 border-white/10 text-foreground placeholder:text-muted-foreground font-mono text-sm"
                 />
-                <p className="text-xs text-white/40 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   This prompt will be used as the system instructions for {config.name}
                 </p>
               </CardContent>
