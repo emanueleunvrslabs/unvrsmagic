@@ -210,7 +210,7 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
     console.log('[UNVRS.HLO] AI response:', aiText)
 
     // Parse AI response
-    let parsedResponse
+    let parsedResponse: any
     try {
       const jsonMatch = aiText.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
@@ -229,7 +229,16 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
       }
     }
 
-    // Update session
+    // Safety fallback: if for qualsiasi motivo la response è vuota,
+    // mandiamo comunque un messaggio di conferma al cliente
+    if (!parsedResponse.response || String(parsedResponse.response).trim() === '') {
+      const name = request.sender_info.name || ''
+      parsedResponse.response = `Ciao${name ? ` ${name}` : ''}! 👋 Ho ricevuto il tuo messaggio e ti rispondo io, il tuo assistente personale UNVRS. Dimmi pure come posso aiutarti.`
+      if (!parsedResponse.action) {
+        parsedResponse.action = 'continue'
+      }
+    }
+
     await supabase
       .from('unvrs_agent_sessions')
       .update({
