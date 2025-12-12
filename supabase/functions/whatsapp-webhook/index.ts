@@ -70,6 +70,7 @@ serve(async (req) => {
           content_type: messageContent.type,
           content: messageContent.text,
           media_url: messageContent.mediaUrl,
+          audio_message_data: messageContent.audioMessageData,
           metadata: {
             wasender_message_id: messageData.key?.id,
             wasender_timestamp: messageData.messageTimestamp,
@@ -129,8 +130,22 @@ serve(async (req) => {
 });
 
 // Extract message content based on message type
-function extractMessageContent(messageData: any): { type: 'text' | 'voice' | 'image' | 'document' | 'video', text?: string, mediaUrl?: string } {
+function extractMessageContent(messageData: any): { 
+  type: 'text' | 'voice' | 'image' | 'document' | 'video', 
+  text?: string, 
+  mediaUrl?: string,
+  audioMessageData?: {
+    url: string
+    mimetype?: string
+    mediaKey: string
+    fileSha256?: string
+    fileLength?: string
+    seconds?: number
+    messageId?: string
+  }
+} {
   const message = messageData.message || {};
+  const messageId = messageData.key?.id;
   
   // Text message
   if (message.conversation) {
@@ -142,12 +157,21 @@ function extractMessageContent(messageData: any): { type: 'text' | 'voice' | 'im
     return { type: 'text', text: message.extendedTextMessage.text };
   }
   
-  // Voice/Audio message
+  // Voice/Audio message - include all data needed for decryption
   if (message.audioMessage) {
     return { 
       type: 'voice', 
       mediaUrl: message.audioMessage.url,
-      text: message.audioMessage.caption
+      text: message.audioMessage.caption,
+      audioMessageData: {
+        url: message.audioMessage.url,
+        mimetype: message.audioMessage.mimetype,
+        mediaKey: message.audioMessage.mediaKey,
+        fileSha256: message.audioMessage.fileSha256,
+        fileLength: message.audioMessage.fileLength,
+        seconds: message.audioMessage.seconds,
+        messageId: messageId
+      }
     };
   }
   
