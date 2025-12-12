@@ -772,13 +772,55 @@ async function generateAgentResponse(
           console.log('[UNVRS.BRAIN] Data request detected, will force text response')
         }
 
+        // Search for client/contact data if owner is asking for specific info
+        let contextData = ''
+        const contentLower = content.toLowerCase()
+        
+        // Check if asking about a specific person/client
+        const namePatterns = [
+          /(?:di|del|della|numero|telefono|mail|email|contatto|cliente)\s+([a-zA-ZàèéìòùÀÈÉÌÒÙ]+)/i,
+          /([a-zA-ZàèéìòùÀÈÉÌÒÙ]+)\s+(?:numero|telefono|mail|email|wa|whatsapp)/i
+        ]
+        
+        let searchName = ''
+        for (const pattern of namePatterns) {
+          const match = content.match(pattern)
+          if (match) {
+            searchName = match[1].toLowerCase()
+            break
+          }
+        }
+        
+        if (searchName && searchName.length > 2) {
+          console.log('[UNVRS.BRAIN] Searching for name:', searchName)
+          
+          // Search in client_contacts
+          const { data: contacts } = await supabase
+            .from('client_contacts')
+            .select('*, clients!inner(company_name)')
+            .or(`first_name.ilike.%${searchName}%,last_name.ilike.%${searchName}%`)
+            .limit(5)
+          
+          if (contacts && contacts.length > 0) {
+            console.log('[UNVRS.BRAIN] Found contacts:', contacts.length)
+            contextData = '\n\nDATI TROVATI NEL DATABASE:\n'
+            for (const c of contacts) {
+              contextData += `• ${c.first_name} ${c.last_name} (${(c.clients as any)?.company_name || 'N/A'})\n`
+              contextData += `  Tel: ${c.whatsapp_number}\n`
+              contextData += `  Email: ${c.email}\n`
+            }
+          } else {
+            contextData = `\n\nNessun contatto trovato con nome "${searchName}" nel database.`
+          }
+        }
+
         const ownerSystemPrompt = `Sei BRAIN, l'intelligenza centrale di UNVRS Labs. Stai parlando con Emanuele, il boss.
 
 STILE OBBLIGATORIO:
 • Risposte BREVI e CONCISE. Massimo 2-3 frasi.
 • Vai dritto al punto, niente giri di parole.
 • Al primo messaggio: "Ciao boss, che posso fare per te?"
-• Chiama SEMPRE Emanuele "boss"
+• Chiama SEMPRE Emanuele "boss", MAI "capo"
 
 CAPACITÀ:
 • Accesso completo a clienti, lead, progetti, conversazioni
@@ -788,8 +830,9 @@ CAPACITÀ:
 REGOLE:
 • NON usare MAI trattini (-, —, –). Usa punti o virgole.
 • Rispondi nella stessa lingua del boss.
-• Se chiede dati specifici (numeri, email, indirizzi), forniscili subito senza fronzoli.
-• Se devi fare qualcosa, conferma brevemente e fallo.`
+• Se ti vengono forniti DATI DAL DATABASE, usali per rispondere.
+• Se non trovi dati, dì chiaramente che non hai trovato nulla.
+• NON inventare MAI dati. Usa solo quelli forniti.${contextData}`
 
         const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -799,7 +842,7 @@ REGOLE:
           },
           body: JSON.stringify({
             model: 'gpt-5-2025-08-07',
-            max_completion_tokens: 1000,
+            max_completion_tokens: 500,
             messages: [
               { role: 'system', content: ownerSystemPrompt },
               ...conversationHistory
@@ -817,7 +860,7 @@ REGOLE:
         }
 
         const aiResult = await openaiResponse.json()
-        const aiText = aiResult.choices?.[0]?.message?.content || 'Messaggio ricevuto, capo!'
+        const aiText = aiResult.choices?.[0]?.message?.content || 'Ciao boss, come posso aiutarti?'
 
         console.log('[UNVRS.BRAIN] Owner response:', aiText)
 
