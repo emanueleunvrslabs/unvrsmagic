@@ -189,27 +189,11 @@ function extractMessageContent(messageData: any): { type: 'text' | 'voice' | 'im
 // Send response back via WhatsApp using WASender
 async function sendWhatsAppResponse(supabase: any, phone: string, text: string) {
   try {
-    // Get owner's WASender API key
-    const { data: ownerRole } = await supabase
-      .from('user_roles')
-      .select('user_id')
-      .eq('role', 'owner')
-      .single();
+    // Get WASender API key from environment (same as OTP function)
+    const wasenderApiKey = Deno.env.get('WASENDER_API_KEY');
 
-    if (!ownerRole) {
-      console.error('[WhatsApp Webhook] No owner found');
-      return;
-    }
-
-    const { data: apiKeyData } = await supabase
-      .from('api_keys')
-      .select('api_key')
-      .eq('user_id', ownerRole.user_id)
-      .eq('provider', 'wasender')
-      .single();
-
-    if (!apiKeyData) {
-      console.log('[WhatsApp Webhook] No WASender API key configured');
+    if (!wasenderApiKey) {
+      console.log('[WhatsApp Webhook] No WASender API key configured in environment');
       return;
     }
 
@@ -221,7 +205,7 @@ async function sendWhatsAppResponse(supabase: any, phone: string, text: string) 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKeyData.api_key}`
+        'Authorization': `Bearer ${wasenderApiKey}`
       },
       body: JSON.stringify({
         to: formattedPhone,
