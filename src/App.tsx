@@ -52,6 +52,8 @@ import AiArtGenerateVideo from "./pages/AiArt/GenerateVideo";
 import Labs from "./pages/Labs";
 import DelibereArera from "./pages/DelibereArera";
 import Search from "./pages/Search";
+import AgentsOverview from "./pages/AiAgents/AgentsOverview";
+import AgentDashboard from "./pages/AiAgents/AgentDashboard";
 
 const queryClient = new QueryClient();
 
@@ -109,6 +111,8 @@ const App = () => (
           <Route path="/strategies-marketplace" element={<HomeRedirect />} />
           <Route path="/labs" element={<ProtectedRoute><Labs /></ProtectedRoute>} />
           <Route path="/delibere-arera" element={<ProtectedRoute><DelibereArera /></ProtectedRoute>} />
+          <Route path="/ai-agents" element={<ProtectedRoute><AgentsOverview /></ProtectedRoute>} />
+          <Route path="/ai-agents/:agentId" element={<ProtectedRoute><AgentDashboard /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<HomeRedirect />} />
           {/* Redirects for removed pages */}
