@@ -251,7 +251,7 @@ async function sendWhatsAppResponse(supabase: any, phone: string, text: string) 
   }
 }
 
-// Send audio response via WhatsApp using WASender
+// Send audio response via WhatsApp using WASender (voice note via audioUrl)
 async function sendWhatsAppAudio(phone: string, audioUrl: string) {
   try {
     const wasenderApiKey = Deno.env.get('WASENDER_API_KEY');
@@ -263,23 +263,21 @@ async function sendWhatsAppAudio(phone: string, audioUrl: string) {
 
     const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
 
-    // Send audio via WASender API
-    const response = await fetch('https://www.wasenderapi.com/api/send-media', {
+    // According to Wasender API docs, audio is sent via /api/send-message with audioUrl
+    const response = await fetch('https://www.wasenderapi.com/api/send-message', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${wasenderApiKey}`
+        'Authorization': `Bearer ${wasenderApiKey}`,
       },
       body: JSON.stringify({
         to: formattedPhone,
-        mediaUrl: audioUrl,
-        mediaType: 'audio'
-      })
+        audioUrl,
+      }),
     });
 
     const result = await response.json();
     console.log('[WhatsApp Webhook] WASender audio send result:', JSON.stringify(result));
-
   } catch (error) {
     console.error('[WhatsApp Webhook] Error sending audio response:', error);
   }
