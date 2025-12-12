@@ -1404,6 +1404,398 @@ export type Database = {
         }
         Relationships: []
       }
+      unvrs_agent_sessions: {
+        Row: {
+          agent_instance_id: string | null
+          agent_type: string
+          context: Json | null
+          conversation_id: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          last_activity_at: string | null
+          started_at: string | null
+          state: Json | null
+          user_id: string
+        }
+        Insert: {
+          agent_instance_id?: string | null
+          agent_type: string
+          context?: Json | null
+          conversation_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          last_activity_at?: string | null
+          started_at?: string | null
+          state?: Json | null
+          user_id: string
+        }
+        Update: {
+          agent_instance_id?: string | null
+          agent_type?: string
+          context?: Json | null
+          conversation_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          last_activity_at?: string | null
+          started_at?: string | null
+          state?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unvrs_agent_sessions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "unvrs_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unvrs_conversations: {
+        Row: {
+          channel: string
+          client_id: string | null
+          contact_identifier: string
+          contact_name: string | null
+          created_at: string
+          current_agent: string | null
+          id: string
+          last_message_at: string | null
+          lead_id: string | null
+          metadata: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          client_id?: string | null
+          contact_identifier: string
+          contact_name?: string | null
+          created_at?: string
+          current_agent?: string | null
+          id?: string
+          last_message_at?: string | null
+          lead_id?: string | null
+          metadata?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          client_id?: string | null
+          contact_identifier?: string
+          contact_name?: string | null
+          created_at?: string
+          current_agent?: string | null
+          id?: string
+          last_message_at?: string | null
+          lead_id?: string | null
+          metadata?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_unvrs_conversations_lead"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "unvrs_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unvrs_conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unvrs_leads: {
+        Row: {
+          company: string | null
+          converted_at: string | null
+          created_at: string
+          email: string | null
+          first_contact_at: string | null
+          id: string
+          metadata: Json | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          qualified_at: string | null
+          source_channel: string | null
+          source_conversation_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company?: string | null
+          converted_at?: string | null
+          created_at?: string
+          email?: string | null
+          first_contact_at?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          qualified_at?: string | null
+          source_channel?: string | null
+          source_conversation_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company?: string | null
+          converted_at?: string | null
+          created_at?: string
+          email?: string | null
+          first_contact_at?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          qualified_at?: string | null
+          source_channel?: string | null
+          source_conversation_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unvrs_leads_source_conversation_id_fkey"
+            columns: ["source_conversation_id"]
+            isOneToOne: false
+            referencedRelation: "unvrs_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unvrs_messages: {
+        Row: {
+          content: string | null
+          content_type: string
+          conversation_id: string
+          created_at: string
+          direction: string
+          id: string
+          media_url: string | null
+          metadata: Json | null
+          processed_by_agent: string | null
+          transcription: string | null
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          content_type?: string
+          conversation_id: string
+          created_at?: string
+          direction: string
+          id?: string
+          media_url?: string | null
+          metadata?: Json | null
+          processed_by_agent?: string | null
+          transcription?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          content_type?: string
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          media_url?: string | null
+          metadata?: Json | null
+          processed_by_agent?: string | null
+          transcription?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unvrs_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "unvrs_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unvrs_project_briefs: {
+        Row: {
+          budget_range: string | null
+          client_id: string | null
+          collected_steps: Json | null
+          completed_at: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          lead_id: string | null
+          project_type: string | null
+          requirements: Json | null
+          status: string
+          timeline_preference: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_range?: string | null
+          client_id?: string | null
+          collected_steps?: Json | null
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          project_type?: string | null
+          requirements?: Json | null
+          status?: string
+          timeline_preference?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_range?: string | null
+          client_id?: string | null
+          collected_steps?: Json | null
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          project_type?: string | null
+          requirements?: Json | null
+          status?: string
+          timeline_preference?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unvrs_project_briefs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unvrs_project_briefs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "unvrs_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unvrs_project_briefs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "unvrs_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unvrs_project_quotes: {
+        Row: {
+          accepted_at: string | null
+          assumptions: Json | null
+          brief_id: string | null
+          client_id: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          lead_id: string | null
+          line_items: Json | null
+          quote_number: string | null
+          risks: Json | null
+          sent_at: string | null
+          status: string
+          subtotal: number | null
+          tax: number | null
+          timeline_days: number | null
+          total: number | null
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          assumptions?: Json | null
+          brief_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          lead_id?: string | null
+          line_items?: Json | null
+          quote_number?: string | null
+          risks?: Json | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number | null
+          tax?: number | null
+          timeline_days?: number | null
+          total?: number | null
+          updated_at?: string
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          assumptions?: Json | null
+          brief_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          lead_id?: string | null
+          line_items?: Json | null
+          quote_number?: string | null
+          risks?: Json | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number | null
+          tax?: number | null
+          timeline_days?: number | null
+          total?: number | null
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unvrs_project_quotes_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "unvrs_project_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unvrs_project_quotes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unvrs_project_quotes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "unvrs_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       uploaded_files: {
         Row: {
           created_at: string | null
