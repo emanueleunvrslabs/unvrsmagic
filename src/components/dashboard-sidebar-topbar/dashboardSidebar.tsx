@@ -185,8 +185,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   if (isOwner) {
     menuSections.push({
       title: "Admin",
-      collapsible: true,
-      defaultOpen: true,
+      collapsible: false,
       items: [
         { id: "admin-dashboard", label: "Dashboard", icon: Home, href: "/admin/dashboard" },
         { id: "admin-clients", label: "Clients", icon: Users, href: "/admin/clients" },
@@ -208,8 +207,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     // Projects section with submenus
     menuSections.push({
       title: "Projects",
-      collapsible: true,
-      defaultOpen: true,
+      collapsible: false,
       items: [
         { 
           id: "ai-social", 
@@ -325,8 +323,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   // Tools section
   menuSections.push({
     title: "Tools",
-    collapsible: true,
-    defaultOpen: true,
+    collapsible: false,
     items: [
       ...(isOwner ? [{ id: "audit-logs", label: "Audit Logs", icon: Shield, href: "/admin/audit-logs" }] : []),
       { id: "upload", label: "Upload", icon: Upload, href: "/file-upload" },
