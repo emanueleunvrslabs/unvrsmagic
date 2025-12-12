@@ -304,7 +304,22 @@ async function identifySender(
   ownerId: string, 
   channel: string, 
   contact: string
-): Promise<{ type: 'client' | 'lead' | 'public', client_id?: string, lead_id?: string, name?: string }> {
+): Promise<{ type: 'owner' | 'client' | 'lead' | 'public', client_id?: string, lead_id?: string, name?: string }> {
+  
+  // OWNER PHONE NUMBER - has full powers
+  const OWNER_PHONE = '34625976744'
+  
+  // Check if sender is the OWNER
+  if (channel === 'whatsapp' || channel === 'phone') {
+    const normalizedContact = contact.replace(/[^\d]/g, '')
+    if (normalizedContact === OWNER_PHONE || normalizedContact.endsWith(OWNER_PHONE)) {
+      console.log('[UNVRS.BRAIN] Owner detected from phone:', normalizedContact)
+      return {
+        type: 'owner',
+        name: 'Emanuele'
+      }
+    }
+  }
   
   // Check if it's an existing client by phone or email
   if (channel === 'whatsapp' || channel === 'phone') {
@@ -367,6 +382,11 @@ async function determineRouting(
   senderInfo: any,
   message: IncomingMessage
 ): Promise<{ agent: string, reason: string }> {
+  
+  // If sender is the OWNER → route directly to BRAIN (full control)
+  if (senderInfo.type === 'owner') {
+    return { agent: 'brain', reason: 'Owner detected - BRAIN responds directly with full capabilities' }
+  }
   
   // If sender is a known client → route to HLO (client support)
   if (senderInfo.type === 'client') {
@@ -696,6 +716,107 @@ async function generateAgentResponse(
   
   // Route to appropriate agent edge function
   switch (routing.agent) {
+    case 'brain':
+      // OWNER mode - BRAIN responds directly with full AI capabilities
+      try {
+        console.log('[UNVRS.BRAIN] Owner mode - responding directly')
+        
+        // Get OpenAI API key
+        const { data: openaiKey } = await supabase
+          .from('api_keys')
+          .select('api_key')
+          .eq('user_id', ownerId)
+          .eq('provider', 'openai')
+          .single()
+
+        if (!openaiKey) {
+          return {
+            text: 'Ciao capo! Non ho trovato la chiave API OpenAI configurata. Verificala nelle impostazioni.',
+            action: 'error'
+          }
+        }
+
+        // Get conversation history for context
+        const { data: messages } = await supabase
+          .from('unvrs_messages')
+          .select('direction, content, content_type')
+          .eq('conversation_id', conversation.id)
+          .order('created_at', { ascending: true })
+          .limit(30)
+
+        const conversationHistory = (messages || []).map((m: any) => ({
+          role: m.direction === 'inbound' ? 'user' : 'assistant',
+          content: m.content || '[media]'
+        }))
+
+        conversationHistory.push({
+          role: 'user',
+          content: content
+        })
+
+        const ownerSystemPrompt = `Sei BRAIN, l'intelligenza centrale di UNVRS Labs. Stai parlando con Emanuele, il proprietario e fondatore.
+
+POTERI E CAPACITÀ:
+• Hai accesso completo a tutte le informazioni del sistema
+• Puoi delegare compiti agli altri agenti (HLO, SWITCH, INTAKE, QUOTE, DECK)
+• Puoi fornire report, analisi e suggerimenti strategici
+• Rispondi in modo diretto, conciso e professionale
+• Usa la stessa lingua in cui ti scrive Emanuele
+
+CONTESTO:
+• Emanuele è il boss. Trattalo con rispetto ma senza formalità eccessive.
+• Puoi essere informale e diretto nelle risposte.
+• Se ti chiede di fare qualcosa, conferma e fallo (o spiega cosa farai).
+• Se non puoi fare qualcosa direttamente, spiega cosa può fare lui o cosa delegherai agli altri agenti.
+
+REGOLE:
+• NON usare MAI trattini (-, —, –) nelle risposte. Usa punti, virgole o frasi separate.
+• Rispondi sempre in modo utile e proattivo.
+• Se Emanuele chiede info su clienti, progetti, lead, fornisci i dati disponibili.
+• Se vuole inviare messaggi o fare azioni, conferma e procedi.`
+
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openaiKey.api_key}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-5-2025-08-07',
+            max_completion_tokens: 1000,
+            messages: [
+              { role: 'system', content: ownerSystemPrompt },
+              ...conversationHistory
+            ]
+          })
+        })
+
+        if (!openaiResponse.ok) {
+          const error = await openaiResponse.text()
+          console.error('[UNVRS.BRAIN] OpenAI error for owner:', error)
+          return {
+            text: 'Ciao capo! Ho avuto un problema con OpenAI. Riprova tra poco.',
+            action: 'error'
+          }
+        }
+
+        const aiResult = await openaiResponse.json()
+        const aiText = aiResult.choices?.[0]?.message?.content || 'Messaggio ricevuto, capo!'
+
+        console.log('[UNVRS.BRAIN] Owner response:', aiText)
+
+        return {
+          text: aiText,
+          action: 'continue'
+        }
+      } catch (error) {
+        console.error('[UNVRS.BRAIN] BRAIN owner mode error:', error)
+        return {
+          text: 'Ciao capo! Ho avuto un errore interno. Riprova.',
+          action: 'error'
+        }
+      }
+
     case 'hlo':
       try {
         const hloResponse = await fetch(`${supabaseUrl}/functions/v1/unvrs-hlo`, {
