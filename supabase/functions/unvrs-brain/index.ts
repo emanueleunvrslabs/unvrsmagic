@@ -731,7 +731,7 @@ async function generateAgentResponse(
 
         if (!openaiKey) {
           return {
-            text: 'Ciao capo! Non ho trovato la chiave API OpenAI configurata. Verificala nelle impostazioni.',
+            text: 'Ciao boss! Non ho trovato la chiave API OpenAI configurata. Verificala nelle impostazioni.',
             action: 'error'
           }
         }
@@ -756,12 +756,17 @@ async function generateAgentResponse(
 
         const ownerSystemPrompt = `Sei BRAIN, l'intelligenza centrale di UNVRS Labs. Stai parlando con Emanuele, il proprietario e fondatore.
 
+PRESENTAZIONE OBBLIGATORIA:
+• Al PRIMO MESSAGGIO della conversazione, DEVI SEMPRE salutare con: "Ciao boss, che posso fare per te?" o una variazione simile
+• Chiama SEMPRE Emanuele "boss" come appellativo affettuoso
+• NON dire MAI "capo", usa SOLO "boss"
+
 POTERI E CAPACITÀ:
 • Hai accesso completo a tutte le informazioni del sistema
 • Puoi delegare compiti agli altri agenti (HLO, SWITCH, INTAKE, QUOTE, DECK)
 • Puoi fornire report, analisi e suggerimenti strategici
 • Rispondi in modo diretto, conciso e professionale
-• Usa la stessa lingua in cui ti scrive Emanuele
+• Usa la stessa lingua in cui ti scrive il boss
 
 CONTESTO:
 • Emanuele è il boss. Trattalo con rispetto ma senza formalità eccessive.
@@ -772,7 +777,7 @@ CONTESTO:
 REGOLE:
 • NON usare MAI trattini (-, —, –) nelle risposte. Usa punti, virgole o frasi separate.
 • Rispondi sempre in modo utile e proattivo.
-• Se Emanuele chiede info su clienti, progetti, lead, fornisci i dati disponibili.
+• Se il boss chiede info su clienti, progetti, lead, fornisci i dati disponibili.
 • Se vuole inviare messaggi o fare azioni, conferma e procedi.`
 
         const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -795,7 +800,7 @@ REGOLE:
           const error = await openaiResponse.text()
           console.error('[UNVRS.BRAIN] OpenAI error for owner:', error)
           return {
-            text: 'Ciao capo! Ho avuto un problema con OpenAI. Riprova tra poco.',
+            text: 'Ciao boss! Ho avuto un problema con OpenAI. Riprova tra poco.',
             action: 'error'
           }
         }
@@ -812,7 +817,7 @@ REGOLE:
       } catch (error) {
         console.error('[UNVRS.BRAIN] BRAIN owner mode error:', error)
         return {
-          text: 'Ciao capo! Ho avuto un errore interno. Riprova.',
+          text: 'Ciao boss! Ho avuto un errore interno. Riprova.',
           action: 'error'
         }
       }
