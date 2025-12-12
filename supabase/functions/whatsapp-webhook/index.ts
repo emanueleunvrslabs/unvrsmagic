@@ -95,11 +95,15 @@ serve(async (req) => {
 
         // If BRAIN generated a response, send it back via WhatsApp
         if (brainResult.success && brainResult.response) {
-          // If response is audio (voice message reply), send audio
-          if (brainResult.response_type === 'audio' && brainResult.audio_url) {
-            await sendWhatsAppAudio(normalizedPhone, brainResult.audio_url);
+          // For voice messages, we MUST reply with voice only
+          if (messageContent.type === 'voice') {
+            if (brainResult.response_type === 'audio' && brainResult.audio_url) {
+              await sendWhatsAppAudio(normalizedPhone, brainResult.audio_url);
+            } else {
+              console.warn('[WhatsApp Webhook] Voice message received but no audio_url in BRAIN response, skipping text reply');
+            }
           } else {
-            // Otherwise send text
+            // For text (and other non-voice) messages, reply with text only
             await sendWhatsAppResponse(supabase, normalizedPhone, brainResult.response);
           }
         }
