@@ -620,7 +620,12 @@ async function textToSpeech(
     // Voice ID: Laura (Italian) - FGY2WhTYpPnrIDTdsKH5
     const voiceId = 'FGY2WhTYpPnrIDTdsKH5'
     
-    console.log('[UNVRS.BRAIN] Generating TTS for:', text.substring(0, 100))
+    // Replace UNVRS with Universe for proper TTS pronunciation
+    const ttsText = text
+      .replace(/UNVRS Labs/gi, 'Universe Labs')
+      .replace(/UNVRS/gi, 'Universe')
+    
+    console.log('[UNVRS.BRAIN] Generating TTS for:', ttsText.substring(0, 100))
 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
@@ -629,7 +634,7 @@ async function textToSpeech(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text,
+        text: ttsText,
         model_id: 'eleven_multilingual_v2',
         output_format: 'mp3_44100_128',
         voice_settings: {
