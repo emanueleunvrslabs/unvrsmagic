@@ -625,7 +625,7 @@ async function textToSpeech(
 
     // Use OpenAI TTS API
     // Voice options: alloy, echo, fable, onyx, nova, shimmer
-    // Using 'nova' - natural sounding female voice good for multilingual
+    // Using 'shimmer' - warm, engaging, energetic voice good for multilingual
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
@@ -635,7 +635,7 @@ async function textToSpeech(
       body: JSON.stringify({
         model: 'tts-1',
         input: ttsText,
-        voice: 'nova',
+        voice: 'shimmer',
         response_format: 'mp3'
       })
     })
