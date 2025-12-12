@@ -474,30 +474,104 @@ async function generateAgentResponse(
   originalMessage: IncomingMessage
 ): Promise<{ text?: string, action?: string }> {
   
-  // For now, generate a placeholder response based on routing
-  // In Phase 2, each agent will have its own edge function
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   
+  // Route to appropriate agent edge function
   switch (routing.agent) {
     case 'hlo':
-      return {
-        text: `Ciao${senderInfo.name ? ` ${senderInfo.name}` : ''}! Sono qui per aiutarti. Come posso assisterti oggi?`,
-        action: 'await_response'
+      try {
+        const hloResponse = await fetch(`${supabaseUrl}/functions/v1/unvrs-hlo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`
+          },
+          body: JSON.stringify({
+            conversation_id: conversation.id,
+            session_id: session.id,
+            user_id: ownerId,
+            message: content,
+            sender_info: {
+              type: 'client',
+              client_id: senderInfo.client_id,
+              name: senderInfo.name
+            },
+            channel: originalMessage.channel,
+            contact_identifier: originalMessage.contact_identifier
+          })
+        })
+        
+        const hloResult = await hloResponse.json()
+        console.log('[UNVRS.BRAIN] HLO response:', JSON.stringify(hloResult))
+        
+        return {
+          text: hloResult.response,
+          action: hloResult.action
+        }
+      } catch (error) {
+        console.error('[UNVRS.BRAIN] HLO error:', error)
+        return {
+          text: `Ciao${senderInfo.name ? ` ${senderInfo.name}` : ''}! Ho ricevuto il tuo messaggio. Ti risponderemo a breve.`,
+          action: 'queue_for_human'
+        }
       }
 
     case 'switch':
-      if (senderInfo.type === 'public') {
-        return {
-          text: `Ciao! Benvenuto in UNVRS Labs. 👋\n\nSono l'assistente AI. Posso aiutarti con:\n• Informazioni sui nostri servizi\n• Richiesta preventivo\n• Supporto tecnico\n\nCome posso aiutarti?`,
-          action: 'await_qualification'
+      try {
+        const switchResponse = await fetch(`${supabaseUrl}/functions/v1/unvrs-switch`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`
+          },
+          body: JSON.stringify({
+            conversation_id: conversation.id,
+            session_id: session.id,
+            user_id: ownerId,
+            message: content,
+            sender_info: {
+              type: senderInfo.type,
+              lead_id: senderInfo.lead_id,
+              name: senderInfo.name
+            },
+            channel: originalMessage.channel,
+            contact_identifier: originalMessage.contact_identifier
+          })
+        })
+        
+        const switchResult = await switchResponse.json()
+        console.log('[UNVRS.BRAIN] SWITCH response:', JSON.stringify(switchResult))
+        
+        // Handle handoffs
+        if (switchResult.action === 'handoff_intake') {
+          // Update conversation to INTAKE agent
+          await supabase
+            .from('unvrs_conversations')
+            .update({ current_agent: 'intake' })
+            .eq('id', conversation.id)
+          
+          // End SWITCH session
+          await supabase
+            .from('unvrs_agent_sessions')
+            .update({ ended_at: new Date().toISOString() })
+            .eq('id', session.id)
         }
-      } else {
+        
         return {
-          text: `Ciao${senderInfo.name ? ` ${senderInfo.name}` : ''}! Come posso aiutarti oggi?`,
+          text: switchResult.response,
+          action: switchResult.action
+        }
+      } catch (error) {
+        console.error('[UNVRS.BRAIN] SWITCH error:', error)
+        return {
+          text: `Ciao! Benvenuto in UNVRS Labs. 👋\nCome posso aiutarti oggi?`,
           action: 'await_response'
         }
       }
 
     case 'intake':
+      // INTAKE agent will be implemented in Phase 2.5
       return {
         text: `Perfetto! Vediamo insieme di cosa hai bisogno. Puoi descrivermi brevemente il tuo progetto?`,
         action: 'collect_requirements'
