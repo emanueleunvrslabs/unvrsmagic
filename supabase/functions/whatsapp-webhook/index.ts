@@ -18,6 +18,7 @@ serve(async (req) => {
     const webhookSecret = Deno.env.get('WASENDER_WEBHOOK_SECRET');
     
     if (!signature || !webhookSecret) {
+      console.error('[WhatsApp Webhook] Missing signature or secret');
       return new Response(
         JSON.stringify({ error: 'Invalid signature' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -30,6 +31,7 @@ serve(async (req) => {
     
     // Length check and timing-safe comparison
     if (sigBuffer.length !== secretBuffer.length || !timingSafeEqual(sigBuffer, secretBuffer)) {
+      console.error('[WhatsApp Webhook] Signature mismatch');
       return new Response(
         JSON.stringify({ error: 'Invalid signature' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -43,59 +45,67 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log('Webhook payload received:', JSON.stringify(payload));
+    console.log('[WhatsApp Webhook] Payload received:', JSON.stringify(payload));
 
     // Process incoming messages - WASender uses "messages.received" event
     if (payload.event === 'messages.received') {
-      // WASender format: data.messages contains the message object
       const messageData = payload.data?.messages || {};
       const from = messageData.key?.remoteJid || messageData.remoteJid;
-      const text = messageData.message?.conversation || messageData.messageBody || messageData.message?.extendedTextMessage?.text;
+      const pushName = messageData.pushName || payload.data?.pushName;
       
-      console.log('Processing incoming message from:', from, 'text:', text);
+      // Determine message content type and extract content
+      const messageContent = extractMessageContent(messageData);
       
-      if (from && text) {
-        // Normalize phone number (remove @s.whatsapp.net suffix if present)
+      console.log('[WhatsApp Webhook] Processing message from:', from, 'type:', messageContent.type, 'content:', messageContent.text?.substring(0, 100));
+      
+      if (from) {
+        // Normalize phone number
         const normalizedPhone = from.replace('@s.whatsapp.net', '').replace('@c.us', '');
-        const phoneWithPlus = normalizedPhone.startsWith('+') ? normalizedPhone : `+${normalizedPhone}`;
         
-        console.log('Looking for contact with phone:', phoneWithPlus, 'or', normalizedPhone);
-        
-        // Find the contact by phone number (try with and without +)
-        const { data: contact, error: contactError } = await supabase
-          .from('client_contacts')
-          .select('id, client_id, first_name, last_name, whatsapp_number')
-          .or(`whatsapp_number.eq.${phoneWithPlus},whatsapp_number.eq.${normalizedPhone}`)
-          .single();
+        // Forward to UNVRS.BRAIN for intelligent routing
+        const brainPayload = {
+          channel: 'whatsapp',
+          contact_identifier: normalizedPhone,
+          contact_name: pushName,
+          content_type: messageContent.type,
+          content: messageContent.text,
+          media_url: messageContent.mediaUrl,
+          metadata: {
+            wasender_message_id: messageData.key?.id,
+            wasender_timestamp: messageData.messageTimestamp,
+            raw_payload: payload
+          }
+        };
 
-        console.log('Contact lookup result:', contact, 'error:', contactError);
+        console.log('[WhatsApp Webhook] Forwarding to UNVRS.BRAIN:', JSON.stringify(brainPayload));
 
-        if (contact) {
-          // Get owner user_id
-          const { data: ownerRole } = await supabase
-            .from('user_roles')
-            .select('user_id')
-            .eq('role', 'owner')
-            .single();
+        // Call UNVRS.BRAIN edge function
+        const brainResponse = await fetch(`${supabaseUrl}/functions/v1/unvrs-brain`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseServiceKey}`
+          },
+          body: JSON.stringify(brainPayload)
+        });
 
-          // Save incoming message to database
-          const { error: insertError } = await supabase
-            .from('whatsapp_messages')
-            .insert({
-              client_id: contact.client_id,
-              contact_id: contact.id,
-              phone_number: contact.whatsapp_number,
-              message_text: text,
-              direction: 'incoming',
-              status: 'received',
-              user_id: ownerRole?.user_id
-            });
+        const brainResult = await brainResponse.json();
+        console.log('[WhatsApp Webhook] UNVRS.BRAIN response:', JSON.stringify(brainResult));
 
-          console.log('Message insert result:', insertError ? 'error: ' + insertError.message : 'success');
-        } else {
-          console.log('No contact found for phone number:', phoneWithPlus);
+        // If BRAIN generated a response, send it back via WhatsApp
+        if (brainResult.success && brainResult.response) {
+          await sendWhatsAppResponse(supabase, normalizedPhone, brainResult.response);
         }
+
+        // Also maintain backward compatibility - store in whatsapp_messages if it's an existing client
+        await storeMessageForLegacySystem(supabase, normalizedPhone, messageContent.text || '[Media message]');
       }
+    }
+
+    // Handle message status updates
+    if (payload.event === 'messages.update' || payload.event === 'message.status') {
+      console.log('[WhatsApp Webhook] Status update received:', JSON.stringify(payload));
+      // Status updates can be processed here if needed
     }
 
     return new Response(
@@ -107,6 +117,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    console.error('[WhatsApp Webhook] Error:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { 
@@ -116,3 +127,152 @@ serve(async (req) => {
     );
   }
 });
+
+// Extract message content based on message type
+function extractMessageContent(messageData: any): { type: 'text' | 'voice' | 'image' | 'document' | 'video', text?: string, mediaUrl?: string } {
+  const message = messageData.message || {};
+  
+  // Text message
+  if (message.conversation) {
+    return { type: 'text', text: message.conversation };
+  }
+  
+  // Extended text message (with links, etc.)
+  if (message.extendedTextMessage?.text) {
+    return { type: 'text', text: message.extendedTextMessage.text };
+  }
+  
+  // Voice/Audio message
+  if (message.audioMessage) {
+    return { 
+      type: 'voice', 
+      mediaUrl: message.audioMessage.url,
+      text: message.audioMessage.caption
+    };
+  }
+  
+  // Image message
+  if (message.imageMessage) {
+    return { 
+      type: 'image', 
+      mediaUrl: message.imageMessage.url,
+      text: message.imageMessage.caption
+    };
+  }
+  
+  // Video message
+  if (message.videoMessage) {
+    return { 
+      type: 'video', 
+      mediaUrl: message.videoMessage.url,
+      text: message.videoMessage.caption
+    };
+  }
+  
+  // Document message
+  if (message.documentMessage) {
+    return { 
+      type: 'document', 
+      mediaUrl: message.documentMessage.url,
+      text: message.documentMessage.fileName
+    };
+  }
+  
+  // Fallback to messageBody if available
+  if (messageData.messageBody) {
+    return { type: 'text', text: messageData.messageBody };
+  }
+  
+  return { type: 'text', text: '[Unsupported message type]' };
+}
+
+// Send response back via WhatsApp using WASender
+async function sendWhatsAppResponse(supabase: any, phone: string, text: string) {
+  try {
+    // Get owner's WASender API key
+    const { data: ownerRole } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'owner')
+      .single();
+
+    if (!ownerRole) {
+      console.error('[WhatsApp Webhook] No owner found');
+      return;
+    }
+
+    const { data: apiKeyData } = await supabase
+      .from('api_keys')
+      .select('api_key')
+      .eq('user_id', ownerRole.user_id)
+      .eq('provider', 'wasender')
+      .single();
+
+    if (!apiKeyData) {
+      console.log('[WhatsApp Webhook] No WASender API key configured');
+      return;
+    }
+
+    // Format phone number for WASender
+    const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+
+    // Send message via WASender API
+    const response = await fetch('https://api.wasender.dev/v1/messages/text', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKeyData.api_key}`
+      },
+      body: JSON.stringify({
+        to: formattedPhone,
+        text: text
+      })
+    });
+
+    const result = await response.json();
+    console.log('[WhatsApp Webhook] WASender send result:', JSON.stringify(result));
+
+  } catch (error) {
+    console.error('[WhatsApp Webhook] Error sending response:', error);
+  }
+}
+
+// Maintain backward compatibility with existing whatsapp_messages table
+async function storeMessageForLegacySystem(supabase: any, phone: string, text: string) {
+  try {
+    const phoneWithPlus = phone.startsWith('+') ? phone : `+${phone}`;
+    
+    // Find the contact by phone number
+    const { data: contact } = await supabase
+      .from('client_contacts')
+      .select('id, client_id, whatsapp_number')
+      .or(`whatsapp_number.eq.${phoneWithPlus},whatsapp_number.eq.${phone}`)
+      .single();
+
+    if (contact) {
+      // Get owner user_id
+      const { data: ownerRole } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'owner')
+        .single();
+
+      // Save incoming message to legacy database
+      await supabase
+        .from('whatsapp_messages')
+        .insert({
+          client_id: contact.client_id,
+          contact_id: contact.id,
+          phone_number: contact.whatsapp_number,
+          message_text: text,
+          direction: 'incoming',
+          status: 'received',
+          user_id: ownerRole?.user_id
+        });
+
+      console.log('[WhatsApp Webhook] Message stored in legacy system for contact:', contact.id);
+    }
+  } catch (error) {
+    console.error('[WhatsApp Webhook] Error storing legacy message:', error);
+  }
+}
