@@ -491,6 +491,62 @@ serve(async (req) => {
         }
         break;
 
+      case "elevenlabs":
+        try {
+          // ElevenLabs API - verify with user info endpoint
+          const response = await fetch("https://api.elevenlabs.io/v1/user", {
+            method: "GET",
+            headers: {
+              "xi-api-key": apiKey,
+              "Accept": "application/json",
+            },
+          });
+
+          console.log("ElevenLabs response status:", response.status);
+
+          if (response.status === 200) {
+            isValid = true;
+            console.log("ElevenLabs API key is valid");
+          } else if (response.status === 401 || response.status === 403) {
+            errorMessage = "Invalid ElevenLabs API key";
+            console.error("ElevenLabs verification failed:", response.status);
+          } else {
+            errorMessage = "Failed to verify ElevenLabs API key";
+            console.error("ElevenLabs unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify ElevenLabs API key";
+          console.error("ElevenLabs verification error:", error);
+        }
+        break;
+
+      case "telegram":
+        try {
+          // Telegram Bot API - verify with getMe endpoint
+          const response = await fetch(`https://api.telegram.org/bot${apiKey}/getMe`, {
+            method: "GET",
+          });
+
+          console.log("Telegram response status:", response.status);
+
+          const data = await response.json();
+          
+          if (response.status === 200 && data.ok === true) {
+            isValid = true;
+            console.log("Telegram Bot Token is valid, bot name:", data.result?.username);
+          } else if (response.status === 401 || data.ok === false) {
+            errorMessage = data.description || "Invalid Telegram Bot Token";
+            console.error("Telegram verification failed:", errorMessage);
+          } else {
+            errorMessage = "Failed to verify Telegram Bot Token";
+            console.error("Telegram unexpected status:", response.status);
+          }
+        } catch (error) {
+          errorMessage = "Failed to verify Telegram Bot Token";
+          console.error("Telegram verification error:", error);
+        }
+        break;
+
       default:
         return new Response(
           JSON.stringify({ error: "Unsupported provider" }),
