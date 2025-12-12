@@ -31,6 +31,8 @@ interface BrainResponse {
   conversation_id: string
   routed_to_agent: string
   response?: string
+  response_type?: 'text' | 'audio'
+  audio_url?: string
   action?: string
   error?: string
 }
@@ -160,13 +162,27 @@ Deno.serve(async (req) => {
       message
     )
 
-    // Step 13: Store outbound message if response generated
+    // Step 13: If original message was voice, convert response to audio
+    let responseType: 'text' | 'audio' = 'text'
+    let audioUrl: string | undefined
+    
+    if (message.content_type === 'voice' && response.text) {
+      console.log('[UNVRS.BRAIN] Original was voice message, converting response to audio...')
+      audioUrl = await textToSpeech(supabase, ownerId, response.text)
+      if (audioUrl) {
+        responseType = 'audio'
+        console.log('[UNVRS.BRAIN] Audio generated:', audioUrl)
+      }
+    }
+
+    // Step 14: Store outbound message if response generated
     if (response.text) {
       await storeMessage(supabase, ownerId, conversation.id, {
         channel: message.channel,
         contact_identifier: normalizedContact,
-        content_type: 'text',
+        content_type: responseType === 'audio' ? 'voice' : 'text',
         content: response.text,
+        media_url: audioUrl,
         metadata: { agent: routingDecision.agent }
       }, 'outbound')
     }
@@ -176,6 +192,8 @@ Deno.serve(async (req) => {
       conversation_id: conversation.id,
       routed_to_agent: routingDecision.agent,
       response: response.text,
+      response_type: responseType,
+      audio_url: audioUrl,
       action: response.action
     }
 
@@ -576,6 +594,90 @@ async function transcribeVoice(
   } catch (error) {
     console.error('[UNVRS.BRAIN] Transcription error:', error)
     return '[Voice message - transcription error]'
+  }
+}
+
+async function textToSpeech(
+  supabase: any,
+  ownerId: string,
+  text: string
+): Promise<string | undefined> {
+  // Get ElevenLabs API key
+  const { data: elevenLabsKey } = await supabase
+    .from('api_keys')
+    .select('api_key')
+    .eq('user_id', ownerId)
+    .eq('provider', 'elevenlabs')
+    .single()
+
+  if (!elevenLabsKey) {
+    console.log('[UNVRS.BRAIN] No ElevenLabs API key found, skipping TTS')
+    return undefined
+  }
+
+  try {
+    // Use ElevenLabs TTS API
+    // Voice ID: Laura (Italian) - FGY2WhTYpPnrIDTdsKH5
+    const voiceId = 'FGY2WhTYpPnrIDTdsKH5'
+    
+    console.log('[UNVRS.BRAIN] Generating TTS for:', text.substring(0, 100))
+
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': elevenLabsKey.api_key,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_multilingual_v2',
+        output_format: 'mp3_44100_128',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          style: 0.3,
+          use_speaker_boost: true
+        }
+      })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('[UNVRS.BRAIN] ElevenLabs TTS error:', response.status, errorText)
+      return undefined
+    }
+
+    // Get audio as array buffer
+    const audioBuffer = await response.arrayBuffer()
+    console.log('[UNVRS.BRAIN] TTS audio generated, size:', audioBuffer.byteLength)
+
+    // Upload to Supabase Storage
+    const fileName = `tts_${Date.now()}.mp3`
+    const filePath = `voice-responses/${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('uploads')
+      .upload(filePath, audioBuffer, {
+        contentType: 'audio/mpeg',
+        upsert: false
+      })
+
+    if (uploadError) {
+      console.error('[UNVRS.BRAIN] Error uploading TTS audio:', uploadError)
+      return undefined
+    }
+
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from('uploads')
+      .getPublicUrl(filePath)
+
+    console.log('[UNVRS.BRAIN] TTS audio uploaded:', publicUrlData.publicUrl)
+    return publicUrlData.publicUrl
+
+  } catch (error) {
+    console.error('[UNVRS.BRAIN] TTS error:', error)
+    return undefined
   }
 }
 

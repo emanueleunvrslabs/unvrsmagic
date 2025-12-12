@@ -95,7 +95,13 @@ serve(async (req) => {
 
         // If BRAIN generated a response, send it back via WhatsApp
         if (brainResult.success && brainResult.response) {
-          await sendWhatsAppResponse(supabase, normalizedPhone, brainResult.response);
+          // If response is audio (voice message reply), send audio
+          if (brainResult.response_type === 'audio' && brainResult.audio_url) {
+            await sendWhatsAppAudio(normalizedPhone, brainResult.audio_url);
+          } else {
+            // Otherwise send text
+            await sendWhatsAppResponse(supabase, normalizedPhone, brainResult.response);
+          }
         }
 
         // Also maintain backward compatibility - store in whatsapp_messages if it's an existing client
@@ -242,6 +248,40 @@ async function sendWhatsAppResponse(supabase: any, phone: string, text: string) 
 
   } catch (error) {
     console.error('[WhatsApp Webhook] Error sending response:', error);
+  }
+}
+
+// Send audio response via WhatsApp using WASender
+async function sendWhatsAppAudio(phone: string, audioUrl: string) {
+  try {
+    const wasenderApiKey = Deno.env.get('WASENDER_API_KEY');
+
+    if (!wasenderApiKey) {
+      console.log('[WhatsApp Webhook] No WASender API key configured for audio');
+      return;
+    }
+
+    const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+
+    // Send audio via WASender API
+    const response = await fetch('https://www.wasenderapi.com/api/send-media', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wasenderApiKey}`
+      },
+      body: JSON.stringify({
+        to: formattedPhone,
+        mediaUrl: audioUrl,
+        mediaType: 'audio'
+      })
+    });
+
+    const result = await response.json();
+    console.log('[WhatsApp Webhook] WASender audio send result:', JSON.stringify(result));
+
+  } catch (error) {
+    console.error('[WhatsApp Webhook] Error sending audio response:', error);
   }
 }
 
