@@ -420,16 +420,16 @@ async function transcribeVoice(
   ownerId: string,
   mediaUrl: string
 ): Promise<string> {
-  // Get ElevenLabs API key
+  // Get OpenAI API key
   const { data: apiKey } = await supabase
     .from('api_keys')
     .select('api_key')
     .eq('user_id', ownerId)
-    .eq('provider', 'elevenlabs')
+    .eq('provider', 'openai')
     .single()
 
   if (!apiKey) {
-    console.log('[UNVRS.BRAIN] No ElevenLabs API key found, skipping transcription')
+    console.log('[UNVRS.BRAIN] No OpenAI API key found, skipping transcription')
     return '[Voice message - transcription unavailable]'
   }
 
@@ -446,31 +446,28 @@ async function transcribeVoice(
     const audioBlob = await audioResponse.blob()
     console.log('[UNVRS.BRAIN] Audio blob size:', audioBlob.size, 'type:', audioBlob.type)
 
-    // Send to ElevenLabs Speech-to-Text with required model_id
+    // Send to OpenAI Whisper
     const formData = new FormData()
-    // Use the actual MIME type from the response, or default to audio/mpeg for WhatsApp voice messages
-    const mimeType = audioBlob.type || 'audio/ogg'
-    const extension = mimeType.includes('ogg') ? 'ogg' : mimeType.includes('mp4') ? 'm4a' : 'mp3'
-    formData.append('file', audioBlob, `audio.${extension}`)
-    formData.append('model_id', 'scribe_v1')
+    formData.append('file', audioBlob, 'audio.ogg')
+    formData.append('model', 'whisper-1')
 
-    console.log('[UNVRS.BRAIN] Sending to ElevenLabs STT...')
+    console.log('[UNVRS.BRAIN] Sending to OpenAI Whisper...')
     
-    const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
-        'xi-api-key': apiKey.api_key
+        'Authorization': `Bearer ${apiKey.api_key}`
       },
       body: formData
     })
 
     if (response.ok) {
       const result = await response.json()
-      console.log('[UNVRS.BRAIN] Transcription result:', JSON.stringify(result))
+      console.log('[UNVRS.BRAIN] Transcription result:', result.text)
       return result.text || '[Voice message - no text detected]'
     } else {
       const errorText = await response.text()
-      console.error('[UNVRS.BRAIN] ElevenLabs STT error:', response.status, errorText)
+      console.error('[UNVRS.BRAIN] OpenAI Whisper error:', response.status, errorText)
       return '[Voice message - transcription failed]'
     }
   } catch (error) {
