@@ -772,45 +772,242 @@ async function generateAgentResponse(
           console.log('[UNVRS.BRAIN] Data request detected, will force text response')
         }
 
-        // Search for client/contact data if owner is asking for specific info
-        let contextData = ''
-        const contentLower = content.toLowerCase()
-        
-        // Check if asking about a specific person/client
-        const namePatterns = [
-          /(?:di|del|della|numero|telefono|mail|email|contatto|cliente)\s+([a-zA-ZàèéìòùÀÈÉÌÒÙ]+)/i,
-          /([a-zA-ZàèéìòùÀÈÉÌÒÙ]+)\s+(?:numero|telefono|mail|email|wa|whatsapp)/i
-        ]
-        
-        let searchName = ''
-        for (const pattern of namePatterns) {
-          const match = content.match(pattern)
-          if (match) {
-            searchName = match[1].toLowerCase()
-            break
-          }
-        }
-        
-        if (searchName && searchName.length > 2) {
-          console.log('[UNVRS.BRAIN] Searching for name:', searchName)
-          
-          // Search in client_contacts
-          const { data: contacts } = await supabase
-            .from('client_contacts')
-            .select('*, clients!inner(company_name)')
-            .or(`first_name.ilike.%${searchName}%,last_name.ilike.%${searchName}%`)
-            .limit(5)
-          
-          if (contacts && contacts.length > 0) {
-            console.log('[UNVRS.BRAIN] Found contacts:', contacts.length)
-            contextData = '\n\nDATI TROVATI NEL DATABASE:\n'
-            for (const c of contacts) {
-              contextData += `• ${c.first_name} ${c.last_name} (${(c.clients as any)?.company_name || 'N/A'})\n`
-              contextData += `  Tel: ${c.whatsapp_number}\n`
-              contextData += `  Email: ${c.email}\n`
+        // Define database tools for BRAIN
+        const databaseTools = [
+          {
+            type: 'function',
+            function: {
+              name: 'search_database',
+              description: 'Cerca nel database. Usa per trovare clienti, contatti, lead, progetti, conversazioni.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  table: { 
+                    type: 'string', 
+                    enum: ['clients', 'client_contacts', 'unvrs_leads', 'client_projects', 'unvrs_conversations', 'unvrs_messages'],
+                    description: 'Tabella da cercare'
+                  },
+                  search_term: { type: 'string', description: 'Termine di ricerca (nome, email, telefono, ecc.)' },
+                  filters: { type: 'object', description: 'Filtri aggiuntivi come oggetto chiave-valore' }
+                },
+                required: ['table']
+              }
             }
-          } else {
-            contextData = `\n\nNessun contatto trovato con nome "${searchName}" nel database.`
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'create_record',
+              description: 'Crea un nuovo record nel database.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  table: { 
+                    type: 'string', 
+                    enum: ['clients', 'client_contacts', 'unvrs_leads', 'client_projects'],
+                    description: 'Tabella dove creare il record'
+                  },
+                  data: { type: 'object', description: 'Dati del nuovo record' }
+                },
+                required: ['table', 'data']
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'update_record',
+              description: 'Aggiorna un record esistente nel database.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  table: { 
+                    type: 'string', 
+                    enum: ['clients', 'client_contacts', 'unvrs_leads', 'client_projects'],
+                    description: 'Tabella da aggiornare'
+                  },
+                  id: { type: 'string', description: 'ID del record da aggiornare' },
+                  data: { type: 'object', description: 'Dati da aggiornare' }
+                },
+                required: ['table', 'id', 'data']
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'delete_record',
+              description: 'Elimina un record dal database.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  table: { 
+                    type: 'string', 
+                    enum: ['clients', 'client_contacts', 'unvrs_leads', 'client_projects'],
+                    description: 'Tabella da cui eliminare'
+                  },
+                  id: { type: 'string', description: 'ID del record da eliminare' }
+                },
+                required: ['table', 'id']
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'send_message',
+              description: 'Invia un messaggio WhatsApp a un contatto.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  phone_number: { type: 'string', description: 'Numero di telefono del destinatario' },
+                  message: { type: 'string', description: 'Testo del messaggio da inviare' }
+                },
+                required: ['phone_number', 'message']
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'get_stats',
+              description: 'Ottieni statistiche aggregate dal database.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  stat_type: { 
+                    type: 'string', 
+                    enum: ['clients_count', 'leads_count', 'active_leads', 'conversations_today', 'all_clients', 'all_leads'],
+                    description: 'Tipo di statistica richiesta'
+                  }
+                },
+                required: ['stat_type']
+              }
+            }
+          }
+        ]
+
+        // Function to execute database tools
+        const executeDbTool = async (toolName: string, args: any): Promise<string> => {
+          console.log(`[UNVRS.BRAIN] Executing tool: ${toolName}`, args)
+          
+          switch (toolName) {
+            case 'search_database': {
+              const { table, search_term, filters } = args
+              let query = supabase.from(table).select('*')
+              
+              if (search_term) {
+                if (table === 'clients') {
+                  query = query.or(`company_name.ilike.%${search_term}%,vat_number.ilike.%${search_term}%`)
+                } else if (table === 'client_contacts') {
+                  query = supabase.from(table).select('*, clients(company_name)')
+                    .or(`first_name.ilike.%${search_term}%,last_name.ilike.%${search_term}%,email.ilike.%${search_term}%,whatsapp_number.ilike.%${search_term}%`)
+                } else if (table === 'unvrs_leads') {
+                  query = query.or(`name.ilike.%${search_term}%,email.ilike.%${search_term}%,phone.ilike.%${search_term}%,company.ilike.%${search_term}%`)
+                } else if (table === 'client_projects') {
+                  query = supabase.from(table).select('*, clients(company_name)')
+                    .or(`project_name.ilike.%${search_term}%,description.ilike.%${search_term}%`)
+                }
+              }
+              
+              if (filters) {
+                for (const [key, value] of Object.entries(filters)) {
+                  query = query.eq(key, value)
+                }
+              }
+              
+              const { data, error } = await query.limit(20)
+              if (error) return `Errore: ${error.message}`
+              if (!data || data.length === 0) return 'Nessun risultato trovato.'
+              return JSON.stringify(data, null, 2)
+            }
+            
+            case 'create_record': {
+              const { table, data } = args
+              // Add user_id for tables that need it
+              const insertData = { ...data, user_id: ownerId }
+              
+              const { data: created, error } = await supabase.from(table).insert(insertData).select().single()
+              if (error) return `Errore creazione: ${error.message}`
+              return `Record creato con successo. ID: ${created.id}`
+            }
+            
+            case 'update_record': {
+              const { table, id, data } = args
+              const { error } = await supabase.from(table).update(data).eq('id', id)
+              if (error) return `Errore aggiornamento: ${error.message}`
+              return `Record aggiornato con successo.`
+            }
+            
+            case 'delete_record': {
+              const { table, id } = args
+              const { error } = await supabase.from(table).delete().eq('id', id)
+              if (error) return `Errore eliminazione: ${error.message}`
+              return `Record eliminato con successo.`
+            }
+            
+            case 'send_message': {
+              const { phone_number, message } = args
+              // Get WASender API key
+              const { data: wasenderKey } = await supabase
+                .from('api_keys')
+                .select('api_key')
+                .eq('provider', 'wasender')
+                .single()
+              
+              if (!wasenderKey) return 'Errore: chiave WASender non configurata.'
+              
+              const waResponse = await fetch('https://api.wasender.dev/v1/messages/send', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${wasenderKey.api_key}`
+                },
+                body: JSON.stringify({
+                  phone: phone_number.replace(/[^0-9]/g, ''),
+                  message: message
+                })
+              })
+              
+              if (!waResponse.ok) return `Errore invio messaggio: ${await waResponse.text()}`
+              return `Messaggio inviato con successo a ${phone_number}`
+            }
+            
+            case 'get_stats': {
+              const { stat_type } = args
+              switch (stat_type) {
+                case 'clients_count': {
+                  const { count } = await supabase.from('clients').select('*', { count: 'exact', head: true })
+                  return `Totale clienti: ${count || 0}`
+                }
+                case 'leads_count': {
+                  const { count } = await supabase.from('unvrs_leads').select('*', { count: 'exact', head: true })
+                  return `Totale lead: ${count || 0}`
+                }
+                case 'active_leads': {
+                  const { data } = await supabase.from('unvrs_leads').select('*').in('status', ['new', 'qualified'])
+                  return `Lead attivi: ${data?.length || 0}\n${JSON.stringify(data, null, 2)}`
+                }
+                case 'conversations_today': {
+                  const today = new Date().toISOString().split('T')[0]
+                  const { count } = await supabase.from('unvrs_conversations').select('*', { count: 'exact', head: true }).gte('created_at', today)
+                  return `Conversazioni oggi: ${count || 0}`
+                }
+                case 'all_clients': {
+                  const { data } = await supabase.from('clients').select('*, client_contacts(*)')
+                  return JSON.stringify(data, null, 2)
+                }
+                case 'all_leads': {
+                  const { data } = await supabase.from('unvrs_leads').select('*')
+                  return JSON.stringify(data, null, 2)
+                }
+                default:
+                  return 'Tipo statistica non riconosciuto'
+              }
+            }
+            
+            default:
+              return 'Tool non riconosciuto'
           }
         }
 
@@ -822,19 +1019,29 @@ STILE OBBLIGATORIO:
 • Al primo messaggio: "Ciao boss, che posso fare per te?"
 • Chiama SEMPRE Emanuele "boss", MAI "capo"
 
-CAPACITÀ:
-• Accesso completo a clienti, lead, progetti, conversazioni
-• Delega compiti ad altri agenti (HLO, SWITCH, INTAKE, QUOTE, DECK)
-• Report e analisi su richiesta
+HAI ACCESSO COMPLETO AL DATABASE:
+• USA i tool per CERCARE, CREARE, MODIFICARE, ELIMINARE dati
+• Clienti: aziende con P.IVA, indirizzi, contatti
+• Contatti: persone associate ai clienti (nome, telefono, email)
+• Lead: potenziali clienti in lavorazione
+• Progetti: progetti dei clienti
+• Conversazioni e messaggi
+
+QUANDO TI CHIEDONO DATI:
+• USA SEMPRE il tool search_database per cercare
+• NON inventare MAI dati, usa solo quelli dei tool
+• Per numeri/email/indirizzi: cerca e fornisci i risultati
+
+QUANDO TI CHIEDONO DI CREARE/MODIFICARE/ELIMINARE:
+• USA i tool create_record, update_record, delete_record
+• Conferma brevemente l'azione completata
 
 REGOLE:
 • NON usare MAI trattini (-, —, –). Usa punti o virgole.
-• Rispondi nella stessa lingua del boss.
-• Se ti vengono forniti DATI DAL DATABASE, usali per rispondere.
-• Se non trovi dati, dì chiaramente che non hai trovato nulla.
-• NON inventare MAI dati. Usa solo quelli forniti.${contextData}`
+• Rispondi nella stessa lingua del boss.`
 
-        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        // First API call with tools
+        let openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -842,11 +1049,13 @@ REGOLE:
           },
           body: JSON.stringify({
             model: 'gpt-5-2025-08-07',
-            max_completion_tokens: 500,
+            max_completion_tokens: 1000,
             messages: [
               { role: 'system', content: ownerSystemPrompt },
               ...conversationHistory
-            ]
+            ],
+            tools: databaseTools,
+            tool_choice: 'auto'
           })
         })
 
@@ -859,8 +1068,52 @@ REGOLE:
           }
         }
 
-        const aiResult = await openaiResponse.json()
-        const aiText = aiResult.choices?.[0]?.message?.content || 'Ciao boss, come posso aiutarti?'
+        let aiResult = await openaiResponse.json()
+        let message = aiResult.choices?.[0]?.message
+
+        // Process tool calls if any
+        const toolResults: any[] = []
+        while (message?.tool_calls && message.tool_calls.length > 0) {
+          console.log('[UNVRS.BRAIN] Processing tool calls:', message.tool_calls.length)
+          
+          for (const toolCall of message.tool_calls) {
+            const args = JSON.parse(toolCall.function.arguments)
+            const result = await executeDbTool(toolCall.function.name, args)
+            toolResults.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              content: result
+            })
+          }
+          
+          // Call API again with tool results
+          openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${openaiKey.api_key}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-5-2025-08-07',
+              max_completion_tokens: 1000,
+              messages: [
+                { role: 'system', content: ownerSystemPrompt },
+                ...conversationHistory,
+                message,
+                ...toolResults
+              ],
+              tools: databaseTools,
+              tool_choice: 'auto'
+            })
+          })
+          
+          if (!openaiResponse.ok) break
+          aiResult = await openaiResponse.json()
+          message = aiResult.choices?.[0]?.message
+          toolResults.length = 0 // Clear for next iteration if needed
+        }
+
+        const aiText = message?.content || 'Ciao boss, come posso aiutarti?'
 
         console.log('[UNVRS.BRAIN] Owner response:', aiText)
 
