@@ -212,9 +212,10 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
     }
 
     const aiResult = await openaiResponse.json()
-    const aiText = aiResult.choices[0]?.message?.content || ''
+    console.log('[UNVRS.HLO] Raw AI result:', JSON.stringify(aiResult))
+    const aiText = aiResult.choices?.[0]?.message?.content || ''
     
-    console.log('[UNVRS.HLO] AI response:', aiText)
+    console.log('[UNVRS.HLO] AI response text:', aiText)
 
     // Parse AI response
     let parsedResponse: any
@@ -240,10 +241,11 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
     // mandiamo comunque un messaggio di conferma al cliente
     if (!parsedResponse.response || String(parsedResponse.response).trim() === '') {
       const name = request.sender_info.name || ''
+      const lastUserMessage = request.message
       if (messageCount === 1) {
         parsedResponse.response = `Ciao${name ? ` ${name}` : ''}! 👋 Mi chiamo HiLO, il tuo agente personale di UNVRS Labs. Ho ricevuto il tuo messaggio, dimmi pure come posso aiutarti.`
       } else {
-        parsedResponse.response = `Ho ricevuto il tuo messaggio e ti risponde il tuo agente personale HiLO di UNVRS Labs. Rispondo sempre alla tua ultima domanda, quindi dimmi pure cosa ti serve adesso.`
+        parsedResponse.response = `Mi hai appena chiesto: "${lastUserMessage}". Ti risponde il tuo agente personale HiLO di UNVRS Labs e mi concentro sempre sull’ultima domanda che fai, quindi ti aiuto proprio su questo messaggio.`
       }
       if (!parsedResponse.action) {
         parsedResponse.action = 'continue'
