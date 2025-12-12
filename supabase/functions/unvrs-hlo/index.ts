@@ -50,8 +50,22 @@ Rispondi SOLO in formato JSON:
     "subject": "se create_ticket",
     "priority": "low" | "medium" | "high",
     "category": "support" | "billing" | "feature" | "bug"
-  }
+  },
+  "complexity": "low" | "medium" | "high"
 }`
+
+// Complexity detection for model escalation
+function detectComplexity(message: string, messageCount: number): 'low' | 'medium' | 'high' {
+  const complexKeywords = ['preventivo', 'quote', 'prezzo', 'costo', 'budget', 'contratto', 'fattura', 'urgente', 'problema grave', 'non funziona', 'errore critico', 'nuovo progetto', 'modifica importante']
+  const messageLower = message.toLowerCase()
+  
+  const hasComplexKeyword = complexKeywords.some(kw => messageLower.includes(kw))
+  const isLongMessage = message.length > 300
+  
+  if (hasComplexKeyword || isLongMessage) return 'high'
+  if (messageCount > 5) return 'medium'
+  return 'low'
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -118,16 +132,29 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
       content: request.message
     })
 
-    // Get Anthropic API key
+    // Get session state for message count
+    const { data: session } = await supabase
+      .from('unvrs_agent_sessions')
+      .select('state')
+      .eq('id', request.session_id)
+      .single()
+
+    const messageCount = ((session?.state as any)?.message_count || 0) + 1
+
+    // Detect complexity to decide model escalation
+    const complexity = detectComplexity(request.message, messageCount)
+    console.log('[UNVRS.HLO] Detected complexity:', complexity)
+
+    // Get OpenAI API key
     const { data: apiKeyData } = await supabase
       .from('api_keys')
       .select('api_key')
       .eq('user_id', request.user_id)
-      .eq('provider', 'anthropic')
+      .eq('provider', 'openai')
       .single()
 
     if (!apiKeyData) {
-      console.error('[UNVRS.HLO] No Anthropic API key found')
+      console.error('[UNVRS.HLO] No OpenAI API key found')
       return new Response(JSON.stringify({
         success: false,
         response: `Ciao${request.sender_info.name ? ` ${request.sender_info.name}` : ''}! Ho ricevuto il tuo messaggio. Un membro del team ti risponderà a breve.`,
@@ -142,33 +169,40 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
       .replace('{{CLIENT_CONTEXT}}', clientContext)
       .replace('{{CLIENT_PROJECTS}}', projectsContext)
 
-    // Call Anthropic Claude
-    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    // Select model based on complexity:
+    // - low/medium: GPT-5 mini (cost-optimized)
+    // - high: GPT-5.2 Pro (maximum quality)
+    const model = complexity === 'high' ? 'gpt-5-2025-08-07' : 'gpt-5-mini-2025-08-07'
+    console.log('[UNVRS.HLO] Using model:', model)
+
+    // Call OpenAI GPT
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKeyData.api_key,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${apiKeyData.api_key}`
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 500,
-        system: systemPrompt,
-        messages: conversationHistory.map(m => ({
-          role: m.role,
-          content: m.content
-        }))
+        model: model,
+        max_completion_tokens: 500,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...conversationHistory.map(m => ({
+            role: m.role,
+            content: m.content
+          }))
+        ]
       })
     })
 
-    if (!anthropicResponse.ok) {
-      const error = await anthropicResponse.text()
-      console.error('[UNVRS.HLO] Anthropic error:', error)
+    if (!openaiResponse.ok) {
+      const error = await openaiResponse.text()
+      console.error('[UNVRS.HLO] OpenAI error:', error)
       throw new Error('AI response failed')
     }
 
-    const aiResult = await anthropicResponse.json()
-    const aiText = aiResult.content[0]?.text || ''
+    const aiResult = await openaiResponse.json()
+    const aiText = aiResult.choices[0]?.message?.content || ''
     
     console.log('[UNVRS.HLO] AI response:', aiText)
 
@@ -193,19 +227,15 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
     }
 
     // Update session
-    const { data: session } = await supabase
-      .from('unvrs_agent_sessions')
-      .select('state')
-      .eq('id', request.session_id)
-      .single()
-
     await supabase
       .from('unvrs_agent_sessions')
       .update({
         state: {
           ...((session?.state as object) || {}),
           last_action: parsedResponse.action,
-          message_count: ((session?.state as any)?.message_count || 0) + 1
+          message_count: messageCount,
+          last_model_used: model,
+          last_complexity: complexity
         },
         last_activity_at: new Date().toISOString()
       })
@@ -222,7 +252,9 @@ Contatti: ${contacts?.map(c => `${c.first_name} ${c.last_name}`).join(', ') || '
         conversation_id: request.conversation_id,
         session_id: request.session_id,
         client_id: request.sender_info.client_id,
-        has_ticket: !!parsedResponse.ticket_data
+        has_ticket: !!parsedResponse.ticket_data,
+        model_used: model,
+        complexity: complexity
       },
       duration_ms: Date.now() - startTime
     })

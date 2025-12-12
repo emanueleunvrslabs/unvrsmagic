@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
       content: request.message
     })
 
-    // Get Anthropic API key
+    // Get Anthropic API key for Claude Haiku 4.5 (fast/cheap for triage)
     const { data: apiKeyData } = await supabase
       .from('api_keys')
       .select('api_key')
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Call Anthropic Claude
+    // Call Anthropic Claude Haiku 4.5 (primary for SWITCH - fast/cheap triage)
     const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-haiku-20241022',
         max_tokens: 500,
         system: SWITCH_SYSTEM_PROMPT,
         messages: conversationHistory.map(m => ({
