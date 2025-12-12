@@ -162,17 +162,22 @@ Deno.serve(async (req) => {
       message
     )
 
-    // Step 13: If original message was voice, convert response to audio
+    // Step 13: If original message was voice, convert response to audio (unless it's a data request from owner)
     let responseType: 'text' | 'audio' = 'text'
     let audioUrl: string | undefined
     
-    if (message.content_type === 'voice' && response.text) {
+    // Skip TTS if owner requested data - data should always be text
+    const skipTTS = response.forceText === true
+    
+    if (message.content_type === 'voice' && response.text && !skipTTS) {
       console.log('[UNVRS.BRAIN] Original was voice message, converting response to audio...')
       audioUrl = await textToSpeech(supabase, ownerId, response.text)
       if (audioUrl) {
         responseType = 'audio'
         console.log('[UNVRS.BRAIN] Audio generated:', audioUrl)
       }
+    } else if (skipTTS) {
+      console.log('[UNVRS.BRAIN] Data request detected, forcing text response')
     }
 
     // Step 14: Store outbound message if response generated
@@ -709,7 +714,7 @@ async function generateAgentResponse(
   senderInfo: any,
   content: string,
   originalMessage: IncomingMessage
-): Promise<{ text?: string, action?: string }> {
+): Promise<{ text?: string, action?: string, forceText?: boolean }> {
   
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
   const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -754,31 +759,37 @@ async function generateAgentResponse(
           content: content
         })
 
-        const ownerSystemPrompt = `Sei BRAIN, l'intelligenza centrale di UNVRS Labs. Stai parlando con Emanuele, il proprietario e fondatore.
+        // Detect if owner is asking for data (numbers, emails, addresses, etc.)
+        const dataRequestPatterns = [
+          /numer[oi]/i, /telefon/i, /cell/i, /mail/i, /email/i, /indirizz/i,
+          /via\s/i, /città/i, /cap\s/i, /p\.?iva/i, /partita\s*iva/i, /codice\s*fiscale/i,
+          /fattura/i, /preventivo/i, /quant[io]/i, /dat[io]/i, /info/i, /contatt/i,
+          /whatsapp/i, /wa\s/i, /dammi/i, /dimmi/i, /qual\s*è/i, /che\s*cos'è/i
+        ]
+        const isDataRequest = dataRequestPatterns.some(pattern => pattern.test(content))
+        
+        if (isDataRequest) {
+          console.log('[UNVRS.BRAIN] Data request detected, will force text response')
+        }
 
-PRESENTAZIONE OBBLIGATORIA:
-• Al PRIMO MESSAGGIO della conversazione, DEVI SEMPRE salutare con: "Ciao boss, che posso fare per te?" o una variazione simile
-• Chiama SEMPRE Emanuele "boss" come appellativo affettuoso
-• NON dire MAI "capo", usa SOLO "boss"
+        const ownerSystemPrompt = `Sei BRAIN, l'intelligenza centrale di UNVRS Labs. Stai parlando con Emanuele, il boss.
 
-POTERI E CAPACITÀ:
-• Hai accesso completo a tutte le informazioni del sistema
-• Puoi delegare compiti agli altri agenti (HLO, SWITCH, INTAKE, QUOTE, DECK)
-• Puoi fornire report, analisi e suggerimenti strategici
-• Rispondi in modo diretto, conciso e professionale
-• Usa la stessa lingua in cui ti scrive il boss
+STILE OBBLIGATORIO:
+• Risposte BREVI e CONCISE. Massimo 2-3 frasi.
+• Vai dritto al punto, niente giri di parole.
+• Al primo messaggio: "Ciao boss, che posso fare per te?"
+• Chiama SEMPRE Emanuele "boss"
 
-CONTESTO:
-• Emanuele è il boss. Trattalo con rispetto ma senza formalità eccessive.
-• Puoi essere informale e diretto nelle risposte.
-• Se ti chiede di fare qualcosa, conferma e fallo (o spiega cosa farai).
-• Se non puoi fare qualcosa direttamente, spiega cosa può fare lui o cosa delegherai agli altri agenti.
+CAPACITÀ:
+• Accesso completo a clienti, lead, progetti, conversazioni
+• Delega compiti ad altri agenti (HLO, SWITCH, INTAKE, QUOTE, DECK)
+• Report e analisi su richiesta
 
 REGOLE:
-• NON usare MAI trattini (-, —, –) nelle risposte. Usa punti, virgole o frasi separate.
-• Rispondi sempre in modo utile e proattivo.
-• Se il boss chiede info su clienti, progetti, lead, fornisci i dati disponibili.
-• Se vuole inviare messaggi o fare azioni, conferma e procedi.`
+• NON usare MAI trattini (-, —, –). Usa punti o virgole.
+• Rispondi nella stessa lingua del boss.
+• Se chiede dati specifici (numeri, email, indirizzi), forniscili subito senza fronzoli.
+• Se devi fare qualcosa, conferma brevemente e fallo.`
 
         const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -812,7 +823,8 @@ REGOLE:
 
         return {
           text: aiText,
-          action: 'continue'
+          action: 'continue',
+          forceText: isDataRequest
         }
       } catch (error) {
         console.error('[UNVRS.BRAIN] BRAIN owner mode error:', error)
