@@ -200,8 +200,8 @@ async function sendWhatsAppResponse(supabase: any, phone: string, text: string) 
     // Format phone number for WASender
     const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
 
-    // Send message via WASender API
-    const response = await fetch('https://api.wasender.dev/v1/messages/text', {
+    // Send message via WASender API (same endpoint as OTP function)
+    const response = await fetch('https://www.wasenderapi.com/api/send-message', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
