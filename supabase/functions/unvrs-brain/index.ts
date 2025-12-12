@@ -5,6 +5,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface AudioMessageData {
+  url: string
+  mimetype?: string
+  mediaKey: string
+  fileSha256?: string
+  fileLength?: string
+  seconds?: number
+  messageId?: string
+}
+
 interface IncomingMessage {
   channel: 'whatsapp' | 'telegram' | 'instagram' | 'linkedin' | 'phone' | 'email'
   contact_identifier: string // phone number, telegram user id, etc.
@@ -12,6 +22,7 @@ interface IncomingMessage {
   content_type: 'text' | 'voice' | 'image' | 'document' | 'video'
   content?: string
   media_url?: string
+  audio_message_data?: AudioMessageData
   metadata?: Record<string, any>
 }
 
@@ -126,7 +137,7 @@ Deno.serve(async (req) => {
     // Step 11: If voice message, transcribe it
     let processedContent = message.content
     if (message.content_type === 'voice' && message.media_url) {
-      processedContent = await transcribeVoice(supabase, ownerId, message.media_url)
+      processedContent = await transcribeVoice(supabase, ownerId, message.media_url, message.audio_message_data)
       console.log('[UNVRS.BRAIN] Transcribed voice:', processedContent)
       
       // Update message with transcription
@@ -418,57 +429,149 @@ async function getOrCreateAgentSession(
 async function transcribeVoice(
   supabase: any,
   ownerId: string,
-  mediaUrl: string
+  mediaUrl: string,
+  audioMessageData?: any
 ): Promise<string> {
   // Get OpenAI API key
-  const { data: apiKey } = await supabase
+  const { data: openaiKey } = await supabase
     .from('api_keys')
     .select('api_key')
     .eq('user_id', ownerId)
     .eq('provider', 'openai')
     .single()
 
-  if (!apiKey) {
+  if (!openaiKey) {
     console.log('[UNVRS.BRAIN] No OpenAI API key found, skipping transcription')
     return '[Voice message - transcription unavailable]'
   }
 
+  const WASENDER_API_KEY = Deno.env.get('WASENDER_API_KEY')
+  if (!WASENDER_API_KEY) {
+    console.log('[UNVRS.BRAIN] No WASender API key found, skipping transcription')
+    return '[Voice message - transcription unavailable]'
+  }
+
   try {
-    console.log('[UNVRS.BRAIN] Downloading audio from:', mediaUrl)
-    
-    // Download audio file
-    const audioResponse = await fetch(mediaUrl)
-    if (!audioResponse.ok) {
-      console.error('[UNVRS.BRAIN] Failed to download audio:', audioResponse.status)
-      return '[Voice message - download failed]'
-    }
-    
-    const audioBlob = await audioResponse.blob()
-    console.log('[UNVRS.BRAIN] Audio blob size:', audioBlob.size, 'type:', audioBlob.type)
+    // If we have audioMessageData, use WASender decrypt-media API
+    if (audioMessageData) {
+      console.log('[UNVRS.BRAIN] Decrypting audio via WASender API...')
+      
+      // Build the decrypt request body
+      const decryptBody = {
+        data: {
+          messages: {
+            key: {
+              id: audioMessageData.messageId || 'unknown'
+            },
+            message: {
+              audioMessage: {
+                url: audioMessageData.url,
+                mimetype: audioMessageData.mimetype || 'audio/ogg; codecs=opus',
+                mediaKey: audioMessageData.mediaKey,
+                fileSha256: audioMessageData.fileSha256,
+                fileLength: audioMessageData.fileLength,
+                seconds: audioMessageData.seconds
+              }
+            }
+          }
+        }
+      }
 
-    // Send to OpenAI Whisper
-    const formData = new FormData()
-    formData.append('file', audioBlob, 'audio.ogg')
-    formData.append('model', 'whisper-1')
+      console.log('[UNVRS.BRAIN] Decrypt request:', JSON.stringify(decryptBody))
 
-    console.log('[UNVRS.BRAIN] Sending to OpenAI Whisper...')
-    
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey.api_key}`
-      },
-      body: formData
-    })
+      const decryptResponse = await fetch('https://www.wasenderapi.com/api/decrypt-media', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${WASENDER_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(decryptBody)
+      })
 
-    if (response.ok) {
-      const result = await response.json()
-      console.log('[UNVRS.BRAIN] Transcription result:', result.text)
-      return result.text || '[Voice message - no text detected]'
+      if (!decryptResponse.ok) {
+        const errorText = await decryptResponse.text()
+        console.error('[UNVRS.BRAIN] WASender decrypt error:', decryptResponse.status, errorText)
+        return '[Voice message - decrypt failed]'
+      }
+
+      const decryptResult = await decryptResponse.json()
+      console.log('[UNVRS.BRAIN] Decrypt result:', JSON.stringify(decryptResult))
+
+      if (!decryptResult.publicUrl) {
+        console.error('[UNVRS.BRAIN] No publicUrl in decrypt response')
+        return '[Voice message - decrypt failed]'
+      }
+
+      // Now download the decrypted audio
+      console.log('[UNVRS.BRAIN] Downloading decrypted audio from:', decryptResult.publicUrl)
+      
+      const audioResponse = await fetch(decryptResult.publicUrl)
+      if (!audioResponse.ok) {
+        console.error('[UNVRS.BRAIN] Failed to download decrypted audio:', audioResponse.status)
+        return '[Voice message - download failed]'
+      }
+
+      const audioBlob = await audioResponse.blob()
+      console.log('[UNVRS.BRAIN] Decrypted audio blob size:', audioBlob.size, 'type:', audioBlob.type)
+
+      // Send to OpenAI Whisper
+      const formData = new FormData()
+      formData.append('file', audioBlob, 'audio.ogg')
+      formData.append('model', 'whisper-1')
+
+      console.log('[UNVRS.BRAIN] Sending to OpenAI Whisper...')
+
+      const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiKey.api_key}`
+        },
+        body: formData
+      })
+
+      if (whisperResponse.ok) {
+        const result = await whisperResponse.json()
+        console.log('[UNVRS.BRAIN] Transcription result:', result.text)
+        return result.text || '[Voice message - no text detected]'
+      } else {
+        const errorText = await whisperResponse.text()
+        console.error('[UNVRS.BRAIN] OpenAI Whisper error:', whisperResponse.status, errorText)
+        return '[Voice message - transcription failed]'
+      }
     } else {
-      const errorText = await response.text()
-      console.error('[UNVRS.BRAIN] OpenAI Whisper error:', response.status, errorText)
-      return '[Voice message - transcription failed]'
+      // Fallback: try direct download (won't work for encrypted files)
+      console.log('[UNVRS.BRAIN] No audioMessageData, trying direct download from:', mediaUrl)
+      
+      const audioResponse = await fetch(mediaUrl)
+      if (!audioResponse.ok) {
+        console.error('[UNVRS.BRAIN] Failed to download audio:', audioResponse.status)
+        return '[Voice message - download failed]'
+      }
+      
+      const audioBlob = await audioResponse.blob()
+      console.log('[UNVRS.BRAIN] Audio blob size:', audioBlob.size, 'type:', audioBlob.type)
+
+      const formData = new FormData()
+      formData.append('file', audioBlob, 'audio.ogg')
+      formData.append('model', 'whisper-1')
+
+      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiKey.api_key}`
+        },
+        body: formData
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('[UNVRS.BRAIN] Transcription result:', result.text)
+        return result.text || '[Voice message - no text detected]'
+      } else {
+        const errorText = await response.text()
+        console.error('[UNVRS.BRAIN] OpenAI Whisper error:', response.status, errorText)
+        return '[Voice message - transcription failed]'
+      }
     }
   } catch (error) {
     console.error('[UNVRS.BRAIN] Transcription error:', error)
