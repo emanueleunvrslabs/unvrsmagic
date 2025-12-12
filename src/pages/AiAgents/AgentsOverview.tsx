@@ -19,7 +19,6 @@ import {
   Activity,
   Clock,
   CheckCircle,
-  AlertCircle,
   Loader2
 } from "lucide-react";
 import { format } from "date-fns";
@@ -74,7 +73,7 @@ export default function AgentsOverview() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000); // Refresh every 30s
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -82,13 +81,11 @@ export default function AgentsOverview() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Fetch agent states
     const { data: states } = await supabase
       .from("agent_state")
       .select("*")
       .eq("user_id", user.id);
 
-    // Fetch recent logs
     const { data: logs } = await supabase
       .from("agent_logs")
       .select("*")
@@ -96,7 +93,6 @@ export default function AgentsOverview() {
       .order("timestamp", { ascending: false })
       .limit(20);
 
-    // Fetch active conversations
     const { data: convs } = await supabase
       .from("unvrs_conversations")
       .select("*")
@@ -105,7 +101,6 @@ export default function AgentsOverview() {
       .order("last_message_at", { ascending: false })
       .limit(10);
 
-    // Calculate stats
     const { count: messageCount } = await supabase
       .from("unvrs_messages")
       .select("*", { count: "exact", head: true })
@@ -116,7 +111,7 @@ export default function AgentsOverview() {
     setConversations(convs || []);
     setStats({
       totalMessages: messageCount || 0,
-      avgResponseTime: 2.3, // Placeholder
+      avgResponseTime: 2.3,
       activeAgents: (states || []).filter(s => s.status === "active").length
     });
     setLoading(false);
@@ -130,11 +125,11 @@ export default function AgentsOverview() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Active</Badge>;
+        return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">Active</Badge>;
       case "error":
-        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Error</Badge>;
+        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Error</Badge>;
       default:
-        return <Badge className="bg-white/10 text-white/60 border-white/20">Idle</Badge>;
+        return <Badge className="bg-white/10 text-white/60 border-white/20 text-xs">Idle</Badge>;
     }
   };
 
@@ -159,66 +154,66 @@ export default function AgentsOverview() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-semibold text-white">AI Agents</h1>
-          <p className="text-white/60">Monitor and manage your UNVRS agent system</p>
+          <h1 className="text-2xl font-semibold text-foreground">AI Agents</h1>
+          <p className="text-muted-foreground">Monitor and manage your UNVRS agent system</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="social-media-card border-white/10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-emerald-500/20">
                   <CheckCircle className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-semibold text-white">{stats.activeAgents}</p>
-                  <p className="text-sm text-white/60">Active Agents</p>
+                  <p className="text-2xl font-semibold text-foreground">{stats.activeAgents}</p>
+                  <p className="text-sm text-muted-foreground">Active Agents</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="social-media-card border-white/10">
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-500/20">
                   <Activity className="h-5 w-5 text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-semibold text-white">{stats.totalMessages}</p>
-                  <p className="text-sm text-white/60">Total Messages</p>
+                  <p className="text-2xl font-semibold text-foreground">{stats.totalMessages}</p>
+                  <p className="text-sm text-muted-foreground">Total Messages</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="social-media-card border-white/10">
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-purple-500/20">
                   <Clock className="h-5 w-5 text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-semibold text-white">{stats.avgResponseTime}s</p>
-                  <p className="text-sm text-white/60">Avg Response</p>
+                  <p className="text-2xl font-semibold text-foreground">{stats.avgResponseTime}s</p>
+                  <p className="text-sm text-muted-foreground">Avg Response</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="social-media-card border-white/10">
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-orange-500/20">
                   <MessageSquare className="h-5 w-5 text-orange-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-semibold text-white">{conversations.length}</p>
-                  <p className="text-sm text-white/60">Active Conversations</p>
+                  <p className="text-2xl font-semibold text-foreground">{conversations.length}</p>
+                  <p className="text-sm text-muted-foreground">Active Conversations</p>
                 </div>
               </div>
             </CardContent>
@@ -226,12 +221,12 @@ export default function AgentsOverview() {
         </div>
 
         {/* Agent Status Cards */}
-        <Card className="social-media-card border-white/10">
-          <CardHeader>
-            <CardTitle className="text-white">Agent Status</CardTitle>
+        <Card className="glass-card">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-foreground text-lg">Agent Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {AGENTS.map((agent) => {
                 const Icon = agent.icon;
                 const status = getAgentStatus(agent.id);
@@ -241,14 +236,14 @@ export default function AgentsOverview() {
                     to={agent.href}
                     className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 rounded-lg bg-white/10">
-                        <Icon className="h-4 w-4 text-white/80" />
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 rounded-lg bg-white/10">
+                        <Icon className="h-4 w-4 text-foreground/80" />
                       </div>
                       {getStatusBadge(status)}
                     </div>
-                    <p className="text-sm font-medium text-white">{agent.name}</p>
-                    <p className="text-xs text-white/50">{agent.description}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{agent.name}</p>
+                    <p className="text-xs text-muted-foreground">{agent.description}</p>
                   </Link>
                 );
               })}
@@ -258,33 +253,33 @@ export default function AgentsOverview() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Logs */}
-          <Card className="social-media-card border-white/10">
-            <CardHeader>
-              <CardTitle className="text-white">Recent Logs</CardTitle>
+          <Card className="glass-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-foreground text-lg">Recent Logs</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-glass">
                 {recentLogs.length === 0 ? (
-                  <p className="text-white/50 text-sm text-center py-8">No logs yet</p>
+                  <p className="text-muted-foreground text-sm text-center py-8">No logs yet</p>
                 ) : (
                   recentLogs.map((log) => (
                     <div key={log.id} className="p-3 rounded-lg bg-white/5 border border-white/10">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs border-white/20 text-white/70">
+                          <Badge variant="outline" className="text-xs border-white/20 text-foreground/70">
                             {log.agent_name}
                           </Badge>
                           <span className={`text-xs font-medium ${getLogLevelColor(log.log_level)}`}>
                             {log.log_level.toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-xs text-white/40">
+                        <span className="text-xs text-muted-foreground">
                           {log.timestamp ? format(new Date(log.timestamp), "HH:mm:ss") : ""}
                         </span>
                       </div>
-                      <p className="text-sm text-white/80 line-clamp-2">{log.message}</p>
+                      <p className="text-sm text-foreground/80 line-clamp-2">{log.message}</p>
                       {log.action && (
-                        <span className="text-xs text-white/40 mt-1 block">Action: {log.action}</span>
+                        <span className="text-xs text-muted-foreground mt-1 block">Action: {log.action}</span>
                       )}
                     </div>
                   ))
@@ -294,30 +289,30 @@ export default function AgentsOverview() {
           </Card>
 
           {/* Active Conversations */}
-          <Card className="social-media-card border-white/10">
-            <CardHeader>
-              <CardTitle className="text-white">Active Conversations</CardTitle>
+          <Card className="glass-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-foreground text-lg">Active Conversations</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-glass">
                 {conversations.length === 0 ? (
-                  <p className="text-white/50 text-sm text-center py-8">No active conversations</p>
+                  <p className="text-muted-foreground text-sm text-center py-8">No active conversations</p>
                 ) : (
                   conversations.map((conv) => (
                     <div key={conv.id} className="p-3 rounded-lg bg-white/5 border border-white/10">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm font-medium text-foreground">
                           {conv.contact_name || conv.contact_identifier}
                         </span>
-                        <Badge variant="outline" className="text-xs border-white/20 text-white/70">
+                        <Badge variant="outline" className="text-xs border-white/20 text-foreground/70">
                           {conv.channel}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/50">
+                        <span className="text-xs text-muted-foreground">
                           Agent: {conv.current_agent || "BRAIN"}
                         </span>
-                        <span className="text-xs text-white/40">
+                        <span className="text-xs text-muted-foreground">
                           {conv.last_message_at ? format(new Date(conv.last_message_at), "HH:mm") : ""}
                         </span>
                       </div>
