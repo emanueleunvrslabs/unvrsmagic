@@ -99,6 +99,27 @@ verify_jwt = false
 [functions.unvrs-hlo]
 verify_jwt = false
 
+[functions.unvrs-intake]
+verify_jwt = false
+
+[functions.unvrs-quote]
+verify_jwt = false
+
+[functions.unvrs-deck]
+verify_jwt = false
+
+[functions.unvrs-call]
+verify_jwt = false
+
+[functions.unvrs-social-brain]
+verify_jwt = false
+
+[functions.unvrs-social-publisher]
+verify_jwt = false
+
+[functions.unvrs-social-reply]
+verify_jwt = false
+
 [functions.agent-logger]
 verify_jwt = false
 
