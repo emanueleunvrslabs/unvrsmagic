@@ -126,43 +126,33 @@ where businesses and AI evolve together.";
             transition={{ duration: 0.8, delay: 0.3 }}
             className="w-full max-w-2xl"
           >
-            <div className="liquid-glass-card liquid-glass-glow p-8 relative">
-              {/* Window controls */}
-              <div className="flex gap-2 mb-6 relative z-10">
-                <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                <div className="w-3 h-3 rounded-full bg-green-500/80" />
-              </div>
-
-              {/* Code content */}
-              <pre
-                className="font-mono text-sm text-white/90 whitespace-pre-wrap leading-relaxed relative z-10"
-                style={{ fontFamily: "Orbitron, sans-serif" }}
-              >
-                <code>
-                  {(() => {
-                    const lines = typewriterText.split('\n');
-                    return lines.map((line, lineIdx) => (
-                      <div key={lineIdx}>
-                        {line.split(/(\bfunction\b|\breturn\b|buildUniverse|"[^"]*")/).map((token, tokenIdx) => {
-                          if (token === 'function') {
-                            return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
-                          } else if (token === 'return') {
-                            return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
-                          } else if (token === 'buildUniverse') {
-                            return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
-                          } else if (token.startsWith('"')) {
-                            return <span key={tokenIdx} className="text-cyan-400">{token}</span>;
-                          }
-                          return <span key={tokenIdx} className="text-white/90">{token}</span>;
-                        })}
-                      </div>
-                    ));
-                  })()}
-                  <span className="inline-block w-2 h-5 bg-white/80 animate-pulse ml-1" />
-                </code>
-              </pre>
-            </div>
+            <pre
+              className="font-mono text-sm md:text-base text-white/90 whitespace-pre-wrap leading-relaxed text-center"
+              style={{ fontFamily: "Orbitron, sans-serif" }}
+            >
+              <code>
+                {(() => {
+                  const lines = typewriterText.split('\n');
+                  return lines.map((line, lineIdx) => (
+                    <div key={lineIdx}>
+                      {line.split(/(\bfunction\b|\breturn\b|buildUniverse|"[^"]*")/).map((token, tokenIdx) => {
+                        if (token === 'function') {
+                          return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
+                        } else if (token === 'return') {
+                          return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
+                        } else if (token === 'buildUniverse') {
+                          return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
+                        } else if (token.startsWith('"')) {
+                          return <span key={tokenIdx} className="text-cyan-400">{token}</span>;
+                        }
+                        return <span key={tokenIdx} className="text-white/90">{token}</span>;
+                      })}
+                    </div>
+                  ));
+                })()}
+                <span className="inline-block w-2 h-5 bg-white/80 animate-pulse ml-1" />
+              </code>
+            </pre>
           </motion.div>
 
           {/* Scroll indicator - below code card */}
