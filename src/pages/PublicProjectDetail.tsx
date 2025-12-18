@@ -2,7 +2,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Sparkles } from "lucide-react";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { LandingFooterNew } from "@/components/landing/LandingFooterNew";
 
@@ -142,7 +142,13 @@ export default function PublicProjectDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+        <motion.div 
+          className="liquid-glass-pill p-6"
+          animate={{ scale: [1, 1.05, 1], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Sparkles className="w-8 h-8 text-white/60" />
+        </motion.div>
       </div>
     );
   }
@@ -150,9 +156,11 @@ export default function PublicProjectDetail() {
   if (!project) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Project Not Found</h1>
-          <Link to="/" className="text-white/60 hover:text-white">
+        <div className="liquid-glass-card p-12 text-center">
+          <h1 className="text-4xl font-bold text-white mb-4" style={{ fontFamily: "Orbitron, sans-serif" }}>
+            Project Not Found
+          </h1>
+          <Link to="/" className="text-white/60 hover:text-white transition-colors">
             Return to Home
           </Link>
         </div>
@@ -169,16 +177,22 @@ export default function PublicProjectDetail() {
     <div className="min-h-screen bg-black">
       <LandingNav />
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-black">
-        <div className="container mx-auto px-6">
-          <button
+      {/* Hero Section with Liquid Glass */}
+      <section className="pt-32 pb-20 bg-black relative overflow-hidden">
+        {/* Background glows */}
+        <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-6 relative z-10">
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/60 hover:text-white mb-8 transition-colors"
+            className="liquid-glass-pill flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 mb-8 transition-all"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
             <span style={{ fontFamily: "Orbitron, sans-serif" }}>Back</span>
-          </button>
+          </motion.button>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -186,38 +200,73 @@ export default function PublicProjectDetail() {
             transition={{ duration: 0.8 }}
             className="max-w-4xl mx-auto text-center"
           >
+            {/* Hero Image */}
+            {project.icon && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="liquid-glass-card liquid-glass-specular overflow-hidden mb-12 max-w-3xl mx-auto"
+              >
+                <img 
+                  src={project.icon} 
+                  alt={project.name}
+                  className="w-full h-[400px] object-cover"
+                />
+              </motion.div>
+            )}
+
             <h1
-              className="text-5xl md:text-7xl font-bold text-white mb-12"
+              className="text-5xl md:text-7xl font-bold text-white mb-6"
               style={{ fontFamily: "Orbitron, sans-serif" }}
             >
               {project.name}
             </h1>
 
-            <Link
-              to="/auth"
-              className="inline-block px-12 py-4 bg-white text-black text-lg font-semibold rounded-full hover:bg-white/90 transition-all hover:scale-105"
+            <p 
+              className="text-xl text-white/60 mb-12 max-w-2xl mx-auto"
               style={{ fontFamily: "Orbitron, sans-serif" }}
             >
+              {project.description}
+            </p>
+
+            <Link
+              to="/auth"
+              className="liquid-glass-btn inline-flex items-center gap-2 px-12 py-4 text-lg font-semibold hover:scale-105 transition-transform"
+              style={{ fontFamily: "Orbitron, sans-serif" }}
+            >
+              <Sparkles size={20} />
               Get Started
             </Link>
           </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section with Liquid Glass Cards */}
       {features.length > 0 && (
-        <section className="py-20 bg-black border-t border-white/10">
-          <div className="container mx-auto px-6">
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
+        <section className="py-24 bg-black relative overflow-hidden">
+          <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="container mx-auto px-6 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="text-4xl md:text-5xl font-bold text-white text-center mb-16"
-              style={{ fontFamily: "Orbitron, sans-serif" }}
+              className="text-center mb-16"
             >
-              Key Features
-            </motion.h2>
+              <p
+                className="text-white/60 text-sm mb-4 tracking-wider"
+                style={{ fontFamily: "Orbitron, sans-serif" }}
+              >
+                What's Included
+              </p>
+              <h2
+                className="text-4xl md:text-5xl font-bold text-white"
+                style={{ fontFamily: "Orbitron, sans-serif" }}
+              >
+                Key Features
+              </h2>
+            </motion.div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {features.map((feature, index) => (
@@ -226,15 +275,15 @@ export default function PublicProjectDetail() {
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.8 }}
-                  className="p-6 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/30 transition-all"
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  className="liquid-glass-card liquid-glass-interactive p-6 group"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center mt-1">
-                      <Check size={16} className="text-white" />
+                  <div className="flex items-start gap-4">
+                    <div className="liquid-glass-pill flex-shrink-0 w-10 h-10 flex items-center justify-center group-hover:bg-white/10 transition-all">
+                      <Check size={18} className="text-white/80" />
                     </div>
                     <p
-                      className="text-white/80 text-base leading-relaxed"
+                      className="text-white/80 text-base leading-relaxed pt-2"
                       style={{ fontFamily: "Orbitron, sans-serif" }}
                     >
                       {feature}
@@ -247,20 +296,31 @@ export default function PublicProjectDetail() {
         </section>
       )}
 
-      {/* Screenshots Section */}
+      {/* Screenshots Section with Liquid Glass */}
       {screenshots.length > 0 && (
-        <section className="py-20 bg-black border-t border-white/10">
-          <div className="container mx-auto px-6">
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
+        <section className="py-24 bg-black relative overflow-hidden">
+          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="container mx-auto px-6 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="text-4xl md:text-5xl font-bold text-white text-center mb-16"
-              style={{ fontFamily: "Orbitron, sans-serif" }}
+              className="text-center mb-16"
             >
-              Dashboard Preview
-            </motion.h2>
+              <p
+                className="text-white/60 text-sm mb-4 tracking-wider"
+                style={{ fontFamily: "Orbitron, sans-serif" }}
+              >
+                Platform Preview
+              </p>
+              <h2
+                className="text-4xl md:text-5xl font-bold text-white"
+                style={{ fontFamily: "Orbitron, sans-serif" }}
+              >
+                Dashboard Preview
+              </h2>
+            </motion.div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {screenshots.map((screenshot, index) => (
@@ -269,15 +329,15 @@ export default function PublicProjectDetail() {
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.8 }}
-                  className="group relative overflow-hidden rounded-xl border border-white/10 hover:border-white/30 transition-all"
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  className="liquid-glass-card liquid-glass-interactive liquid-glass-specular overflow-hidden group"
                 >
                   <img
                     src={screenshot}
                     alt={`${project.name} screenshot ${index + 1}`}
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </motion.div>
               ))}
             </div>
@@ -285,31 +345,47 @@ export default function PublicProjectDetail() {
         </section>
       )}
 
-      {/* Pricing Section */}
+      {/* Pricing Section with Liquid Glass */}
       {pricing.length > 0 && (
-        <section className="py-20 bg-black border-t border-white/10">
-          <div className="container mx-auto px-6">
-            <motion.h2
+        <section className="py-24 bg-black relative overflow-hidden">
+          <div className="absolute top-0 left-1/3 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="container mx-auto px-6 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <p
+                className="text-white/60 text-sm mb-4 tracking-wider"
+                style={{ fontFamily: "Orbitron, sans-serif" }}
+              >
+                Simple & Transparent
+              </p>
+              <h2
+                className="text-4xl md:text-5xl font-bold text-white"
+                style={{ fontFamily: "Orbitron, sans-serif" }}
+              >
+                Pricing
+              </h2>
+            </motion.div>
+
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="text-4xl md:text-5xl font-bold text-white text-center mb-16"
-              style={{ fontFamily: "Orbitron, sans-serif" }}
+              className="max-w-2xl mx-auto"
             >
-              Pricing
-            </motion.h2>
-
-            <div className="max-w-2xl mx-auto">
-              <div className="p-8 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+              <div className="liquid-glass-card liquid-glass-specular p-8">
                 <h3
-                  className="text-2xl font-semibold text-white mb-6"
+                  className="text-2xl font-semibold text-white mb-4"
                   style={{ fontFamily: "Orbitron, sans-serif" }}
                 >
                   Usage-Based Billing
                 </h3>
                 <p
-                  className="text-white/70 mb-8 leading-relaxed"
+                  className="text-white/60 mb-8 leading-relaxed"
                   style={{ fontFamily: "Orbitron, sans-serif" }}
                 >
                   Pay only for what you generate. Costs are calculated based on actual content created.
@@ -318,7 +394,7 @@ export default function PublicProjectDetail() {
                   {pricing.map((item, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
+                      className="liquid-glass-pill flex items-center justify-between p-4"
                     >
                       <span
                         className="text-white/80 text-lg"
@@ -336,45 +412,56 @@ export default function PublicProjectDetail() {
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
       )}
 
-      {/* How It Works Section */}
+      {/* How It Works Section with Liquid Glass */}
       {howItWorks.length > 0 && (
-        <section className="py-20 bg-black border-t border-white/10">
-          <div className="container mx-auto px-6">
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
+        <section className="py-24 bg-black relative overflow-hidden">
+          <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="container mx-auto px-6 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="text-4xl md:text-5xl font-bold text-white text-center mb-16"
-              style={{ fontFamily: "Orbitron, sans-serif" }}
+              className="text-center mb-16"
             >
-              How It Works
-            </motion.h2>
+              <p
+                className="text-white/60 text-sm mb-4 tracking-wider"
+                style={{ fontFamily: "Orbitron, sans-serif" }}
+              >
+                Getting Started
+              </p>
+              <h2
+                className="text-4xl md:text-5xl font-bold text-white"
+                style={{ fontFamily: "Orbitron, sans-serif" }}
+              >
+                How It Works
+              </h2>
+            </motion.div>
 
-            <div className="max-w-4xl mx-auto space-y-12">
+            <div className="max-w-4xl mx-auto space-y-8">
               {howItWorks.map((item, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.2, duration: 0.8 }}
-                  className="flex gap-6"
+                  transition={{ delay: index * 0.2, duration: 0.5 }}
+                  className="liquid-glass-card liquid-glass-interactive p-6 flex gap-6"
                 >
                   <div className="flex-shrink-0">
                     <div
-                      className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white font-bold text-xl"
+                      className="liquid-glass-pill w-14 h-14 flex items-center justify-center text-white font-bold text-xl"
                       style={{ fontFamily: "Orbitron, sans-serif" }}
                     >
                       {index + 1}
                     </div>
                   </div>
-                  <div>
+                  <div className="pt-2">
                     <h3
                       className="text-2xl font-semibold text-white mb-3"
                       style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -382,7 +469,7 @@ export default function PublicProjectDetail() {
                       {item.step}
                     </h3>
                     <p
-                      className="text-white/70 text-lg leading-relaxed"
+                      className="text-white/60 text-lg leading-relaxed"
                       style={{ fontFamily: "Orbitron, sans-serif" }}
                     >
                       {item.description}
@@ -395,15 +482,16 @@ export default function PublicProjectDetail() {
         </section>
       )}
 
-      {/* CTA Section */}
-      <section className="py-20 bg-black border-t border-white/10">
-        <div className="container mx-auto px-6">
+      {/* CTA Section with Liquid Glass */}
+      <section className="py-24 bg-black relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-purple-500/5 to-transparent pointer-events-none" />
+        
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="max-w-3xl mx-auto text-center"
+            className="liquid-glass-card liquid-glass-specular max-w-3xl mx-auto p-12 text-center"
           >
             <h2
               className="text-4xl md:text-5xl font-bold text-white mb-6"
@@ -412,16 +500,17 @@ export default function PublicProjectDetail() {
               Ready to Get Started?
             </h2>
             <p
-              className="text-xl text-white/70 mb-8"
+              className="text-xl text-white/60 mb-8"
               style={{ fontFamily: "Orbitron, sans-serif" }}
             >
               Join thousands of users already using {project.name} to transform their workflow.
             </p>
             <Link
               to="/auth"
-              className="inline-block px-12 py-4 bg-white text-black text-lg font-semibold rounded-full hover:bg-white/90 transition-all hover:scale-105"
+              className="liquid-glass-btn inline-flex items-center gap-2 px-12 py-4 text-lg font-semibold hover:scale-105 transition-transform"
               style={{ fontFamily: "Orbitron, sans-serif" }}
             >
+              <Sparkles size={20} />
               Start Now
             </Link>
           </motion.div>
