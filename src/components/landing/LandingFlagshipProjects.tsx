@@ -102,11 +102,19 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
     >
       <div className="liquid-glass-card rounded-3xl overflow-hidden max-w-5xl mx-auto relative">
         {/* Italian Flag */}
-        <div className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full overflow-hidden border-2 border-white/20 shadow-lg">
+        <div 
+          className="absolute top-4 right-4 z-20 w-12 h-12 rounded-full overflow-hidden"
+          style={{
+            backdropFilter: "blur(20px) saturate(1.3)",
+            WebkitBackdropFilter: "blur(20px) saturate(1.3)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)",
+          }}
+        >
           <div className="flex h-full">
-            <div className="w-1/3 bg-green-500" />
-            <div className="w-1/3 bg-white" />
-            <div className="w-1/3 bg-red-500" />
+            <div className="w-1/3 bg-green-500/80" />
+            <div className="w-1/3 bg-white/90" />
+            <div className="w-1/3 bg-red-500/80" />
           </div>
         </div>
         
