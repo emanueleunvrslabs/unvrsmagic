@@ -1,8 +1,8 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Sparkles } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { LandingFooterNew } from "@/components/landing/LandingFooterNew";
 
@@ -117,7 +117,6 @@ const projectHowItWorks: Record<string, { step: string; description: string }[]>
 
 export default function PublicProjectDetail() {
   const { projectId } = useParams();
-  const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -175,7 +174,7 @@ export default function PublicProjectDetail() {
 
   return (
     <div className="min-h-screen bg-black">
-      <LandingNav />
+      <LandingNav showBack />
 
       {/* Hero Section with Liquid Glass */}
       <section className="pt-32 pb-20 bg-black relative overflow-hidden">
@@ -184,14 +183,6 @@ export default function PublicProjectDetail() {
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="container mx-auto px-6 relative z-10">
-          <button
-            onClick={() => navigate(-1)}
-            className="liquid-glass-pill flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 mb-8 transition-all"
-          >
-            <ArrowLeft size={18} />
-            <span style={{ fontFamily: "Orbitron, sans-serif" }}>Back</span>
-          </button>
-
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero Image */}
             {project.icon && (
