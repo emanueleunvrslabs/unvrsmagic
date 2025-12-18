@@ -100,16 +100,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
       transition={{ duration: 0.8 }}
       className="w-full"
     >
-      <div 
-        className="rounded-3xl overflow-hidden hover:bg-white/[0.06] transition-colors duration-300"
-        style={{
-          backdropFilter: "blur(40px) saturate(1.3)",
-          WebkitBackdropFilter: "blur(40px) saturate(1.3)",
-          background: "rgba(255, 255, 255, 0.04)",
-          border: "0.5px solid rgba(255, 255, 255, 0.15)",
-          boxShadow: "0 12px 40px rgba(0, 0, 0, 0.3)",
-        }}
-      >
+      <div className="liquid-glass-card rounded-3xl overflow-hidden">
         {/* MODULO 1: HERO */}
         <div className="grid md:grid-cols-2 gap-0">
           {/* Hero Content */}
