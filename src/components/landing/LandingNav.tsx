@@ -1,9 +1,14 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function LandingNav() {
+interface LandingNavProps {
+  showBack?: boolean;
+}
+
+export function LandingNav({ showBack = false }: LandingNavProps) {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -76,7 +81,24 @@ export function LandingNav() {
   }, [displayIndex]);
 
   return (
-    <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
+    <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center items-center gap-3 px-4">
+      {/* Back Button - Desktop */}
+      {showBack && (
+        <button
+          onClick={() => navigate(-1)}
+          className="hidden md:flex items-center justify-center w-10 h-10 rounded-full transition-all hover:scale-105"
+          style={{
+            background: "rgba(255, 255, 255, 0.06)",
+            backdropFilter: "blur(40px) saturate(1.8)",
+            WebkitBackdropFilter: "blur(40px) saturate(1.8)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+          }}
+        >
+          <ArrowLeft size={18} className="text-white/80" />
+        </button>
+      )}
+
       {/* Desktop Navigation - Apple Liquid Glass Segmented Control */}
       <motion.div 
         ref={navRef}
@@ -189,9 +211,19 @@ export function LandingNav() {
             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
           }}
         >
-          <span className="text-white font-semibold" style={{ fontFamily: "Orbitron, sans-serif" }}>
-            UNVRS
-          </span>
+          <div className="flex items-center gap-2">
+            {showBack && (
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 text-white/80 rounded-full hover:bg-white/10 transition-colors"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            )}
+            <span className="text-white font-semibold" style={{ fontFamily: "Orbitron, sans-serif" }}>
+              UNVRS
+            </span>
+          </div>
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
             className="p-2 text-white/80 rounded-full"
