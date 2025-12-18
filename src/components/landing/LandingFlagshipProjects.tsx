@@ -347,7 +347,7 @@ export function LandingFlagshipProjects() {
             THE FOUNDATIONS
           </h2>
           <p className="text-white/60 max-w-2xl mx-auto text-lg">
-            I nostri progetti proprietari che definiscono il futuro della tecnologia
+            Our proprietary projects shaping the future of technology
           </p>
         </motion.div>
 
