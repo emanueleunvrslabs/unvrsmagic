@@ -6,18 +6,16 @@ interface ShinyTextProps {
   className?: string;
 }
 
-const ShinyText = ({ text, speed = 5, className = "" }: ShinyTextProps) => {
+const ShinyText = ({ text, speed = 3, className = "" }: ShinyTextProps) => {
   return (
     <span
       className={`inline bg-clip-text ${className}`}
       style={{
         backgroundImage: `linear-gradient(
           120deg,
-          rgba(255, 255, 255, 0.5) 0%,
           rgba(255, 255, 255, 0.5) 40%,
           rgba(255, 255, 255, 1) 50%,
-          rgba(255, 255, 255, 0.5) 60%,
-          rgba(255, 255, 255, 0.5) 100%
+          rgba(255, 255, 255, 0.5) 60%
         )`,
         backgroundSize: "200% 100%",
         animation: `shiny-text-claim ${speed}s linear infinite`,
@@ -29,10 +27,10 @@ const ShinyText = ({ text, speed = 5, className = "" }: ShinyTextProps) => {
       <style>{`
         @keyframes shiny-text-claim {
           0% {
-            background-position: 200% 50%;
+            background-position: 100% 50%;
           }
           100% {
-            background-position: -200% 50%;
+            background-position: -100% 50%;
           }
         }
       `}</style>
