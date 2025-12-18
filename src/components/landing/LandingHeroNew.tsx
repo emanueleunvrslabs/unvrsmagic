@@ -123,14 +123,8 @@ export function LandingHeroNew() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex flex-col items-center gap-2 cursor-pointer group mt-8"
+              className="flex flex-col items-center cursor-pointer group mt-8"
             >
-              <span
-                className="text-white/50 text-xs tracking-widest group-hover:text-white/80 transition-colors"
-                style={{ fontFamily: "Orbitron, sans-serif" }}
-              >
-                SCROLL
-              </span>
               <div className="liquid-glass-pill p-2 animate-bounce">
                 <ChevronDown size={20} className="text-white/70" />
               </div>
