@@ -8,7 +8,7 @@ export function LandingScrollText() {
           "We don't build technology to replace humans.",
           "We build it to expand human intelligence."
         ]}
-        velocity={3}
+        velocity={1}
         className="font-orbitron text-3xl md:text-5xl lg:text-6xl font-semibold text-white/90 tracking-wide"
         numCopies={4}
         damping={50}
