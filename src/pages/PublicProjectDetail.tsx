@@ -184,36 +184,24 @@ export default function PublicProjectDetail() {
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="container mx-auto px-6 relative z-10">
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+          <button
             onClick={() => navigate(-1)}
             className="liquid-glass-pill flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 mb-8 transition-all"
           >
             <ArrowLeft size={18} />
             <span style={{ fontFamily: "Orbitron, sans-serif" }}>Back</span>
-          </motion.button>
+          </button>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto text-center"
-          >
+          <div className="max-w-4xl mx-auto text-center">
             {/* Hero Image */}
             {project.icon && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="liquid-glass-card liquid-glass-specular overflow-hidden mb-12 max-w-3xl mx-auto"
-              >
+              <div className="liquid-glass-card liquid-glass-specular overflow-hidden mb-12 max-w-3xl mx-auto">
                 <img 
                   src={project.icon} 
                   alt={project.name}
                   className="w-full h-[400px] object-cover"
                 />
-              </motion.div>
+              </div>
             )}
 
             <h1
@@ -238,7 +226,7 @@ export default function PublicProjectDetail() {
               <Sparkles size={20} />
               Get Started
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -248,12 +236,7 @@ export default function PublicProjectDetail() {
           <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="container mx-auto px-6 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
+            <div className="text-center mb-16">
               <p
                 className="text-white/60 text-sm mb-4 tracking-wider"
                 style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -266,16 +249,12 @@ export default function PublicProjectDetail() {
               >
                 Key Features
               </h2>
-            </motion.div>
+            </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {features.map((feature, index) => (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
                   className="liquid-glass-card liquid-glass-interactive p-6 group"
                 >
                   <div className="flex items-start gap-4">
@@ -289,7 +268,7 @@ export default function PublicProjectDetail() {
                       {feature}
                     </p>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -302,12 +281,7 @@ export default function PublicProjectDetail() {
           <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="container mx-auto px-6 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
+            <div className="text-center mb-16">
               <p
                 className="text-white/60 text-sm mb-4 tracking-wider"
                 style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -320,16 +294,12 @@ export default function PublicProjectDetail() {
               >
                 Dashboard Preview
               </h2>
-            </motion.div>
+            </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {screenshots.map((screenshot, index) => (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
                   className="liquid-glass-card liquid-glass-interactive liquid-glass-specular overflow-hidden group"
                 >
                   <img
@@ -338,7 +308,7 @@ export default function PublicProjectDetail() {
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -351,12 +321,7 @@ export default function PublicProjectDetail() {
           <div className="absolute top-0 left-1/3 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="container mx-auto px-6 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
+            <div className="text-center mb-16">
               <p
                 className="text-white/60 text-sm mb-4 tracking-wider"
                 style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -369,14 +334,9 @@ export default function PublicProjectDetail() {
               >
                 Pricing
               </h2>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="max-w-2xl mx-auto"
-            >
+            <div className="max-w-2xl mx-auto">
               <div className="liquid-glass-card liquid-glass-specular p-8">
                 <h3
                   className="text-2xl font-semibold text-white mb-4"
@@ -412,7 +372,7 @@ export default function PublicProjectDetail() {
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </section>
       )}
@@ -423,12 +383,7 @@ export default function PublicProjectDetail() {
           <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="container mx-auto px-6 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
+            <div className="text-center mb-16">
               <p
                 className="text-white/60 text-sm mb-4 tracking-wider"
                 style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -441,16 +396,12 @@ export default function PublicProjectDetail() {
               >
                 How It Works
               </h2>
-            </motion.div>
+            </div>
 
             <div className="max-w-4xl mx-auto space-y-8">
               {howItWorks.map((item, index) => (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.2, duration: 0.5 }}
                   className="liquid-glass-card liquid-glass-interactive p-6 flex gap-6"
                 >
                   <div className="flex-shrink-0">
@@ -475,7 +426,7 @@ export default function PublicProjectDetail() {
                       {item.description}
                     </p>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -487,12 +438,7 @@ export default function PublicProjectDetail() {
         <div className="absolute inset-0 bg-gradient-to-t from-purple-500/5 to-transparent pointer-events-none" />
         
         <div className="container mx-auto px-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="liquid-glass-card liquid-glass-specular max-w-3xl mx-auto p-12 text-center"
-          >
+          <div className="liquid-glass-card liquid-glass-specular max-w-3xl mx-auto p-12 text-center">
             <h2
               className="text-4xl md:text-5xl font-bold text-white mb-6"
               style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -513,7 +459,7 @@ export default function PublicProjectDetail() {
               <Sparkles size={20} />
               Start Now
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 

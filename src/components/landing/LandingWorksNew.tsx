@@ -1,7 +1,5 @@
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Project {
@@ -13,8 +11,6 @@ interface Project {
 }
 
 export function LandingWorksNew() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
@@ -34,17 +30,12 @@ export function LandingWorksNew() {
   }, []);
 
   return (
-    <section id="works" ref={ref} className="py-32 bg-black relative overflow-hidden">
+    <section id="works" className="py-32 bg-black relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-16"
-        >
+        <div className="mb-16">
           <p
             className="text-white/60 text-sm mb-4 tracking-wider"
             style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -57,16 +48,12 @@ export function LandingWorksNew() {
           >
             Magic AI
           </h2>
-        </motion.div>
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project, index) => (
-            <motion.div
+          {projects.map((project) => (
+            <div
               key={project.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ delay: index * 0.08, duration: 0.4, ease: "easeOut" }}
-              style={{ willChange: isInView ? 'auto' : 'transform, opacity' }}
               className="liquid-glass-card liquid-glass-interactive liquid-glass-specular overflow-hidden cursor-pointer group"
               onClick={() => window.location.href = `/project/${project.route.replace('/', '')}`}
             >
@@ -106,7 +93,7 @@ export function LandingWorksNew() {
                   {project.description || "Enterprise solution"}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

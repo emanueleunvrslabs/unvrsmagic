@@ -21,16 +21,12 @@ export function LandingBrands() {
   return (
     <section className="py-20 bg-black overflow-hidden">
       <div className="container mx-auto px-6">
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+        <p
           className="text-center text-white/40 text-sm mb-12 tracking-wider"
           style={{ fontFamily: "Orbitron, sans-serif" }}
         >
           POWERED BY LEADING AI TECHNOLOGIES
-        </motion.p>
+        </p>
 
         {/* Infinite scroll container */}
         <div className="relative">
