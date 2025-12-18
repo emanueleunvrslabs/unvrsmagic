@@ -45,25 +45,30 @@ function StatItem({ value, label, suffix }: StatProps) {
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.8 }}
-      className="text-center"
+      className="liquid-glass-card p-8 text-center"
     >
-      <div
-        className="text-7xl md:text-8xl font-bold text-white mb-4"
-        style={{ fontFamily: "Orbitron, sans-serif" }}
-      >
-        <AnimatedNumber value={value} suffix={suffix} />
+      <div className="relative z-10">
+        <div
+          className="text-5xl md:text-6xl font-bold text-white mb-4"
+          style={{ fontFamily: "Orbitron, sans-serif" }}
+        >
+          <AnimatedNumber value={value} suffix={suffix} />
+        </div>
+        <p
+          className="text-white/60 text-sm tracking-[0.15em] uppercase"
+          style={{ fontFamily: "Orbitron, sans-serif" }}
+        >
+          {label}
+        </p>
       </div>
-      <p
-        className="text-white/60 text-sm tracking-[0.2em] uppercase"
-        style={{ fontFamily: "Orbitron, sans-serif" }}
-      >
-        {label}
-      </p>
     </motion.div>
   );
 }
 
 export function LandingStats() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
   const stats: StatProps[] = [
     { value: 150, label: "Projects Completed", suffix: "+" },
     { value: 98, label: "Client Satisfaction", suffix: "%" },
@@ -71,15 +76,23 @@ export function LandingStats() {
   ];
 
   return (
-    <section className="py-32 bg-black">
+    <section className="py-32 bg-black relative overflow-hidden" ref={ref}>
+      {/* Background glow */}
+      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+
       <div className="container mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8 }}
           >
+            <p
+              className="text-white/60 text-sm mb-4 tracking-wider"
+              style={{ fontFamily: "Orbitron, sans-serif" }}
+            >
+              Our Track Record
+            </p>
             <h2
               className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight"
               style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -97,11 +110,11 @@ export function LandingStats() {
               Unleash the power of creativity with UNVRS LABS. Our passion is crafting unique brand
               stories that resonate and engage. Whether it's through stunning design, innovative
               digital experiences, or dynamic marketing strategies, we transform your vision into
-              impactful realities. Let's create something unforgettable.
+              impactful realities.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-16">
+          <div className="grid grid-cols-1 gap-6">
             {stats.map((stat, index) => (
               <StatItem
                 key={index}

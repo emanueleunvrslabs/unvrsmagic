@@ -110,13 +110,15 @@ const reviews = [
 ];
 
 export function LandingReviews() {
-  // Split reviews into 3 columns (5 reviews each)
   const column1 = reviews.slice(0, 5);
   const column2 = reviews.slice(5, 10);
   const column3 = reviews.slice(10, 15);
 
   return (
-    <section className="py-32 bg-black overflow-hidden">
+    <section className="py-32 bg-black overflow-hidden relative">
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+
       <div className="container mx-auto px-6">
         <div className="grid lg:grid-cols-[1fr_2fr] gap-12 items-start">
           <div>
@@ -129,8 +131,8 @@ export function LandingReviews() {
               <p className="text-white/60 text-sm mb-4 tracking-wider" style={{ fontFamily: "Orbitron, sans-serif" }}>
                 What Our Clients Say
               </p>
-              <h2 className="text-5xl md:text-6xl font-bold text-white mb-6" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                TRUSTED BY MANY, LOVED BY ALL
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                TRUSTED BY MANY
               </h2>
               <p className="text-white/60 leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
                 Our clients' success stories reflect our commitment to excellence. See how we've helped them achieve their digital transformation goals.
@@ -139,7 +141,7 @@ export function LandingReviews() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] overflow-hidden">
-            {/* Column 1 - scrolls up - always visible */}
+            {/* Column 1 - scrolls up */}
             <motion.div
               initial={{ y: 0 }}
               animate={{ y: "-50%" }}
@@ -155,7 +157,7 @@ export function LandingReviews() {
               ))}
             </motion.div>
 
-            {/* Column 2 - scrolls down - hidden on mobile */}
+            {/* Column 2 - scrolls down */}
             <motion.div
               initial={{ y: "-50%" }}
               animate={{ y: 0 }}
@@ -171,7 +173,7 @@ export function LandingReviews() {
               ))}
             </motion.div>
 
-            {/* Column 3 - scrolls up - hidden on mobile */}
+            {/* Column 3 - scrolls up */}
             <motion.div
               initial={{ y: 0 }}
               animate={{ y: "-50%" }}
@@ -195,32 +197,34 @@ export function LandingReviews() {
 
 function ReviewCard({ review }: { review: typeof reviews[0] }) {
   return (
-    <div className="flex-shrink-0 p-6 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/20 transition-all">
-      <div className="flex items-center gap-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center border border-white/20">
-          <span className="text-white font-semibold text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
-            {review.avatar}
-          </span>
+    <div className="flex-shrink-0 liquid-glass-card liquid-glass-interactive p-6">
+      <div className="relative z-10">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="liquid-glass-pill w-12 h-12 flex items-center justify-center">
+            <span className="text-white font-semibold text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
+              {review.avatar}
+            </span>
+          </div>
+          <div>
+            <h3 className="text-white font-semibold text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
+              {review.name}
+            </h3>
+            <p className="text-white/60 text-xs" style={{ fontFamily: "Orbitron, sans-serif" }}>
+              {review.role}
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-white font-semibold text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
-            {review.name}
-          </h3>
-          <p className="text-white/60 text-xs" style={{ fontFamily: "Orbitron, sans-serif" }}>
-            {review.role}
-          </p>
+        
+        <div className="flex gap-1 mb-4">
+          {[...Array(review.rating)].map((_, i) => (
+            <Star key={i} size={14} className="fill-yellow-500 text-yellow-500" />
+          ))}
         </div>
-      </div>
-      
-      <div className="flex gap-1 mb-4">
-        {[...Array(review.rating)].map((_, i) => (
-          <Star key={i} size={14} className="fill-yellow-500 text-yellow-500" />
-        ))}
-      </div>
 
-      <p className="text-white/70 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
-        {review.text}
-      </p>
+        <p className="text-white/70 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
+          {review.text}
+        </p>
+      </div>
     </div>
   );
 }
