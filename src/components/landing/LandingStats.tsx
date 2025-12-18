@@ -37,38 +37,21 @@ function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string
 }
 
 function StatItem({ value, label, suffix }: StatProps) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 30 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-      transition={{ duration: 0.8 }}
-    >
-      <ShapeBlur
-        className="liquid-glass-card p-8 text-center rounded-2xl overflow-hidden"
-        shapeSize={1.0}
-        roundness={0.5}
-        borderSize={0.05}
-        circleSize={0.25}
-        circleEdge={1}
+    <div className="p-8 text-center">
+      <div
+        className="text-5xl md:text-6xl font-bold text-white mb-4"
+        style={{ fontFamily: "Orbitron, sans-serif" }}
       >
-        <div
-          className="text-5xl md:text-6xl font-bold text-white mb-4"
-          style={{ fontFamily: "Orbitron, sans-serif" }}
-        >
-          <AnimatedNumber value={value} suffix={suffix} />
-        </div>
-        <p
-          className="text-white/60 text-sm tracking-[0.15em] uppercase"
-          style={{ fontFamily: "Orbitron, sans-serif" }}
-        >
-          {label}
-        </p>
-      </ShapeBlur>
-    </motion.div>
+        <AnimatedNumber value={value} suffix={suffix} />
+      </div>
+      <p
+        className="text-white/60 text-sm tracking-[0.15em] uppercase"
+        style={{ fontFamily: "Orbitron, sans-serif" }}
+      >
+        {label}
+      </p>
+    </div>
   );
 }
 
