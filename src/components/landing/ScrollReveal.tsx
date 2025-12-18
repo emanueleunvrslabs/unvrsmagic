@@ -87,17 +87,20 @@ export const ScrollReveal: FC<ScrollRevealProps> = ({
   // Split text into words
   const renderContent = () => {
     if (typeof children === 'string') {
-      return children.split(' ').map((word, index) => (
-        <span 
-          key={index} 
-          className="scroll-reveal-word inline-block mr-[0.25em]"
-          style={{ 
-            opacity: baseOpacity,
-            filter: enableBlur ? `blur(${blurStrength}px)` : 'none',
-            willChange: 'opacity, filter'
-          }}
-        >
-          {word}
+      const words = children.split(' ');
+      return words.map((word, index) => (
+        <span key={index}>
+          <span 
+            className="scroll-reveal-word inline-block"
+            style={{ 
+              opacity: baseOpacity,
+              filter: enableBlur ? `blur(${blurStrength}px)` : 'none',
+              willChange: 'opacity, filter'
+            }}
+          >
+            {word}
+          </span>
+          {index < words.length - 1 && ' '}
         </span>
       ));
     }
