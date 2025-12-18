@@ -90,7 +90,7 @@ const ParallaxText: FC<ParallaxTextProps> = ({
 
   return (
     <div
-      className={`${parallaxClassName} overflow-hidden whitespace-nowrap flex flex-nowrap`}
+      className={`${parallaxClassName} overflow-hidden whitespace-nowrap flex flex-nowrap py-4`}
       style={parallaxStyle}
     >
       <motion.div
