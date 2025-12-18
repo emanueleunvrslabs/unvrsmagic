@@ -8,57 +8,88 @@ export function LandingFooterNew() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
       <div className="container mx-auto px-6">
-        <div className="grid md:grid-cols-3 gap-12 mb-12">
-          {/* Logo & Description */}
-          <div>
-            <img 
-              src={logo}
-              alt="UNVRS LABS" 
-              className="h-14 w-auto mb-4"
-            />
-            <p className="text-white font-semibold text-lg mb-3" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              UNVRS LABS
-            </p>
-            <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              Coding the Universe, One Pixel at a Time
-            </p>
-          </div>
+        {/* Liquid Glass Container */}
+        <div 
+          className="rounded-3xl p-8 md:p-12 mb-12"
+          style={{
+            background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 0 rgba(255,255,255,0.1)",
+          }}
+        >
+          <div className="grid md:grid-cols-4 gap-12">
+            {/* Logo & Description */}
+            <div>
+              <img 
+                src={logo}
+                alt="UNVRS LABS" 
+                className="h-14 w-auto mb-4"
+              />
+              <p className="text-white font-semibold text-lg mb-3" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                UNVRS LABS
+              </p>
+              <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                Coding the Universe, One Pixel at a Time
+              </p>
+            </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-white font-semibold mb-6 text-sm tracking-wider" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              QUICK LINKS
-            </h3>
-            <div className="flex flex-col gap-3">
-              {["Home", "Services", "Magic AI", "Contact"].map((item) => (
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-6 text-sm tracking-wider" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                QUICK LINKS
+              </h3>
+              <div className="flex flex-col gap-3">
+                {["Home", "Services", "Magic AI", "Contact"].map((item) => (
+                  <a 
+                    key={item}
+                    href={item === "Contact" ? "#contact" : item === "Services" ? "#services" : item === "Magic AI" ? "#works" : "#home"} 
+                    className="text-white/60 hover:text-white transition-colors text-sm"
+                    style={{ fontFamily: "Orbitron, sans-serif" }}
+                  >
+                    {item}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Foundations */}
+            <div>
+              <h3 className="text-white font-semibold mb-6 text-sm tracking-wider" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                FOUNDATIONS
+              </h3>
+              <div className="flex flex-col gap-3">
                 <a 
-                  key={item}
-                  href={item === "Contact" ? "#contact" : item === "Services" ? "#services" : item === "Magic AI" ? "#works" : "#home"} 
-                  className="text-white/60 hover:text-white transition-colors text-sm"
+                  href="#foundations" 
+                  className="text-white/60 hover:text-lime-400 transition-colors text-sm"
                   style={{ fontFamily: "Orbitron, sans-serif" }}
                 >
-                  {item}
+                  Energizzo
                 </a>
-              ))}
+                <span className="text-white/40 text-xs" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                  AI Energy Operating System
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="text-white font-semibold mb-6 text-sm tracking-wider" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              GET IN TOUCH
-            </h3>
-            <div className="flex flex-col gap-3">
-              <a href="mailto:emanuele@unvrslabs.dev" className="text-white/60 hover:text-white transition-colors text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                emanuele@unvrslabs.dev
-              </a>
-              <Link 
-                to="/auth" 
-                className="liquid-glass-pill inline-block w-fit text-white/80 hover:text-white text-xs"
-                style={{ fontFamily: "Orbitron, sans-serif" }}
-              >
-                Client Portal
-              </Link>
+            {/* Contact */}
+            <div>
+              <h3 className="text-white font-semibold mb-6 text-sm tracking-wider" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                GET IN TOUCH
+              </h3>
+              <div className="flex flex-col gap-3">
+                <a href="mailto:emanuele@unvrslabs.dev" className="text-white/60 hover:text-white transition-colors text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                  emanuele@unvrslabs.dev
+                </a>
+                <Link 
+                  to="/auth" 
+                  className="liquid-glass-pill inline-block w-fit text-white/80 hover:text-white text-xs"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
+                  Client Portal
+                </Link>
+              </div>
             </div>
           </div>
         </div>
