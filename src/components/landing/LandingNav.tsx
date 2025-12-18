@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function LandingNav() {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const navRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const location = useLocation();
 
   const navItems = [
     { label: "HOME", href: "#hero" },
@@ -18,10 +20,22 @@ export function LandingNav() {
     { label: "LOGIN", href: "/auth", isRoute: true },
   ];
 
-  // Update indicator position when hoveredIndex changes
+  // Track active section from URL hash
   useEffect(() => {
-    if (hoveredIndex !== null && itemRefs.current[hoveredIndex] && navRef.current) {
-      const item = itemRefs.current[hoveredIndex];
+    const hash = location.hash || "#hero";
+    const index = navItems.findIndex(item => item.href === hash);
+    if (index !== -1) {
+      setActiveIndex(index);
+    }
+  }, [location.hash]);
+
+  // Determine which index to show indicator for (hover takes priority over active)
+  const displayIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
+
+  // Update indicator position
+  useEffect(() => {
+    if (displayIndex !== null && itemRefs.current[displayIndex] && navRef.current) {
+      const item = itemRefs.current[displayIndex];
       const nav = navRef.current;
       if (item) {
         const itemRect = item.getBoundingClientRect();
@@ -32,7 +46,7 @@ export function LandingNav() {
         });
       }
     }
-  }, [hoveredIndex]);
+  }, [displayIndex]);
 
   return (
     <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
@@ -63,15 +77,14 @@ export function LandingNav() {
           animate={{
             left: indicatorStyle.left,
             width: indicatorStyle.width,
-            opacity: hoveredIndex !== null ? 1 : 0,
-            scaleX: hoveredIndex !== null ? 1 : 0.8,
+            opacity: 1,
+            scaleX: 1,
           }}
           transition={{
             type: "spring",
             stiffness: 400,
             damping: 30,
             mass: 0.8,
-            opacity: { duration: 0.15 },
           }}
           style={{
             background: "linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.12) 100%)",
@@ -87,13 +100,14 @@ export function LandingNav() {
         />
 
         {navItems.map((item, index) => {
+          const isActive = displayIndex === index;
           const commonProps = {
             key: item.label,
             ref: (el: HTMLAnchorElement | null) => (itemRefs.current[index] = el),
             className: "relative px-5 py-2.5 text-sm font-medium rounded-full z-10 transition-colors duration-200",
             style: { 
               fontFamily: "Orbitron, sans-serif",
-              color: hoveredIndex === index ? "rgba(255, 255, 255, 1)" : "rgba(255, 255, 255, 0.7)",
+              color: isActive ? "rgba(255, 255, 255, 1)" : "rgba(255, 255, 255, 0.7)",
             },
             onMouseEnter: () => setHoveredIndex(index),
           };
