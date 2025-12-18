@@ -21,6 +21,7 @@ export function LandingNav({ showBack = false, backTo }: LandingNavProps) {
     { label: "HOME", href: "#hero", sectionId: "hero" },
     { label: "SERVICES", href: "#services", sectionId: "services" },
     { label: "MAGIC AI", href: "#works", sectionId: "works" },
+    { label: "FOUNDATIONS", href: "#foundations", sectionId: "foundations" },
     { label: "CONTACT", href: "https://wa.me/34625976744", external: true },
     { label: "LOGIN", href: "/auth", isRoute: true },
   ];
