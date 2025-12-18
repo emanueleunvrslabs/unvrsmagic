@@ -15,6 +15,7 @@ export function LandingNav() {
     { label: "SERVICES", href: "#services" },
     { label: "MAGIC AI", href: "#works" },
     { label: "CONTACT", href: "https://wa.me/34625976744", external: true },
+    { label: "LOGIN", href: "/auth", isRoute: true },
   ];
 
   // Update indicator position when hoveredIndex changes
@@ -85,67 +86,52 @@ export function LandingNav() {
           }}
         />
 
-        {navItems.map((item, index) => (
-          item.external ? (
-            <a
-              key={item.label}
-              ref={(el) => (itemRefs.current[index] = el)}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative px-5 py-2.5 text-sm font-medium rounded-full z-10 transition-colors duration-200"
-              style={{ 
-                fontFamily: "Orbitron, sans-serif",
-                color: hoveredIndex === index ? "rgba(255, 255, 255, 1)" : "rgba(255, 255, 255, 0.7)",
-              }}
-              onMouseEnter={() => setHoveredIndex(index)}
-            >
+        {navItems.map((item, index) => {
+          const commonProps = {
+            key: item.label,
+            ref: (el: HTMLAnchorElement | null) => (itemRefs.current[index] = el),
+            className: "relative px-5 py-2.5 text-sm font-medium rounded-full z-10 transition-colors duration-200",
+            style: { 
+              fontFamily: "Orbitron, sans-serif",
+              color: hoveredIndex === index ? "rgba(255, 255, 255, 1)" : "rgba(255, 255, 255, 0.7)",
+            },
+            onMouseEnter: () => setHoveredIndex(index),
+          };
+
+          if (item.isRoute) {
+            return (
+              <Link
+                key={item.label}
+                to={item.href}
+                ref={(el) => (itemRefs.current[index] = el)}
+                className={commonProps.className}
+                style={commonProps.style}
+                onMouseEnter={commonProps.onMouseEnter}
+              >
+                {item.label}
+              </Link>
+            );
+          }
+
+          if (item.external) {
+            return (
+              <a
+                {...commonProps}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {item.label}
+              </a>
+            );
+          }
+
+          return (
+            <a {...commonProps} href={item.href}>
               {item.label}
             </a>
-          ) : (
-            <a
-              key={item.label}
-              ref={(el) => (itemRefs.current[index] = el)}
-              href={item.href}
-              className="relative px-5 py-2.5 text-sm font-medium rounded-full z-10 transition-colors duration-200"
-              style={{ 
-                fontFamily: "Orbitron, sans-serif",
-                color: hoveredIndex === index ? "rgba(255, 255, 255, 1)" : "rgba(255, 255, 255, 0.7)",
-              }}
-              onMouseEnter={() => setHoveredIndex(index)}
-            >
-              {item.label}
-            </a>
-          )
-        ))}
-        
-        {/* Login Button with Glass Morphing Effect */}
-        <Link to="/auth" className="ml-1">
-          <motion.div
-            className="relative px-6 py-2.5 rounded-full overflow-hidden cursor-pointer"
-            style={{
-              background: "linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%)",
-              border: "0.5px solid rgba(255, 255, 255, 0.2)",
-              boxShadow: `
-                0 0 0 0.5px rgba(255, 255, 255, 0.15) inset,
-                0 1px 0 0 rgba(255, 255, 255, 0.1) inset
-              `,
-            }}
-            whileHover={{ 
-              scale: 1.02,
-              background: "linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.12) 100%)",
-            }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          >
-            <span 
-              className="relative z-10 text-sm font-semibold text-white"
-              style={{ fontFamily: "Orbitron, sans-serif" }}
-            >
-              LOGIN
-            </span>
-          </motion.div>
-        </Link>
+          );
+        })}
       </motion.div>
 
       {/* Mobile Navigation */}
@@ -193,13 +179,48 @@ export function LandingNav() {
               }}
             >
               <div className="p-2">
-                {navItems.map((item, index) => (
-                  item.external ? (
+                {navItems.map((item, index) => {
+                  if (item.isRoute) {
+                    return (
+                      <Link key={item.label} to={item.href} onClick={() => setIsOpen(false)}>
+                        <motion.div
+                          className="block px-4 py-3 text-white/80 rounded-xl"
+                          style={{ fontFamily: "Orbitron, sans-serif" }}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          whileHover={{ background: "rgba(255, 255, 255, 0.1)" }}
+                        >
+                          {item.label}
+                        </motion.div>
+                      </Link>
+                    );
+                  }
+
+                  if (item.external) {
+                    return (
+                      <motion.a
+                        key={item.label}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block px-4 py-3 text-white/80 rounded-xl"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ background: "rgba(255, 255, 255, 0.1)" }}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {item.label}
+                      </motion.a>
+                    );
+                  }
+
+                  return (
                     <motion.a
                       key={item.label}
                       href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       className="block px-4 py-3 text-white/80 rounded-xl"
                       style={{ fontFamily: "Orbitron, sans-serif" }}
                       initial={{ opacity: 0, x: -10 }}
@@ -210,38 +231,8 @@ export function LandingNav() {
                     >
                       {item.label}
                     </motion.a>
-                  ) : (
-                    <motion.a
-                      key={item.label}
-                      href={item.href}
-                      className="block px-4 py-3 text-white/80 rounded-xl"
-                      style={{ fontFamily: "Orbitron, sans-serif" }}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      whileHover={{ background: "rgba(255, 255, 255, 0.1)" }}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {item.label}
-                    </motion.a>
-                  )
-                ))}
-                <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <motion.div
-                    className="mt-2 px-4 py-3 text-center text-white font-semibold rounded-xl"
-                    style={{ 
-                      fontFamily: "Orbitron, sans-serif",
-                      background: "linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%)",
-                      border: "1px solid rgba(255, 255, 255, 0.12)",
-                    }}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: navItems.length * 0.05 }}
-                    whileHover={{ background: "rgba(255, 255, 255, 0.15)" }}
-                  >
-                    LOGIN
-                  </motion.div>
-                </Link>
+                  );
+                })}
               </div>
             </motion.div>
           )}
