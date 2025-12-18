@@ -93,17 +93,31 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
       <div className="liquid-glass-card rounded-3xl overflow-hidden hover:bg-white/[0.06] transition-colors duration-300">
         {/* MODULO 1: HERO */}
         <div className="grid md:grid-cols-2 gap-0">
-          {/* Hero Image */}
-          <div className="relative h-64 md:h-96 overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-cyan-500/20"
-              style={{
-                backgroundImage: `url(${project.heroImage})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          {/* Hero Content */}
+          <div className="p-8 md:p-12 bg-black/40 flex flex-col justify-center">
+            <h4 
+              className="text-lg md:text-xl font-bold text-purple-400 mb-6"
+              style={{ fontFamily: "Orbitron, sans-serif" }}
+            >
+              AI Energy Operating System
+            </h4>
+            <div className="space-y-4 text-white/70 text-sm md:text-base leading-relaxed">
+              <p>
+                <span className="text-white font-semibold">Energizzo</span> è il sistema operativo intelligente che governa l'energia.
+                Una piattaforma avanzata che unisce intelligenza artificiale, automazione e controllo normativo per trasformare la gestione energetica in un ecosistema autonomo, scalabile e predittivo.
+              </p>
+              <p>
+                Dalla vendita al dispacciamento, dall'onboarding digitale alla ricezione e interpretazione automatica delle delibere, Energizzo coordina ogni flusso energetico e operativo in tempo reale.
+              </p>
+              <p>
+                Al centro del sistema opera <span className="text-purple-400 font-semibold">Max Power</span>, il cervello centrale di Energizzo:
+                un'intelligenza artificiale evoluta che osserva, decide e orchestra una rete di agenti specializzati, ognuno con un'identità, un ruolo e una funzione precisa.
+              </p>
+              <p className="text-white/90 italic mt-4">
+                Non un software.<br />
+                Un'intelligenza che governa l'energia.
+              </p>
+            </div>
           </div>
 
           {/* Hero Info */}
