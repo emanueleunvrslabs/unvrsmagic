@@ -3,7 +3,7 @@ import { ScrollReveal } from "./ScrollReveal";
 
 export function LandingClaim() {
   return (
-    <section className="relative py-32 bg-black overflow-hidden">
+    <section id="learn-more" className="relative py-32 bg-black overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="max-w-5xl text-left">
           <h2 className="font-orbitron text-3xl md:text-5xl lg:text-6xl font-semibold text-white mb-8 tracking-wide leading-tight">
