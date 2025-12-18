@@ -122,12 +122,7 @@ export function LandingReviews() {
       <div className="container mx-auto px-6">
         <div className="grid lg:grid-cols-[1fr_2fr] gap-12 items-start">
           <div>
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
+            <div>
               <p className="text-white/60 text-sm mb-4 tracking-wider" style={{ fontFamily: "Orbitron, sans-serif" }}>
                 What Our Clients Say
               </p>
@@ -137,7 +132,7 @@ export function LandingReviews() {
               <p className="text-white/60 leading-relaxed" style={{ fontFamily: "Orbitron, sans-serif" }}>
                 Our clients' success stories reflect our commitment to excellence. See how we've helped them achieve their digital transformation goals.
               </p>
-            </motion.div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] overflow-hidden">

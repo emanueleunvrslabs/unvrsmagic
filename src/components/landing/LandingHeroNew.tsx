@@ -1,6 +1,7 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
 
 const words = ["UNVRS", "LABS"];
 
@@ -66,11 +67,7 @@ export function LandingHeroNew() {
           <div className="flex flex-col items-center gap-12">
             {/* Title - Centered */}
             <div className="text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-              >
+              <div>
                 <p
                   className="text-white/60 text-sm mb-4 tracking-widest"
                   style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -125,21 +122,18 @@ export function LandingHeroNew() {
                   className="text-lg md:text-xl max-w-md mx-auto leading-relaxed"
                   style={{ fontFamily: "Orbitron, sans-serif" }}
                 />
-              </motion.div>
+              </div>
             </div>
 
             {/* Scroll indicator */}
-            <motion.a
+            <a
               href="#learn-more"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
               className="flex flex-col items-center cursor-pointer group mt-8"
             >
               <div className="liquid-glass-pill p-2 animate-bounce">
                 <ChevronDown size={20} className="text-white/70" />
               </div>
-            </motion.a>
+            </a>
           </div>
         </div>
       </section>
