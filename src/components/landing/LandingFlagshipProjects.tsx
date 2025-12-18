@@ -163,7 +163,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                 border: "1px solid rgba(168, 85, 247, 0.5)",
               }}
             >
-              Scopri di più
+              Richiedi una demo
             </motion.button>
           </div>
         </div>
