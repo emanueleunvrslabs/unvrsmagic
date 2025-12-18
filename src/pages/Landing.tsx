@@ -20,6 +20,7 @@ const Landing = () => {
       <LandingBrands />
       <LandingServicesNew />
       <LandingScrollText />
+      <LandingWorksNew />
       <LandingFlagshipProjects />
       <LandingReviews />
       <LandingStats />
