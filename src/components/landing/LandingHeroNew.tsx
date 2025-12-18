@@ -86,7 +86,7 @@ where businesses and AI evolve together.";
 
               <div className="relative h-[140px] md:h-[200px] mb-6 flex items-center justify-center">
                 <div className="relative inline-flex justify-center items-center" style={{ fontFamily: "Inter, sans-serif" }}>
-                  <AnimatePresence>
+                  <AnimatePresence mode="wait">
                     <motion.div
                       key={currentIndex}
                       className="flex"
