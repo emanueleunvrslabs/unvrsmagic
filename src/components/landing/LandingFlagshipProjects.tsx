@@ -41,32 +41,32 @@ const projects: FlagshipProject[] = [
     features: [
       {
         icon: <Zap className="w-6 h-6" />,
-        title: "Smart Dispatching",
+        title: "Dispacciamento Intelligente",
         description: "Gestione avanzata del dispacciamento energetico, con controllo dei flussi, supporto decisionale e ottimizzazione continua delle risorse in tempo reale.",
       },
       {
         icon: <Brain className="w-6 h-6" />,
-        title: "Central AI Orchestration",
+        title: "Orchestrazione AI Centrale",
         description: "Max Power coordina agenti autonomi specializzati in vendite, operations, compliance, customer care e amministrazione.",
       },
       {
         icon: <ScrollText className="w-6 h-6" />,
-        title: "Automatic Regulatory Intelligence",
+        title: "Intelligenza Normativa Automatica",
         description: "Ricezione, analisi e adattamento automatico alle delibere e agli aggiornamenti normativi. Il sistema evolve insieme alle regole.",
       },
       {
         icon: <Bot className="w-6 h-6" />,
-        title: "Autonomous Operations",
+        title: "Operazioni Autonome",
         description: "Onboarding digitale, gestione contratti, chiamate vocali AI, customer care e flussi amministrativi completamente automatizzati.",
       },
       {
         icon: <BarChart3 className="w-6 h-6" />,
-        title: "Predictive & Market Analytics",
+        title: "Analytics Predittive",
         description: "Modelli predittivi basati su AI per consumi, comportamenti, rischi e opportunità di mercato energetico.",
       },
       {
         icon: <Shield className="w-6 h-6" />,
-        title: "Compliance by Design",
+        title: "Compliance Nativa",
         description: "La conformità normativa è integrata nel DNA del sistema, non come modulo esterno ma come funzione nativa.",
       },
     ],
@@ -100,7 +100,16 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
       transition={{ duration: 0.8 }}
       className="w-full"
     >
-      <div className="liquid-glass-card rounded-3xl overflow-hidden max-w-5xl mx-auto">
+      <div className="liquid-glass-card rounded-3xl overflow-hidden max-w-5xl mx-auto relative">
+        {/* Italian Flag */}
+        <div className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full overflow-hidden border-2 border-white/20 shadow-lg">
+          <div className="flex h-full">
+            <div className="w-1/3 bg-green-500" />
+            <div className="w-1/3 bg-white" />
+            <div className="w-1/3 bg-red-500" />
+          </div>
+        </div>
+        
         {/* MODULO 1: HERO */}
         <div className="grid md:grid-cols-2 gap-0">
           {/* Hero Content */}
