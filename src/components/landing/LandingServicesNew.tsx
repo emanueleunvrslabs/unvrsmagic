@@ -1,6 +1,4 @@
 import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 
 const services = [
@@ -31,18 +29,16 @@ const services = [
 ];
 
 export function LandingServicesNew() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
-
   return (
-    <section id="services" ref={ref} className="py-32 bg-black relative overflow-hidden">
+    <section id="services" className="py-32 bg-black relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="mb-16"
         >
@@ -65,9 +61,9 @@ export function LandingServicesNew() {
             <motion.div
               key={service.title}
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
-              style={{ willChange: isInView ? 'auto' : 'transform, opacity' }}
             >
               <div className="liquid-glass-card liquid-glass-interactive liquid-glass-specular p-8 h-full group cursor-pointer">
                 <div className="relative z-10">
