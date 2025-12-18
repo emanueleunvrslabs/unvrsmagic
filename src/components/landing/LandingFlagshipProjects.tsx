@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Zap, TrendingUp, Shield, BarChart3, ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ShapeBlur } from "./ShapeBlur";
 
 interface ProjectFeature {
   icon: React.ReactNode;
@@ -91,14 +90,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
       transition={{ duration: 0.8 }}
       className="w-full"
     >
-      <ShapeBlur
-        className="liquid-glass-card rounded-3xl overflow-hidden"
-        shapeSize={1.2}
-        roundness={0.5}
-        borderSize={0.05}
-        circleSize={0.3}
-        circleEdge={1}
-      >
+      <div className="liquid-glass-card rounded-3xl overflow-hidden hover:bg-white/[0.06] transition-colors duration-300">
         {/* MODULO 1: HERO */}
         <div className="grid md:grid-cols-2 gap-0">
           {/* Hero Image */}
@@ -289,7 +281,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
             </div>
           </div>
         </div>
-      </ShapeBlur>
+      </div>
     </motion.div>
   );
 }
