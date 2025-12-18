@@ -82,28 +82,33 @@ where businesses and AI evolve together.";
 
               <div className="relative h-[140px] md:h-[200px] mb-6 flex items-center justify-center">
                 <div className="relative inline-flex justify-center items-center" style={{ fontFamily: "Inter, sans-serif" }}>
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="popLayout">
                     <motion.div
                       key={currentIndex}
-                      className="flex"
+                      className="flex absolute"
+                      initial={{ y: 80, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -80, opacity: 0 }}
+                      transition={{ 
+                        duration: 0.4,
+                        ease: [0.43, 0.13, 0.23, 0.96]
+                      }}
                     >
                       {letters.map((letter, index) => (
-                        <div key={index} className="relative inline-block overflow-y-hidden px-1">
-                          <motion.span
-                            initial={{ y: "100%" }}
-                            animate={{ y: "0%" }}
-                            exit={{ y: "-100%" }}
-                            transition={{ 
-                              duration: 0.5, 
-                              delay: index * 0.06,
-                              ease: [0.43, 0.13, 0.23, 0.96]
-                            }}
-                            className="inline-block text-[60px] md:text-[100px] lg:text-[140px] font-bold text-white tracking-tighter leading-none"
-                            style={{ fontFamily: "Orbitron, sans-serif" }}
-                          >
-                            {letter}
-                          </motion.span>
-                        </div>
+                        <motion.span
+                          key={index}
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ 
+                            duration: 0.3, 
+                            delay: index * 0.04,
+                            ease: [0.43, 0.13, 0.23, 0.96]
+                          }}
+                          className="inline-block text-[60px] md:text-[100px] lg:text-[140px] font-bold text-white tracking-tighter leading-none px-1"
+                          style={{ fontFamily: "Orbitron, sans-serif" }}
+                        >
+                          {letter}
+                        </motion.span>
                       ))}
                     </motion.div>
                   </AnimatePresence>
