@@ -203,7 +203,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
           >
             KEY FEATURES
           </h4>
-          <div className="overflow-x-auto pb-4 -mx-2">
+          <div className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
               {project.features.map((feature, index) => (
                 <motion.div
@@ -284,7 +284,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
           >
             AI AGENTS
           </h4>
-          <div className="overflow-x-auto pb-4 -mx-2">
+          <div className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
               {/* Max Power - Central Agent */}
               <div className="p-6 rounded-xl bg-lime-500/10 border border-lime-500/30 w-64 flex-shrink-0">
