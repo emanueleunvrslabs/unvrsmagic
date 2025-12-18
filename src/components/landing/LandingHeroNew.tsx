@@ -69,9 +69,9 @@ where businesses and AI evolve together.";
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left side - Title */}
-          <div className="text-center lg:text-left">
+        <div className="flex flex-col items-center gap-12">
+          {/* Title - Centered */}
+          <div className="text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -84,7 +84,7 @@ where businesses and AI evolve together.";
                 WELCOME TO
               </p>
 
-              <div className="relative h-[140px] md:h-[200px] mb-6 flex items-center justify-center lg:justify-start">
+              <div className="relative h-[140px] md:h-[200px] mb-6 flex items-center justify-center">
                 <div className="relative inline-flex justify-center items-center" style={{ fontFamily: "Inter, sans-serif" }}>
                   <AnimatePresence>
                     <motion.div
@@ -115,7 +115,7 @@ where businesses and AI evolve together.";
               </div>
 
               <p
-                className="text-white/70 text-lg md:text-xl max-w-md mx-auto lg:mx-0 leading-relaxed"
+                className="text-white/70 text-lg md:text-xl max-w-md mx-auto leading-relaxed"
                 style={{ fontFamily: "Orbitron, sans-serif" }}
               >
                 Coding the Universe, One Pixel at a Time
@@ -123,12 +123,12 @@ where businesses and AI evolve together.";
             </motion.div>
           </div>
 
-          {/* Right side - Liquid Glass Code Container */}
+          {/* Code Container - Centered below title */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="hidden lg:block"
+            className="w-full max-w-2xl"
           >
             <div className="liquid-glass-card liquid-glass-glow p-8 relative">
               {/* Window controls */}
