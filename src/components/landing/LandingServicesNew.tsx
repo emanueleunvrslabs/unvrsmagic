@@ -62,9 +62,9 @@ export function LandingServicesNew() {
             return (
               <div
                 key={service.title}
-                className="liquid-glass-card p-8 h-full group cursor-pointer hover:bg-white/[0.06] transition-colors duration-300"
+                className="liquid-glass-card p-8 h-full group cursor-pointer hover:bg-white/[0.06] transition-colors duration-300 flex flex-col"
               >
-                <div className="relative z-10">
+                <div className="relative z-10 flex flex-col h-full">
                   <h3
                     className="text-xl font-semibold text-white mb-4 group-hover:text-white/90 transition-colors duration-300"
                     style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -72,12 +72,12 @@ export function LandingServicesNew() {
                     {service.title}
                   </h3>
                   <p
-                    className="text-white/60 text-sm leading-relaxed mb-6"
+                    className="text-white/60 text-sm leading-relaxed flex-grow"
                     style={{ fontFamily: "Orbitron, sans-serif" }}
                   >
                     {service.description}
                   </p>
-                  <div className="flex items-center justify-center w-10 h-10 liquid-glass-pill group-hover:bg-white/10 transition-all overflow-hidden">
+                  <div className="flex items-center justify-center w-10 h-10 liquid-glass-pill group-hover:bg-white/10 transition-all overflow-hidden mt-6">
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
