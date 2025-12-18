@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -10,24 +10,46 @@ export function LandingNav() {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const navRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const location = useLocation();
 
   const navItems = [
-    { label: "HOME", href: "#hero" },
-    { label: "SERVICES", href: "#services" },
-    { label: "MAGIC AI", href: "#works" },
+    { label: "HOME", href: "#hero", sectionId: "hero" },
+    { label: "SERVICES", href: "#services", sectionId: "services" },
+    { label: "MAGIC AI", href: "#works", sectionId: "works" },
     { label: "CONTACT", href: "https://wa.me/34625976744", external: true },
     { label: "LOGIN", href: "/auth", isRoute: true },
   ];
 
-  // Track active section from URL hash
+  // Scroll spy - track which section is in view
   useEffect(() => {
-    const hash = location.hash || "#hero";
-    const index = navItems.findIndex(item => item.href === hash);
-    if (index !== -1) {
-      setActiveIndex(index);
-    }
-  }, [location.hash]);
+    const sectionIds = navItems
+      .filter(item => item.sectionId)
+      .map(item => item.sectionId!);
+
+    const observerCallback: IntersectionObserverCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = navItems.findIndex(item => item.sectionId === entry.target.id);
+          if (index !== -1) {
+            setActiveIndex(index);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, {
+      rootMargin: "-40% 0px -40% 0px",
+      threshold: 0,
+    });
+
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Determine which index to show indicator for (hover takes priority over active)
   const displayIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
