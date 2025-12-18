@@ -168,26 +168,26 @@ where businesses and AI evolve together.";
               </pre>
             </div>
           </motion.div>
-        </div>
 
-        {/* Scroll indicator */}
-        <motion.a
-          href="#learn-more"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer group"
-        >
-          <span
-            className="text-white/50 text-xs tracking-widest group-hover:text-white/80 transition-colors"
-            style={{ fontFamily: "Orbitron, sans-serif" }}
+          {/* Scroll indicator - below code card */}
+          <motion.a
+            href="#learn-more"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1 }}
+            className="flex flex-col items-center gap-2 cursor-pointer group mt-8"
           >
-            SCROLL
-          </span>
-          <div className="liquid-glass-pill p-2 animate-bounce">
-            <ChevronDown size={20} className="text-white/70" />
-          </div>
-        </motion.a>
+            <span
+              className="text-white/50 text-xs tracking-widest group-hover:text-white/80 transition-colors"
+              style={{ fontFamily: "Orbitron, sans-serif" }}
+            >
+              SCROLL
+            </span>
+            <div className="liquid-glass-pill p-2 animate-bounce">
+              <ChevronDown size={20} className="text-white/70" />
+            </div>
+          </motion.a>
+        </div>
       </div>
     </section>
   );
