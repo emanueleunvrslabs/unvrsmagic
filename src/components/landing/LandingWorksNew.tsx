@@ -99,7 +99,7 @@ export function LandingWorksNew() {
                     <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2 pr-20 group-hover:text-cyan-200 transition-colors" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                <h3 className="text-xl font-semibold text-white mb-2 pr-20 group-hover:text-white/90 transition-colors" style={{ fontFamily: "Orbitron, sans-serif" }}>
                   {project.name}
                 </h3>
                 <p className="text-white/60 text-sm" style={{ fontFamily: "Orbitron, sans-serif" }}>
