@@ -4,8 +4,42 @@ import { ChevronDown } from "lucide-react";
 
 const words = ["UNVRS", "LABS"];
 
+const useDecryptedText = (text: string, speed: number = 50) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const chars = "!@#$%^&*()_+-=[]{}|;:,.<>?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  
+  useEffect(() => {
+    let iteration = 0;
+    const interval = setInterval(() => {
+      setDisplayedText(
+        text
+          .split("")
+          .map((char, index) => {
+            if (char === " ") return " ";
+            if (index < iteration) {
+              return text[index];
+            }
+            return chars[Math.floor(Math.random() * chars.length)];
+          })
+          .join("")
+      );
+      
+      if (iteration >= text.length) {
+        clearInterval(interval);
+      }
+      
+      iteration += 1 / 3;
+    }, speed);
+    
+    return () => clearInterval(interval);
+  }, [text, speed]);
+  
+  return displayedText;
+};
+
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const decryptedSubtitle = useDecryptedText("Coding the Universe, One Pixel at a Time", 40);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -69,10 +103,10 @@ export function LandingHeroNew() {
               </div>
 
               <p
-                className="text-white/70 text-lg md:text-xl max-w-md mx-auto leading-relaxed"
+                className="text-white/70 text-lg md:text-xl max-w-md mx-auto leading-relaxed font-mono"
                 style={{ fontFamily: "Orbitron, sans-serif" }}
               >
-                Coding the Universe, One Pixel at a Time
+                {decryptedSubtitle}
               </p>
             </motion.div>
           </div>
