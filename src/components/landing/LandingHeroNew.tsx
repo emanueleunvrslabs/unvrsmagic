@@ -80,15 +80,8 @@ export function LandingHeroNew() {
 
                 <div className="relative h-[140px] md:h-[200px] mb-6 flex items-center justify-center">
                   <div 
-                    className="relative inline-flex justify-center items-center px-8 py-4 rounded-2xl"
-                    style={{ 
-                      fontFamily: "Orbitron, sans-serif",
-                      background: "rgba(255, 255, 255, 0.03)",
-                      backdropFilter: "blur(12px)",
-                      WebkitBackdropFilter: "blur(12px)",
-                      border: "1px solid rgba(255, 255, 255, 0.08)",
-                      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
-                    }}
+                    className="relative inline-flex justify-center items-center"
+                    style={{ fontFamily: "Orbitron, sans-serif" }}
                   >
                     <AnimatePresence mode="wait">
                       <motion.div
@@ -106,8 +99,16 @@ export function LandingHeroNew() {
                                 delay: index * 0.06,
                                 ease: [0.43, 0.13, 0.23, 0.96]
                               }}
-                              className="inline-block text-[60px] md:text-[100px] lg:text-[140px] font-bold text-white/90 tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.15)]"
-                              style={{ fontFamily: "Orbitron, sans-serif" }}
+                              className="inline-block text-[60px] md:text-[100px] lg:text-[140px] font-bold tracking-tighter leading-none"
+                              style={{ 
+                                fontFamily: "Orbitron, sans-serif",
+                                background: "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.15) 100%)",
+                                WebkitBackgroundClip: "text",
+                                backgroundClip: "text",
+                                color: "transparent",
+                                WebkitTextStroke: "1px rgba(255,255,255,0.1)",
+                                filter: "drop-shadow(0 0 20px rgba(255,255,255,0.2)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))",
+                              }}
                             >
                               {letter}
                             </motion.span>
