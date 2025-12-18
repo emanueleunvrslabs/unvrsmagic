@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 const words = ["UNVRS", "LABS"];
-const reelLetters = "UNVRSLABS";
 
 interface ShinyTextProps {
   text: string;
@@ -34,75 +33,12 @@ const ShinyText = ({ text, speed = 3, className = "", style }: ShinyTextProps) =
   );
 };
 
-// Slot machine reel component for a single letter
-const SlotReel = ({ 
-  targetLetter, 
-  delay, 
-  isActive 
-}: { 
-  targetLetter: string; 
-  delay: number;
-  isActive: boolean;
-}) => {
-  const [displayLetter, setDisplayLetter] = useState(targetLetter);
-  const [isSpinning, setIsSpinning] = useState(false);
-
-  useEffect(() => {
-    if (!isActive) return;
-    
-    setIsSpinning(true);
-    const spinDuration = 1500 + delay * 200;
-    const intervalSpeed = 100;
-    let elapsed = 0;
-    
-    const spinInterval = setInterval(() => {
-      elapsed += intervalSpeed;
-      setDisplayLetter(reelLetters[Math.floor(Math.random() * reelLetters.length)]);
-      
-      if (elapsed >= spinDuration) {
-        clearInterval(spinInterval);
-        setDisplayLetter(targetLetter);
-        setIsSpinning(false);
-      }
-    }, intervalSpeed);
-
-    return () => clearInterval(spinInterval);
-  }, [targetLetter, delay, isActive]);
-
-  return (
-    <div className="relative inline-block overflow-hidden px-1">
-      <motion.div
-        animate={isSpinning ? { 
-          y: [0, -10, 0, 10, 0],
-        } : { y: 0 }}
-        transition={isSpinning ? {
-          duration: 0.1,
-          repeat: Infinity,
-          ease: "linear"
-        } : {
-          duration: 0.3,
-          ease: [0.23, 1, 0.32, 1]
-        }}
-      >
-        <span
-          className="inline-block text-[60px] md:text-[100px] lg:text-[140px] font-bold text-white tracking-tighter leading-none"
-          style={{ fontFamily: "Orbitron, sans-serif" }}
-        >
-          {displayLetter}
-        </span>
-      </motion.div>
-    </div>
-  );
-};
-
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [triggerSpin, setTriggerSpin] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % words.length);
-      setTriggerSpin((prev) => prev + 1);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -143,15 +79,32 @@ export function LandingHeroNew() {
                 </p>
 
                 <div className="relative h-[140px] md:h-[200px] mb-6 flex items-center justify-center">
-                  <div className="relative inline-flex justify-center items-center">
-                    {letters.map((letter, index) => (
-                      <SlotReel
-                        key={`${triggerSpin}-${index}`}
-                        targetLetter={letter}
-                        delay={index}
-                        isActive={true}
-                      />
-                    ))}
+                  <div className="relative inline-flex justify-center items-center" style={{ fontFamily: "Inter, sans-serif" }}>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentIndex}
+                        className="flex"
+                      >
+                        {letters.map((letter, index) => (
+                          <div key={index} className="relative inline-block overflow-y-hidden px-1">
+                            <motion.span
+                              initial={{ y: "100%" }}
+                              animate={{ y: "0%" }}
+                              exit={{ y: "-100%" }}
+                              transition={{ 
+                                duration: 0.5, 
+                                delay: index * 0.06,
+                                ease: [0.43, 0.13, 0.23, 0.96]
+                              }}
+                              className="inline-block text-[60px] md:text-[100px] lg:text-[140px] font-bold text-white tracking-tighter leading-none"
+                              style={{ fontFamily: "Orbitron, sans-serif" }}
+                            >
+                              {letter}
+                            </motion.span>
+                          </div>
+                        ))}
+                      </motion.div>
+                    </AnimatePresence>
                   </div>
                 </div>
 
