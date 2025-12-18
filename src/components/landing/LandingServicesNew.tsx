@@ -53,7 +53,7 @@ export function LandingServicesNew() {
           {services.map((service) => (
             <div
               key={service.title}
-              className="liquid-glass-card liquid-glass-interactive p-8 h-full group cursor-pointer"
+              className="liquid-glass-card p-8 h-full group cursor-pointer hover:bg-white/[0.06] transition-colors duration-300"
             >
               <div className="relative z-10">
                 <h3
