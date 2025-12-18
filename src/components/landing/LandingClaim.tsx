@@ -57,9 +57,9 @@ export function LandingClaim() {
           
           <div className="max-w-3xl">
             <p className="font-orbitron text-base md:text-lg font-light tracking-wide leading-relaxed">
-              <ShinyText 
+            <ShinyText 
                 text="Specializing in developing enterprise software, custom applications, and AI integrations, delivering innovative and scalable solutions that create real value for businesses across all digital platforms."
-                speed={4}
+                speed={3}
               />
             </p>
           </div>
