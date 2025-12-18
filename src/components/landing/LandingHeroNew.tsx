@@ -39,7 +39,7 @@ const useDecryptedText = (text: string, speed: number = 50) => {
 
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const decryptedSubtitle = useDecryptedText("Coding the Universe, One Pixel at a Time", 40);
+  const decryptedSubtitle = useDecryptedText("Coding the Universe, One Pixel at a Time", 80);
 
   useEffect(() => {
     const interval = setInterval(() => {
