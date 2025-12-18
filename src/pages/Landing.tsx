@@ -22,8 +22,8 @@ const Landing = () => {
       <LandingScrollText />
       <LandingWorksNew />
       <LandingFlagshipProjects />
-      <LandingReviews />
       <LandingStats />
+      <LandingReviews />
       <LandingCTANew />
       <LandingFooterNew />
     </div>
