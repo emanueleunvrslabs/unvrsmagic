@@ -102,7 +102,7 @@ where businesses and AI evolve together.";
                               delay: index * 0.06,
                               ease: [0.43, 0.13, 0.23, 0.96]
                             }}
-                            className="inline-block text-[60px] md:text-[100px] lg:text-[140px] font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent tracking-tighter leading-none"
+                            className="inline-block text-[60px] md:text-[100px] lg:text-[140px] font-bold text-white tracking-tighter leading-none"
                             style={{ fontFamily: "Orbitron, sans-serif" }}
                           >
                             {letter}
