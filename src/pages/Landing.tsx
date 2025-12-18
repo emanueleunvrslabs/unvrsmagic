@@ -4,7 +4,6 @@ import { LandingBrands } from "@/components/landing/LandingBrands";
 import { LandingClaim } from "@/components/landing/LandingClaim";
 import { LandingWorksNew } from "@/components/landing/LandingWorksNew";
 import { LandingServicesNew } from "@/components/landing/LandingServicesNew";
-import { LandingScrollText } from "@/components/landing/LandingScrollText";
 import { LandingReviews } from "@/components/landing/LandingReviews";
 import { LandingStats } from "@/components/landing/LandingStats";
 import { LandingCTANew } from "@/components/landing/LandingCTANew";
@@ -18,7 +17,6 @@ const Landing = () => {
       <LandingClaim />
       <LandingBrands />
       <LandingServicesNew />
-      <LandingScrollText />
       <LandingWorksNew />
       <LandingReviews />
       <LandingStats />
