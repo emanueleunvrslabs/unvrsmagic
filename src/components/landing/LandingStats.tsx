@@ -1,5 +1,6 @@
 import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef } from "react";
+import { ShapeBlur } from "./ShapeBlur";
 
 interface StatProps {
   value: number;
@@ -45,9 +46,15 @@ function StatItem({ value, label, suffix }: StatProps) {
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.8 }}
-      className="liquid-glass-card p-8 text-center"
     >
-      <div className="relative z-10">
+      <ShapeBlur
+        className="liquid-glass-card p-8 text-center rounded-2xl overflow-hidden"
+        shapeSize={1.0}
+        roundness={0.5}
+        borderSize={0.05}
+        circleSize={0.25}
+        circleEdge={1}
+      >
         <div
           className="text-5xl md:text-6xl font-bold text-white mb-4"
           style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -60,7 +67,7 @@ function StatItem({ value, label, suffix }: StatProps) {
         >
           {label}
         </p>
-      </div>
+      </ShapeBlur>
     </motion.div>
   );
 }
