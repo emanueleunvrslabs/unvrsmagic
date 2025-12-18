@@ -286,9 +286,6 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-4 relative overflow-hidden">
-      {/* Background glow effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-[150px] opacity-20 bg-lime-500 pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-[150px] opacity-10 bg-purple-500 pointer-events-none" />
 
       <header className="fixed top-6 left-6 z-50 flex items-center gap-3">
         <Link to="/" className="flex items-center gap-3 group">
