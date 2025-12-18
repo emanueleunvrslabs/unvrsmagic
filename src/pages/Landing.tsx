@@ -8,6 +8,7 @@ import { LandingReviews } from "@/components/landing/LandingReviews";
 import { LandingStats } from "@/components/landing/LandingStats";
 import { LandingCTANew } from "@/components/landing/LandingCTANew";
 import { LandingFooterNew } from "@/components/landing/LandingFooterNew";
+import { LandingFlagshipProjects } from "@/components/landing/LandingFlagshipProjects";
 
 const Landing = () => {
   return (
@@ -18,6 +19,7 @@ const Landing = () => {
       <LandingBrands />
       <LandingServicesNew />
       <LandingWorksNew />
+      <LandingFlagshipProjects />
       <LandingReviews />
       <LandingStats />
       <LandingCTANew />
