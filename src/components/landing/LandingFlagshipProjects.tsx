@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Zap, TrendingUp, Shield, BarChart3, ChevronLeft, ChevronRight } from "lucide-react";
+import { Zap, Brain, ScrollText, Bot, BarChart3, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 
 interface ProjectFeature {
@@ -41,23 +41,33 @@ const projects: FlagshipProject[] = [
     features: [
       {
         icon: <Zap className="w-6 h-6" />,
-        title: "Real-time Monitoring",
-        description: "Monitoraggio in tempo reale dei consumi",
+        title: "Smart Dispatching",
+        description: "Gestione avanzata del dispacciamento energetico, con controllo dei flussi, supporto decisionale e ottimizzazione continua delle risorse in tempo reale.",
       },
       {
-        icon: <TrendingUp className="w-6 h-6" />,
-        title: "AI Analytics",
-        description: "Analisi predittiva con intelligenza artificiale",
+        icon: <Brain className="w-6 h-6" />,
+        title: "Central AI Orchestration",
+        description: "Max Power coordina agenti autonomi specializzati in vendite, operations, compliance, customer care e amministrazione.",
       },
       {
-        icon: <Shield className="w-6 h-6" />,
-        title: "Compliance",
-        description: "Conformità normativa automatizzata",
+        icon: <ScrollText className="w-6 h-6" />,
+        title: "Automatic Regulatory Intelligence",
+        description: "Ricezione, analisi e adattamento automatico alle delibere e agli aggiornamenti normativi. Il sistema evolve insieme alle regole.",
+      },
+      {
+        icon: <Bot className="w-6 h-6" />,
+        title: "Autonomous Operations",
+        description: "Onboarding digitale, gestione contratti, chiamate vocali AI, customer care e flussi amministrativi completamente automatizzati.",
       },
       {
         icon: <BarChart3 className="w-6 h-6" />,
-        title: "Reporting",
-        description: "Report dettagliati e personalizzabili",
+        title: "Predictive & Market Analytics",
+        description: "Modelli predittivi basati su AI per consumi, comportamenti, rischi e opportunità di mercato energetico.",
+      },
+      {
+        icon: <Shield className="w-6 h-6" />,
+        title: "Compliance by Design",
+        description: "La conformità normativa è integrata nel DNA del sistema, non come modulo esterno ma come funzione nativa.",
       },
     ],
     gallery: [
@@ -176,7 +186,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
           >
             KEY FEATURES
           </h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {project.features.map((feature, index) => (
               <motion.div
                 key={feature.title}
