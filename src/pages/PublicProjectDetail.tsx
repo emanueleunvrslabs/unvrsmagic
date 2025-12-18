@@ -174,7 +174,7 @@ export default function PublicProjectDetail() {
 
   return (
     <div className="min-h-screen bg-black">
-      <LandingNav showBack />
+      <LandingNav showBack backTo="/#works" />
 
       {/* Hero Section with Liquid Glass */}
       <section className="pt-32 pb-20 bg-black relative overflow-hidden">
