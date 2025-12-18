@@ -100,7 +100,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
       transition={{ duration: 0.8 }}
       className="w-full"
     >
-      <div className="liquid-glass-card rounded-3xl overflow-hidden">
+      <div className="liquid-glass-card rounded-3xl overflow-hidden max-w-5xl mx-auto">
         {/* MODULO 1: HERO */}
         <div className="grid md:grid-cols-2 gap-0">
           {/* Hero Content */}
