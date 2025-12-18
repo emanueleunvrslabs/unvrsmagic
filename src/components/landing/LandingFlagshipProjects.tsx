@@ -33,8 +33,8 @@ const projects: FlagshipProject[] = [
   {
     id: "energizzo",
     name: "Energizzo",
-    tagline: "Smart Energy Management",
-    description: "Piattaforma innovativa per la gestione intelligente dell'energia. Monitora, analizza e ottimizza i consumi energetici in tempo reale.",
+    tagline: "AI Energy Operating System",
+    description: "Il sistema operativo intelligente che governa l'energia. Una piattaforma che unisce AI, automazione e controllo normativo.",
     heroImage: "/images/energizzo-hero.jpg",
     status: "Active",
     year: "2024",
