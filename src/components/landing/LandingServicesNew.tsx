@@ -1,36 +1,66 @@
-import { ArrowUpRight, Brain, Code, Smartphone, Cloud, Lightbulb, Cog } from "lucide-react";
-import { motion } from "framer-motion";
+import { Brain, Code, Smartphone, Cloud, Lightbulb, Cog, LucideIcon } from "lucide-react";
+import { motion, TargetAndTransition } from "framer-motion";
 
-const services = [
+interface ServiceItem {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  animation: TargetAndTransition;
+}
+
+const services: ServiceItem[] = [
   {
     title: "AI Integration",
     description: "Seamlessly integrate cutting-edge AI solutions into your existing infrastructure for enhanced automation and insights.",
     icon: Brain,
+    animation: {
+      scale: [1, 1.1, 1],
+      opacity: [0.6, 1, 0.6],
+    },
   },
   {
     title: "Custom Software",
     description: "Tailored enterprise applications built from the ground up to match your unique business requirements.",
     icon: Code,
+    animation: {
+      x: [-2, 2, -2],
+      opacity: [0.6, 1, 0.6],
+    },
   },
   {
     title: "Mobile Applications",
     description: "Native and cross-platform mobile solutions that deliver exceptional user experiences.",
     icon: Smartphone,
+    animation: {
+      rotate: [-5, 5, -5],
+      opacity: [0.6, 1, 0.6],
+    },
   },
   {
     title: "Cloud Architecture",
     description: "Design and implement scalable cloud infrastructure that grows with your business needs.",
     icon: Cloud,
+    animation: {
+      y: [-2, 2, -2],
+      opacity: [0.6, 1, 0.6],
+    },
   },
   {
     title: "Consulting & Strategy",
     description: "Expert guidance on digital transformation and technology roadmap planning.",
     icon: Lightbulb,
+    animation: {
+      scale: [1, 1.15, 1],
+      filter: ["brightness(1)", "brightness(1.3)", "brightness(1)"],
+    },
   },
   {
     title: "DevOps & Automation",
     description: "Streamline your development pipeline with modern DevOps practices and automation.",
     icon: Cog,
+    animation: {
+      rotate: [0, 360],
+    },
   },
 ];
 
@@ -79,11 +109,14 @@ export function LandingServicesNew() {
                   </p>
                   <div className="flex items-center justify-center w-10 h-10 liquid-glass-pill group-hover:bg-white/10 transition-all overflow-hidden mt-6">
                     <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                      className="group-hover:scale-110 transition-transform duration-300"
+                      animate={service.animation}
+                      transition={{ 
+                        duration: service.title === "DevOps & Automation" ? 4 : 2,
+                        repeat: Infinity, 
+                        ease: service.title === "DevOps & Automation" ? "linear" : "easeInOut",
+                      }}
                     >
-                      <IconComponent size={18} className="text-white/60 group-hover:text-white transition-colors duration-300" />
+                      <IconComponent size={18} className="text-white/80" />
                     </motion.div>
                   </div>
                 </div>
