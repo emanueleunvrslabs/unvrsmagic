@@ -1,6 +1,6 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { Zap, Brain, ScrollText, Bot, BarChart3, Shield, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { Zap, Brain, ScrollText, Bot, BarChart3, Shield, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 
 interface ProjectFeature {
@@ -88,6 +88,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const scrollPrev = () => emblaApi?.scrollPrev();
   const scrollNext = () => emblaApi?.scrollNext();
@@ -195,239 +196,273 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
           </div>
         </div>
 
-        {/* MODULO 2: KEY FEATURES - Horizontal Scroll */}
-        <div className="border-t border-white/10 p-8 md:p-12">
-          <h4 
-            className="text-sm tracking-[0.2em] text-white/50 mb-6"
-            style={{ fontFamily: "Orbitron, sans-serif" }}
+        {/* Expand/Collapse Button */}
+        <div className="border-t border-white/10 p-4">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full flex items-center justify-center gap-2 py-3 text-white/60 hover:text-white transition-colors"
           >
-            KEY FEATURES
-          </h4>
-          <div className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
-              {project.features.map((feature, index) => (
-                <motion.div
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-72 flex-shrink-0"
-                >
-                  <div className="text-lime-400 mb-3">{feature.icon}</div>
-                  <h5 
-                    className="text-white font-medium mb-2 text-base"
-                    style={{ fontFamily: "Orbitron, sans-serif" }}
-                  >
-                    {feature.title}
-                  </h5>
-                  <p className="text-white/60 text-sm leading-relaxed">{feature.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+            <span 
+              className="text-sm tracking-[0.1em]"
+              style={{ fontFamily: "Orbitron, sans-serif" }}
+            >
+              {isExpanded ? "NASCONDI DETTAGLI" : "SCOPRI DI PIÙ"}
+            </span>
+            <motion.div
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChevronDown size={20} />
+            </motion.div>
+          </button>
         </div>
 
-        {/* MODULO 3: IMAGE GALLERY */}
-        <div className="border-t border-white/10 p-8 md:p-12">
-          <h4 
-            className="text-sm tracking-[0.2em] text-white/50 mb-6"
-            style={{ fontFamily: "Orbitron, sans-serif" }}
-          >
-            GALLERY
-          </h4>
-          <div className="relative">
-            <div ref={emblaRef} className="overflow-hidden rounded-xl">
-              <div className="flex">
-                {project.gallery.map((image, index) => (
-                  <div
-                    key={index}
-                    className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] px-2"
-                  >
-                    <div 
-                      className="aspect-video rounded-xl bg-gradient-to-br from-lime-500/20 to-green-500/20 overflow-hidden"
-                      style={{
-                        backgroundImage: `url(${image.src})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
-                    >
-                      <div className="w-full h-full flex items-center justify-center text-white/30 text-sm">
-                        {image.alt}
-                      </div>
+        {/* Collapsible Content */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              {/* MODULO 2: KEY FEATURES - Horizontal Scroll */}
+              <div className="border-t border-white/10 p-8 md:p-12">
+                <h4 
+                  className="text-sm tracking-[0.2em] text-white/50 mb-6"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
+                  KEY FEATURES
+                </h4>
+                <div className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                  <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
+                    {project.features.map((feature, index) => (
+                      <motion.div
+                        key={feature.title}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                        className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-72 flex-shrink-0"
+                      >
+                        <div className="text-lime-400 mb-3">{feature.icon}</div>
+                        <h5 
+                          className="text-white font-medium mb-2 text-base"
+                          style={{ fontFamily: "Orbitron, sans-serif" }}
+                        >
+                          {feature.title}
+                        </h5>
+                        <p className="text-white/60 text-sm leading-relaxed">{feature.description}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* MODULO 3: IMAGE GALLERY */}
+              <div className="border-t border-white/10 p-8 md:p-12">
+                <h4 
+                  className="text-sm tracking-[0.2em] text-white/50 mb-6"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
+                  GALLERY
+                </h4>
+                <div className="relative">
+                  <div ref={emblaRef} className="overflow-hidden rounded-xl">
+                    <div className="flex">
+                      {project.gallery.map((image, index) => (
+                        <div
+                          key={index}
+                          className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] px-2"
+                        >
+                          <div 
+                            className="aspect-video rounded-xl bg-gradient-to-br from-lime-500/20 to-green-500/20 overflow-hidden"
+                            style={{
+                              backgroundImage: `url(${image.src})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }}
+                          >
+                            <div className="w-full h-full flex items-center justify-center text-white/30 text-sm">
+                              {image.alt}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Carousel Controls */}
-            <button
-              onClick={scrollPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              onClick={scrollNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </div>
-
-        {/* MODULO 4: AI AGENTS - Horizontal Scroll */}
-        <div className="border-t border-white/10 p-8 md:p-12">
-          <h4 
-            className="text-sm tracking-[0.2em] text-white/50 mb-6"
-            style={{ fontFamily: "Orbitron, sans-serif" }}
-          >
-            AI AGENTS
-          </h4>
-          <div className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
-              {/* Max Power - Central Agent */}
-              <div className="p-6 rounded-xl bg-lime-500/10 border border-lime-500/30 w-64 flex-shrink-0">
-                <span className="text-3xl mb-3 block">🧠</span>
-                <h5 
-                  className="text-lg font-bold text-lime-400 mb-1"
-                  style={{ fontFamily: "Orbitron, sans-serif" }}
-                >
-                  Max Power
-                </h5>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Central Intelligence Core</p>
-                <p className="text-white/70 text-sm">Il cervello che orchestra tutto.</p>
-              </div>
-
-              {/* Ignition */}
-              <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
-                <span className="text-2xl mb-3 block">🚀</span>
-                <h5 
-                  className="text-base font-bold text-white mb-1"
-                  style={{ fontFamily: "Orbitron, sans-serif" }}
-                >
-                  Ignition
-                </h5>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Onboarding Agent</p>
-                <p className="text-white/60 text-sm leading-relaxed">Attiva il cliente, avvia il flusso, accende il sistema.</p>
-              </div>
-
-              {/* Switchboard */}
-              <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
-                <span className="text-2xl mb-3 block">☎️</span>
-                <h5 
-                  className="text-base font-bold text-white mb-1"
-                  style={{ fontFamily: "Orbitron, sans-serif" }}
-                >
-                  Switchboard
-                </h5>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Centralino AI / Voice Agent</p>
-                <p className="text-white/60 text-sm leading-relaxed">Gestisce chiamate, instrada richieste, parla con clienti e operatori.</p>
-              </div>
-
-              {/* Halo */}
-              <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
-                <span className="text-2xl mb-3 block">👤</span>
-                <h5 
-                  className="text-base font-bold text-white mb-1"
-                  style={{ fontFamily: "Orbitron, sans-serif" }}
-                >
-                  Halo
-                </h5>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Personal AI Agent (HLO)</p>
-                <p className="text-white/60 text-sm leading-relaxed">L'agente personale di ogni cliente. Conosce dati, contratti, storico.</p>
-              </div>
-
-              {/* Ledger */}
-              <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
-                <span className="text-2xl mb-3 block">💳</span>
-                <h5 
-                  className="text-base font-bold text-white mb-1"
-                  style={{ fontFamily: "Orbitron, sans-serif" }}
-                >
-                  Ledger
-                </h5>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Billing & Invoicing Agent</p>
-                <p className="text-white/60 text-sm leading-relaxed">Fatture, note di credito, insoluti, riconciliazioni.</p>
-              </div>
-
-              {/* Gridmind */}
-              <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
-                <span className="text-2xl mb-3 block">⚡</span>
-                <h5 
-                  className="text-base font-bold text-white mb-1"
-                  style={{ fontFamily: "Orbitron, sans-serif" }}
-                >
-                  Gridmind
-                </h5>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Dispatching Agent</p>
-                <p className="text-white/60 text-sm leading-relaxed">Intelligenza dedicata al dispacciamento energetico.</p>
-              </div>
-
-              {/* Oracle */}
-              <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
-                <span className="text-2xl mb-3 block">📜</span>
-                <h5 
-                  className="text-base font-bold text-white mb-1"
-                  style={{ fontFamily: "Orbitron, sans-serif" }}
-                >
-                  Oracle
-                </h5>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Regulatory & Delibere Agent</p>
-                <p className="text-white/60 text-sm leading-relaxed">Riceve, interpreta e traduce delibere e normative.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* MODULO 5: TECHNOLOGIES & STATS */}
-        <div className="border-t border-white/10 p-8 md:p-12">
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Tech Stack */}
-            <div>
-              <h4 
-                className="text-sm tracking-[0.2em] text-white/50 mb-4"
-                style={{ fontFamily: "Orbitron, sans-serif" }}
-              >
-                TECH STACK
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {project.technologies.map((tech) => (
-                  <span
-                    key={tech}
-                    className="px-4 py-2 rounded-full text-xs font-medium bg-white/5 border border-white/20 text-white/70"
-                    style={{ fontFamily: "Orbitron, sans-serif" }}
+                  
+                  {/* Carousel Controls */}
+                  <button
+                    onClick={scrollPrev}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
                   >
-                    {tech}
-                  </span>
-                ))}
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    onClick={scrollNext}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Stats */}
-            <div>
-              <h4 
-                className="text-sm tracking-[0.2em] text-white/50 mb-4"
-                style={{ fontFamily: "Orbitron, sans-serif" }}
-              >
-                STATS
-              </h4>
-              <div className="flex gap-8">
-                {project.stats.map((stat) => (
-                  <div key={stat.label}>
-                    <div 
-                      className="text-2xl font-bold text-white"
+              {/* MODULO 4: AI AGENTS - Horizontal Scroll */}
+              <div className="border-t border-white/10 p-8 md:p-12">
+                <h4 
+                  className="text-sm tracking-[0.2em] text-white/50 mb-6"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
+                  AI AGENTS
+                </h4>
+                <div className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                  <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
+                    {/* Max Power - Central Agent */}
+                    <div className="p-6 rounded-xl bg-lime-500/10 border border-lime-500/30 w-64 flex-shrink-0">
+                      <span className="text-3xl mb-3 block">🧠</span>
+                      <h5 
+                        className="text-lg font-bold text-lime-400 mb-1"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                      >
+                        Max Power
+                      </h5>
+                      <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Central Intelligence Core</p>
+                      <p className="text-white/70 text-sm">Il cervello che orchestra tutto.</p>
+                    </div>
+
+                    {/* Ignition */}
+                    <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
+                      <span className="text-2xl mb-3 block">🚀</span>
+                      <h5 
+                        className="text-base font-bold text-white mb-1"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                      >
+                        Ignition
+                      </h5>
+                      <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Onboarding Agent</p>
+                      <p className="text-white/60 text-sm leading-relaxed">Attiva il cliente, avvia il flusso, accende il sistema.</p>
+                    </div>
+
+                    {/* Switchboard */}
+                    <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
+                      <span className="text-2xl mb-3 block">☎️</span>
+                      <h5 
+                        className="text-base font-bold text-white mb-1"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                      >
+                        Switchboard
+                      </h5>
+                      <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Centralino AI / Voice Agent</p>
+                      <p className="text-white/60 text-sm leading-relaxed">Gestisce chiamate, instrada richieste, parla con clienti e operatori.</p>
+                    </div>
+
+                    {/* Halo */}
+                    <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
+                      <span className="text-2xl mb-3 block">👤</span>
+                      <h5 
+                        className="text-base font-bold text-white mb-1"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                      >
+                        Halo
+                      </h5>
+                      <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Personal AI Agent (HLO)</p>
+                      <p className="text-white/60 text-sm leading-relaxed">L'agente personale di ogni cliente. Conosce dati, contratti, storico.</p>
+                    </div>
+
+                    {/* Ledger */}
+                    <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
+                      <span className="text-2xl mb-3 block">💳</span>
+                      <h5 
+                        className="text-base font-bold text-white mb-1"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                      >
+                        Ledger
+                      </h5>
+                      <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Billing & Invoicing Agent</p>
+                      <p className="text-white/60 text-sm leading-relaxed">Fatture, note di credito, insoluti, riconciliazioni.</p>
+                    </div>
+
+                    {/* Gridmind */}
+                    <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
+                      <span className="text-2xl mb-3 block">⚡</span>
+                      <h5 
+                        className="text-base font-bold text-white mb-1"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                      >
+                        Gridmind
+                      </h5>
+                      <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Dispatching Agent</p>
+                      <p className="text-white/60 text-sm leading-relaxed">Intelligenza dedicata al dispacciamento energetico.</p>
+                    </div>
+
+                    {/* Oracle */}
+                    <div className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors w-64 flex-shrink-0">
+                      <span className="text-2xl mb-3 block">📜</span>
+                      <h5 
+                        className="text-base font-bold text-white mb-1"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                      >
+                        Oracle
+                      </h5>
+                      <p className="text-white/50 text-xs uppercase tracking-widest mb-2">Regulatory & Delibere Agent</p>
+                      <p className="text-white/60 text-sm leading-relaxed">Riceve, interpreta e traduce delibere e normative.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* MODULO 5: TECHNOLOGIES & STATS */}
+              <div className="border-t border-white/10 p-8 md:p-12">
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Tech Stack */}
+                  <div>
+                    <h4 
+                      className="text-sm tracking-[0.2em] text-white/50 mb-4"
                       style={{ fontFamily: "Orbitron, sans-serif" }}
                     >
-                      {stat.value}
+                      TECH STACK
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {project.technologies.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-4 py-2 rounded-full text-xs font-medium bg-white/5 border border-white/20 text-white/70"
+                          style={{ fontFamily: "Orbitron, sans-serif" }}
+                        >
+                          {tech}
+                        </span>
+                      ))}
                     </div>
-                    <div className="text-xs text-white/50">{stat.label}</div>
                   </div>
-                ))}
+
+                  {/* Stats */}
+                  <div>
+                    <h4 
+                      className="text-sm tracking-[0.2em] text-white/50 mb-4"
+                      style={{ fontFamily: "Orbitron, sans-serif" }}
+                    >
+                      STATS
+                    </h4>
+                    <div className="flex gap-8">
+                      {project.stats.map((stat) => (
+                        <div key={stat.label}>
+                          <div 
+                            className="text-2xl font-bold text-white"
+                            style={{ fontFamily: "Orbitron, sans-serif" }}
+                          >
+                            {stat.value}
+                          </div>
+                          <div className="text-xs text-white/50">{stat.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
