@@ -193,16 +193,16 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
               >
                 <div className="text-lime-400 mb-3">{feature.icon}</div>
                 <h5 
-                  className="text-white font-medium mb-1 text-sm"
+                  className="text-white font-medium mb-2 text-base"
                   style={{ fontFamily: "Orbitron, sans-serif" }}
                 >
                   {feature.title}
                 </h5>
-                <p className="text-white/50 text-xs">{feature.description}</p>
+                <p className="text-white/60 text-sm leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
