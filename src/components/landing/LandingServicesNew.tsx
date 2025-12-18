@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
 const services = [
@@ -35,13 +34,7 @@ export function LandingServicesNew() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-16"
-        >
+        <div className="mb-16">
           <p
             className="text-white/60 text-sm mb-4 tracking-wider"
             style={{ fontFamily: "Orbitron, sans-serif" }}
@@ -54,37 +47,32 @@ export function LandingServicesNew() {
           >
             Services
           </h2>
-        </motion.div>
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service, index) => (
-            <motion.div
+          {services.map((service) => (
+            <div
               key={service.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
+              className="liquid-glass-card liquid-glass-interactive p-8 h-full group cursor-pointer"
             >
-              <div className="liquid-glass-card liquid-glass-interactive liquid-glass-specular p-8 h-full group cursor-pointer">
-                <div className="relative z-10">
-                  <h3
-                    className="text-xl font-semibold text-white mb-4 group-hover:text-cyan-200 transition-colors duration-300"
-                    style={{ fontFamily: "Orbitron, sans-serif" }}
-                  >
-                    {service.title}
-                  </h3>
-                  <p
-                    className="text-white/60 text-sm leading-relaxed mb-6"
-                    style={{ fontFamily: "Orbitron, sans-serif" }}
-                  >
-                    {service.description}
-                  </p>
-                  <div className="flex items-center justify-center w-10 h-10 liquid-glass-pill group-hover:bg-white/10 transition-all">
-                    <ArrowUpRight size={18} className="text-white/60 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                  </div>
+              <div className="relative z-10">
+                <h3
+                  className="text-xl font-semibold text-white mb-4 group-hover:text-cyan-200 transition-colors duration-300"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
+                  {service.title}
+                </h3>
+                <p
+                  className="text-white/60 text-sm leading-relaxed mb-6"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
+                  {service.description}
+                </p>
+                <div className="flex items-center justify-center w-10 h-10 liquid-glass-pill group-hover:bg-white/10 transition-all">
+                  <ArrowUpRight size={18} className="text-white/60 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
