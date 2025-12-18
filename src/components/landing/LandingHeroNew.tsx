@@ -2,52 +2,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-const useTypewriter = (text: string, baseSpeed: number = 50) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const currentChar = text[currentIndex];
-      let speed = baseSpeed + Math.random() * 40;
-      
-      if ([',', '.', ';', '\n', '{', '}'].includes(currentChar)) {
-        speed += 100 + Math.random() * 200;
-      }
-      if (currentChar === ' ') {
-        speed += 20 + Math.random() * 30;
-      }
-      
-      const timeout = setTimeout(() => {
-        setDisplayedText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }, speed);
-      
-      return () => clearTimeout(timeout);
-    } else {
-      const resetTimeout = setTimeout(() => {
-        setDisplayedText("");
-        setCurrentIndex(0);
-      }, 2000);
-      
-      return () => clearTimeout(resetTimeout);
-    }
-  }, [currentIndex, text, baseSpeed]);
-
-  return displayedText;
-};
-
 const words = ["UNVRS", "LABS"];
 
 export function LandingHeroNew() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  
-  const fullCode = `function buildUniverse() {
-  return "Beyond code, we build universes
-where businesses and AI evolve together.";
-}`;
-  
-  const typewriterText = useTypewriter(fullCode, 30);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -119,48 +77,12 @@ where businesses and AI evolve together.";
             </motion.div>
           </div>
 
-          {/* Code Container - Centered below title */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="w-full max-w-2xl"
-          >
-            <pre
-              className="font-mono text-sm md:text-base text-white/90 whitespace-pre-wrap leading-relaxed text-center"
-              style={{ fontFamily: "Orbitron, sans-serif" }}
-            >
-              <code>
-                {(() => {
-                  const lines = typewriterText.split('\n');
-                  return lines.map((line, lineIdx) => (
-                    <div key={lineIdx}>
-                      {line.split(/(\bfunction\b|\breturn\b|buildUniverse|"[^"]*")/).map((token, tokenIdx) => {
-                        if (token === 'function') {
-                          return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
-                        } else if (token === 'return') {
-                          return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
-                        } else if (token === 'buildUniverse') {
-                          return <span key={tokenIdx} style={{ color: '#37FF8B' }}>{token}</span>;
-                        } else if (token.startsWith('"')) {
-                          return <span key={tokenIdx} className="text-cyan-400">{token}</span>;
-                        }
-                        return <span key={tokenIdx} className="text-white/90">{token}</span>;
-                      })}
-                    </div>
-                  ));
-                })()}
-                <span className="inline-block w-2 h-5 bg-white/80 animate-pulse ml-1" />
-              </code>
-            </pre>
-          </motion.div>
-
-          {/* Scroll indicator - below code card */}
+          {/* Scroll indicator */}
           <motion.a
             href="#learn-more"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
             className="flex flex-col items-center gap-2 cursor-pointer group mt-8"
           >
             <span
