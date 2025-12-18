@@ -285,47 +285,83 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-primary/5 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-black p-4 relative overflow-hidden">
+      {/* Background glow effects */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-[150px] opacity-20 bg-lime-500 pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-[150px] opacity-10 bg-purple-500 pointer-events-none" />
+
       <header className="fixed top-6 left-6 z-50 flex items-center gap-3">
         <Link to="/" className="flex items-center gap-3 group">
           <div className="w-12 h-12">
             <img src={logo} alt="Unvrs Labs" className="w-full h-full object-contain" />
           </div>
-          <span className="text-xl font-orbitron font-semibold tracking-tight text-white transition-opacity group-hover:opacity-80">
+          <span 
+            className="text-xl font-semibold tracking-tight text-white transition-opacity group-hover:opacity-80"
+            style={{ fontFamily: "Orbitron, sans-serif" }}
+          >
             UNVRS LABS
           </span>
         </Link>
       </header>
-      <Card className="w-full max-w-sm relative">
-        <MorseLED />
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center font-orbitron">
+
+      {/* Liquid Glass Card */}
+      <div 
+        className="w-full max-w-md relative rounded-3xl p-8"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          border: "1px solid rgba(255,255,255,0.15)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 0 rgba(255,255,255,0.15)",
+        }}
+      >
+        {/* LED Indicator */}
+        <div className="flex justify-center mb-6">
+          <MorseLED />
+        </div>
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 
+            className="text-2xl font-bold text-white mb-2"
+            style={{ fontFamily: "Orbitron, sans-serif" }}
+          >
             {step === "username" ? "Choose Username" : "Login with WhatsApp"}
-          </CardTitle>
-          <CardDescription className="text-center font-orbitron">
+          </h1>
+          <p 
+            className="text-white/60 text-sm"
+            style={{ fontFamily: "Orbitron, sans-serif" }}
+          >
             {step === "phone" 
               ? <>Enter your phone number to receive<br />the OTP code</>
               : step === "otp"
               ? "Enter the code you received on WhatsApp"
               : "Choose a unique username for your account"
             }
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+
+        {/* Content */}
+        <div>
           {step === "phone" ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Phone number</Label>
+                <Label className="text-white/80" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                  Phone number
+                </Label>
                 <div className="flex gap-2">
                   <Select value={countryCode} onValueChange={setCountryCode}>
-                    <SelectTrigger className="w-[120px]">
+                    <SelectTrigger 
+                      className="w-[120px] bg-white/5 border-white/20 text-white hover:bg-white/10"
+                      style={{ fontFamily: "Orbitron, sans-serif" }}
+                    >
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="+34">🇪🇸 +34</SelectItem>
-                      <SelectItem value="+39">🇮🇹 +39</SelectItem>
-                      <SelectItem value="+44">🇬🇧 +44</SelectItem>
-                      <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                    <SelectContent className="bg-black/90 backdrop-blur-xl border-white/20">
+                      <SelectItem value="+34" className="text-white hover:bg-white/10">🇪🇸 +34</SelectItem>
+                      <SelectItem value="+39" className="text-white hover:bg-white/10">🇮🇹 +39</SelectItem>
+                      <SelectItem value="+44" className="text-white hover:bg-white/10">🇬🇧 +44</SelectItem>
+                      <SelectItem value="+1" className="text-white hover:bg-white/10">🇺🇸 +1</SelectItem>
                     </SelectContent>
                   </Select>
                   <Input
@@ -336,15 +372,16 @@ export default function Auth() {
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
                     required
                     disabled={loading}
-                    className="flex-1"
+                    className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-lime-500/50 focus:ring-lime-500/20"
+                    style={{ fontFamily: "Orbitron, sans-serif" }}
                     maxLength={countryCode === "+34" ? 9 : 10}
                     autoFocus
                   />
                 </div>
                 {loading && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs text-white/60">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    Sending code...
+                    <span style={{ fontFamily: "Orbitron, sans-serif" }}>Sending code...</span>
                   </div>
                 )}
               </div>
@@ -352,7 +389,10 @@ export default function Auth() {
           ) : step === "otp" ? (
             <div className="space-y-6">
               <div className="text-center space-y-4">
-                <p className="text-sm text-muted-foreground">
+                <p 
+                  className="text-sm text-white/60"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
                   Code sent to {countryCode}{phoneNumber}
                 </p>
                 <Button
@@ -360,7 +400,8 @@ export default function Auth() {
                   variant="link"
                   onClick={handleBack}
                   disabled={loading}
-                  className="text-sm underline"
+                  className="text-sm text-lime-400 hover:text-lime-300 underline"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
                 >
                   Change number
                 </Button>
@@ -373,26 +414,31 @@ export default function Auth() {
                   onChange={setOtp}
                   disabled={loading}
                 >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
+                  <InputOTPGroup className="gap-2">
+                    {[0, 1, 2, 3, 4, 5].map((index) => (
+                      <InputOTPSlot 
+                        key={index}
+                        index={index} 
+                        className="bg-white/5 border-white/20 text-white w-12 h-14 text-xl rounded-xl"
+                        style={{ fontFamily: "Orbitron, sans-serif" }}
+                      />
+                    ))}
                   </InputOTPGroup>
                 </InputOTP>
               </div>
 
               {loading && (
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center justify-center gap-2 text-sm text-white/60">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Verifying...
+                  <span style={{ fontFamily: "Orbitron, sans-serif" }}>Verifying...</span>
                 </div>
               )}
 
               <div className="text-center space-y-2">
-                <p className="text-sm text-muted-foreground">
+                <p 
+                  className="text-sm text-white/50"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
                   Didn&apos;t receive the code?
                 </p>
                 <Button
@@ -400,16 +446,23 @@ export default function Auth() {
                   variant="link"
                   onClick={handleSendOtp}
                   disabled={loading}
-                  className="text-sm"
+                  className="text-sm text-lime-400 hover:text-lime-300"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
                 >
                   Resend Code
                 </Button>
               </div>
             </div>
           ) : step === "username" ? (
-            <form onSubmit={handleSubmitUsername} className="space-y-4">
+            <form onSubmit={handleSubmitUsername} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label 
+                  htmlFor="username" 
+                  className="text-white/80"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
+                  Username
+                </Label>
                 <div className="relative">
                   <Input
                     id="username"
@@ -422,21 +475,25 @@ export default function Auth() {
                     minLength={3}
                     maxLength={20}
                     autoFocus
-                    className="pr-10"
+                    className="pr-10 bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-lime-500/50 focus:ring-lime-500/20"
+                    style={{ fontFamily: "Orbitron, sans-serif" }}
                   />
                   {username.length >= 3 && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {checkingUsername ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        <Loader2 className="h-4 w-4 animate-spin text-white/60" />
                       ) : usernameAvailable === true ? (
-                        <Check className="h-4 w-4 text-green-500" />
+                        <Check className="h-4 w-4 text-lime-400" />
                       ) : usernameAvailable === false ? (
-                        <X className="h-4 w-4 text-red-500" />
+                        <X className="h-4 w-4 text-red-400" />
                       ) : null}
                     </div>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p 
+                  className="text-xs text-white/50"
+                  style={{ fontFamily: "Orbitron, sans-serif" }}
+                >
                   {username.length >= 3 && usernameAvailable === false
                     ? "Username already taken"
                     : "3-20 characters, lowercase, no spaces"}
@@ -444,7 +501,12 @@ export default function Auth() {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-primary/80 hover:bg-primary/90" 
+                className="w-full rounded-xl py-6 text-sm font-medium transition-all"
+                style={{
+                  fontFamily: "Orbitron, sans-serif",
+                  background: "linear-gradient(135deg, rgba(132, 204, 22, 0.4), rgba(34, 197, 94, 0.4))",
+                  border: "1px solid rgba(132, 204, 22, 0.5)",
+                }}
                 disabled={loading || checkingUsername || usernameAvailable === false}
               >
                 {loading ? (
@@ -458,8 +520,8 @@ export default function Auth() {
               </Button>
             </form>
           ) : null}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
