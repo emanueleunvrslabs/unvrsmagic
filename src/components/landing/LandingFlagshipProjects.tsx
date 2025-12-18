@@ -106,7 +106,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
           {/* Hero Content */}
           <div className="p-8 md:p-12 bg-black/40 flex flex-col justify-center">
             <h4 
-              className="text-lg md:text-xl font-bold text-purple-400 mb-6"
+              className="text-lg md:text-xl font-bold text-cyan-400 mb-6"
               style={{ fontFamily: "Orbitron, sans-serif" }}
             >
               AI Energy Operating System
@@ -120,7 +120,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                 Dalla vendita al dispacciamento, dall'onboarding digitale alla ricezione e interpretazione automatica delle delibere, Energizzo coordina ogni flusso energetico e operativo in tempo reale.
               </p>
               <p>
-                Al centro del sistema opera <span className="text-purple-400 font-semibold">Max Power</span>, il cervello centrale di Energizzo:
+                Al centro del sistema opera <span className="text-cyan-400 font-semibold">Max Power</span>, il cervello centrale di Energizzo:
                 un'intelligenza artificiale evoluta che osserva, decide e orchestra una rete di agenti specializzati, ognuno con un'identità, un ruolo e una funzione precisa.
               </p>
               <p className="text-white/90 italic mt-4">
@@ -154,7 +154,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
               {project.name}
             </h3>
             <p 
-              className="text-lg text-purple-300 mb-4"
+              className="text-lg text-cyan-300 mb-4"
               style={{ fontFamily: "Orbitron, sans-serif" }}
             >
               {project.tagline}
@@ -195,7 +195,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
               >
-                <div className="text-purple-400 mb-3">{feature.icon}</div>
+                <div className="text-cyan-400 mb-3">{feature.icon}</div>
                 <h5 
                   className="text-white font-medium mb-1 text-sm"
                   style={{ fontFamily: "Orbitron, sans-serif" }}
