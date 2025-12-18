@@ -1,4 +1,5 @@
 import { WaveTextEntrance } from "./WaveTextEntrance";
+import { ScrollReveal } from "./ScrollReveal";
 
 export function LandingClaim() {
   return (
@@ -14,12 +15,16 @@ export function LandingClaim() {
             <WaveTextEntrance text="for the Future" className="block" emoji="🔮" delay={900} />
           </h2>
           
-          <p className="font-orbitron text-base md:text-lg text-white/70 font-light tracking-wide leading-relaxed max-w-3xl">
-            <WaveTextEntrance 
-              text="Specializing in developing enterprise software, custom applications, and AI integrations, delivering innovative and scalable solutions that create real value for businesses across all digital platforms."
-              delay={1200}
-            />
-          </p>
+          <ScrollReveal
+            baseOpacity={0.1}
+            baseRotation={3}
+            enableBlur={true}
+            blurStrength={4}
+            textClassName="font-orbitron text-base md:text-lg text-white/70 font-light tracking-wide leading-relaxed"
+            containerClassName="max-w-3xl"
+          >
+            Specializing in developing enterprise software, custom applications, and AI integrations, delivering innovative and scalable solutions that create real value for businesses across all digital platforms.
+          </ScrollReveal>
         </div>
       </div>
     </section>
