@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 const words = ["UNVRS", "LABS"];
-const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const reelLetters = "UNVRSLABS";
 
 interface ShinyTextProps {
   text: string;
@@ -51,13 +51,13 @@ const SlotReel = ({
     if (!isActive) return;
     
     setIsSpinning(true);
-    const spinDuration = 800 + delay * 150;
-    const intervalSpeed = 50;
+    const spinDuration = 1500 + delay * 200;
+    const intervalSpeed = 100;
     let elapsed = 0;
     
     const spinInterval = setInterval(() => {
       elapsed += intervalSpeed;
-      setDisplayLetter(alphabet[Math.floor(Math.random() * alphabet.length)]);
+      setDisplayLetter(reelLetters[Math.floor(Math.random() * reelLetters.length)]);
       
       if (elapsed >= spinDuration) {
         clearInterval(spinInterval);
