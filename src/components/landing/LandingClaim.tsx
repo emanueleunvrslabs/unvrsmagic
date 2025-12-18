@@ -1,5 +1,43 @@
 import { WaveTextEntrance } from "./WaveTextEntrance";
-import { ScrollReveal } from "./ScrollReveal";
+
+interface ShinyTextProps {
+  text: string;
+  speed?: number;
+  className?: string;
+}
+
+const ShinyText = ({ text, speed = 5, className = "" }: ShinyTextProps) => {
+  return (
+    <>
+      <style>{`
+        @keyframes shiny-text-claim {
+          0% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: -100% 50%;
+          }
+        }
+      `}</style>
+      <span
+        className={`inline-block bg-clip-text text-transparent ${className}`}
+        style={{
+          backgroundImage: `linear-gradient(
+            120deg,
+            rgba(255, 255, 255, 0.4) 40%,
+            rgba(255, 255, 255, 0.9) 50%,
+            rgba(255, 255, 255, 0.4) 60%
+          )`,
+          backgroundSize: "200% 100%",
+          animation: `shiny-text-claim ${speed}s linear infinite`,
+          WebkitBackgroundClip: "text",
+        }}
+      >
+        {text}
+      </span>
+    </>
+  );
+};
 
 export function LandingClaim() {
   return (
@@ -15,16 +53,14 @@ export function LandingClaim() {
             <WaveTextEntrance text="for the Future" className="block" emoji="🔮" delay={900} />
           </h2>
           
-          <ScrollReveal
-            baseOpacity={0.1}
-            baseRotation={3}
-            enableBlur={true}
-            blurStrength={4}
-            textClassName="font-orbitron text-base md:text-lg text-white/70 font-light tracking-wide leading-relaxed"
-            containerClassName="max-w-3xl"
-          >
-            Specializing in developing enterprise software, custom applications, and AI integrations, delivering innovative and scalable solutions that create real value for businesses across all digital platforms.
-          </ScrollReveal>
+          <div className="max-w-3xl">
+            <p className="font-orbitron text-base md:text-lg font-light tracking-wide leading-relaxed">
+              <ShinyText 
+                text="Specializing in developing enterprise software, custom applications, and AI integrations, delivering innovative and scalable solutions that create real value for businesses across all digital platforms."
+                speed={4}
+              />
+            </p>
+          </div>
         </div>
       </div>
     </section>
