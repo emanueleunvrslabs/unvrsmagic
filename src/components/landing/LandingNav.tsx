@@ -25,30 +25,35 @@ export function LandingNav() {
       .filter(item => item.sectionId)
       .map(item => item.sectionId!);
 
-    const observerCallback: IntersectionObserverCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const index = navItems.findIndex(item => item.sectionId === entry.target.id);
-          if (index !== -1) {
-            setActiveIndex(index);
+    const handleScroll = () => {
+      // If at top of page, set HOME as active
+      if (window.scrollY < 100) {
+        setActiveIndex(0);
+        return;
+      }
+
+      // Find which section is currently in view
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const element = document.getElementById(sectionIds[i]);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          // Section is considered active if its top is in the upper 50% of viewport
+          if (rect.top <= viewportHeight * 0.5) {
+            const index = navItems.findIndex(item => item.sectionId === sectionIds[i]);
+            if (index !== -1) {
+              setActiveIndex(index);
+              return;
+            }
           }
         }
-      });
+      }
     };
 
-    const observer = new IntersectionObserver(observerCallback, {
-      rootMargin: "-40% 0px -40% 0px",
-      threshold: 0,
-    });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Check initial position
 
-    sectionIds.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
-    return () => observer.disconnect();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Determine which index to show indicator for (hover takes priority over active)
