@@ -135,54 +135,72 @@ export function LandingReviews() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] overflow-hidden">
-            {/* Column 1 - scrolls up */}
-            <motion.div
-              initial={{ y: 0 }}
-              animate={{ y: "-50%" }}
-              transition={{
-                duration: 60,
-                repeat: Infinity,
-                ease: "linear",
+          <div className="relative">
+            {/* Top gradient blur */}
+            <div 
+              className="absolute top-0 left-0 right-0 h-32 z-10 pointer-events-none"
+              style={{
+                background: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%)",
               }}
-              className="flex flex-col gap-6"
-            >
-              {[...column1, ...column1, ...column1].map((review, i) => (
-                <ReviewCard key={`col1-${i}`} review={review} />
-              ))}
-            </motion.div>
+            />
+            
+            {/* Bottom gradient blur */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-32 z-10 pointer-events-none"
+              style={{
+                background: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%)",
+              }}
+            />
 
-            {/* Column 2 - scrolls down */}
-            <motion.div
-              initial={{ y: "-50%" }}
-              animate={{ y: 0 }}
-              transition={{
-                duration: 60,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              className="hidden md:flex flex-col gap-6"
-            >
-              {[...column2, ...column2, ...column2].map((review, i) => (
-                <ReviewCard key={`col2-${i}`} review={review} />
-              ))}
-            </motion.div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] overflow-hidden">
+              {/* Column 1 - scrolls up */}
+              <motion.div
+                initial={{ y: 0 }}
+                animate={{ y: "-50%" }}
+                transition={{
+                  duration: 60,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="flex flex-col gap-6"
+              >
+                {[...column1, ...column1, ...column1].map((review, i) => (
+                  <ReviewCard key={`col1-${i}`} review={review} />
+                ))}
+              </motion.div>
 
-            {/* Column 3 - scrolls up */}
-            <motion.div
-              initial={{ y: 0 }}
-              animate={{ y: "-50%" }}
-              transition={{
-                duration: 60,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              className="hidden md:flex flex-col gap-6"
-            >
-              {[...column3, ...column3, ...column3].map((review, i) => (
-                <ReviewCard key={`col3-${i}`} review={review} />
-              ))}
-            </motion.div>
+              {/* Column 2 - scrolls down */}
+              <motion.div
+                initial={{ y: "-50%" }}
+                animate={{ y: 0 }}
+                transition={{
+                  duration: 60,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="hidden md:flex flex-col gap-6"
+              >
+                {[...column2, ...column2, ...column2].map((review, i) => (
+                  <ReviewCard key={`col2-${i}`} review={review} />
+                ))}
+              </motion.div>
+
+              {/* Column 3 - scrolls up */}
+              <motion.div
+                initial={{ y: 0 }}
+                animate={{ y: "-50%" }}
+                transition={{
+                  duration: 60,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="hidden md:flex flex-col gap-6"
+              >
+                {[...column3, ...column3, ...column3].map((review, i) => (
+                  <ReviewCard key={`col3-${i}`} review={review} />
+                ))}
+              </motion.div>
+            </div>
           </div>
         </div>
       </div>
