@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Copy, Trash2, MessageCircle, Cake, Gift, Calendar } from "lucide-react";
+import { Copy, Trash2, MessageCircle, Cake, Gift, Calendar, Check } from "lucide-react";
 import { format, differenceInDays, setYear, isToday, isTomorrow, addYears } from "date-fns";
 import { enUS } from "date-fns/locale";
 
@@ -24,6 +24,7 @@ const Memora = () => {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Fetch user profile and contacts
   useEffect(() => {
@@ -98,7 +99,9 @@ const Memora = () => {
     if (!username) return;
     const link = `https://unvrslabs.dev/${username}/memora`;
     navigator.clipboard.writeText(link);
+    setCopied(true);
     toast.success("Link copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const deleteContact = async (id: string) => {
@@ -190,9 +193,22 @@ const Memora = () => {
               <div className="flex-1 p-3 bg-muted rounded-lg border border-border font-mono text-sm text-foreground truncate">
                 {username ? `https://unvrslabs.dev/${username}/memora` : "Loading..."}
               </div>
-              <Button onClick={copyLink} disabled={!username}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copia
+              <Button 
+                onClick={copyLink} 
+                disabled={!username}
+                className={copied ? "bg-green-600 hover:bg-green-600" : ""}
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
