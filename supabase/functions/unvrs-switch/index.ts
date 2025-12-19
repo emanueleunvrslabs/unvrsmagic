@@ -23,9 +23,10 @@ const SWITCH_SYSTEM_PROMPT = `Sei UNVRS.SWITCH, l'assistente AI di qualificazion
 
 Il tuo obiettivo è:
 1. Accogliere in modo professionale e amichevole
-2. Capire cosa cerca il visitatore (informazioni, preventivo, supporto, altro)
+2. Capire cosa cerca il visitatore (informazioni, preventivo, supporto, demo, altro)
 3. Raccogliere informazioni base: nome, azienda (se applicabile), email
 4. Qualificare l'interesse e indirizzare all'agente giusto
+5. SE il visitatore vuole una DEMO di un progetto, gestire la prenotazione
 
 SERVIZI UNVRS LABS:
 • Sviluppo Web/Mobile (app, siti, piattaforme)
@@ -33,11 +34,25 @@ SERVIZI UNVRS LABS:
 • Marketing Digitale (social media, contenuti AI)
 • Consulenza Tecnologica
 
+PROGETTI DISPONIBILI PER DEMO:
+• Energizzo: Piattaforma gestionale per aziende energetiche
+• AI Social: Automazione social media con AI
+• NKMT: Trading algoritmico con agenti AI
+
+GESTIONE RICHIESTE DEMO:
+Quando un visitatore vuole una demo:
+1. Chiedi quale progetto gli interessa (se non specificato)
+2. Chiedi il nome per la prenotazione
+3. Proponi le date/orari disponibili (li troverai nel campo "demo_slots" se presente)
+4. Quando conferma data e ora, usa action "book_demo" con i dati raccolti
+5. Gli orari disponibili sono: mattina 11:00/13:00, pomeriggio 15:00/18:00, dal lunedì al venerdì
+
 COMPORTAMENTO:
 • Sii conciso ma cordiale (max 2-3 frasi per risposta)
 • Fai una domanda alla volta
 • Se il visitatore vuole un preventivo, passa a INTAKE
 • Se il visitatore è un cliente esistente, passa a HLO
+• Se vuole una DEMO, gestisci tu la prenotazione
 • Se ha domande generiche, rispondi direttamente
 • NON usare MAI trattini (-, —, –) nelle risposte. Usa punti, virgole o frasi separate.
 
@@ -45,12 +60,16 @@ FORMATO RISPOSTA:
 Rispondi SOLO in formato JSON:
 {
   "response": "Il tuo messaggio di risposta",
-  "action": "continue" | "handoff_intake" | "handoff_hlo" | "handoff_human",
+  "action": "continue" | "handoff_intake" | "handoff_hlo" | "handoff_human" | "check_demo_availability" | "book_demo",
   "collected_data": {
     "name": "se raccolto",
     "company": "se raccolto",
     "email": "se raccolto",
+    "phone": "se raccolto",
     "interest": "tipo di interesse rilevato",
+    "project_type": "energizzo | ai-social | nkmt (solo per demo)",
+    "demo_date": "YYYY-MM-DD (solo per book_demo)",
+    "demo_time": "HH:mm (solo per book_demo)",
     "qualified": true/false
   }
 }`
@@ -86,6 +105,31 @@ Deno.serve(async (req) => {
       .eq('id', request.session_id)
       .single()
 
+    // Check if we need to fetch demo availability
+    const sessionState = (session?.state as any) || {}
+    let demoContext = ''
+    
+    if (sessionState.wants_demo || request.message.toLowerCase().includes('demo')) {
+      // Fetch available demo slots
+      const availabilityResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/get-demo-availability`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+        },
+        body: JSON.stringify({ user_id: request.user_id, days_ahead: 7 })
+      })
+      
+      if (availabilityResponse.ok) {
+        const availability = await availabilityResponse.json()
+        if (availability.success && availability.suggestions?.length > 0) {
+          demoContext = `\n\nSLOT DEMO DISPONIBILI:\n${availability.suggestions.map((s: any) => 
+            `• ${s.date_formatted} alle ${s.time}`
+          ).join('\n')}\n\nUsa queste date quando proponi slot per la demo.`
+        }
+      }
+    }
+
     // Build conversation context for AI
     const conversationHistory = (messages || []).map(m => ({
       role: m.direction === 'inbound' ? 'user' : 'assistant',
@@ -117,6 +161,9 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Build system prompt with demo context if available
+    const systemPrompt = SWITCH_SYSTEM_PROMPT + demoContext
+
     // Call Anthropic Claude Haiku 4.5 (primary for SWITCH - fast/cheap triage)
     const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -128,7 +175,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: 'claude-3-5-haiku-20241022',
         max_tokens: 500,
-        system: SWITCH_SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: conversationHistory.map(m => ({
           role: m.role,
           content: m.content
@@ -170,12 +217,54 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Handle book_demo action
+    if (parsedResponse.action === 'book_demo') {
+      const demoData = parsedResponse.collected_data
+      
+      if (demoData.demo_date && demoData.demo_time && demoData.name && demoData.project_type) {
+        const bookingResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/book-demo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+          },
+          body: JSON.stringify({
+            user_id: request.user_id,
+            date: demoData.demo_date,
+            time: demoData.demo_time,
+            client_name: demoData.name,
+            client_phone: request.channel === 'whatsapp' ? request.contact_identifier : demoData.phone,
+            client_email: demoData.email,
+            project_type: demoData.project_type,
+            conversation_id: request.conversation_id,
+            lead_id: request.sender_info.lead_id
+          })
+        })
+
+        const bookingResult = await bookingResponse.json()
+        
+        if (bookingResult.success) {
+          parsedResponse.response = bookingResult.message
+          parsedResponse.action = 'continue' // Stay in conversation
+          parsedResponse.collected_data.demo_booked = true
+          parsedResponse.collected_data.booking_id = bookingResult.booking.id
+        } else {
+          // Booking failed, inform user
+          parsedResponse.response = `Mi dispiace, c'è stato un problema con la prenotazione: ${bookingResult.error}. Vuoi provare un altro orario?`
+          parsedResponse.action = 'check_demo_availability'
+        }
+      }
+    }
+
     // Update session state with collected data
     const newState = {
-      ...((session?.state as object) || {}),
+      ...sessionState,
       ...parsedResponse.collected_data,
       last_action: parsedResponse.action,
-      message_count: ((session?.state as any)?.message_count || 0) + 1
+      wants_demo: parsedResponse.action === 'check_demo_availability' || 
+                  parsedResponse.collected_data?.project_type || 
+                  sessionState.wants_demo,
+      message_count: (sessionState.message_count || 0) + 1
     }
 
     await supabase
@@ -201,7 +290,8 @@ Deno.serve(async (req) => {
       metadata: {
         conversation_id: request.conversation_id,
         session_id: request.session_id,
-        collected_data: parsedResponse.collected_data
+        collected_data: parsedResponse.collected_data,
+        demo_context: demoContext ? 'included' : 'none'
       },
       duration_ms: Date.now() - startTime
     })

@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { format, isSameDay, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { Plus, Video, Clock, User, Mail, Phone, ChevronLeft, ChevronRight, Trash2, Edit2, ExternalLink } from "lucide-react";
+import { Plus, Video, Clock, User, Mail, Phone, ChevronLeft, ChevronRight, Trash2, Edit2, ExternalLink, Check, X } from "lucide-react";
 
 interface DemoBooking {
   id: string;
@@ -228,6 +228,8 @@ export default function AdminDemoCalendar() {
         return "bg-red-500/20 text-red-400 border-red-500/30";
       case "rescheduled":
         return "bg-amber-500/20 text-amber-400 border-amber-500/30";
+      case "pending_approval":
+        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
       default:
         return "bg-white/10 text-white/70 border-white/20";
     }
@@ -243,10 +245,40 @@ export default function AdminDemoCalendar() {
         return "Cancelled";
       case "rescheduled":
         return "Rescheduled";
+      case "pending_approval":
+        return "Pending";
       default:
         return status;
     }
   };
+
+  const approveBooking = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("demo_bookings").update({ status: "scheduled" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["demo-bookings"] });
+      toast.success("Demo approved!");
+    },
+    onError: () => {
+      toast.error("Error approving demo");
+    },
+  });
+
+  const rejectBooking = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("demo_bookings").update({ status: "cancelled" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["demo-bookings"] });
+      toast.success("Demo rejected");
+    },
+    onError: () => {
+      toast.error("Error rejecting demo");
+    },
+  });
 
   return (
     <DashboardLayout>
@@ -532,51 +564,88 @@ export default function AdminDemoCalendar() {
                           </Badge>
                         )}
 
-                        <div className="flex items-center gap-2 pt-2 border-t border-white/10">
-                          {booking.meeting_link && (
+                        {/* Approve/Reject buttons for pending approval */}
+                        {booking.status === "pending_approval" && (
+                          <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                            <Button
+                              size="sm"
+                              className="gap-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30"
+                              onClick={() => approveBooking.mutate(booking.id)}
+                              disabled={approveBooking.isPending}
+                            >
+                              <Check size={14} />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                              onClick={() => rejectBooking.mutate(booking.id)}
+                              disabled={rejectBooking.isPending}
+                            >
+                              <X size={14} />
+                              Reject
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="gap-1 text-xs ml-auto"
+                              onClick={() => handleEdit(booking)}
+                            >
+                              <Edit2 size={14} />
+                              Edit
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Regular action buttons for other statuses */}
+                        {booking.status !== "pending_approval" && (
+                          <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                            {booking.meeting_link && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="gap-1 text-xs"
+                                onClick={() => window.open(booking.meeting_link!, "_blank")}
+                              >
+                                <Video size={14} />
+                                Join
+                                <ExternalLink size={12} />
+                              </Button>
+                            )}
                             <Button
                               size="sm"
                               variant="ghost"
                               className="gap-1 text-xs"
-                              onClick={() => window.open(booking.meeting_link!, "_blank")}
+                              onClick={() => handleEdit(booking)}
                             >
-                              <Video size={14} />
-                              Join
-                              <ExternalLink size={12} />
+                              <Edit2 size={14} />
+                              Edit
                             </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="gap-1 text-xs"
-                            onClick={() => handleEdit(booking)}
-                          >
-                            <Edit2 size={14} />
-                            Edit
-                          </Button>
-                          <Select
-                            value={booking.status}
-                            onValueChange={(status) => updateStatus.mutate({ id: booking.id, status })}
-                          >
-                            <SelectTrigger className="h-8 text-xs w-auto bg-transparent border-0 p-0 pl-2">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
-                              <SelectItem value="scheduled">Scheduled</SelectItem>
-                              <SelectItem value="completed">Completed</SelectItem>
-                              <SelectItem value="cancelled">Cancelled</SelectItem>
-                              <SelectItem value="rescheduled">Rescheduled</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="gap-1 text-xs text-red-400 hover:text-red-300 ml-auto"
-                            onClick={() => deleteBooking.mutate(booking.id)}
-                          >
-                            <Trash2 size={14} />
-                          </Button>
-                        </div>
+                            <Select
+                              value={booking.status}
+                              onValueChange={(status) => updateStatus.mutate({ id: booking.id, status })}
+                            >
+                              <SelectTrigger className="h-8 text-xs w-auto bg-transparent border-0 p-0 pl-2">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
+                                <SelectItem value="scheduled">Scheduled</SelectItem>
+                                <SelectItem value="completed">Completed</SelectItem>
+                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                                <SelectItem value="rescheduled">Rescheduled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="gap-1 text-xs text-red-400 hover:text-red-300 ml-auto"
+                              onClick={() => deleteBooking.mutate(booking.id)}
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
