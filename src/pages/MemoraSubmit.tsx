@@ -125,7 +125,7 @@ const MemoraSubmit = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-card border-border">
+      <Card className="w-full max-w-md bg-card border-border overflow-hidden">
         <CardHeader className="text-center space-y-4">
           <div className="p-4 rounded-full bg-primary/10 border border-primary/20 w-fit mx-auto">
             <Cake className="h-10 w-10 text-primary" />
@@ -168,6 +168,7 @@ const MemoraSubmit = () => {
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
                 required
+                className="w-full max-w-full [&::-webkit-calendar-picker-indicator]:opacity-100"
               />
             </div>
 
