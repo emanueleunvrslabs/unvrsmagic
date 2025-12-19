@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useWalletConnection } from "@/hooks/use-wallet-connection";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import {
   Bell,
@@ -18,20 +19,21 @@ import {
   Wallet,
 } from "lucide-react";
 import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function Topbar() {
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const [username, setUsername] = useState<string | null>(null);
   const [clientSearch, setClientSearch] = useState("");
   const { isConnected, address, balance, disconnect, copyAddress } = useWalletConnection();
   const { isOwner } = useUserRole();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   
+  const username = profile?.username;
   const isLabsPage = location.pathname === "/labs";
   const isClientsPage = location.pathname === "/admin/clients";
   const showClientsMenu = isLabsPage || isClientsPage;
@@ -52,31 +54,6 @@ export function Topbar() {
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
-
-  // Load username from database
-  useEffect(() => {
-    const loadUsername = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('user_id', user.id)
-            .maybeSingle();
-
-          if (profile?.username) {
-            setUsername(profile.username);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading username:', error);
-      }
-    };
-
-    loadUsername();
-  }, []);
 
   const handleLogout = async () => {
     try {

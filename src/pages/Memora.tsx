@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import { Copy, Trash2, MessageCircle, Cake, Gift, Calendar, Check } from "lucide-react";
 import { format, differenceInDays, setYear, isToday, isTomorrow, addYears } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { useAuth } from "@/hooks/use-auth";
 
 interface MemoraContact {
   id: string;
@@ -20,52 +22,34 @@ interface MemoraContact {
 }
 
 const Memora = () => {
-  const [contacts, setContacts] = useState<MemoraContact[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refCode, setRefCode] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const queryClient = useQueryClient();
+  const { profile, userId } = useAuth();
+  const refCode = profile?.ref_code;
 
-  // Fetch user profile and contacts
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      setUserId(user.id);
-
-      // Get ref_code
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("ref_code")
-        .eq("user_id", user.id)
-        .single();
-
-      if (profile?.ref_code) {
-        setRefCode(profile.ref_code);
-      }
-
-      // Get contacts
-      const { data: contactsData, error } = await supabase
+  // Fetch contacts with react-query
+  const { data: contacts = [], isLoading: loading } = useQuery({
+    queryKey: ["memora-contacts", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data, error } = await supabase
         .from("memora_contacts")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .order("birth_date", { ascending: true });
 
       if (error) {
         console.error("Error fetching contacts:", error);
         toast.error("Error loading contacts");
-      } else {
-        setContacts(contactsData || []);
+        return [];
       }
+      return data as MemoraContact[];
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 2,
+  });
 
-      setLoading(false);
-    };
-
-    fetchData();
-  }, []);
-
-  // Realtime subscription
+  // Realtime subscription for new contacts
   useEffect(() => {
     if (!userId) return;
 
@@ -80,11 +64,10 @@ const Memora = () => {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
+          // Invalidate query to refetch
+          queryClient.invalidateQueries({ queryKey: ["memora-contacts", userId] });
           if (payload.eventType === "INSERT") {
-            setContacts((prev) => [...prev, payload.new as MemoraContact]);
             toast.success("New contact added!");
-          } else if (payload.eventType === "DELETE") {
-            setContacts((prev) => prev.filter((c) => c.id !== payload.old.id));
           }
         }
       )
@@ -93,7 +76,7 @@ const Memora = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, queryClient]);
 
   const copyLink = () => {
     if (!refCode) return;
@@ -117,6 +100,7 @@ const Memora = () => {
     if (error) {
       toast.error("Error deleting contact");
     } else {
+      queryClient.invalidateQueries({ queryKey: ["memora-contacts", userId] });
       toast.success("Contact deleted");
     }
   };

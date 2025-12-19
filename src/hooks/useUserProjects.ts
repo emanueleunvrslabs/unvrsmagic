@@ -2,15 +2,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { MarketplaceProject } from "./useMarketplaceProjects";
+import { useAuth } from "./use-auth";
 
 export const useUserProjects = () => {
   const queryClient = useQueryClient();
+  const { userId } = useAuth();
 
   const { data: userProjects, isLoading } = useQuery({
-    queryKey: ["user-projects"],
+    queryKey: ["user-projects", userId],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      if (!userId) return [];
 
       const { data, error } = await supabase
         .from("user_projects")
@@ -27,7 +28,7 @@ export const useUserProjects = () => {
             published
           )
         `)
-        .eq("user_id", user.id);
+        .eq("user_id", userId);
 
       if (error) throw error;
       return data.map((up) => ({
@@ -35,16 +36,17 @@ export const useUserProjects = () => {
         project: up.marketplace_projects as unknown as MarketplaceProject,
       }));
     },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
   });
 
   const addProject = useMutation({
     mutationFn: async (projectId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non autenticato");
+      if (!userId) throw new Error("Non autenticato");
 
       const { error } = await supabase
         .from("user_projects")
-        .insert({ user_id: user.id, project_id: projectId });
+        .insert({ user_id: userId, project_id: projectId });
 
       if (error) throw error;
     },
@@ -64,13 +66,12 @@ export const useUserProjects = () => {
 
   const removeProject = useMutation({
     mutationFn: async (projectId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non autenticato");
+      if (!userId) throw new Error("Non autenticato");
 
       const { error } = await supabase
         .from("user_projects")
         .delete()
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("project_id", projectId);
 
       if (error) throw error;
