@@ -49,6 +49,34 @@ const MemoraSubmit = () => {
     lookupUser();
   }, [username]);
 
+  // Auto-format date input as DD/MM/YYYY
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+    
+    if (value.length > 8) {
+      value = value.slice(0, 8);
+    }
+    
+    // Auto-add slashes
+    if (value.length >= 2) {
+      value = value.slice(0, 2) + "/" + value.slice(2);
+    }
+    if (value.length >= 5) {
+      value = value.slice(0, 5) + "/" + value.slice(5);
+    }
+    
+    setBirthDate(value);
+  };
+
+  // Convert DD/MM/YYYY to YYYY-MM-DD for database
+  const formatDateForDB = (dateStr: string): string | null => {
+    const parts = dateStr.split("/");
+    if (parts.length !== 3) return null;
+    const [day, month, year] = parts;
+    if (day.length !== 2 || month.length !== 2 || year.length !== 4) return null;
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -62,13 +90,19 @@ const MemoraSubmit = () => {
       return;
     }
 
+    const formattedDate = formatDateForDB(birthDate);
+    if (!formattedDate) {
+      toast.error("Please enter a valid date (DD/MM/YYYY)");
+      return;
+    }
+
     setSubmitting(true);
 
     const { error } = await supabase.from("memora_contacts").insert({
       user_id: userId,
       first_name: firstName.trim(),
       last_name: lastName.trim(),
-      birth_date: birthDate,
+      birth_date: formattedDate,
       whatsapp_number: whatsappNumber.trim(),
     });
 
@@ -164,11 +198,13 @@ const MemoraSubmit = () => {
               <Label htmlFor="birthDate">Date of Birth</Label>
               <Input
                 id="birthDate"
-                type="date"
+                type="text"
+                inputMode="numeric"
                 value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
+                onChange={handleDateChange}
+                placeholder="DD/MM/YYYY"
+                maxLength={10}
                 required
-                className="w-full max-w-full [&::-webkit-calendar-picker-indicator]:opacity-100"
               />
             </div>
 
