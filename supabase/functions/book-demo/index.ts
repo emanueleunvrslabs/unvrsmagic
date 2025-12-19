@@ -72,16 +72,26 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Parse and validate date - Create date in Europe/Rome timezone
-    // The time slot is in Italian business hours, so we need to convert to UTC
-    const dateTimeStr = `${request.date}T${request.time}:00`
+    // Parse and validate date - Input time is in Italian time (Europe/Rome)
+    // We need to convert to UTC for storage
+    // Italy is UTC+1 (CET) in winter, UTC+2 (CEST) in summer
+    const [hours, minutes] = request.time.split(':').map(Number)
     
-    // Create date treating the input as Europe/Rome time
-    // Italy is UTC+1 (CET) or UTC+2 (CEST in summer)
-    // For simplicity, we'll create the date and assume it's meant to be at that local hour
-    // We store as UTC by appending Z, which means 11:00 input becomes 11:00 UTC
-    // The frontend will display it correctly as local time
-    const scheduledDate = new Date(`${dateTimeStr}Z`) // Treat as UTC to maintain consistency
+    // Create date in UTC, then adjust for Italian timezone
+    // Simple approach: assume CET (UTC+1) for winter months, CEST (UTC+2) for summer
+    const targetDate = new Date(`${request.date}T00:00:00Z`)
+    const month = targetDate.getUTCMonth() // 0-11
+    
+    // DST in Italy: last Sunday of March to last Sunday of October
+    // Simplified: April-October is CEST (UTC+2), November-March is CET (UTC+1)
+    const isSummer = month >= 3 && month <= 9 // April (3) to October (9)
+    const utcOffset = isSummer ? 2 : 1
+    
+    // Convert Italian time to UTC by subtracting the offset
+    const utcHours = hours - utcOffset
+    targetDate.setUTCHours(utcHours, minutes, 0, 0)
+    
+    const scheduledDate = targetDate
     
     if (isNaN(scheduledDate.getTime())) {
       return new Response(JSON.stringify({
