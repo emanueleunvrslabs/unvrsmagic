@@ -382,10 +382,19 @@ export default function AdminDemoCalendar() {
                     <label className="text-xs uppercase tracking-wider text-white/50 font-medium">Schedule</label>
                     <div className="grid grid-cols-2 gap-3">
                       <Input
-                        type="time"
+                        type="text"
+                        placeholder="00:00"
                         value={formData.scheduled_time}
-                        onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
-                        className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus-visible:ring-1 focus-visible:ring-white/30 [&::-webkit-calendar-picker-indicator]:invert"
+                        onChange={(e) => {
+                          let value = e.target.value.replace(/[^0-9:]/g, '');
+                          if (value.length === 2 && !value.includes(':')) {
+                            value = value + ':';
+                          }
+                          if (value.length <= 5) {
+                            setFormData({ ...formData, scheduled_time: value });
+                          }
+                        }}
+                        className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                       />
                       <Select
                         value={formData.duration_minutes.toString()}
