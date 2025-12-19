@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { format, isSameDay, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
-import { it } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { Plus, Video, Clock, User, Mail, Phone, ChevronLeft, ChevronRight, Trash2, Edit2, ExternalLink } from "lucide-react";
 
 interface DemoBooking {
@@ -73,7 +73,7 @@ export default function AdminDemoCalendar() {
   const createBooking = useMutation({
     mutationFn: async (data: typeof formData) => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Non autenticato");
+      if (!userData.user) throw new Error("Not authenticated");
 
       const scheduledAt = new Date(selectedDate);
       const [hours, minutes] = data.scheduled_time.split(":");
@@ -97,12 +97,12 @@ export default function AdminDemoCalendar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["demo-bookings"] });
-      toast.success("Demo programmata con successo");
+      toast.success("Demo scheduled successfully");
       resetForm();
       setIsDialogOpen(false);
     },
     onError: () => {
-      toast.error("Errore nella creazione della demo");
+      toast.error("Error creating demo");
     },
   });
 
@@ -132,12 +132,12 @@ export default function AdminDemoCalendar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["demo-bookings"] });
-      toast.success("Demo aggiornata con successo");
+      toast.success("Demo updated successfully");
       resetForm();
       setIsDialogOpen(false);
     },
     onError: () => {
-      toast.error("Errore nell'aggiornamento della demo");
+      toast.error("Error updating demo");
     },
   });
 
@@ -148,10 +148,10 @@ export default function AdminDemoCalendar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["demo-bookings"] });
-      toast.success("Demo eliminata");
+      toast.success("Demo deleted");
     },
     onError: () => {
-      toast.error("Errore nell'eliminazione");
+      toast.error("Error deleting demo");
     },
   });
 
@@ -162,7 +162,7 @@ export default function AdminDemoCalendar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["demo-bookings"] });
-      toast.success("Stato aggiornato");
+      toast.success("Status updated");
     },
   });
 
@@ -236,13 +236,13 @@ export default function AdminDemoCalendar() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "scheduled":
-        return "Programmata";
+        return "Scheduled";
       case "completed":
-        return "Completata";
+        return "Completed";
       case "cancelled":
-        return "Annullata";
+        return "Cancelled";
       case "rescheduled":
-        return "Riprogrammata";
+        return "Rescheduled";
       default:
         return status;
     }
@@ -261,7 +261,7 @@ export default function AdminDemoCalendar() {
               Demo Calendar
             </h1>
             <p className="text-white/60 mt-1">
-              Gestisci le video call di presentazione dei software
+              Manage software demo video calls
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -269,21 +269,22 @@ export default function AdminDemoCalendar() {
             if (!open) resetForm();
           }}>
             <DialogTrigger asChild>
-              <Button className="gap-2 bg-lime-500/20 text-lime-400 border border-lime-500/30 hover:bg-lime-500/30">
+              <Button className="gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white">
                 <Plus size={18} />
-                Nuova Demo
+                New Demo
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg bg-black/95 border-white/10">
+            <DialogContent className="max-w-lg bg-black/95 border-white/10 backdrop-blur-xl">
               <DialogHeader>
                 <DialogTitle className="text-white" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                  {editingBooking ? "Modifica Demo" : "Programma Nuova Demo"}
+                  {editingBooking ? "Edit Demo" : "Schedule New Demo"}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div>
+                  <label className="text-sm text-white/60 mb-1.5 block">Title *</label>
                   <Input
-                    placeholder="Titolo demo *"
+                    placeholder="Demo title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
@@ -292,17 +293,19 @@ export default function AdminDemoCalendar() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <label className="text-sm text-white/60 mb-1.5 block">Client Name</label>
                     <Input
-                      placeholder="Nome cliente"
+                      placeholder="Name"
                       value={formData.client_name}
                       onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                       className="bg-white/5 border-white/10"
                     />
                   </div>
                   <div>
+                    <label className="text-sm text-white/60 mb-1.5 block">Client Email</label>
                     <Input
                       type="email"
-                      placeholder="Email cliente"
+                      placeholder="Email"
                       value={formData.client_email}
                       onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
                       className="bg-white/5 border-white/10"
@@ -311,70 +314,74 @@ export default function AdminDemoCalendar() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <label className="text-sm text-white/60 mb-1.5 block">Phone</label>
                     <Input
-                      placeholder="Telefono"
+                      placeholder="Phone number"
                       value={formData.client_phone}
                       onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
                       className="bg-white/5 border-white/10"
                     />
                   </div>
                   <div>
+                    <label className="text-sm text-white/60 mb-1.5 block">Project</label>
                     <Select
                       value={formData.project_type}
                       onValueChange={(value) => setFormData({ ...formData, project_type: value })}
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10">
-                        <SelectValue placeholder="Progetto" />
+                      <SelectTrigger className="bg-white/5 border-white/10 h-10">
+                        <SelectValue placeholder="Select project" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
                         <SelectItem value="energizzo">Energizzo</SelectItem>
                         <SelectItem value="ai-social">AI Social</SelectItem>
                         <SelectItem value="nkmt">NKMT</SelectItem>
-                        <SelectItem value="altro">Altro</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-white/60 mb-1 block">Orario</label>
+                    <label className="text-sm text-white/60 mb-1.5 block">Time</label>
                     <Input
                       type="time"
                       value={formData.scheduled_time}
                       onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
-                      className="bg-white/5 border-white/10"
+                      className="bg-white/5 border-white/10 h-10"
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-white/60 mb-1 block">Durata (minuti)</label>
+                    <label className="text-sm text-white/60 mb-1.5 block">Duration</label>
                     <Select
                       value={formData.duration_minutes.toString()}
                       onValueChange={(value) => setFormData({ ...formData, duration_minutes: parseInt(value) })}
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10">
+                      <SelectTrigger className="bg-white/5 border-white/10 h-10">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="15">15 min</SelectItem>
-                        <SelectItem value="30">30 min</SelectItem>
-                        <SelectItem value="45">45 min</SelectItem>
-                        <SelectItem value="60">60 min</SelectItem>
-                        <SelectItem value="90">90 min</SelectItem>
+                      <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
+                        <SelectItem value="15">15 minutes</SelectItem>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="45">45 minutes</SelectItem>
+                        <SelectItem value="60">60 minutes</SelectItem>
+                        <SelectItem value="90">90 minutes</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div>
+                  <label className="text-sm text-white/60 mb-1.5 block">Meeting Link</label>
                   <Input
-                    placeholder="Link meeting (Zoom, Meet, etc.)"
+                    placeholder="Zoom, Meet, etc."
                     value={formData.meeting_link}
                     onChange={(e) => setFormData({ ...formData, meeting_link: e.target.value })}
                     className="bg-white/5 border-white/10"
                   />
                 </div>
                 <div>
+                  <label className="text-sm text-white/60 mb-1.5 block">Notes</label>
                   <Textarea
-                    placeholder="Note aggiuntive"
+                    placeholder="Additional notes"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     className="bg-white/5 border-white/10 min-h-[80px]"
@@ -382,14 +389,14 @@ export default function AdminDemoCalendar() {
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
                   <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)}>
-                    Annulla
+                    Cancel
                   </Button>
                   <Button 
                     type="submit" 
                     disabled={createBooking.isPending || updateBooking.isPending}
-                    className="bg-lime-500/20 text-lime-400 border border-lime-500/30 hover:bg-lime-500/30"
+                    className="bg-white/10 border border-white/20 hover:bg-white/20 text-white"
                   >
-                    {editingBooking ? "Aggiorna" : "Crea Demo"}
+                    {editingBooking ? "Update" : "Create Demo"}
                   </Button>
                 </div>
               </form>
@@ -404,7 +411,7 @@ export default function AdminDemoCalendar() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                  {format(currentMonth, "MMMM yyyy", { locale: it })}
+                  {format(currentMonth, "MMMM yyyy", { locale: enUS })}
                 </CardTitle>
                 <div className="flex gap-2">
                   <Button
@@ -433,7 +440,7 @@ export default function AdminDemoCalendar() {
                 onSelect={(date) => date && setSelectedDate(date)}
                 month={currentMonth}
                 onMonthChange={setCurrentMonth}
-                locale={it}
+                locale={enUS}
                 modifiers={{
                   booked: getDaysWithBookings(),
                 }}
@@ -467,16 +474,16 @@ export default function AdminDemoCalendar() {
           <Card className="bg-white/5 border-white/10">
             <CardHeader>
               <CardTitle className="text-white text-lg" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                {format(selectedDate, "d MMMM yyyy", { locale: it })}
+                {format(selectedDate, "MMMM d, yyyy", { locale: enUS })}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px] pr-4">
                 {isLoading ? (
-                  <div className="text-white/50 text-center py-8">Caricamento...</div>
+                  <div className="text-white/50 text-center py-8">Loading...</div>
                 ) : selectedDayBookings.length === 0 ? (
                   <div className="text-white/50 text-center py-8">
-                    Nessuna demo programmata per questo giorno
+                    No demos scheduled for this day
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -545,7 +552,7 @@ export default function AdminDemoCalendar() {
                             onClick={() => handleEdit(booking)}
                           >
                             <Edit2 size={14} />
-                            Modifica
+                            Edit
                           </Button>
                           <Select
                             value={booking.status}
@@ -554,11 +561,11 @@ export default function AdminDemoCalendar() {
                             <SelectTrigger className="h-8 text-xs w-auto bg-transparent border-0 p-0 pl-2">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="scheduled">Programmata</SelectItem>
-                              <SelectItem value="completed">Completata</SelectItem>
-                              <SelectItem value="cancelled">Annullata</SelectItem>
-                              <SelectItem value="rescheduled">Riprogrammata</SelectItem>
+                            <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
+                              <SelectItem value="scheduled">Scheduled</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                              <SelectItem value="rescheduled">Rescheduled</SelectItem>
                             </SelectContent>
                           </Select>
                           <Button
