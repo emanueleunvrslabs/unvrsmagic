@@ -20,7 +20,12 @@ const Menubar = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <MenubarPrimitive.Root
     ref={ref}
-    className={cn("flex h-10 items-center space-x-1 rounded-md border bg-background p-1", className)}
+    className={cn(
+      "flex h-10 items-center space-x-1 rounded-full p-1.5",
+      "border border-white/10 bg-white/[0.06] backdrop-blur-[40px] saturate-[1.8]",
+      "shadow-[0_0_0_0.5px_rgba(255,255,255,0.05)_inset,0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2)]",
+      className
+    )}
     {...props}
   />
 ));
@@ -33,7 +38,11 @@ const MenubarTrigger = React.forwardRef<
   <MenubarPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex cursor-default select-none items-center rounded-sm px-3 py-1.5 text-sm font-medium outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+      "flex cursor-default select-none items-center rounded-full px-4 py-2 text-sm font-medium outline-none transition-colors",
+      "text-white/70 hover:text-white",
+      "data-[state=open]:bg-gradient-to-b data-[state=open]:from-white/[0.22] data-[state=open]:to-white/[0.12] data-[state=open]:text-white",
+      "data-[state=open]:shadow-[0_0_0_0.5px_rgba(255,255,255,0.3)_inset,0_1px_0_0_rgba(255,255,255,0.2)_inset,0_4px_16px_rgba(0,0,0,0.2)]",
+      "focus:bg-white/10 focus:text-white",
       className,
     )}
     {...props}
@@ -50,7 +59,8 @@ const MenubarSubTrigger = React.forwardRef<
   <MenubarPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+      "flex cursor-default select-none items-center rounded-lg px-3 py-2 text-sm outline-none transition-colors",
+      "data-[state=open]:bg-white/10 data-[state=open]:text-white focus:bg-white/10 focus:text-white",
       inset && "pl-8",
       className,
     )}
@@ -69,7 +79,10 @@ const MenubarSubContent = React.forwardRef<
   <MenubarPrimitive.SubContent
     ref={ref}
     className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      "z-50 min-w-[8rem] overflow-hidden rounded-xl p-1.5 text-popover-foreground",
+      "border border-white/10 bg-black/90 backdrop-blur-[40px] saturate-[1.8]",
+      "shadow-[0_0_0_0.5px_rgba(255,255,255,0.05)_inset,0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2)]",
+      "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
       className,
     )}
     {...props}
@@ -88,7 +101,10 @@ const MenubarContent = React.forwardRef<
       alignOffset={alignOffset}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[12rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "z-50 min-w-[12rem] overflow-hidden rounded-xl p-1.5 text-popover-foreground",
+        "border border-white/10 bg-black/90 backdrop-blur-[40px] saturate-[1.8]",
+        "shadow-[0_0_0_0.5px_rgba(255,255,255,0.05)_inset,0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2)]",
+        "data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className,
       )}
       {...props}
@@ -106,7 +122,9 @@ const MenubarItem = React.forwardRef<
   <MenubarPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+      "relative flex cursor-default select-none items-center rounded-lg px-3 py-2 text-sm outline-none transition-colors",
+      "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "focus:bg-white/10 focus:text-white",
       inset && "pl-8",
       className,
     )}
