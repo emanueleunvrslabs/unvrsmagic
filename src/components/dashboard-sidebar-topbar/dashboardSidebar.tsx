@@ -56,11 +56,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 type SubMenuItem = {
   id: string;
@@ -93,14 +95,52 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const location = useLocation();
   const pathname = location.pathname;
   const navigate = useNavigate();
-  const [userProfile, setUserProfile] = useState<{ full_name: string | null; phone_number: string } | null>(null);
-  const [exchanges, setExchanges] = useState<Array<{ exchange: string }>>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>({});
   const [profileOpen, setProfileOpen] = useState(false);
-  const [pendingDemosCount, setPendingDemosCount] = useState(0);
   const { isOwner, isAdmin, isUser } = useUserRole();
   const { userProjects } = useUserProjects();
+  const { profile, userId } = useAuth();
+
+  // Use profile from centralized hook
+  const userProfile = useMemo(() => 
+    profile ? { full_name: profile.full_name, phone_number: profile.phone_number } : null,
+    [profile]
+  );
+
+  // Load connected exchanges with react-query
+  const { data: exchanges = [] } = useQuery({
+    queryKey: ["exchanges", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data } = await supabase
+        .from("exchange_keys")
+        .select("exchange")
+        .eq("user_id", userId);
+      if (data) {
+        return Array.from(new Set(data.map(item => item.exchange)))
+          .map(exchange => ({ exchange }));
+      }
+      return [];
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Load pending demos count with react-query
+  const { data: pendingDemosCount = 0 } = useQuery({
+    queryKey: ["pending-demos-count"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("demo_bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending_approval");
+      return count || 0;
+    },
+    enabled: isOwner,
+    staleTime: 1000 * 60 * 2,
+    refetchInterval: 1000 * 60 * 2, // Refetch every 2 minutes instead of realtime
+  });
 
   const handleLogout = async () => {
     try {
@@ -112,73 +152,6 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
       toast.error("Error logging out");
     }
   };
-
-  // Load user profile
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name, phone_number")
-        .eq("user_id", user.id)
-        .single();
-      
-      if (data) {
-        setUserProfile(data);
-      }
-    };
-    fetchUserProfile();
-  }, []);
-
-  // Load connected exchanges
-  useEffect(() => {
-    const fetchExchanges = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("exchange_keys")
-        .select("exchange")
-        .eq("user_id", user.id);
-      
-      if (data) {
-        const uniqueExchanges = Array.from(new Set(data.map(item => item.exchange)))
-          .map(exchange => ({ exchange }));
-        setExchanges(uniqueExchanges);
-      }
-    };
-    fetchExchanges();
-  }, []);
-
-  // Load pending demos count
-  useEffect(() => {
-    const fetchPendingDemos = async () => {
-      if (!isOwner) return;
-      
-      const { count } = await supabase
-        .from("demo_bookings")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pending_approval");
-      
-      setPendingDemosCount(count || 0);
-    };
-    fetchPendingDemos();
-
-    // Subscribe to realtime changes
-    const channel = supabase
-      .channel('demo-bookings-count')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'demo_bookings' }, () => {
-        fetchPendingDemos();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [isOwner]);
-
   const toggleSection = (title: string) => {
     setOpenSections(prev => ({ ...prev, [title]: !prev[title] }));
   };
