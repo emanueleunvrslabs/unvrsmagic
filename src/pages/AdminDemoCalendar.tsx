@@ -504,7 +504,7 @@ export default function AdminDemoCalendar() {
         <Card className="bg-white/5 border-white/10">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              <Video className="text-purple-400" size={20} />
+              <Video className="text-lime-400" size={20} />
               Videocall da Confermare
             </CardTitle>
           </CardHeader>
@@ -529,11 +529,13 @@ export default function AdminDemoCalendar() {
                   {pendingBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 space-y-3"
+                      className="p-4 rounded-xl bg-lime-500/10 border border-lime-500/20 space-y-3"
                     >
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="text-white font-medium">{booking.title}</h4>
+                          <h4 className="text-white font-medium">
+                            Demo {booking.project_type ? booking.project_type.charAt(0).toUpperCase() + booking.project_type.slice(1) : 'Demo'}
+                          </h4>
                           <div className="flex items-center gap-2 mt-1">
                             <Clock size={14} className="text-white/50" />
                             <span className="text-white/60 text-sm">
@@ -541,14 +543,14 @@ export default function AdminDemoCalendar() {
                             </span>
                           </div>
                         </div>
-                        <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                        <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30">
                           Pending
                         </Badge>
                       </div>
 
                       {booking.client_name && (
-                        <div className="flex items-center gap-2 text-white/60 text-sm">
-                          <User size={14} />
+                        <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
+                          <User size={14} className="text-lime-400" />
                           <span>{booking.client_name}</span>
                         </div>
                       )}
@@ -557,12 +559,6 @@ export default function AdminDemoCalendar() {
                           <Phone size={14} />
                           <span>{booking.client_phone}</span>
                         </div>
-                      )}
-
-                      {booking.project_type && (
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {booking.project_type}
-                        </Badge>
                       )}
 
                       <div className="flex items-center gap-2 pt-2 border-t border-white/10">
