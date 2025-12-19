@@ -47,9 +47,18 @@ serve(async (req) => {
 
     console.log('[WhatsApp Webhook] Payload received:', JSON.stringify(payload));
 
-    // Process incoming messages - WASender uses "messages.received" event
-    if (payload.event === 'messages.received') {
+    // Process incoming messages - WASender uses "messages.upsert" or "messages.received" event
+    if (payload.event === 'messages.received' || payload.event === 'messages.upsert') {
       const messageData = payload.data?.messages || {};
+      
+      // Skip messages sent by us (fromMe: true)
+      if (messageData.key?.fromMe === true) {
+        console.log('[WhatsApp Webhook] Skipping outgoing message (fromMe: true)');
+        return new Response(
+          JSON.stringify({ success: true, skipped: 'outgoing message' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
       // Use senderPn (actual phone number) if available, otherwise fall back to remoteJid
       // senderPn contains the real phone number like "447853751579@s.whatsapp.net"
@@ -63,9 +72,9 @@ serve(async (req) => {
       // Determine message content type and extract content
       const messageContent = extractMessageContent(messageData);
       
-      console.log('[WhatsApp Webhook] Processing message from:', from, 'senderPn:', senderPn, 'remoteJid:', remoteJid, 'type:', messageContent.type);
+      console.log('[WhatsApp Webhook] Processing INCOMING message from:', from, 'senderPn:', senderPn, 'remoteJid:', remoteJid, 'type:', messageContent.type, 'content:', messageContent.text);
       
-      if (from) {
+      if (from && messageContent.text) {
         // Normalize phone number - remove WhatsApp suffixes
         const normalizedPhone = from.replace('@s.whatsapp.net', '').replace('@c.us', '').replace('@lid', '');
         
