@@ -436,224 +436,278 @@ export default function AdminDemoCalendar() {
           </Dialog>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Calendar */}
-          <Card className="col-span-1 lg:col-span-2 bg-white/5 border-white/10">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                  {format(currentMonth, "MMMM yyyy", { locale: enUS })}
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                    className="text-white/60 hover:text-white"
-                  >
-                    <ChevronLeft size={20} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                    className="text-white/60 hover:text-white"
-                  >
-                    <ChevronRight size={20} />
-                  </Button>
-                </div>
+        {/* Calendar */}
+        <Card className="bg-white/5 border-white/10">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                {format(currentMonth, "MMMM yyyy", { locale: enUS })}
+              </CardTitle>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                  className="text-white/60 hover:text-white"
+                >
+                  <ChevronLeft size={20} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                  className="text-white/60 hover:text-white"
+                >
+                  <ChevronRight size={20} />
+                </Button>
               </div>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                month={currentMonth}
-                onMonthChange={setCurrentMonth}
-                locale={enUS}
-                modifiers={{
-                  booked: getDaysWithBookings(),
-                }}
-                modifiersStyles={{
-                  booked: {
-                    fontWeight: "bold",
-                    backgroundColor: "rgba(132, 204, 22, 0.2)",
-                    borderRadius: "50%",
-                  },
-                }}
-                className="w-full"
-                classNames={{
-                  months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                  month: "space-y-4 w-full",
-                  caption: "hidden",
-                  table: "w-full border-collapse",
-                  head_row: "flex w-full",
-                  head_cell: "text-white/50 rounded-md flex-1 font-normal text-sm",
-                  row: "flex w-full mt-2",
-                  cell: "flex-1 text-center text-sm p-0 relative",
-                  day: "h-10 w-10 p-0 font-normal mx-auto rounded-full hover:bg-white/10 transition-colors flex items-center justify-center",
-                  day_selected: "bg-lime-500/30 text-lime-400 hover:bg-lime-500/40",
-                  day_today: "border border-white/30",
-                  day_outside: "text-white/20",
-                }}
-              />
-            </CardContent>
-          </Card>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => date && setSelectedDate(date)}
+              month={currentMonth}
+              onMonthChange={setCurrentMonth}
+              locale={enUS}
+              modifiers={{
+                booked: getDaysWithBookings(),
+              }}
+              modifiersStyles={{
+                booked: {
+                  fontWeight: "bold",
+                  backgroundColor: "rgba(132, 204, 22, 0.2)",
+                  borderRadius: "50%",
+                },
+              }}
+              className="w-full"
+              classNames={{
+                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                month: "space-y-4 w-full",
+                caption: "hidden",
+                table: "w-full border-collapse",
+                head_row: "flex w-full",
+                head_cell: "text-white/50 rounded-md flex-1 font-normal text-sm",
+                row: "flex w-full mt-2",
+                cell: "flex-1 text-center text-sm p-0 relative",
+                day: "h-10 w-10 p-0 font-normal mx-auto rounded-full hover:bg-white/10 transition-colors flex items-center justify-center",
+                day_selected: "bg-lime-500/30 text-lime-400 hover:bg-lime-500/40",
+                day_today: "border border-white/30",
+                day_outside: "text-white/20",
+              }}
+            />
+          </CardContent>
+        </Card>
 
-          {/* Selected Day Bookings */}
+        {/* Pending Videocalls Section */}
+        <Card className="bg-white/5 border-white/10">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2" style={{ fontFamily: "Orbitron, sans-serif" }}>
+              <Video className="text-purple-400" size={20} />
+              Videocall da Confermare
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const pendingBookings = bookings.filter(b => b.status === "pending_approval");
+              
+              if (isLoading) {
+                return <div className="text-white/50 text-center py-8">Loading...</div>;
+              }
+              
+              if (pendingBookings.length === 0) {
+                return (
+                  <div className="text-white/50 text-center py-8">
+                    Nessuna videocall in attesa di conferma
+                  </div>
+                );
+              }
+              
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {pendingBookings.map((booking) => (
+                    <div
+                      key={booking.id}
+                      className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 space-y-3"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="text-white font-medium">{booking.title}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Clock size={14} className="text-white/50" />
+                            <span className="text-white/60 text-sm">
+                              {format(new Date(booking.scheduled_at), "dd/MM/yyyy")} alle {format(new Date(booking.scheduled_at), "HH:mm")}
+                            </span>
+                          </div>
+                        </div>
+                        <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                          Pending
+                        </Badge>
+                      </div>
+
+                      {booking.client_name && (
+                        <div className="flex items-center gap-2 text-white/60 text-sm">
+                          <User size={14} />
+                          <span>{booking.client_name}</span>
+                        </div>
+                      )}
+                      {booking.client_phone && (
+                        <div className="flex items-center gap-2 text-white/60 text-sm">
+                          <Phone size={14} />
+                          <span>{booking.client_phone}</span>
+                        </div>
+                      )}
+
+                      {booking.project_type && (
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {booking.project_type}
+                        </Badge>
+                      )}
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                        <Button
+                          size="sm"
+                          className="gap-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30"
+                          onClick={() => approveBooking.mutate(booking.id)}
+                          disabled={approveBooking.isPending}
+                        >
+                          <Check size={14} />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                          onClick={() => rejectBooking.mutate(booking.id)}
+                          disabled={rejectBooking.isPending}
+                        >
+                          <X size={14} />
+                          Reject
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1 text-xs ml-auto"
+                          onClick={() => handleEdit(booking)}
+                        >
+                          <Edit2 size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+
+        {/* Selected Day Bookings */}
+        {selectedDayBookings.length > 0 && (
           <Card className="bg-white/5 border-white/10">
             <CardHeader>
               <CardTitle className="text-white text-lg" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                {format(selectedDate, "MMMM d, yyyy", { locale: enUS })}
+                {format(selectedDate, "d MMMM yyyy", { locale: enUS })}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px] pr-4">
-                {isLoading ? (
-                  <div className="text-white/50 text-center py-8">Loading...</div>
-                ) : selectedDayBookings.length === 0 ? (
-                  <div className="text-white/50 text-center py-8">
-                    No demos scheduled for this day
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {selectedDayBookings.map((booking) => (
-                      <div
-                        key={booking.id}
-                        className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="text-white font-medium">{booking.title}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Clock size={14} className="text-white/50" />
-                              <span className="text-white/60 text-sm">
-                                {format(new Date(booking.scheduled_at), "HH:mm")} - {booking.duration_minutes} min
-                              </span>
-                            </div>
-                          </div>
-                          <Badge className={getStatusColor(booking.status)}>
-                            {getStatusLabel(booking.status)}
-                          </Badge>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {selectedDayBookings.filter(b => b.status !== "pending_approval").map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="text-white font-medium">{booking.title}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Clock size={14} className="text-white/50" />
+                          <span className="text-white/60 text-sm">
+                            {format(new Date(booking.scheduled_at), "HH:mm")} - {booking.duration_minutes} min
+                          </span>
                         </div>
-
-                        {booking.client_name && (
-                          <div className="flex items-center gap-2 text-white/60 text-sm">
-                            <User size={14} />
-                            <span>{booking.client_name}</span>
-                          </div>
-                        )}
-                        {booking.client_email && (
-                          <div className="flex items-center gap-2 text-white/60 text-sm">
-                            <Mail size={14} />
-                            <span>{booking.client_email}</span>
-                          </div>
-                        )}
-                        {booking.client_phone && (
-                          <div className="flex items-center gap-2 text-white/60 text-sm">
-                            <Phone size={14} />
-                            <span>{booking.client_phone}</span>
-                          </div>
-                        )}
-
-                        {booking.project_type && (
-                          <Badge variant="outline" className="text-xs capitalize">
-                            {booking.project_type}
-                          </Badge>
-                        )}
-
-                        {/* Approve/Reject buttons for pending approval */}
-                        {booking.status === "pending_approval" && (
-                          <div className="flex items-center gap-2 pt-2 border-t border-white/10">
-                            <Button
-                              size="sm"
-                              className="gap-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30"
-                              onClick={() => approveBooking.mutate(booking.id)}
-                              disabled={approveBooking.isPending}
-                            >
-                              <Check size={14} />
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/20"
-                              onClick={() => rejectBooking.mutate(booking.id)}
-                              disabled={rejectBooking.isPending}
-                            >
-                              <X size={14} />
-                              Reject
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="gap-1 text-xs ml-auto"
-                              onClick={() => handleEdit(booking)}
-                            >
-                              <Edit2 size={14} />
-                              Edit
-                            </Button>
-                          </div>
-                        )}
-
-                        {/* Regular action buttons for other statuses */}
-                        {booking.status !== "pending_approval" && (
-                          <div className="flex items-center gap-2 pt-2 border-t border-white/10">
-                            {booking.meeting_link && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="gap-1 text-xs"
-                                onClick={() => window.open(booking.meeting_link!, "_blank")}
-                              >
-                                <Video size={14} />
-                                Join
-                                <ExternalLink size={12} />
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="gap-1 text-xs"
-                              onClick={() => handleEdit(booking)}
-                            >
-                              <Edit2 size={14} />
-                              Edit
-                            </Button>
-                            <Select
-                              value={booking.status}
-                              onValueChange={(status) => updateStatus.mutate({ id: booking.id, status })}
-                            >
-                              <SelectTrigger className="h-8 text-xs w-auto bg-transparent border-0 p-0 pl-2">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
-                                <SelectItem value="scheduled">Scheduled</SelectItem>
-                                <SelectItem value="completed">Completed</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                                <SelectItem value="rescheduled">Rescheduled</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="gap-1 text-xs text-red-400 hover:text-red-300 ml-auto"
-                              onClick={() => deleteBooking.mutate(booking.id)}
-                            >
-                              <Trash2 size={14} />
-                            </Button>
-                          </div>
-                        )}
                       </div>
-                    ))}
+                      <Badge className={getStatusColor(booking.status)}>
+                        {getStatusLabel(booking.status)}
+                      </Badge>
+                    </div>
+
+                    {booking.client_name && (
+                      <div className="flex items-center gap-2 text-white/60 text-sm">
+                        <User size={14} />
+                        <span>{booking.client_name}</span>
+                      </div>
+                    )}
+                    {booking.client_email && (
+                      <div className="flex items-center gap-2 text-white/60 text-sm">
+                        <Mail size={14} />
+                        <span>{booking.client_email}</span>
+                      </div>
+                    )}
+                    {booking.client_phone && (
+                      <div className="flex items-center gap-2 text-white/60 text-sm">
+                        <Phone size={14} />
+                        <span>{booking.client_phone}</span>
+                      </div>
+                    )}
+
+                    {booking.project_type && (
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {booking.project_type}
+                      </Badge>
+                    )}
+
+                    <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                      {booking.meeting_link && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1 text-xs"
+                          onClick={() => window.open(booking.meeting_link!, "_blank")}
+                        >
+                          <Video size={14} />
+                          Join
+                          <ExternalLink size={12} />
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1 text-xs"
+                        onClick={() => handleEdit(booking)}
+                      >
+                        <Edit2 size={14} />
+                        Edit
+                      </Button>
+                      <Select
+                        value={booking.status}
+                        onValueChange={(status) => updateStatus.mutate({ id: booking.id, status })}
+                      >
+                        <SelectTrigger className="h-8 text-xs w-auto bg-transparent border-0 p-0 pl-2">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
+                          <SelectItem value="scheduled">Scheduled</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          <SelectItem value="rescheduled">Rescheduled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1 text-xs text-red-400 hover:text-red-300 ml-auto"
+                        onClick={() => deleteBooking.mutate(booking.id)}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </ScrollArea>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        </div>
+        )}
       </div>
     </DashboardLayout>
   );
