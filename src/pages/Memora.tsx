@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Copy, Trash2, MessageCircle, Cake, Gift, Calendar } from "lucide-react";
 import { format, differenceInDays, setYear, isToday, isTomorrow, addYears } from "date-fns";
-import { it } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 
 interface MemoraContact {
   id: string;
@@ -53,7 +53,7 @@ const Memora = () => {
 
       if (error) {
         console.error("Error fetching contacts:", error);
-        toast.error("Errore nel caricamento dei contatti");
+        toast.error("Error loading contacts");
       } else {
         setContacts(contactsData || []);
       }
@@ -81,7 +81,7 @@ const Memora = () => {
         (payload) => {
           if (payload.eventType === "INSERT") {
             setContacts((prev) => [...prev, payload.new as MemoraContact]);
-            toast.success("Nuovo contatto aggiunto!");
+            toast.success("New contact added!");
           } else if (payload.eventType === "DELETE") {
             setContacts((prev) => prev.filter((c) => c.id !== payload.old.id));
           }
@@ -96,9 +96,9 @@ const Memora = () => {
 
   const copyLink = () => {
     if (!username) return;
-    const link = `${window.location.origin}/${username}/memora`;
+    const link = `https://unvrslabs.dev/${username}/memora`;
     navigator.clipboard.writeText(link);
-    toast.success("Link copiato negli appunti!");
+    toast.success("Link copied to clipboard!");
   };
 
   const deleteContact = async (id: string) => {
@@ -108,9 +108,9 @@ const Memora = () => {
       .eq("id", id);
 
     if (error) {
-      toast.error("Errore nell'eliminazione del contatto");
+      toast.error("Error deleting contact");
     } else {
-      toast.success("Contatto eliminato");
+      toast.success("Contact deleted");
     }
   };
 
@@ -142,15 +142,15 @@ const Memora = () => {
     }
 
     if (isToday(nextBirthday)) {
-      return <Badge className="bg-primary text-primary-foreground animate-pulse">🎂 Oggi!</Badge>;
+      return <Badge className="bg-primary text-primary-foreground animate-pulse">🎂 Today!</Badge>;
     } else if (isTomorrow(nextBirthday)) {
-      return <Badge className="bg-accent text-accent-foreground">Domani</Badge>;
+      return <Badge className="bg-accent text-accent-foreground">Tomorrow</Badge>;
     } else if (days <= 7) {
-      return <Badge variant="secondary">Fra {days} giorni</Badge>;
+      return <Badge variant="secondary">In {days} days</Badge>;
     } else if (days <= 30) {
-      return <Badge variant="outline">Fra {days} giorni</Badge>;
+      return <Badge variant="outline">In {days} days</Badge>;
     }
-    return <Badge variant="outline" className="text-muted-foreground">{days} giorni</Badge>;
+    return <Badge variant="outline" className="text-muted-foreground">{days} days</Badge>;
   };
 
   // Sort contacts by next birthday
@@ -169,7 +169,7 @@ const Memora = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Memora</h1>
-              <p className="text-muted-foreground">Ricorda i compleanni delle persone care</p>
+              <p className="text-muted-foreground">Remember the birthdays of your loved ones</p>
             </div>
           </div>
         </div>
@@ -179,16 +179,16 @@ const Memora = () => {
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
               <Gift className="h-5 w-5 text-primary" />
-              Il tuo link da condividere
+              Your shareable link
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              Condividi questo link con amici e familiari. Loro potranno inserire la loro data di compleanno e tu riceverai i dati qui.
+              Share this link with friends and family. They can enter their birthday and you'll receive the data here.
             </p>
             <div className="flex items-center gap-3">
               <div className="flex-1 p-3 bg-muted rounded-lg border border-border font-mono text-sm text-foreground truncate">
-                {username ? `${window.location.origin}/${username}/memora` : "Caricamento..."}
+                {username ? `https://unvrslabs.dev/${username}/memora` : "Loading..."}
               </div>
               <Button onClick={copyLink} disabled={!username}>
                 <Copy className="h-4 w-4 mr-2" />
@@ -203,29 +203,29 @@ const Memora = () => {
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
-              I tuoi contatti ({contacts.length})
+              Your contacts ({contacts.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Caricamento...</div>
+              <div className="text-center py-8 text-muted-foreground">Loading...</div>
             ) : sortedContacts.length === 0 ? (
               <div className="text-center py-12 space-y-4">
                 <Cake className="h-16 w-16 mx-auto text-muted-foreground/30" />
-                <p className="text-muted-foreground">Nessun contatto ancora</p>
+                <p className="text-muted-foreground">No contacts yet</p>
                 <p className="text-muted-foreground/70 text-sm">
-                  Condividi il link con i tuoi amici per iniziare a raccogliere i loro compleanni!
+                  Share the link with your friends to start collecting their birthdays!
                 </p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="text-muted-foreground">Nome</TableHead>
-                    <TableHead className="text-muted-foreground">Data di nascita</TableHead>
-                    <TableHead className="text-muted-foreground">Prossimo compleanno</TableHead>
+                    <TableHead className="text-muted-foreground">Name</TableHead>
+                    <TableHead className="text-muted-foreground">Date of birth</TableHead>
+                    <TableHead className="text-muted-foreground">Next birthday</TableHead>
                     <TableHead className="text-muted-foreground">WhatsApp</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Azioni</TableHead>
+                    <TableHead className="text-muted-foreground text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -235,7 +235,7 @@ const Memora = () => {
                         {contact.first_name} {contact.last_name}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {format(new Date(contact.birth_date), "d MMMM yyyy", { locale: it })}
+                        {format(new Date(contact.birth_date), "MMMM d, yyyy", { locale: enUS })}
                       </TableCell>
                       <TableCell>
                         {getBirthdayBadge(contact.birth_date)}
