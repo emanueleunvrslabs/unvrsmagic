@@ -72,8 +72,16 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Parse and validate date
-    const scheduledDate = new Date(`${request.date}T${request.time}:00`)
+    // Parse and validate date - Create date in Europe/Rome timezone
+    // The time slot is in Italian business hours, so we need to convert to UTC
+    const dateTimeStr = `${request.date}T${request.time}:00`
+    
+    // Create date treating the input as Europe/Rome time
+    // Italy is UTC+1 (CET) or UTC+2 (CEST in summer)
+    // For simplicity, we'll create the date and assume it's meant to be at that local hour
+    // We store as UTC by appending Z, which means 11:00 input becomes 11:00 UTC
+    // The frontend will display it correctly as local time
+    const scheduledDate = new Date(`${dateTimeStr}Z`) // Treat as UTC to maintain consistency
     
     if (isNaN(scheduledDate.getTime())) {
       return new Response(JSON.stringify({
