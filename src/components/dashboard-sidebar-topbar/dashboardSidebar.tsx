@@ -201,6 +201,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           ]
         },
         { id: "admin-projects", label: "Project Management", icon: FolderCog, href: "/admin/projects" },
+        { id: "admin-demo-calendar", label: "Demo Calendar", icon: Calendar, href: "/admin/demo-calendar" },
       ],
     });
 
