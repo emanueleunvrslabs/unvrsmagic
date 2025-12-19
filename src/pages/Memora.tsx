@@ -97,7 +97,11 @@ const Memora = () => {
 
   const copyLink = () => {
     if (!username) return;
-    const link = `https://unvrslabs.dev/${username}/memora`;
+    // Use production domain in production, otherwise use current origin for dev/preview
+    const baseUrl = window.location.hostname === 'unvrslabs.dev' 
+      ? 'https://unvrslabs.dev' 
+      : window.location.origin;
+    const link = `${baseUrl}/${username}/memora`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     toast.success("Link copied to clipboard!");
@@ -191,7 +195,7 @@ const Memora = () => {
             </p>
             <div className="flex items-center gap-3">
               <div className="flex-1 p-3 bg-muted rounded-lg border border-border font-mono text-sm text-foreground truncate">
-                {username ? `https://unvrslabs.dev/${username}/memora` : "Loading..."}
+                {username ? `${window.location.origin}/${username}/memora` : "Loading..."}
               </div>
               <Button 
                 onClick={copyLink} 
