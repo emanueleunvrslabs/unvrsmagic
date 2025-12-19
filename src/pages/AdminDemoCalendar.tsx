@@ -436,69 +436,160 @@ export default function AdminDemoCalendar() {
           </Dialog>
         </div>
 
-        {/* Calendar */}
-        <Card className="bg-white/5 border-white/10">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-white" style={{ fontFamily: "Orbitron, sans-serif" }}>
-                {format(currentMonth, "MMMM yyyy", { locale: enUS })}
-              </CardTitle>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                  className="text-white/60 hover:text-white"
-                >
-                  <ChevronLeft size={20} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  className="text-white/60 hover:text-white"
-                >
-                  <ChevronRight size={20} />
-                </Button>
+        {/* Calendar + Selected Day Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendar */}
+          <Card className="bg-white/5 border-white/10 lg:col-span-2">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                  {format(currentMonth, "MMMM yyyy", { locale: enUS })}
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                    className="text-white/60 hover:text-white"
+                  >
+                    <ChevronLeft size={20} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                    className="text-white/60 hover:text-white"
+                  >
+                    <ChevronRight size={20} />
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
-              month={currentMonth}
-              onMonthChange={setCurrentMonth}
-              locale={enUS}
-              modifiers={{
-                booked: getDaysWithBookings(),
-              }}
-              modifiersStyles={{
-                booked: {
-                  fontWeight: "bold",
-                  backgroundColor: "rgba(132, 204, 22, 0.2)",
-                  borderRadius: "50%",
-                },
-              }}
-              className="w-full"
-              classNames={{
-                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                month: "space-y-4 w-full",
-                caption: "hidden",
-                table: "w-full border-collapse",
-                head_row: "flex w-full",
-                head_cell: "text-white/50 rounded-md flex-1 font-normal text-sm",
-                row: "flex w-full mt-2",
-                cell: "flex-1 text-center text-sm p-0 relative",
-                day: "h-10 w-10 p-0 font-normal mx-auto rounded-full hover:bg-white/10 transition-colors flex items-center justify-center",
-                day_selected: "bg-lime-500/30 text-lime-400 hover:bg-lime-500/40",
-                day_today: "border border-white/30",
-                day_outside: "text-white/20",
-              }}
-            />
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                month={currentMonth}
+                onMonthChange={setCurrentMonth}
+                locale={enUS}
+                modifiers={{
+                  booked: getDaysWithBookings(),
+                }}
+                modifiersStyles={{
+                  booked: {
+                    fontWeight: "bold",
+                    backgroundColor: "rgba(132, 204, 22, 0.2)",
+                    borderRadius: "50%",
+                  },
+                }}
+                className="w-full"
+                classNames={{
+                  months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                  month: "space-y-4 w-full",
+                  caption: "hidden",
+                  table: "w-full border-collapse",
+                  head_row: "flex w-full",
+                  head_cell: "text-white/50 rounded-md flex-1 font-normal text-sm",
+                  row: "flex w-full mt-2",
+                  cell: "flex-1 text-center text-sm p-0 relative",
+                  day: "h-10 w-10 p-0 font-normal mx-auto rounded-full hover:bg-white/10 transition-colors flex items-center justify-center",
+                  day_selected: "bg-lime-500/30 text-lime-400 hover:bg-lime-500/40",
+                  day_today: "border border-white/30",
+                  day_outside: "text-white/20",
+                }}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Selected Day Sidebar */}
+          <Card className="bg-white/5 border-white/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-white text-lg" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                {format(selectedDate, "dd MMMM yyyy", { locale: enUS })}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[350px] pr-2">
+                {(() => {
+                  const dayBookings = bookings.filter(b => 
+                    isSameDay(new Date(b.scheduled_at), selectedDate)
+                  );
+                  
+                  if (isLoading) {
+                    return <div className="text-white/50 text-center py-8">Loading...</div>;
+                  }
+                  
+                  if (dayBookings.length === 0) {
+                    return (
+                      <div className="text-white/50 text-center py-8">
+                        Nessuna call per questa data
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div className="space-y-3">
+                      {dayBookings.map((booking) => (
+                        <div
+                          key={booking.id}
+                          className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md space-y-2"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-white font-medium text-sm">
+                              {format(new Date(booking.scheduled_at), "HH:mm")}
+                            </span>
+                            <Badge 
+                              className={
+                                booking.status === "pending_approval" 
+                                  ? "bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs"
+                                  : booking.status === "scheduled"
+                                  ? "bg-lime-500/20 text-lime-400 border-lime-500/30 text-xs"
+                                  : "bg-white/10 text-white/70 border-white/20 text-xs"
+                              }
+                            >
+                              {booking.status === "pending_approval" ? "Pending" : booking.status}
+                            </Badge>
+                          </div>
+                          <h4 className="text-white/90 text-sm">
+                            {booking.project_type 
+                              ? `Demo ${booking.project_type.charAt(0).toUpperCase() + booking.project_type.slice(1)}`
+                              : booking.title
+                            }
+                          </h4>
+                          {booking.client_name && (
+                            <div className="flex items-center gap-2 text-white/60 text-xs">
+                              <User size={12} />
+                              <span>{booking.client_name}</span>
+                            </div>
+                          )}
+                          <div className="flex gap-1 pt-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2 text-xs text-white/60 hover:text-white"
+                              onClick={() => handleEdit(booking)}
+                            >
+                              <Edit2 size={12} />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2 text-xs text-red-400 hover:text-red-300"
+                              onClick={() => deleteBooking.mutate(booking.id)}
+                            >
+                              <Trash2 size={12} />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Pending Videocalls Section */}
         <Card className="bg-white/5 border-white/10">
