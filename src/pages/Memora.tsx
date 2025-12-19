@@ -22,7 +22,7 @@ interface MemoraContact {
 const Memora = () => {
   const [contacts, setContacts] = useState<MemoraContact[]>([]);
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState<string | null>(null);
+  const [refCode, setRefCode] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -34,15 +34,15 @@ const Memora = () => {
 
       setUserId(user.id);
 
-      // Get username
+      // Get ref_code
       const { data: profile } = await supabase
         .from("profiles")
-        .select("username")
+        .select("ref_code")
         .eq("user_id", user.id)
         .single();
 
-      if (profile?.username) {
-        setUsername(profile.username);
+      if (profile?.ref_code) {
+        setRefCode(profile.ref_code);
       }
 
       // Get contacts
@@ -96,12 +96,12 @@ const Memora = () => {
   }, [userId]);
 
   const copyLink = () => {
-    if (!username) return;
+    if (!refCode) return;
     // Use production domain in production, otherwise use current origin for dev/preview
     const baseUrl = window.location.hostname === 'unvrslabs.dev' 
       ? 'https://unvrslabs.dev' 
       : window.location.origin;
-    const link = `${baseUrl}/${username}/memora`;
+    const link = `${baseUrl}/m/${refCode}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     toast.success("Link copied to clipboard!");
@@ -195,11 +195,11 @@ const Memora = () => {
             </p>
             <div className="flex items-center gap-3">
               <div className="flex-1 p-3 bg-muted rounded-lg border border-border font-mono text-sm text-foreground truncate">
-                {username ? `${window.location.origin}/${username}/memora` : "Loading..."}
+                {refCode ? `${window.location.origin}/m/${refCode}` : "Loading..."}
               </div>
               <Button 
                 onClick={copyLink} 
-                disabled={!username}
+                disabled={!refCode}
                 variant={copied ? "outline" : "default"}
                 className={copied ? "border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-400" : ""}
               >

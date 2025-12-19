@@ -137,8 +137,8 @@ const App = () => (
           <Route path="/control-panel/*" element={<HomeRedirect />} />
           <Route path="/invite-friends" element={<Navigate to="/settings" replace />} />
           <Route path="/help-center" element={<Navigate to="/settings" replace />} />
-          {/* Dynamic username route - must be before catch-all */}
-          <Route path="/:username/memora" element={<MemoraSubmit />} />
+          {/* Public memora submit with ref code - must be before catch-all */}
+          <Route path="/m/:refCode" element={<MemoraSubmit />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
