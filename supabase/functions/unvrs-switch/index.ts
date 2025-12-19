@@ -67,7 +67,7 @@ COMPORTAMENTO:
 • NON usare MAI trattini (-, —, –) nelle risposte. Usa punti, virgole o frasi separate.
 
 FORMATO RISPOSTA:
-Rispondi SOLO in formato JSON:
+Rispondi SEMPRE e SOLO con UN SINGOLO oggetto JSON valido. MAI duplicare la risposta.
 {
   "response": "Il tuo messaggio di risposta",
   "action": "continue" | "handoff_intake" | "handoff_hlo" | "handoff_human" | "check_demo_availability" | "book_demo",
@@ -82,7 +82,9 @@ Rispondi SOLO in formato JSON:
     "demo_time": "HH:mm (solo per book_demo)",
     "qualified": true/false
   }
-}`
+}
+
+IMPORTANTE: Output SOLO il JSON, nient'altro. UN SOLO oggetto JSON per risposta.`
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -204,24 +206,41 @@ Deno.serve(async (req) => {
     
     console.log('[UNVRS.SWITCH] AI response:', aiText)
 
-    // Parse AI response
+    // Parse AI response - extract only the first valid JSON object
     let parsedResponse
     try {
-      // Extract JSON from response
-      const jsonMatch = aiText.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        parsedResponse = JSON.parse(jsonMatch[0])
-      } else {
-        parsedResponse = {
-          response: aiText,
-          action: 'continue',
-          collected_data: {}
+      // Clean the response - remove any text before first { and after matching }
+      let cleanedText = aiText.trim()
+      const firstBrace = cleanedText.indexOf('{')
+      if (firstBrace > 0) {
+        cleanedText = cleanedText.substring(firstBrace)
+      }
+      
+      // Find matching closing brace
+      let braceCount = 0
+      let endIndex = -1
+      for (let i = 0; i < cleanedText.length; i++) {
+        if (cleanedText[i] === '{') braceCount++
+        if (cleanedText[i] === '}') braceCount--
+        if (braceCount === 0) {
+          endIndex = i + 1
+          break
         }
       }
+      
+      if (endIndex > 0) {
+        const jsonStr = cleanedText.substring(0, endIndex)
+        parsedResponse = JSON.parse(jsonStr)
+        console.log('[UNVRS.SWITCH] Parsed JSON successfully')
+      } else {
+        throw new Error('No valid JSON found')
+      }
     } catch (e) {
-      console.error('[UNVRS.SWITCH] JSON parse error:', e)
+      console.error('[UNVRS.SWITCH] JSON parse error:', e, 'Raw:', aiText.substring(0, 500))
+      // Fallback: try to extract response text
+      const responseMatch = aiText.match(/"response"\s*:\s*"([^"]+)"/)
       parsedResponse = {
-        response: aiText.replace(/```json|```/g, '').trim(),
+        response: responseMatch ? responseMatch[1] : aiText.replace(/```json|```|\{|\}/g, '').trim().substring(0, 200),
         action: 'continue',
         collected_data: {}
       }
