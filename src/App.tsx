@@ -28,6 +28,7 @@ import NotificationCenter from "./pages/NotificationCenter";
 import Marketplace from "./pages/Marketplace";
 import AdminProjects from "./pages/AdminProjects";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminDemoCalendar from "./pages/AdminDemoCalendar";
 import AdminClients from "./pages/AdminClients";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import FinanceDashboard from "./pages/Finance/FinanceDashboard";
@@ -98,6 +99,7 @@ const App = () => (
           <Route path="/admin/finance/transfers" element={<ProtectedRoute><FinanceTransfers /></ProtectedRoute>} />
           <Route path="/admin/finance/payments" element={<ProtectedRoute><FinancePayments /></ProtectedRoute>} />
           <Route path="/admin/projects" element={<ProtectedRoute><AdminProjects /></ProtectedRoute>} />
+          <Route path="/admin/demo-calendar" element={<ProtectedRoute><AdminDemoCalendar /></ProtectedRoute>} />
           <Route path="/ai-social" element={<ProtectedRoute><AiSocialDashboard /></ProtectedRoute>} />
           <Route path="/ai-social/generate-image" element={<ProtectedRoute><GenerateImage /></ProtectedRoute>} />
           <Route path="/ai-social/generate-video" element={<ProtectedRoute><GenerateVideo /></ProtectedRoute>} />
