@@ -306,77 +306,68 @@ export default function AdminDemoCalendar() {
                 New Demo
               </Button>
             </DialogTrigger>
-            <DialogContent 
-              className="max-w-[360px] p-0 overflow-hidden border-0"
-              style={{
-                background: 'rgba(28, 28, 30, 0.95)',
-                backdropFilter: 'blur(60px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(60px) saturate(180%)',
-                borderRadius: '14px',
-                border: '0.5px solid rgba(255,255,255,0.12)',
-                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-              }}
-            >
+            <DialogContent className="glassmorphism-modal max-w-[380px] rounded-2xl p-0 overflow-hidden">
               {/* Header */}
-              <div className="px-5 pt-5 pb-4" style={{ borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
+              <div className="px-5 pt-5 pb-4 border-b border-white/10">
                 <DialogHeader>
-                  <DialogTitle className="text-[17px] font-semibold text-white tracking-tight">
+                  <DialogTitle className="text-lg font-semibold text-white">
                     {editingBooking ? "Edit Demo" : "Schedule Demo"}
                   </DialogTitle>
-                  <p className="text-[13px] text-white/50 mt-0.5">
+                  <p className="text-sm text-white/50 mt-1">
                     {format(selectedDate, "EEEE, MMMM d, yyyy", { locale: enUS })}
                   </p>
                 </DialogHeader>
               </div>
 
               {/* Scrollable Content */}
-              <ScrollArea className="max-h-[50vh]">
-                <form onSubmit={handleSubmit} className="px-5 py-4 space-y-5">
+              <ScrollArea className="max-h-[55vh]">
+                <div className="px-5 py-5 space-y-6">
                   
-                  {/* Title */}
-                  <div>
+                  {/* Title Field */}
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-wider text-white/50 font-medium">Title</label>
                     <Input
                       placeholder="Demo title"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       required
-                      className="h-11 bg-white/5 border-0 rounded-lg text-[15px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                      className="h-11 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                     />
                   </div>
 
-                  {/* Client Info */}
-                  <div className="space-y-2.5">
-                    <span className="text-[11px] uppercase tracking-wider text-white/40 font-medium">Client</span>
-                    <div className="grid grid-cols-2 gap-2.5">
+                  {/* Client Info Section */}
+                  <div className="space-y-3">
+                    <label className="text-xs uppercase tracking-wider text-white/50 font-medium">Client Information</label>
+                    <div className="grid grid-cols-2 gap-3">
                       <Input
                         placeholder="Name"
                         value={formData.client_name}
                         onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                        className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                        className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                       />
                       <Input
                         type="email"
                         placeholder="Email"
                         value={formData.client_email}
                         onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
-                        className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                        className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-2 gap-3">
                       <Input
                         placeholder="Phone"
                         value={formData.client_phone}
                         onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
-                        className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                        className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                       />
                       <Select
                         value={formData.project_type}
                         onValueChange={(value) => setFormData({ ...formData, project_type: value })}
                       >
-                        <SelectTrigger className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white/70 focus:ring-1 focus:ring-white/20">
+                        <SelectTrigger className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white/70 focus:ring-1 focus:ring-white/30">
                           <SelectValue placeholder="Project" />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#2c2c2e] border-white/10 rounded-xl">
+                        <SelectContent className="glassmorphism-modal border-white/10 rounded-xl z-50">
                           <SelectItem value="energizzo">Energizzo</SelectItem>
                           <SelectItem value="ai-social">AI Social</SelectItem>
                           <SelectItem value="nkmt">NKMT</SelectItem>
@@ -386,24 +377,24 @@ export default function AdminDemoCalendar() {
                     </div>
                   </div>
 
-                  {/* Schedule */}
-                  <div className="space-y-2.5">
-                    <span className="text-[11px] uppercase tracking-wider text-white/40 font-medium">Schedule</span>
-                    <div className="grid grid-cols-2 gap-2.5">
+                  {/* Schedule Section */}
+                  <div className="space-y-3">
+                    <label className="text-xs uppercase tracking-wider text-white/50 font-medium">Schedule</label>
+                    <div className="grid grid-cols-2 gap-3">
                       <Input
                         type="time"
                         value={formData.scheduled_time}
                         onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
-                        className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white focus-visible:ring-1 focus-visible:ring-white/20 [&::-webkit-calendar-picker-indicator]:invert"
+                        className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus-visible:ring-1 focus-visible:ring-white/30 [&::-webkit-calendar-picker-indicator]:invert"
                       />
                       <Select
                         value={formData.duration_minutes.toString()}
                         onValueChange={(value) => setFormData({ ...formData, duration_minutes: parseInt(value) })}
                       >
-                        <SelectTrigger className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white/70 focus:ring-1 focus:ring-white/20">
+                        <SelectTrigger className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white/70 focus:ring-1 focus:ring-white/30">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#2c2c2e] border-white/10 rounded-xl">
+                        <SelectContent className="glassmorphism-modal border-white/10 rounded-xl z-50">
                           <SelectItem value="15">15 min</SelectItem>
                           <SelectItem value="30">30 min</SelectItem>
                           <SelectItem value="45">45 min</SelectItem>
@@ -416,40 +407,37 @@ export default function AdminDemoCalendar() {
                       placeholder="Meeting link (Zoom, Meet...)"
                       value={formData.meeting_link}
                       onChange={(e) => setFormData({ ...formData, meeting_link: e.target.value })}
-                      className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                      className="h-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                     />
                   </div>
 
-                  {/* Notes */}
-                  <div className="space-y-2.5">
-                    <span className="text-[11px] uppercase tracking-wider text-white/40 font-medium">Notes</span>
+                  {/* Notes Section */}
+                  <div className="space-y-3">
+                    <label className="text-xs uppercase tracking-wider text-white/50 font-medium">Notes</label>
                     <Textarea
                       placeholder="Additional notes..."
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="min-h-[80px] bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20 resize-none"
+                      className="min-h-[80px] bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30 resize-none"
                     />
                   </div>
-                </form>
+                </div>
               </ScrollArea>
 
               {/* Footer */}
-              <div 
-                className="px-5 py-4 flex justify-end gap-3"
-                style={{ borderTop: '0.5px solid rgba(255,255,255,0.08)' }}
-              >
+              <div className="px-5 py-4 border-t border-white/10 flex justify-end gap-3">
                 <Button 
                   type="button" 
                   variant="ghost" 
                   onClick={() => setIsDialogOpen(false)} 
-                  className="h-9 px-4 text-[14px] text-white/60 hover:text-white hover:bg-white/5 rounded-lg"
+                  className="h-10 px-4 text-sm text-white/60 hover:text-white hover:bg-white/10 rounded-xl"
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={handleSubmit}
                   disabled={createBooking.isPending || updateBooking.isPending}
-                  className="h-9 px-5 text-[14px] font-medium text-white bg-white/10 hover:bg-white/15 border-0 rounded-lg"
+                  className="h-10 px-5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl"
                 >
                   {createBooking.isPending || updateBooking.isPending ? "Saving..." : editingBooking ? "Update" : "Create"}
                 </Button>
