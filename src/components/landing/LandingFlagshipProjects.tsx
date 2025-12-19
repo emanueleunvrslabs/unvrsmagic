@@ -71,9 +71,9 @@ const projects: FlagshipProject[] = [
       },
     ],
     gallery: [
-      { src: "/images/energizzo-dashboard.jpg", alt: "Dashboard Energizzo" },
-      { src: "/images/energizzo-analytics.jpg", alt: "Analytics Energizzo" },
-      { src: "/images/energizzo-reports.jpg", alt: "Reports Energizzo" },
+      { src: "/images/energizzo-dashboard.png", alt: "Dashboard Energizzo" },
+      { src: "/images/energizzo-clienti.png", alt: "Clienti Attivi Energizzo" },
+      { src: "/images/energizzo-livecall.png", alt: "AI Live Call Energizzo" },
     ],
     technologies: ["React", "Supabase", "AI Models", "IoT Integration"],
     stats: [
