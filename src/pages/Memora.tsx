@@ -142,15 +142,15 @@ const Memora = () => {
     }
 
     if (isToday(nextBirthday)) {
-      return <Badge className="bg-gradient-to-r from-pink-500 to-yellow-500 text-white animate-pulse">🎂 Oggi!</Badge>;
+      return <Badge className="bg-primary text-primary-foreground animate-pulse">🎂 Oggi!</Badge>;
     } else if (isTomorrow(nextBirthday)) {
-      return <Badge className="bg-orange-500 text-white">Domani</Badge>;
+      return <Badge className="bg-accent text-accent-foreground">Domani</Badge>;
     } else if (days <= 7) {
-      return <Badge className="bg-yellow-500 text-black">Fra {days} giorni</Badge>;
-    } else if (days <= 30) {
       return <Badge variant="secondary">Fra {days} giorni</Badge>;
+    } else if (days <= 30) {
+      return <Badge variant="outline">Fra {days} giorni</Badge>;
     }
-    return <Badge variant="outline">{days} giorni</Badge>;
+    return <Badge variant="outline" className="text-muted-foreground">{days} giorni</Badge>;
   };
 
   // Sort contacts by next birthday
@@ -164,33 +164,33 @@ const Memora = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-pink-500/20 to-orange-500/20 border border-pink-500/30">
-              <Cake className="h-8 w-8 text-pink-400" />
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+              <Cake className="h-8 w-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Memora</h1>
-              <p className="text-white/60">Ricorda i compleanni delle persone care</p>
+              <h1 className="text-3xl font-bold text-foreground">Memora</h1>
+              <p className="text-muted-foreground">Ricorda i compleanni delle persone care</p>
             </div>
           </div>
         </div>
 
         {/* Share Link Card */}
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Gift className="h-5 w-5 text-pink-400" />
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <Gift className="h-5 w-5 text-primary" />
               Il tuo link da condividere
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-white/70">
+            <p className="text-muted-foreground">
               Condividi questo link con amici e familiari. Loro potranno inserire la loro data di compleanno e tu riceverai i dati qui.
             </p>
             <div className="flex items-center gap-3">
-              <div className="flex-1 p-3 bg-white/10 rounded-lg border border-white/20 font-mono text-sm text-white/90 truncate">
+              <div className="flex-1 p-3 bg-muted rounded-lg border border-border font-mono text-sm text-foreground truncate">
                 {username ? `${window.location.origin}/${username}/memora` : "Caricamento..."}
               </div>
-              <Button onClick={copyLink} disabled={!username} className="bg-pink-500 hover:bg-pink-600">
+              <Button onClick={copyLink} disabled={!username}>
                 <Copy className="h-4 w-4 mr-2" />
                 Copia
               </Button>
@@ -199,55 +199,55 @@ const Memora = () => {
         </Card>
 
         {/* Contacts Table */}
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-pink-400" />
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
               I tuoi contatti ({contacts.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8 text-white/60">Caricamento...</div>
+              <div className="text-center py-8 text-muted-foreground">Caricamento...</div>
             ) : sortedContacts.length === 0 ? (
               <div className="text-center py-12 space-y-4">
-                <Cake className="h-16 w-16 mx-auto text-white/20" />
-                <p className="text-white/60">Nessun contatto ancora</p>
-                <p className="text-white/40 text-sm">
+                <Cake className="h-16 w-16 mx-auto text-muted-foreground/30" />
+                <p className="text-muted-foreground">Nessun contatto ancora</p>
+                <p className="text-muted-foreground/70 text-sm">
                   Condividi il link con i tuoi amici per iniziare a raccogliere i loro compleanni!
                 </p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="border-white/10 hover:bg-transparent">
-                    <TableHead className="text-white/70">Nome</TableHead>
-                    <TableHead className="text-white/70">Data di nascita</TableHead>
-                    <TableHead className="text-white/70">Prossimo compleanno</TableHead>
-                    <TableHead className="text-white/70">WhatsApp</TableHead>
-                    <TableHead className="text-white/70 text-right">Azioni</TableHead>
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="text-muted-foreground">Nome</TableHead>
+                    <TableHead className="text-muted-foreground">Data di nascita</TableHead>
+                    <TableHead className="text-muted-foreground">Prossimo compleanno</TableHead>
+                    <TableHead className="text-muted-foreground">WhatsApp</TableHead>
+                    <TableHead className="text-muted-foreground text-right">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {sortedContacts.map((contact) => (
-                    <TableRow key={contact.id} className="border-white/10 hover:bg-white/5">
-                      <TableCell className="text-white font-medium">
+                    <TableRow key={contact.id} className="border-border hover:bg-muted/50">
+                      <TableCell className="text-foreground font-medium">
                         {contact.first_name} {contact.last_name}
                       </TableCell>
-                      <TableCell className="text-white/70">
+                      <TableCell className="text-muted-foreground">
                         {format(new Date(contact.birth_date), "d MMMM yyyy", { locale: it })}
                       </TableCell>
                       <TableCell>
                         {getBirthdayBadge(contact.birth_date)}
                       </TableCell>
-                      <TableCell className="text-white/70 font-mono text-sm">
+                      <TableCell className="text-muted-foreground font-mono text-sm">
                         {contact.whatsapp_number}
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-green-400 hover:text-green-300 hover:bg-green-500/20"
+                          className="text-green-500 hover:text-green-400 hover:bg-green-500/10"
                           onClick={() => sendWhatsApp(contact.whatsapp_number, contact.first_name)}
                         >
                           <MessageCircle className="h-4 w-4" />
@@ -255,7 +255,7 @@ const Memora = () => {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => deleteContact(contact.id)}
                         >
                           <Trash2 className="h-4 w-4" />
