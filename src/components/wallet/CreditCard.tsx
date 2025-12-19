@@ -91,13 +91,7 @@ export function CreditCard() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent 
-          className="sm:max-w-md border-white/10 backdrop-blur-xl overflow-hidden"
-          style={{ 
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
-            boxShadow: '0 8px 32px 0 rgba(13, 38, 38, 0.37)'
-          }}
-        >
+        <DialogContent className="liquid-glass-card sm:max-w-md border-0 overflow-hidden">
           <DialogHeader>
             <DialogTitle className="text-white">Purchase Credits</DialogTitle>
             <DialogDescription className="text-white/60">
@@ -108,8 +102,7 @@ export function CreditCard() {
             {CREDIT_PACKAGES.map((pkg) => (
               <button
                 key={pkg.id}
-                className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 text-left transition-all hover:bg-white/10 hover:border-white/20 disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)' }}
+                className="liquid-glass-card rounded-xl p-4 text-left transition-all hover:bg-white/10 disabled:opacity-50"
                 onClick={() => {
                   purchaseCredits(pkg.id);
                   setIsDialogOpen(false);
@@ -118,7 +111,7 @@ export function CreditCard() {
               >
                 <div className="flex items-center justify-between w-full">
                   <span className="font-semibold text-white">{pkg.price}</span>
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-white/80 border border-white/10">
+                  <span className="liquid-glass-card px-3 py-1 rounded-full text-xs font-medium text-white/80">
                     {pkg.amount} credits
                   </span>
                 </div>
