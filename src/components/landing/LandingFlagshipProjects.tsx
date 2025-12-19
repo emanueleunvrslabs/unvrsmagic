@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Zap, Brain, ScrollText, Bot, BarChart3, Shield, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
-
+import { useIsMobile } from "@/hooks/use-mobile";
 interface ProjectFeature {
   icon: React.ReactNode;
   title: string;
@@ -89,10 +89,57 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [isExpanded, setIsExpanded] = useState(false);
+  const isMobile = useIsMobile();
+  
+  // Gallery carousel state
+  const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0);
+  
+  // Features scroll state
+  const featuresScrollRef = useRef<HTMLDivElement>(null);
+  const [activeFeaturesIndex, setActiveFeaturesIndex] = useState(0);
+  
+  // Agents scroll state
+  const agentsScrollRef = useRef<HTMLDivElement>(null);
+  const [activeAgentsIndex, setActiveAgentsIndex] = useState(0);
 
   const scrollPrev = () => emblaApi?.scrollPrev();
   const scrollNext = () => emblaApi?.scrollNext();
-
+  
+  // Gallery carousel sync
+  const onGallerySelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedGalleryIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+  
+  useEffect(() => {
+    if (!emblaApi) return;
+    onGallerySelect();
+    emblaApi.on("select", onGallerySelect);
+    return () => {
+      emblaApi.off("select", onGallerySelect);
+    };
+  }, [emblaApi, onGallerySelect]);
+  
+  // Features scroll handler
+  const handleFeaturesScroll = useCallback(() => {
+    if (!featuresScrollRef.current) return;
+    const container = featuresScrollRef.current;
+    const scrollLeft = container.scrollLeft;
+    const itemWidth = 288 + 16; // w-72 (288px) + gap-4 (16px)
+    const index = Math.round(scrollLeft / itemWidth);
+    setActiveFeaturesIndex(Math.min(index, project.features.length - 1));
+  }, [project.features.length]);
+  
+  // Agents scroll handler  
+  const handleAgentsScroll = useCallback(() => {
+    if (!agentsScrollRef.current) return;
+    const container = agentsScrollRef.current;
+    const scrollLeft = container.scrollLeft;
+    const itemWidth = 256 + 16; // w-64 (256px) + gap-4 (16px)
+    const index = Math.round(scrollLeft / itemWidth);
+    // 10 agents total
+    setActiveAgentsIndex(Math.min(index, 9));
+  }, []);
   return (
     <motion.div
       ref={ref}
@@ -235,7 +282,12 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                 >
                   KEY FEATURES
                 </h4>
-                <div className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div 
+                  ref={featuresScrollRef}
+                  onScroll={handleFeaturesScroll}
+                  className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" 
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
                   <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
                     {project.features.map((feature, index) => (
                       <motion.div
@@ -257,6 +309,21 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                     ))}
                   </div>
                 </div>
+                {/* Mobile pagination dots for Features */}
+                {isMobile && (
+                  <div className="flex justify-center gap-2 mt-4">
+                    {project.features.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          index === activeFeaturesIndex 
+                            ? "bg-lime-400 w-4" 
+                            : "bg-white/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* MODULO 3: IMAGE GALLERY */}
@@ -292,20 +359,39 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                     </div>
                   </div>
                   
-                  {/* Carousel Controls */}
-                  <button
-                    onClick={scrollPrev}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  <button
-                    onClick={scrollNext}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
+                  {/* Carousel Controls - Hidden on mobile */}
+                  {!isMobile && (
+                    <>
+                      <button
+                        onClick={scrollPrev}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <button
+                        onClick={scrollNext}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </>
+                  )}
                 </div>
+                {/* Mobile pagination dots for Gallery */}
+                {isMobile && (
+                  <div className="flex justify-center gap-2 mt-4">
+                    {project.gallery.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          index === selectedGalleryIndex 
+                            ? "bg-lime-400 w-4" 
+                            : "bg-white/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* MODULO 4: AI AGENTS - Horizontal Scroll */}
@@ -316,7 +402,12 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                 >
                   AI AGENTS
                 </h4>
-                <div className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div 
+                  ref={agentsScrollRef}
+                  onScroll={handleAgentsScroll}
+                  className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" 
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
                   <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
                     {/* Max Power - Central Agent */}
                     <div className="p-6 rounded-xl bg-lime-500/10 border border-lime-500/30 w-64 flex-shrink-0">
@@ -410,6 +501,21 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                     </div>
                   </div>
                 </div>
+                {/* Mobile pagination dots for Agents */}
+                {isMobile && (
+                  <div className="flex justify-center gap-2 mt-4">
+                    {[0, 1, 2, 3, 4, 5, 6].map((index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          index === activeAgentsIndex 
+                            ? "bg-lime-400 w-4" 
+                            : "bg-white/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* MODULO 5: TECHNOLOGIES & STATS */}
