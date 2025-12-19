@@ -228,10 +228,13 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
               {project.description}
             </p>
             
-            <motion.button
+            <motion.a
+              href="https://wa.me/447575839334?text=Ciao%2C%20voglio%20richiedere%20una%20demo%20per%20visionare%20il%20software%20Energizzo."
+              target="_blank"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-fit px-6 py-3 rounded-full text-sm font-medium transition-all"
+              className="w-fit px-6 py-3 rounded-full text-sm font-medium transition-all inline-block"
               style={{
                 fontFamily: "Orbitron, sans-serif",
                 background: "linear-gradient(135deg, rgba(132, 204, 22, 0.4), rgba(34, 197, 94, 0.4))",
@@ -239,7 +242,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
               }}
             >
               Richiedi una demo
-            </motion.button>
+            </motion.a>
           </div>
         </div>
 
