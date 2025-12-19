@@ -200,7 +200,8 @@ const Memora = () => {
               <Button 
                 onClick={copyLink} 
                 disabled={!username}
-                className={copied ? "bg-green-600 hover:bg-green-600" : ""}
+                variant={copied ? "outline" : "default"}
+                className={copied ? "border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-400" : ""}
               >
                 {copied ? (
                   <>
