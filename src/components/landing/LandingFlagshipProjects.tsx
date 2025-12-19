@@ -326,7 +326,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                 )}
               </div>
 
-              {/* MODULO 3: IMAGE GALLERY */}
+              {/* MODULO 3: IMAGE GALLERY - Horizontal Scroll */}
               <div className="border-t border-white/10 p-8 md:p-12">
                 <h4 
                   className="text-sm tracking-[0.2em] text-white/50 mb-6"
@@ -334,48 +334,31 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
                 >
                   GALLERY
                 </h4>
-                <div className="relative">
-                  <div ref={emblaRef} className="overflow-hidden rounded-xl">
-                    <div className="flex">
-                      {project.gallery.map((image, index) => (
-                        <div
-                          key={index}
-                          className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] px-2"
-                        >
-                          <div 
-                            className="aspect-video rounded-xl bg-gradient-to-br from-lime-500/20 to-green-500/20 overflow-hidden"
-                            style={{
-                              backgroundImage: `url(${image.src})`,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                            }}
-                          >
-                            <div className="w-full h-full flex items-center justify-center text-white/30 text-sm">
-                              {image.alt}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                <div 
+                  ref={emblaRef}
+                  className="overflow-x-auto pb-4 -mx-2 scrollbar-hide" 
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  <div className="flex gap-4 px-2" style={{ minWidth: "max-content" }}>
+                    {project.gallery.map((image, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                        className="w-80 md:w-96 flex-shrink-0"
+                      >
+                        <div 
+                          className="aspect-video rounded-xl bg-gradient-to-br from-lime-500/20 to-green-500/20 overflow-hidden border border-white/10"
+                          style={{
+                            backgroundImage: `url(${image.src})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }}
+                        />
+                      </motion.div>
+                    ))}
                   </div>
-                  
-                  {/* Carousel Controls - Hidden on mobile */}
-                  {!isMobile && (
-                    <>
-                      <button
-                        onClick={scrollPrev}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
-                      >
-                        <ChevronLeft size={20} />
-                      </button>
-                      <button
-                        onClick={scrollNext}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 transition-colors"
-                      >
-                        <ChevronRight size={20} />
-                      </button>
-                    </>
-                  )}
                 </div>
                 {/* Mobile pagination dots for Gallery */}
                 {isMobile && (
