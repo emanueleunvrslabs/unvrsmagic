@@ -97,6 +97,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>({});
   const [profileOpen, setProfileOpen] = useState(false);
+  const [pendingDemosCount, setPendingDemosCount] = useState(0);
   const { isOwner, isAdmin, isUser } = useUserRole();
   const { userProjects } = useUserProjects();
 
@@ -149,6 +150,33 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     };
     fetchExchanges();
   }, []);
+
+  // Load pending demos count
+  useEffect(() => {
+    const fetchPendingDemos = async () => {
+      if (!isOwner) return;
+      
+      const { count } = await supabase
+        .from("demo_bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending_approval");
+      
+      setPendingDemosCount(count || 0);
+    };
+    fetchPendingDemos();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('demo-bookings-count')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'demo_bookings' }, () => {
+        fetchPendingDemos();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isOwner]);
 
   const toggleSection = (title: string) => {
     setOpenSections(prev => ({ ...prev, [title]: !prev[title] }));
@@ -449,7 +477,12 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         )}
       >
         <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-        <span className="font-normal">{item.label}</span>
+        <span className="font-normal flex-1">{item.label}</span>
+        {item.id === "admin-demo-calendar" && pendingDemosCount > 0 && (
+          <Badge className="bg-red-500/80 text-white text-xs px-1.5 py-0 h-5 min-w-5 flex items-center justify-center">
+            {pendingDemosCount}
+          </Badge>
+        )}
       </Link>
     );
   };
