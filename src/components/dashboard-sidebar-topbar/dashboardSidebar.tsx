@@ -18,6 +18,7 @@ import {
   ArrowRightLeft,
   Bell,
   Bot,
+  Cake,
   Calendar,
   ChevronDown,
   ChevronRight,
@@ -262,6 +263,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
           ]
         },
         { id: "delibere-arera", label: "Delibere Arera", icon: FileText, href: "/delibere-arera" },
+        { id: "memora", label: "Memora", icon: Cake, href: "/memora" },
         { 
           id: "nkmt", 
           label: "NKMT", 
@@ -315,6 +317,8 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         };
       } else if (up.project.route === '/delibere-arera') {
         return { id: `project-${up.project_id}`, label: up.project.name, icon: FileText, href: "/delibere-arera" };
+      } else if (up.project.route === '/memora') {
+        return { id: `project-${up.project_id}`, label: up.project.name, icon: Cake, href: "/memora" };
       } else if (up.project.route === '/nkmt') {
         return { 
           id: `project-${up.project_id}`, 

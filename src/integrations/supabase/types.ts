@@ -1293,6 +1293,36 @@ export type Database = {
         }
         Relationships: []
       }
+      memora_contacts: {
+        Row: {
+          birth_date: string
+          created_at: string | null
+          first_name: string
+          id: string
+          last_name: string
+          user_id: string
+          whatsapp_number: string
+        }
+        Insert: {
+          birth_date: string
+          created_at?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          user_id: string
+          whatsapp_number: string
+        }
+        Update: {
+          birth_date?: string
+          created_at?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          user_id?: string
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
       mkt_data_config: {
         Row: {
           created_at: string
