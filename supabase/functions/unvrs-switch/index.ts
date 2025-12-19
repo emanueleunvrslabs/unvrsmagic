@@ -229,7 +229,15 @@ Deno.serve(async (req) => {
       }
       
       if (endIndex > 0) {
-        const jsonStr = cleanedText.substring(0, endIndex)
+        let jsonStr = cleanedText.substring(0, endIndex)
+        
+        // Fix unescaped newlines in JSON strings - this is the most common AI error
+        // Replace literal newlines inside string values with escaped newlines
+        jsonStr = jsonStr.replace(/:\s*"([^"]*?)"/g, (_match: string, content: string) => {
+          const fixed = content.replace(/\n/g, ' ').replace(/\r/g, '')
+          return `: "${fixed}"`
+        })
+        
         parsedResponse = JSON.parse(jsonStr)
         console.log('[UNVRS.SWITCH] Parsed JSON successfully')
       } else {
@@ -237,13 +245,27 @@ Deno.serve(async (req) => {
       }
     } catch (e) {
       console.error('[UNVRS.SWITCH] JSON parse error:', e, 'Raw:', aiText.substring(0, 500))
-      // Fallback: try to extract response text
-      const responseMatch = aiText.match(/"response"\s*:\s*"([^"]+)"/)
+      // Fallback: try to extract fields manually using regex
+      const responseMatch = aiText.match(/"response"\s*:\s*"([\s\S]*?)(?:"\s*[,}])/m)
+      const actionMatch = aiText.match(/"action"\s*:\s*"([^"]+)"/)
+      const nameMatch = aiText.match(/"name"\s*:\s*"([^"]+)"/)
+      const projectMatch = aiText.match(/"project_type"\s*:\s*"([^"]+)"/)
+      const qualifiedMatch = aiText.match(/"qualified"\s*:\s*(true|false)/)
+      const demoDateMatch = aiText.match(/"demo_date"\s*:\s*"([^"]+)"/)
+      const demoTimeMatch = aiText.match(/"demo_time"\s*:\s*"([^"]+)"/)
+      
       parsedResponse = {
-        response: responseMatch ? responseMatch[1] : aiText.replace(/```json|```|\{|\}/g, '').trim().substring(0, 200),
-        action: 'continue',
-        collected_data: {}
+        response: responseMatch ? responseMatch[1].replace(/\n/g, ' ').trim() : 'Mi scusi, non ho capito. Può ripetere?',
+        action: actionMatch ? actionMatch[1] : 'continue',
+        collected_data: {
+          name: nameMatch ? nameMatch[1] : undefined,
+          project_type: projectMatch ? projectMatch[1] : undefined,
+          qualified: qualifiedMatch ? qualifiedMatch[1] === 'true' : false,
+          demo_date: demoDateMatch ? demoDateMatch[1] : undefined,
+          demo_time: demoTimeMatch ? demoTimeMatch[1] : undefined
+        }
       }
+      console.log('[UNVRS.SWITCH] Fallback parsed response:', parsedResponse)
     }
 
     // Handle book_demo action
