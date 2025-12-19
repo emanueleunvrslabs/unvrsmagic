@@ -91,7 +91,7 @@ export function CreditCard() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="liquid-glass-card sm:max-w-md border-0 overflow-hidden">
+        <DialogContent className="sm:max-w-md border border-white/20 overflow-hidden bg-black/90 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle className="text-white">Purchase Credits</DialogTitle>
             <DialogDescription className="text-white/60">
