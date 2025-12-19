@@ -56,7 +56,7 @@ export function TransactionsList() {
   }
 
   return (
-    <div className="liquid-glass-card liquid-glass-interactive w-full max-w-2xl rounded-[22px] p-8">
+    <div className="liquid-glass-card w-full max-w-2xl rounded-[22px] p-8">
       <h3 className="text-lg font-semibold text-white mb-6">Transaction History</h3>
       
       {transactions.length === 0 ? (

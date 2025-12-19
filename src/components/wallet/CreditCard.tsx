@@ -31,7 +31,7 @@ export function CreditCard() {
 
   return (
     <>
-      <div className="liquid-glass-card liquid-glass-interactive w-full max-w-2xl rounded-[22px] p-8">
+      <div className="liquid-glass-card w-full max-w-2xl rounded-[22px] p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
