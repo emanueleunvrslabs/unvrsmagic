@@ -1,16 +1,15 @@
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useMarketplaceProjects } from "@/hooks/useMarketplaceProjects";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Loader2, Package, Eye, EyeOff } from "lucide-react";
+import { Loader2, Package, Eye, EyeOff, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Navigate } from "react-router-dom";
 import "@/components/labs/SocialMediaCard.css";
 
 export default function AdminProjects() {
   const { isOwner, loading: roleLoading } = useUserRole();
-  const { allProjects, allLoading, togglePublished } = useMarketplaceProjects();
+  const { allProjects, allLoading, togglePublished, toggleComingSoon } = useMarketplaceProjects();
 
   if (roleLoading || allLoading) {
     return (
@@ -50,7 +49,12 @@ export default function AdminProjects() {
                   <div>
                     <div className="flex items-center gap-3">
                       <h3 className="text-lg font-semibold text-white">{project.name}</h3>
-                      {project.published ? (
+                      {project.coming_soon ? (
+                        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30">
+                          <Clock className="w-3 h-3 mr-1" />
+                          Coming Soon
+                        </Badge>
+                      ) : project.published ? (
                         <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30">
                           <Eye className="w-3 h-3 mr-1" />
                           Published
@@ -66,10 +70,24 @@ export default function AdminProjects() {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
+                  {/* Coming Soon Toggle */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-white/60">Coming Soon</span>
+                    <Switch
+                      checked={project.coming_soon ?? false}
+                      onCheckedChange={(checked) =>
+                        toggleComingSoon.mutate({ id: project.id, coming_soon: checked })
+                      }
+                      disabled={toggleComingSoon.isPending}
+                      className="data-[state=checked]:bg-amber-500/50"
+                    />
+                  </div>
+
+                  {/* Published Toggle */}
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-white/60">
-                      {project.published ? "Visible in marketplace" : "Hidden from users"}
+                      {project.published ? "Visible" : "Hidden"}
                     </span>
                     <Switch
                       checked={project.published}
