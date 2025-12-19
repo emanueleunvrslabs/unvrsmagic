@@ -25,7 +25,7 @@ const MemoraSubmit = () => {
   useEffect(() => {
     const lookupUser = async () => {
       if (!username) {
-        setError("Link non valido");
+        setError("Invalid link");
         setLoading(false);
         return;
       }
@@ -37,7 +37,7 @@ const MemoraSubmit = () => {
         .single();
 
       if (error || !data) {
-        setError("Utente non trovato");
+        setError("User not found");
         setLoading(false);
         return;
       }
@@ -53,12 +53,12 @@ const MemoraSubmit = () => {
     e.preventDefault();
 
     if (!userId) {
-      toast.error("Errore: utente non trovato");
+      toast.error("Error: user not found");
       return;
     }
 
     if (!firstName || !lastName || !birthDate || !whatsappNumber) {
-      toast.error("Compila tutti i campi");
+      toast.error("Please fill in all fields");
       return;
     }
 
@@ -76,17 +76,17 @@ const MemoraSubmit = () => {
 
     if (error) {
       console.error("Error submitting:", error);
-      toast.error("Errore nel salvataggio. Riprova.");
+      toast.error("Error saving. Please try again.");
     } else {
       setSubmitted(true);
-      toast.success("Dati salvati con successo!");
+      toast.success("Data saved successfully!");
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-muted-foreground">Caricamento...</div>
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     );
   }
@@ -98,7 +98,7 @@ const MemoraSubmit = () => {
           <CardContent className="pt-6 text-center space-y-4">
             <AlertCircle className="h-16 w-16 mx-auto text-destructive" />
             <h2 className="text-xl font-semibold text-foreground">{error}</h2>
-            <p className="text-muted-foreground">Il link che hai seguito non è valido o l'utente non esiste.</p>
+            <p className="text-muted-foreground">The link you followed is invalid or the user doesn't exist.</p>
           </CardContent>
         </Card>
       </div>
@@ -113,9 +113,9 @@ const MemoraSubmit = () => {
             <div className="p-4 rounded-full bg-primary/10 w-fit mx-auto">
               <Check className="h-12 w-12 text-primary" />
             </div>
-            <h2 className="text-2xl font-semibold text-foreground">Grazie! 🎂</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Thank you! 🎂</h2>
             <p className="text-muted-foreground">
-              I tuoi dati sono stati salvati. Riceverai gli auguri al tuo prossimo compleanno!
+              Your data has been saved. You'll receive birthday wishes on your next birthday!
             </p>
           </CardContent>
         </Card>
@@ -132,36 +132,36 @@ const MemoraSubmit = () => {
           </div>
           <CardTitle className="text-2xl text-foreground">Memora</CardTitle>
           <p className="text-muted-foreground">
-            Inserisci i tuoi dati per ricevere gli auguri di compleanno da <span className="text-primary font-medium">@{username}</span>
+            Enter your details to receive birthday wishes from <span className="text-primary font-medium">@{username}</span>
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nome</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Mario"
+                  placeholder="John"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Cognome</Label>
+                <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Rossi"
+                  placeholder="Doe"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="birthDate">Data di nascita</Label>
+              <Label htmlFor="birthDate">Date of Birth</Label>
               <Input
                 id="birthDate"
                 type="date"
@@ -172,16 +172,16 @@ const MemoraSubmit = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="whatsapp">Numero WhatsApp</Label>
+              <Label htmlFor="whatsapp">WhatsApp Number</Label>
               <Input
                 id="whatsapp"
                 type="tel"
                 value={whatsappNumber}
                 onChange={(e) => setWhatsappNumber(e.target.value)}
-                placeholder="+39 123 456 7890"
+                placeholder="+1 234 567 8900"
                 required
               />
-              <p className="text-xs text-muted-foreground">Includi il prefisso internazionale (es. +39)</p>
+              <p className="text-xs text-muted-foreground">Include international prefix (e.g. +1)</p>
             </div>
 
             <Button
@@ -189,7 +189,7 @@ const MemoraSubmit = () => {
               disabled={submitting}
               className="w-full"
             >
-              {submitting ? "Salvataggio..." : "Salva i miei dati"}
+              {submitting ? "Saving..." : "Save my data"}
             </Button>
           </form>
         </CardContent>
