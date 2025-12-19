@@ -1437,6 +1437,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone_number: string
+          ref_code: string | null
           updated_at: string
           user_id: string
           username: string | null
@@ -1446,6 +1447,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone_number: string
+          ref_code?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -1455,6 +1457,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone_number?: string
+          ref_code?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null
@@ -2088,6 +2091,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      generate_ref_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

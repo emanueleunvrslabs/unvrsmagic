@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Cake, Check, AlertCircle } from "lucide-react";
 
 const MemoraSubmit = () => {
-  const { username } = useParams<{ username: string }>();
+  const { refCode } = useParams<{ refCode: string }>();
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -21,10 +21,10 @@ const MemoraSubmit = () => {
   const [birthDate, setBirthDate] = useState("");
   const [whatsappNumber, setWhatsappNumber] = useState("");
 
-  // Lookup user_id from username
+  // Lookup user_id from ref_code
   useEffect(() => {
     const lookupUser = async () => {
-      if (!username) {
+      if (!refCode) {
         setError("Invalid link");
         setLoading(false);
         return;
@@ -33,7 +33,7 @@ const MemoraSubmit = () => {
       const { data, error } = await supabase
         .from("profiles")
         .select("user_id")
-        .eq("username", username)
+        .eq("ref_code", refCode)
         .single();
 
       if (error || !data) {
@@ -47,7 +47,7 @@ const MemoraSubmit = () => {
     };
 
     lookupUser();
-  }, [username]);
+  }, [refCode]);
 
   // Auto-format date input as DD/MM/YYYY
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,7 +166,7 @@ const MemoraSubmit = () => {
           </div>
           <CardTitle className="text-2xl text-foreground">Memora</CardTitle>
           <p className="text-muted-foreground">
-            Enter your details to receive birthday wishes from <span className="text-primary font-medium">@{username}</span>
+            Enter your details to receive birthday wishes!
           </p>
         </CardHeader>
         <CardContent>
