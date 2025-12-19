@@ -522,8 +522,8 @@ export default function AdminDemoCalendar() {
                   
                   if (dayBookings.length === 0) {
                     return (
-                      <div className="text-white/50 text-center py-8">
-                        Nessuna call per questa data
+                    <div className="text-white/50 text-center py-8">
+                        No calls for this date
                       </div>
                     );
                   }
@@ -596,7 +596,7 @@ export default function AdminDemoCalendar() {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2" style={{ fontFamily: "Orbitron, sans-serif" }}>
               <Video className="text-white/70" size={20} />
-              Videocall da Confermare
+              Pending Videocalls
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -610,7 +610,7 @@ export default function AdminDemoCalendar() {
               if (pendingBookings.length === 0) {
                 return (
                   <div className="text-white/50 text-center py-8">
-                    Nessuna videocall in attesa di conferma
+                    No pending videocalls
                   </div>
                 );
               }
