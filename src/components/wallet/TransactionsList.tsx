@@ -47,7 +47,7 @@ export function TransactionsList() {
 
   if (loading) {
     return (
-      <div className="labs-client-card w-full max-w-2xl rounded-[22px] p-8">
+      <div className="liquid-glass-card w-full max-w-2xl rounded-[22px] p-8">
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
         </div>
@@ -56,7 +56,7 @@ export function TransactionsList() {
   }
 
   return (
-    <div className="labs-client-card w-full max-w-2xl rounded-[22px] p-8">
+    <div className="liquid-glass-card liquid-glass-interactive w-full max-w-2xl rounded-[22px] p-8">
       <h3 className="text-lg font-semibold text-white mb-6">Transaction History</h3>
       
       {transactions.length === 0 ? (
@@ -66,7 +66,7 @@ export function TransactionsList() {
           {transactions.map((tx) => (
             <div
               key={tx.id}
-              className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10"
+              className="liquid-glass-card flex items-center gap-4 p-4 rounded-xl"
             >
               <div
                 className={`w-10 h-10 rounded-xl flex items-center justify-center ${

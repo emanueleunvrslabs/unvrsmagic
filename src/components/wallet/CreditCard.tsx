@@ -1,4 +1,3 @@
-import "../labs/SocialMediaCard.css";
 import { TrendingUp, TrendingDown, Wallet, Plus } from "lucide-react";
 import { useUserCredits } from "@/hooks/useUserCredits";
 import {
@@ -32,11 +31,11 @@ export function CreditCard() {
 
   return (
     <>
-      <div className="labs-client-card w-full max-w-2xl rounded-[22px] p-8">
+      <div className="liquid-glass-card liquid-glass-interactive w-full max-w-2xl rounded-[22px] p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+            <div className="liquid-glass-card w-12 h-12 rounded-2xl flex items-center justify-center">
               <Wallet className="w-6 h-6 text-white/80" />
             </div>
             <div>
@@ -46,7 +45,7 @@ export function CreditCard() {
           </div>
           <button 
             onClick={() => setIsDialogOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 text-white/90 text-sm font-medium hover:from-purple-500/30 hover:to-cyan-500/30 hover:border-purple-500/50 transition-all"
+            className="liquid-glass-card liquid-glass-interactive flex items-center gap-2 px-4 py-2.5 rounded-xl text-white/90 text-sm font-medium"
           >
             <Plus className="w-4 h-4" />
             Add Credits
@@ -65,7 +64,7 @@ export function CreditCard() {
         
         {/* Stats */}
         <div className="flex gap-6 justify-center">
-          <div className="flex-1 p-4 rounded-xl bg-white/5 border border-white/10">
+          <div className="flex-1 liquid-glass-card p-4 rounded-xl">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-green-500/20 border border-green-500/30 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-green-400" />
@@ -77,7 +76,7 @@ export function CreditCard() {
             </div>
           </div>
           
-          <div className="flex-1 p-4 rounded-xl bg-white/5 border border-white/10">
+          <div className="flex-1 liquid-glass-card p-4 rounded-xl">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
                 <TrendingDown className="w-5 h-5 text-red-400" />
