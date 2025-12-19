@@ -421,10 +421,12 @@ export function AppleTVClientsDemo() {
         
         if (uploadError) throw uploadError;
 
-        // Get public URL
-        const { data: urlData } = supabase.storage
+        // Get signed URL with 24 hour expiration for document access
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from("client-documents")
-          .getPublicUrl(fileName);
+          .createSignedUrl(fileName, 86400);
+
+        if (signedUrlError) throw signedUrlError;
 
         // Save to database
         const { error: dbError } = await supabase
@@ -434,7 +436,7 @@ export function AppleTVClientsDemo() {
             user_id: user.id,
             file_name: file.name,
             file_path: fileName,
-            file_url: urlData.publicUrl,
+            file_url: signedUrlData?.signedUrl || "",
             file_size: file.size,
             file_type: file.type || `application/${fileExt}`,
           });
