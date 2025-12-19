@@ -13,14 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { format, isSameDay, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
 import { enUS } from "date-fns/locale";
 import { Plus, Video, Clock, User, Mail, Phone, ChevronLeft, ChevronRight, Trash2, Edit2, ExternalLink, Check, X } from "lucide-react";
-
-// Helper to format time in Italian timezone consistently
-const formatItalianTime = (dateStr: string, formatStr: string) => {
-  return formatInTimeZone(new Date(dateStr), 'Europe/Rome', formatStr);
-};
 
 interface DemoBooking {
   id: string;
@@ -198,7 +192,7 @@ export default function AdminDemoCalendar() {
       client_email: booking.client_email || "",
       client_phone: booking.client_phone || "",
       project_type: booking.project_type || "energizzo",
-      scheduled_time: formatItalianTime(booking.scheduled_at, "HH:mm"),
+      scheduled_time: format(date, "HH:mm"),
       duration_minutes: booking.duration_minutes,
       meeting_link: booking.meeting_link || "",
       notes: booking.notes || "",
@@ -575,7 +569,7 @@ export default function AdminDemoCalendar() {
                         >
                           <div className="flex items-center justify-between">
                             <span className="text-white font-medium text-sm">
-                              {formatItalianTime(booking.scheduled_at, "HH:mm")}
+                              {format(new Date(booking.scheduled_at), "HH:mm")}
                             </span>
                             <Badge 
                               className={
@@ -668,7 +662,7 @@ export default function AdminDemoCalendar() {
                           <div className="flex items-center gap-2 mt-1">
                             <Clock size={14} className="text-white/50" />
                             <span className="text-white/60 text-sm">
-                              {formatItalianTime(booking.scheduled_at, "dd/MM/yyyy")} alle {formatItalianTime(booking.scheduled_at, "HH:mm")}
+                              {format(new Date(booking.scheduled_at), "dd/MM/yyyy")} alle {format(new Date(booking.scheduled_at), "HH:mm")}
                             </span>
                           </div>
                         </div>
