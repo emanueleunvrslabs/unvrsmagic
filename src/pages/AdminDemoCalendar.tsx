@@ -306,112 +306,125 @@ export default function AdminDemoCalendar() {
                 New Demo
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg bg-black/95 border-white/10 backdrop-blur-xl">
+            <DialogContent className="max-w-lg bg-gradient-to-br from-white/10 via-white/5 to-white/8 border-white/20 backdrop-blur-[40px] shadow-[0_8px_32px_hsla(0,0%,0%,0.4),inset_0_1px_0_0_hsla(0,0%,100%,0.3)]">
               <DialogHeader>
-                <DialogTitle className="text-white" style={{ fontFamily: "Orbitron, sans-serif" }}>
+                <DialogTitle className="text-white text-xl" style={{ fontFamily: "Orbitron, sans-serif" }}>
                   {editingBooking ? "Edit Demo" : "Schedule New Demo"}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                <div>
-                  <label className="text-sm text-white/60 mb-1.5 block">Title *</label>
+              <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+                {/* Title Section */}
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
+                  <label className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2 block">Title *</label>
                   <Input
                     placeholder="Demo title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
-                    className="bg-white/5 border-white/10"
+                    className="bg-white/5 border-white/10 h-11"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+
+                {/* Client Info Section */}
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md space-y-4">
+                  <label className="text-xs font-medium text-white/50 uppercase tracking-wider block">Client Information</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm text-white/60 mb-1.5 block">Name</label>
+                      <Input
+                        placeholder="Client name"
+                        value={formData.client_name}
+                        onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                        className="bg-white/5 border-white/10"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-white/60 mb-1.5 block">Email</label>
+                      <Input
+                        type="email"
+                        placeholder="Email"
+                        value={formData.client_email}
+                        onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
+                        className="bg-white/5 border-white/10"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm text-white/60 mb-1.5 block">Phone</label>
+                      <Input
+                        placeholder="Phone number"
+                        value={formData.client_phone}
+                        onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
+                        className="bg-white/5 border-white/10"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-white/60 mb-1.5 block">Project</label>
+                      <Select
+                        value={formData.project_type}
+                        onValueChange={(value) => setFormData({ ...formData, project_type: value })}
+                      >
+                        <SelectTrigger className="bg-white/5 border-white/10 h-10">
+                          <SelectValue placeholder="Select project" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
+                          <SelectItem value="energizzo">Energizzo</SelectItem>
+                          <SelectItem value="ai-social">AI Social</SelectItem>
+                          <SelectItem value="nkmt">NKMT</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Scheduling Section */}
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md space-y-4">
+                  <label className="text-xs font-medium text-white/50 uppercase tracking-wider block">Scheduling</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="min-w-0">
+                      <label className="text-sm text-white/60 mb-1.5 block">Time</label>
+                      <Input
+                        type="time"
+                        value={formData.scheduled_time}
+                        onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
+                        className="bg-white/5 border-white/10 h-10 w-full"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <label className="text-sm text-white/60 mb-1.5 block">Duration</label>
+                      <Select
+                        value={formData.duration_minutes.toString()}
+                        onValueChange={(value) => setFormData({ ...formData, duration_minutes: parseInt(value) })}
+                      >
+                        <SelectTrigger className="bg-white/5 border-white/10 h-10 w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                          <SelectItem value="45">45 minutes</SelectItem>
+                          <SelectItem value="60">60 minutes</SelectItem>
+                          <SelectItem value="90">90 minutes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                   <div>
-                    <label className="text-sm text-white/60 mb-1.5 block">Client Name</label>
+                    <label className="text-sm text-white/60 mb-1.5 block">Meeting Link</label>
                     <Input
-                      placeholder="Name"
-                      value={formData.client_name}
-                      onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                      placeholder="Zoom, Meet, etc."
+                      value={formData.meeting_link}
+                      onChange={(e) => setFormData({ ...formData, meeting_link: e.target.value })}
                       className="bg-white/5 border-white/10"
                     />
                   </div>
-                  <div>
-                    <label className="text-sm text-white/60 mb-1.5 block">Client Email</label>
-                    <Input
-                      type="email"
-                      placeholder="Email"
-                      value={formData.client_email}
-                      onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
-                      className="bg-white/5 border-white/10"
-                    />
-                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm text-white/60 mb-1.5 block">Phone</label>
-                    <Input
-                      placeholder="Phone number"
-                      value={formData.client_phone}
-                      onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
-                      className="bg-white/5 border-white/10"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm text-white/60 mb-1.5 block">Project</label>
-                    <Select
-                      value={formData.project_type}
-                      onValueChange={(value) => setFormData({ ...formData, project_type: value })}
-                    >
-                      <SelectTrigger className="bg-white/5 border-white/10 h-10">
-                        <SelectValue placeholder="Select project" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
-                        <SelectItem value="energizzo">Energizzo</SelectItem>
-                        <SelectItem value="ai-social">AI Social</SelectItem>
-                        <SelectItem value="nkmt">NKMT</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="min-w-0">
-                    <label className="text-sm text-white/60 mb-1.5 block">Time</label>
-                    <Input
-                      type="time"
-                      value={formData.scheduled_time}
-                      onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
-                      className="bg-white/5 border-white/10 h-10 w-full"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <label className="text-sm text-white/60 mb-1.5 block">Duration</label>
-                    <Select
-                      value={formData.duration_minutes.toString()}
-                      onValueChange={(value) => setFormData({ ...formData, duration_minutes: parseInt(value) })}
-                    >
-                      <SelectTrigger className="bg-white/5 border-white/10 h-10 w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
-                        <SelectItem value="15">15 minutes</SelectItem>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="45">45 minutes</SelectItem>
-                        <SelectItem value="60">60 minutes</SelectItem>
-                        <SelectItem value="90">90 minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm text-white/60 mb-1.5 block">Meeting Link</label>
-                  <Input
-                    placeholder="Zoom, Meet, etc."
-                    value={formData.meeting_link}
-                    onChange={(e) => setFormData({ ...formData, meeting_link: e.target.value })}
-                    className="bg-white/5 border-white/10"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-white/60 mb-1.5 block">Notes</label>
+
+                {/* Notes Section */}
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
+                  <label className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2 block">Notes</label>
                   <Textarea
                     placeholder="Additional notes"
                     value={formData.notes}
@@ -419,8 +432,10 @@ export default function AdminDemoCalendar() {
                     className="bg-white/5 border-white/10 min-h-[80px]"
                   />
                 </div>
+
+                {/* Actions */}
                 <div className="flex justify-end gap-3 pt-2">
-                  <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)}>
+                  <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-white/60 hover:text-white">
                     Cancel
                   </Button>
                   <Button 
