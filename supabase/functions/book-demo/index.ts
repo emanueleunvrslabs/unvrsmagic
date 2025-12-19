@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
         date_formatted: dateFormatted,
         status: 'pending_approval'
       },
-      message: `Richiesta demo ricevuta per ${dateFormatted} alle ${request.time}. Ti confermeremo a breve!`
+      message: `Richiesta demo ricevuta per\n\n${dateFormatted} alle ${request.time}.\n\nTi confermeremo a breve!`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
