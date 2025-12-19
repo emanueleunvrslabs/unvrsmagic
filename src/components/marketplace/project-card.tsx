@@ -39,7 +39,7 @@ export function ProjectCard({ project, isAdded, onViewDetails }: ProjectCardProp
       
       <button 
         onClick={() => onViewDetails(project)}
-        className="absolute bottom-4 right-4 px-4 py-2 text-sm font-medium rounded-xl bg-white/10 border border-white/20 text-white/70 transition-all hover:bg-white/15 hover:text-white hover:border-white/30"
+        className="absolute bottom-4 right-4 px-4 py-2.5 text-sm font-medium rounded-xl liquid-glass-card text-white/90 transition-all"
       >
         Details
       </button>

@@ -24,7 +24,7 @@
   z-index: 2;
 }
 
-/* Inner cards styling - Liquid Glass */
+/* Inner cards styling - Liquid Glass (no hover effect) */
 .project-details-modal .detail-card {
   background: linear-gradient(
     135deg,
@@ -40,20 +40,9 @@
     0 8px 32px hsla(0, 0%, 0%, 0.3),
     inset 0 1px 0 0 hsla(0, 0%, 100%, 0.4),
     inset 0 -1px 0 0 hsla(0, 0%, 100%, 0.1);
-  transition: all 0.3s ease;
 }
 
-.project-details-modal .detail-card:hover {
-  border-color: hsla(0, 0%, 100%, 0.25);
-  background: linear-gradient(
-    135deg,
-    hsla(0, 0%, 100%, 0.12) 0%,
-    hsla(0, 0%, 100%, 0.04) 50%,
-    hsla(0, 0%, 100%, 0.10) 100%
-  );
-}
-
-/* Image pricing card - Purple accent with Liquid Glass */
+/* Image pricing card - Purple accent with Liquid Glass (no hover effect) */
 .project-details-modal .pricing-image {
   background: linear-gradient(
     135deg,
@@ -64,25 +53,12 @@
   -webkit-backdrop-filter: blur(40px) saturate(1.3);
   border: 1px solid hsla(271, 81%, 56%, 0.3);
   border-radius: 16px;
-  transition: all 0.3s ease;
   box-shadow:
     0 4px 20px hsla(271, 81%, 56%, 0.15),
     inset 0 1px 0 0 hsla(271, 81%, 56%, 0.3);
 }
 
-.project-details-modal .pricing-image:hover {
-  border-color: hsla(271, 81%, 56%, 0.5);
-  background: linear-gradient(
-    135deg,
-    hsla(271, 81%, 56%, 0.25) 0%,
-    hsla(271, 81%, 56%, 0.10) 100%
-  );
-  box-shadow:
-    0 6px 24px hsla(271, 81%, 56%, 0.25),
-    inset 0 1px 0 0 hsla(271, 81%, 56%, 0.4);
-}
-
-/* Video pricing card - Cyan accent with Liquid Glass */
+/* Video pricing card - Cyan accent with Liquid Glass (no hover effect) */
 .project-details-modal .pricing-video {
   background: linear-gradient(
     135deg,
@@ -93,25 +69,12 @@
   -webkit-backdrop-filter: blur(40px) saturate(1.3);
   border: 1px solid hsla(187, 94%, 43%, 0.3);
   border-radius: 16px;
-  transition: all 0.3s ease;
   box-shadow:
     0 4px 20px hsla(187, 94%, 43%, 0.15),
     inset 0 1px 0 0 hsla(187, 94%, 43%, 0.3);
 }
 
-.project-details-modal .pricing-video:hover {
-  border-color: hsla(187, 94%, 43%, 0.5);
-  background: linear-gradient(
-    135deg,
-    hsla(187, 94%, 43%, 0.25) 0%,
-    hsla(187, 94%, 43%, 0.10) 100%
-  );
-  box-shadow:
-    0 6px 24px hsla(187, 94%, 43%, 0.25),
-    inset 0 1px 0 0 hsla(187, 94%, 43%, 0.4);
-}
-
-/* Default pricing card - Liquid Glass */
+/* Default pricing card - Liquid Glass (no hover effect) */
 .project-details-modal .pricing-default {
   background: linear-gradient(
     135deg,
@@ -122,18 +85,8 @@
   -webkit-backdrop-filter: blur(40px) saturate(1.3);
   border: 1px solid hsla(0, 0%, 100%, 0.15);
   border-radius: 16px;
-  transition: all 0.3s ease;
   box-shadow:
     inset 0 1px 0 0 hsla(0, 0%, 100%, 0.3);
-}
-
-.project-details-modal .pricing-default:hover {
-  border-color: hsla(0, 0%, 100%, 0.25);
-  background: linear-gradient(
-    135deg,
-    hsla(0, 0%, 100%, 0.12) 0%,
-    hsla(0, 0%, 100%, 0.04) 100%
-  );
 }
 
 /* Add to Dashboard button - Gradient accent with Liquid Glass */
@@ -166,7 +119,7 @@
   transform: translateY(-1px);
 }
 
-/* Notice card styling - Liquid Glass */
+/* Notice card styling - Liquid Glass (no hover effect) */
 .project-details-modal .notice-card {
   background: linear-gradient(
     135deg,
