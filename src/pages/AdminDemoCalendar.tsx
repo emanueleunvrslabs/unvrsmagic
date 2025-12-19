@@ -307,119 +307,76 @@ export default function AdminDemoCalendar() {
               </Button>
             </DialogTrigger>
             <DialogContent 
-              className="max-w-[380px] p-0 overflow-hidden border-0 bg-transparent shadow-none"
+              className="max-w-[360px] p-0 overflow-hidden border-0"
               style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.08) 100%)',
-                backdropFilter: 'blur(40px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                borderRadius: '24px',
-                border: '1px solid rgba(255,255,255,0.18)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 0 rgba(255,255,255,0.2), inset 0 -1px 0 0 rgba(255,255,255,0.05)',
+                background: 'rgba(28, 28, 30, 0.95)',
+                backdropFilter: 'blur(60px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+                borderRadius: '14px',
+                border: '0.5px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
               }}
             >
               {/* Header */}
-              <div 
-                className="px-5 pt-5 pb-4"
-                style={{
-                  borderBottom: '1px solid rgba(255,255,255,0.1)',
-                  background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%)',
-                }}
-              >
+              <div className="px-5 pt-5 pb-4" style={{ borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
                 <DialogHeader>
-                  <DialogTitle 
-                    className="text-white/95 text-lg font-semibold tracking-tight"
-                    style={{ fontFamily: "SF Pro Display, -apple-system, sans-serif" }}
-                  >
+                  <DialogTitle className="text-[17px] font-semibold text-white tracking-tight">
                     {editingBooking ? "Edit Demo" : "Schedule Demo"}
                   </DialogTitle>
-                  <p className="text-white/50 text-xs mt-1">
+                  <p className="text-[13px] text-white/50 mt-0.5">
                     {format(selectedDate, "EEEE, MMMM d, yyyy", { locale: enUS })}
                   </p>
                 </DialogHeader>
               </div>
 
               {/* Scrollable Content */}
-              <ScrollArea className="max-h-[55vh]">
-                <form onSubmit={handleSubmit} className="p-5 space-y-5">
+              <ScrollArea className="max-h-[50vh]">
+                <form onSubmit={handleSubmit} className="px-5 py-4 space-y-5">
                   
-                  {/* Title Section */}
-                  <div 
-                    className="rounded-2xl p-4"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.1)',
-                    }}
-                  >
-                    <label className="text-[11px] uppercase tracking-wider text-white/40 font-medium mb-2 block">
-                      Demo Title
-                    </label>
+                  {/* Title */}
+                  <div>
                     <Input
-                      placeholder="Enter demo title..."
+                      placeholder="Demo title"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       required
-                      className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 h-9 text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/30 transition-colors"
+                      className="h-11 bg-white/5 border-0 rounded-lg text-[15px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
                     />
                   </div>
 
-                  {/* Client Section */}
-                  <div 
-                    className="rounded-2xl p-4 space-y-3"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.1)',
-                    }}
-                  >
-                    <label className="text-[11px] uppercase tracking-wider text-white/40 font-medium block">
-                      Client Information
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="relative">
-                        <User size={14} className="absolute left-0 top-1/2 -translate-y-1/2 text-white/30" />
-                        <Input
-                          placeholder="Name"
-                          value={formData.client_name}
-                          onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                          className="bg-transparent border-0 border-b border-white/10 rounded-none pl-5 pr-0 h-8 text-sm text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/30"
-                        />
-                      </div>
-                      <div className="relative">
-                        <Mail size={14} className="absolute left-0 top-1/2 -translate-y-1/2 text-white/30" />
-                        <Input
-                          type="email"
-                          placeholder="Email"
-                          value={formData.client_email}
-                          onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
-                          className="bg-transparent border-0 border-b border-white/10 rounded-none pl-5 pr-0 h-8 text-sm text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/30"
-                        />
-                      </div>
+                  {/* Client Info */}
+                  <div className="space-y-2.5">
+                    <span className="text-[11px] uppercase tracking-wider text-white/40 font-medium">Client</span>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <Input
+                        placeholder="Name"
+                        value={formData.client_name}
+                        onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                        className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                      />
+                      <Input
+                        type="email"
+                        placeholder="Email"
+                        value={formData.client_email}
+                        onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
+                        className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                      />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="relative">
-                        <Phone size={14} className="absolute left-0 top-1/2 -translate-y-1/2 text-white/30" />
-                        <Input
-                          placeholder="Phone"
-                          value={formData.client_phone}
-                          onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
-                          className="bg-transparent border-0 border-b border-white/10 rounded-none pl-5 pr-0 h-8 text-sm text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/30"
-                        />
-                      </div>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <Input
+                        placeholder="Phone"
+                        value={formData.client_phone}
+                        onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
+                        className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                      />
                       <Select
                         value={formData.project_type}
                         onValueChange={(value) => setFormData({ ...formData, project_type: value })}
                       >
-                        <SelectTrigger className="bg-transparent border-0 border-b border-white/10 rounded-none h-8 text-sm text-white focus:ring-0 [&>span]:text-white/70">
+                        <SelectTrigger className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white/70 focus:ring-1 focus:ring-white/20">
                           <SelectValue placeholder="Project" />
                         </SelectTrigger>
-                        <SelectContent 
-                          className="border-white/10 rounded-xl"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(30,30,30,0.98) 0%, rgba(20,20,20,0.98) 100%)',
-                            backdropFilter: 'blur(20px)',
-                          }}
-                        >
+                        <SelectContent className="bg-[#2c2c2e] border-white/10 rounded-xl">
                           <SelectItem value="energizzo">Energizzo</SelectItem>
                           <SelectItem value="ai-social">AI Social</SelectItem>
                           <SelectItem value="nkmt">NKMT</SelectItem>
@@ -429,42 +386,24 @@ export default function AdminDemoCalendar() {
                     </div>
                   </div>
 
-                  {/* Schedule Section */}
-                  <div 
-                    className="rounded-2xl p-4 space-y-3"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.1)',
-                    }}
-                  >
-                    <label className="text-[11px] uppercase tracking-wider text-white/40 font-medium block">
-                      Schedule
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="relative">
-                        <Clock size={14} className="absolute left-0 top-1/2 -translate-y-1/2 text-white/30" />
-                        <Input
-                          type="time"
-                          value={formData.scheduled_time}
-                          onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
-                          className="bg-transparent border-0 border-b border-white/10 rounded-none pl-5 pr-0 h-8 text-sm text-white focus-visible:ring-0 focus-visible:border-white/30 [&::-webkit-calendar-picker-indicator]:invert"
-                        />
-                      </div>
+                  {/* Schedule */}
+                  <div className="space-y-2.5">
+                    <span className="text-[11px] uppercase tracking-wider text-white/40 font-medium">Schedule</span>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <Input
+                        type="time"
+                        value={formData.scheduled_time}
+                        onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
+                        className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white focus-visible:ring-1 focus-visible:ring-white/20 [&::-webkit-calendar-picker-indicator]:invert"
+                      />
                       <Select
                         value={formData.duration_minutes.toString()}
                         onValueChange={(value) => setFormData({ ...formData, duration_minutes: parseInt(value) })}
                       >
-                        <SelectTrigger className="bg-transparent border-0 border-b border-white/10 rounded-none h-8 text-sm text-white focus:ring-0 [&>span]:text-white/70">
+                        <SelectTrigger className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white/70 focus:ring-1 focus:ring-white/20">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent 
-                          className="border-white/10 rounded-xl"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(30,30,30,0.98) 0%, rgba(20,20,20,0.98) 100%)',
-                            backdropFilter: 'blur(20px)',
-                          }}
-                        >
+                        <SelectContent className="bg-[#2c2c2e] border-white/10 rounded-xl">
                           <SelectItem value="15">15 min</SelectItem>
                           <SelectItem value="30">30 min</SelectItem>
                           <SelectItem value="45">45 min</SelectItem>
@@ -473,34 +412,22 @@ export default function AdminDemoCalendar() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="relative">
-                      <Video size={14} className="absolute left-0 top-1/2 -translate-y-1/2 text-white/30" />
-                      <Input
-                        placeholder="Meeting link (Zoom, Meet...)"
-                        value={formData.meeting_link}
-                        onChange={(e) => setFormData({ ...formData, meeting_link: e.target.value })}
-                        className="bg-transparent border-0 border-b border-white/10 rounded-none pl-5 pr-0 h-8 text-sm text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/30"
-                      />
-                    </div>
+                    <Input
+                      placeholder="Meeting link (Zoom, Meet...)"
+                      value={formData.meeting_link}
+                      onChange={(e) => setFormData({ ...formData, meeting_link: e.target.value })}
+                      className="h-10 bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20"
+                    />
                   </div>
 
-                  {/* Notes Section */}
-                  <div 
-                    className="rounded-2xl p-4"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.1)',
-                    }}
-                  >
-                    <label className="text-[11px] uppercase tracking-wider text-white/40 font-medium mb-2 block">
-                      Notes
-                    </label>
+                  {/* Notes */}
+                  <div className="space-y-2.5">
+                    <span className="text-[11px] uppercase tracking-wider text-white/40 font-medium">Notes</span>
                     <Textarea
                       placeholder="Additional notes..."
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="bg-transparent border-0 rounded-lg px-0 min-h-[70px] text-sm text-white placeholder:text-white/30 focus-visible:ring-0 resize-none"
+                      className="min-h-[80px] bg-white/5 border-0 rounded-lg text-[14px] text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/20 resize-none"
                     />
                   </div>
                 </form>
@@ -509,27 +436,20 @@ export default function AdminDemoCalendar() {
               {/* Footer */}
               <div 
                 className="px-5 py-4 flex justify-end gap-3"
-                style={{
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  background: 'linear-gradient(0deg, rgba(255,255,255,0.06) 0%, transparent 100%)',
-                }}
+                style={{ borderTop: '0.5px solid rgba(255,255,255,0.08)' }}
               >
                 <Button 
                   type="button" 
                   variant="ghost" 
                   onClick={() => setIsDialogOpen(false)} 
-                  className="text-white/50 hover:text-white hover:bg-white/5 h-9 px-4 rounded-xl text-sm font-medium"
+                  className="h-9 px-4 text-[14px] text-white/60 hover:text-white hover:bg-white/5 rounded-lg"
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={handleSubmit}
                   disabled={createBooking.isPending || updateBooking.isPending}
-                  className="h-9 px-5 rounded-xl text-sm font-medium text-white border-0"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-                    boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.2), 0 2px 8px rgba(0,0,0,0.2)',
-                  }}
+                  className="h-9 px-5 text-[14px] font-medium text-white bg-white/10 hover:bg-white/15 border-0 rounded-lg"
                 >
                   {createBooking.isPending || updateBooking.isPending ? "Saving..." : editingBooking ? "Update" : "Create"}
                 </Button>
