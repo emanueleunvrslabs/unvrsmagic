@@ -254,12 +254,25 @@ export default function AdminDemoCalendar() {
 
   const approveBooking = useMutation({
     mutationFn: async (id: string) => {
+      // Update status to scheduled
       const { error } = await supabase.from("demo_bookings").update({ status: "scheduled" }).eq("id", id);
       if (error) throw error;
+
+      // Send WhatsApp confirmation
+      try {
+        const { error: fnError } = await supabase.functions.invoke("send-demo-confirmation", {
+          body: { bookingId: id }
+        });
+        if (fnError) {
+          console.error("Error sending WhatsApp confirmation:", fnError);
+        }
+      } catch (e) {
+        console.error("Failed to send WhatsApp confirmation:", e);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["demo-bookings"] });
-      toast.success("Demo approved!");
+      toast.success("Demo approved! WhatsApp confirmation sent.");
     },
     onError: () => {
       toast.error("Error approving demo");
