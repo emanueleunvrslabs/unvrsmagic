@@ -504,7 +504,7 @@ export default function AdminDemoCalendar() {
         <Card className="bg-white/5 border-white/10">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2" style={{ fontFamily: "Orbitron, sans-serif" }}>
-              <Video className="text-lime-400" size={20} />
+              <Video className="text-white/70" size={20} />
               Videocall da Confermare
             </CardTitle>
           </CardHeader>
@@ -529,7 +529,7 @@ export default function AdminDemoCalendar() {
                   {pendingBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="p-4 rounded-xl bg-lime-500/10 border border-lime-500/20 space-y-3"
+                      className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md space-y-3"
                     >
                       <div className="flex items-start justify-between">
                         <div>
@@ -543,14 +543,14 @@ export default function AdminDemoCalendar() {
                             </span>
                           </div>
                         </div>
-                        <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30">
+                        <Badge className="bg-white/10 text-white/70 border-white/20">
                           Pending
                         </Badge>
                       </div>
 
                       {booking.client_name && (
                         <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
-                          <User size={14} className="text-lime-400" />
+                          <User size={14} className="text-white/50" />
                           <span>{booking.client_name}</span>
                         </div>
                       )}
