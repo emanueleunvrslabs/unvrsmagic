@@ -1205,6 +1205,7 @@ export type Database = {
       }
       marketplace_projects: {
         Row: {
+          coming_soon: boolean | null
           created_at: string | null
           description: string | null
           icon: string | null
@@ -1215,6 +1216,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          coming_soon?: boolean | null
           created_at?: string | null
           description?: string | null
           icon?: string | null
@@ -1225,6 +1227,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          coming_soon?: boolean | null
           created_at?: string | null
           description?: string | null
           icon?: string | null

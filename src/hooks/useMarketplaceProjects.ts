@@ -8,6 +8,7 @@ export interface MarketplaceProject {
   description: string | null;
   icon: string | null;
   published: boolean;
+  coming_soon: boolean;
   route: string;
   created_at: string;
   updated_at: string;
@@ -48,6 +49,26 @@ export const useMarketplaceProjects = () => {
       const { error } = await supabase
         .from("marketplace_projects")
         .update({ published })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["all-marketplace-projects"] });
+      toast.success("Progetto aggiornato");
+    },
+    onError: (error) => {
+      toast.error("Errore nell'aggiornamento del progetto");
+      console.error(error);
+    },
+  });
+
+  const toggleComingSoon = useMutation({
+    mutationFn: async ({ id, coming_soon }: { id: string; coming_soon: boolean }) => {
+      const { error } = await supabase
+        .from("marketplace_projects")
+        .update({ coming_soon })
         .eq("id", id);
 
       if (error) throw error;
@@ -108,6 +129,7 @@ export const useMarketplaceProjects = () => {
     loading: isLoading,
     allLoading,
     togglePublished,
+    toggleComingSoon,
     createProject,
     deleteProject,
   };
