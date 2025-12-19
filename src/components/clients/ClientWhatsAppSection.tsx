@@ -167,11 +167,13 @@ export function ClientWhatsAppSection({ clientId, contacts, onClose }: ClientWha
 
     if (uploadError) throw uploadError;
 
-    const { data: { publicUrl } } = supabase.storage
+    // Use signed URL with 1 hour expiration for WhatsApp delivery
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from("client-documents")
-      .getPublicUrl(fileName);
+      .createSignedUrl(fileName, 3600);
 
-    return publicUrl;
+    if (signedUrlError) throw signedUrlError;
+    return signedUrlData?.signedUrl || "";
   };
 
   const handleSend = async () => {

@@ -52,11 +52,15 @@ export function SendEmailModal({ recipientEmail, recipientName, open, onOpenChan
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
+        // Use signed URL with 1 hour expiration for email delivery
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from("email-attachments")
-          .getPublicUrl(filePath);
+          .createSignedUrl(filePath, 3600);
 
-        uploadedAttachments.push(publicUrl);
+        if (signedUrlError) throw signedUrlError;
+        if (signedUrlData?.signedUrl) {
+          uploadedAttachments.push(signedUrlData.signedUrl);
+        }
       }
 
       // Call edge function to send email
