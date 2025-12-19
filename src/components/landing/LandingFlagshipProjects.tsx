@@ -229,7 +229,7 @@ function ProjectCard({ project }: { project: FlagshipProject }) {
             </p>
             
             <motion.a
-              href="https://wa.me/447575839334?text=%F0%9F%91%89%20Ciao%2C%20vorrei%20prenotare%20una%20demo%20di%20Energizzo.%0A%0A%F0%9F%93%85%20Quando%20possiamo%20fissare%20una%20demo%3F%0A%0AGrazie!"
+              href="https://wa.me/447575839334?text=%F0%9F%91%89%20Ciao%2C%20Quando%20possiamo%20fissare%20una%20demo%20di%20Energizzo%3F"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
