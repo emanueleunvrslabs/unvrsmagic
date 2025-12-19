@@ -11,10 +11,71 @@ const AVAILABLE_SLOTS = {
   afternoon: ['15:00', '15:30', '16:00', '16:30', '17:00', '17:30']
 }
 
-// Business days: Monday = 1, Friday = 5
+// Italian public holidays (fixed dates)
+const FIXED_HOLIDAYS = [
+  { month: 1, day: 1 },   // Capodanno
+  { month: 1, day: 6 },   // Epifania
+  { month: 4, day: 25 },  // Festa della Liberazione
+  { month: 5, day: 1 },   // Festa dei Lavoratori
+  { month: 6, day: 2 },   // Festa della Repubblica
+  { month: 8, day: 15 },  // Ferragosto
+  { month: 11, day: 1 },  // Ognissanti
+  { month: 12, day: 8 },  // Immacolata Concezione
+  { month: 12, day: 24 }, // Vigilia di Natale
+  { month: 12, day: 25 }, // Natale
+  { month: 12, day: 26 }, // Santo Stefano
+  { month: 12, day: 31 }, // San Silvestro
+]
+
+// Calculate Easter Monday (Pasquetta) for a given year
+const getEasterMonday = (year: number): Date => {
+  // Anonymous Gregorian algorithm
+  const a = year % 19
+  const b = Math.floor(year / 100)
+  const c = year % 100
+  const d = Math.floor(b / 4)
+  const e = b % 4
+  const f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3)
+  const h = (19 * a + b - d - g + 15) % 30
+  const i = Math.floor(c / 4)
+  const k = c % 4
+  const l = (32 + 2 * e + 2 * i - h - k) % 7
+  const m = Math.floor((a + 11 * h + 22 * l) / 451)
+  const month = Math.floor((h + l - 7 * m + 114) / 31)
+  const day = ((h + l - 7 * m + 114) % 31) + 1
+  
+  // Easter Monday is the day after Easter Sunday
+  const easter = new Date(year, month - 1, day)
+  easter.setDate(easter.getDate() + 1)
+  return easter
+}
+
+// Check if a date is a public holiday
+const isHoliday = (date: Date): boolean => {
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const year = date.getFullYear()
+  
+  // Check fixed holidays
+  if (FIXED_HOLIDAYS.some(h => h.month === month && h.day === day)) {
+    return true
+  }
+  
+  // Check Easter Monday
+  const easterMonday = getEasterMonday(year)
+  if (date.getMonth() === easterMonday.getMonth() && 
+      date.getDate() === easterMonday.getDate()) {
+    return true
+  }
+  
+  return false
+}
+
+// Business days: Monday = 1, Friday = 5, excluding holidays
 const isBusinessDay = (date: Date): boolean => {
   const day = date.getDay()
-  return day >= 1 && day <= 5
+  return day >= 1 && day <= 5 && !isHoliday(date)
 }
 
 // Get next N business days starting from tomorrow
