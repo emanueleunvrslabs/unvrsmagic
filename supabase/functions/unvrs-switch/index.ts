@@ -133,9 +133,9 @@ Deno.serve(async (req) => {
       if (availabilityResponse.ok) {
         const availability = await availabilityResponse.json()
         if (availability.success && availability.suggestions?.length > 0) {
-          demoContext = `\n\nSLOT DEMO DISPONIBILI:\n${availability.suggestions.map((s: any) => 
-            `• ${s.date_formatted} alle ${s.time}`
-          ).join('\n')}\n\nUsa queste date quando proponi slot per la demo.`
+          demoContext = `\n\nDATA ODIERNA: ${new Date().toISOString().split('T')[0]} (anno ${new Date().getFullYear()})\n\nSLOT DEMO DISPONIBILI:\n${availability.suggestions.map((s: any) => 
+            `• ${s.date_formatted} ${new Date(s.date).getFullYear()} alle ${s.time} (data ISO: ${s.date})`
+          ).join('\n')}\n\nIMPORTANTE: Quando usi action "book_demo", usa la data nel formato ISO (YYYY-MM-DD) come mostrato sopra.`
         }
       }
     }
