@@ -55,6 +55,8 @@ import DelibereArera from "./pages/DelibereArera";
 import Search from "./pages/Search";
 import AgentsOverview from "./pages/AiAgents/AgentsOverview";
 import AgentDashboard from "./pages/AiAgents/AgentDashboard";
+import Memora from "./pages/Memora";
+import MemoraSubmit from "./pages/MemoraSubmit";
 
 const queryClient = new QueryClient();
 
@@ -115,6 +117,8 @@ const App = () => (
           <Route path="/delibere-arera" element={<ProtectedRoute><DelibereArera /></ProtectedRoute>} />
           <Route path="/ai-agents" element={<ProtectedRoute><AgentsOverview /></ProtectedRoute>} />
           <Route path="/ai-agents/:agentId" element={<ProtectedRoute><AgentDashboard /></ProtectedRoute>} />
+          <Route path="/memora" element={<ProtectedRoute><Memora /></ProtectedRoute>} />
+          <Route path="/:username/memora" element={<MemoraSubmit />} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<HomeRedirect />} />
           {/* Redirects for removed pages */}
