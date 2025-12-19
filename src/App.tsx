@@ -118,7 +118,6 @@ const App = () => (
           <Route path="/ai-agents" element={<ProtectedRoute><AgentsOverview /></ProtectedRoute>} />
           <Route path="/ai-agents/:agentId" element={<ProtectedRoute><AgentDashboard /></ProtectedRoute>} />
           <Route path="/memora" element={<ProtectedRoute><Memora /></ProtectedRoute>} />
-          <Route path="/:username/memora" element={<MemoraSubmit />} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<HomeRedirect />} />
           {/* Redirects for removed pages */}
@@ -138,6 +137,8 @@ const App = () => (
           <Route path="/control-panel/*" element={<HomeRedirect />} />
           <Route path="/invite-friends" element={<Navigate to="/settings" replace />} />
           <Route path="/help-center" element={<Navigate to="/settings" replace />} />
+          {/* Dynamic username route - must be before catch-all */}
+          <Route path="/:username/memora" element={<MemoraSubmit />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
