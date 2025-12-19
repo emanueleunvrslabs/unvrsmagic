@@ -341,22 +341,22 @@ export default function AdminDemoCalendar() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="min-w-0">
                     <label className="text-sm text-white/60 mb-1.5 block">Time</label>
                     <Input
                       type="time"
                       value={formData.scheduled_time}
                       onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
-                      className="bg-white/5 border-white/10 h-10"
+                      className="bg-white/5 border-white/10 h-10 w-full"
                     />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <label className="text-sm text-white/60 mb-1.5 block">Duration</label>
                     <Select
                       value={formData.duration_minutes.toString()}
                       onValueChange={(value) => setFormData({ ...formData, duration_minutes: parseInt(value) })}
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10 h-10">
+                      <SelectTrigger className="bg-white/5 border-white/10 h-10 w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-black/95 border-white/10 backdrop-blur-xl">
