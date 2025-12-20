@@ -57,6 +57,7 @@ import AgentsOverview from "./pages/AiAgents/AgentsOverview";
 import AgentDashboard from "./pages/AiAgents/AgentDashboard";
 import Memora from "./pages/Memora";
 import MemoraSubmit from "./pages/MemoraSubmit";
+import TelegramScraper from "./pages/TelegramScraper";
 
 const queryClient = new QueryClient();
 
@@ -118,6 +119,7 @@ const App = () => (
           <Route path="/ai-agents" element={<ProtectedRoute><AgentsOverview /></ProtectedRoute>} />
           <Route path="/ai-agents/:agentId" element={<ProtectedRoute><AgentDashboard /></ProtectedRoute>} />
           <Route path="/memora" element={<ProtectedRoute><Memora /></ProtectedRoute>} />
+          <Route path="/telegram-scraper" element={<ProtectedRoute><TelegramScraper /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/subscription" element={<HomeRedirect />} />
           {/* Redirects for removed pages */}
