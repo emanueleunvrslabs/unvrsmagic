@@ -365,6 +365,28 @@ serve(async (req) => {
         }
         break;
 
+      case "telegram_api_id":
+        // Validate format only - must be 5-12 digit number
+        if (/^\d{5,12}$/.test(apiKey)) {
+          isValid = true;
+          console.log("Telegram API ID format is valid");
+        } else {
+          errorMessage = "Telegram API ID must be a 5-12 digit number";
+          console.error("Telegram API ID validation failed");
+        }
+        break;
+
+      case "telegram_api_hash":
+        // Validate format only - must be 32 hex characters
+        if (/^[a-f0-9]{32}$/.test(apiKey.toLowerCase())) {
+          isValid = true;
+          console.log("Telegram API Hash format is valid");
+        } else {
+          errorMessage = "Telegram API Hash must be exactly 32 hexadecimal characters";
+          console.error("Telegram API Hash validation failed");
+        }
+        break;
+
       case "restream":
         try {
           // Restream API - verify with user info endpoint

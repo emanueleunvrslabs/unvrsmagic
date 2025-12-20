@@ -27,6 +27,8 @@ const AI_PROVIDERS = [
   { id: "heygen", name: "HeyGen", placeholder: "Enter API key", description: "AI Avatar & Streaming", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "elevenlabs", name: "ElevenLabs", placeholder: "Enter API key", description: "Voice AI (TTS/STT)", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "telegram", name: "Telegram Bot", placeholder: "Enter Bot Token", description: "Telegram Bot API", requiresOwnerId: false, type: 'standard' as ProviderType },
+  { id: "telegram_api_id", name: "Telegram API ID", placeholder: "12345678", description: "MTProto API ID (my.telegram.org)", requiresOwnerId: false, type: 'standard' as ProviderType },
+  { id: "telegram_api_hash", name: "Telegram API Hash", placeholder: "a1b2c3d4e5f6...", description: "MTProto API Hash (my.telegram.org)", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "restream", name: "Restream", placeholder: "Enter API key", description: "Multi-platform streaming (WHIP)", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "gamma", name: "Gamma", placeholder: "Enter API key", description: "Gamma AI models", requiresOwnerId: false, type: 'standard' as ProviderType },
   { id: "resend", name: "Resend", placeholder: "re_...", description: "Email API", requiresOwnerId: false, type: 'standard' as ProviderType },
@@ -61,6 +63,12 @@ const apiKeySchemas = {
   telegram: z.string().trim().regex(/^\d+:[A-Za-z0-9_-]{35,}$/, {
     message: "Telegram Bot Token must be in format: 123456789:ABCdefGHI..."
   }),
+  telegram_api_id: z.string().trim().regex(/^\d{5,12}$/, {
+    message: "Telegram API ID must be a number between 5-12 digits"
+  }),
+  telegram_api_hash: z.string().trim().regex(/^[a-f0-9]{32}$/, {
+    message: "Telegram API Hash must be exactly 32 hexadecimal characters"
+  }),
   restream: z.string().trim().min(10, {
     message: "Restream API key must be at least 10 characters"
   }),
@@ -91,6 +99,8 @@ export const ApiKeysSection: React.FC<ApiKeysSectionProps> = () => {
     heygen: "",
     elevenlabs: "",
     telegram: "",
+    telegram_api_id: "",
+    telegram_api_hash: "",
     restream: "",
     gamma: "",
     resend: "",
