@@ -2,9 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from '../_shared/cors.ts';
 
-// GramJS for MTProto - using the Deno-compatible version
-import { TelegramClient, Api } from "https://esm.sh/telegram@2.22.2";
-import { StringSession } from "https://esm.sh/telegram@2.22.2/sessions";
+// MTCute for MTProto - Deno compatible
+import { TelegramClient, MemoryStorage } from "https://esm.sh/jsr/@mtcute/deno@0.26.3";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
