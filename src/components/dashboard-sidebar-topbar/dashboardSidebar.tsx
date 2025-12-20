@@ -37,6 +37,7 @@ import {
   LayoutDashboard,
   Link2,
   LogOut,
+  MessageCircle,
   PieChart,
   Radio,
   Repeat,
@@ -237,6 +238,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
         },
         { id: "delibere-arera", label: "Delibere Arera", icon: FileText, href: "/delibere-arera" },
         { id: "memora", label: "Memora", icon: Cake, href: "/memora" },
+        { id: "telegram-scraper", label: "Telegram Scraper", icon: MessageCircle, href: "/telegram-scraper" },
         { 
           id: "nkmt", 
           label: "NKMT", 
