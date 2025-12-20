@@ -128,3 +128,9 @@ verify_jwt = false
 
 [functions.telegram-webhook]
 verify_jwt = false
+
+[functions.telegram-mtproto-auth]
+verify_jwt = true
+
+[functions.telegram-mtproto-scrape]
+verify_jwt = true

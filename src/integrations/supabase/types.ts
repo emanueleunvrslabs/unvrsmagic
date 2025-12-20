@@ -1494,6 +1494,139 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_groups: {
+        Row: {
+          created_at: string | null
+          group_name: string | null
+          group_type: string | null
+          group_username: string | null
+          id: string
+          last_scraped_at: string | null
+          member_count: number | null
+          session_id: string | null
+          telegram_group_id: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          group_name?: string | null
+          group_type?: string | null
+          group_username?: string | null
+          id?: string
+          last_scraped_at?: string | null
+          member_count?: number | null
+          session_id?: string | null
+          telegram_group_id: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          group_name?: string | null
+          group_type?: string | null
+          group_username?: string | null
+          id?: string
+          last_scraped_at?: string | null
+          member_count?: number | null
+          session_id?: string | null
+          telegram_group_id?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_groups_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telegram_members: {
+        Row: {
+          first_name: string | null
+          group_id: string | null
+          id: string
+          is_bot: boolean | null
+          is_premium: boolean | null
+          last_name: string | null
+          phone: string | null
+          scraped_at: string | null
+          telegram_user_id: number
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          first_name?: string | null
+          group_id?: string | null
+          id?: string
+          is_bot?: boolean | null
+          is_premium?: boolean | null
+          last_name?: string | null
+          phone?: string | null
+          scraped_at?: string | null
+          telegram_user_id: number
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          first_name?: string | null
+          group_id?: string | null
+          id?: string
+          is_bot?: boolean | null
+          is_premium?: boolean | null
+          last_name?: string | null
+          phone?: string | null
+          scraped_at?: string | null
+          telegram_user_id?: number
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telegram_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          phone_number: string | null
+          session_name: string
+          session_string: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          phone_number?: string | null
+          session_name: string
+          session_string: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          phone_number?: string | null
+          session_name?: string
+          session_string?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       unvrs_agent_sessions: {
         Row: {
           agent_instance_id: string | null
