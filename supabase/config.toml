@@ -134,3 +134,6 @@ verify_jwt = true
 
 [functions.telegram-mtproto-scrape]
 verify_jwt = true
+
+[functions.book-demo]
+verify_jwt = true
