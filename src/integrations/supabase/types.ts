@@ -2232,6 +2232,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_user_by_ref_code: {
+        Args: { ref_code_param: string }
+        Returns: string
+      }
+      lookup_user_by_username: {
+        Args: { username_param: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "owner" | "admin" | "user"

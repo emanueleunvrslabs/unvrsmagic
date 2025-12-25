@@ -6,7 +6,6 @@ const corsHeaders = {
 }
 
 interface BookDemoRequest {
-  user_id: string
   date: string // YYYY-MM-DD
   time: string // HH:mm
   client_name: string
@@ -42,6 +41,44 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      console.error('[book-demo] No authorization header')
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Unauthorized - missing authorization header'
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Create client with user's auth to verify identity
+    const anonClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        auth: { persistSession: false },
+        global: { headers: { Authorization: authHeader } }
+      }
+    )
+
+    const { data: { user }, error: authError } = await anonClient.auth.getUser()
+    if (authError || !user) {
+      console.error('[book-demo] Auth error:', authError)
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Unauthorized - invalid token'
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    console.log('[book-demo] Authenticated user:', user.id)
+
+    // Service role client for database operations
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -50,11 +87,11 @@ Deno.serve(async (req) => {
     const request: BookDemoRequest = await req.json()
     console.log('[book-demo] Booking request:', JSON.stringify(request))
 
-    // Validate required fields
-    if (!request.user_id || !request.date || !request.time || !request.client_name || !request.project_type) {
+    // Validate required fields (user_id comes from auth, not request)
+    if (!request.date || !request.time || !request.client_name || !request.project_type) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Missing required fields: user_id, date, time, client_name, project_type'
+        error: 'Missing required fields: date, time, client_name, project_type'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -73,7 +110,6 @@ Deno.serve(async (req) => {
     }
 
     // Store the time exactly as selected by the user (no timezone conversion)
-    // If user selects 11:00, we store 11:00
     const scheduledDate = new Date(`${request.date}T${request.time}:00`)
     
     if (isNaN(scheduledDate.getTime())) {
@@ -129,14 +165,14 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Create the booking with pending_approval status
+    // Create the booking with authenticated user's ID
     const projectLabel = request.project_type.charAt(0).toUpperCase() + request.project_type.slice(1)
     const title = `Demo ${projectLabel} - ${request.client_name}`
 
     const { data: booking, error: insertError } = await supabase
       .from('demo_bookings')
       .insert({
-        user_id: request.user_id,
+        user_id: user.id, // Use authenticated user ID, not from request
         title,
         client_name: request.client_name,
         client_phone: request.client_phone || null,
