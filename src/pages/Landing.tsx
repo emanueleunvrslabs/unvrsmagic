@@ -10,6 +10,7 @@ import { LandingStats } from "@/components/landing/LandingStats";
 import { LandingInsights } from "@/components/landing/LandingInsights";
 import { LandingCTANew } from "@/components/landing/LandingCTANew";
 import { LandingFooterNew } from "@/components/landing/LandingFooterNew";
+import { LandingPartners } from "@/components/landing/LandingPartners";
 import { LandingFlagshipProjects } from "@/components/landing/LandingFlagshipProjects";
 import { Helmet } from "react-helmet-async";
 
@@ -34,6 +35,7 @@ const Landing = () => {
         <LandingReviews />
         <LandingInsights />
         <LandingCTANew />
+        <LandingPartners />
         <LandingFooterNew />
       </main>
     </>
